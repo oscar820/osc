@@ -7,7 +7,6 @@ using UnityEngine;
 using QTool.Binary;
 #if Addressables
 using UnityEngine.AddressableAssets;
-using QTool.Async;
 # endif
 namespace QTool.Data
 {

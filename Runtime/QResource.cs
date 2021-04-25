@@ -5,20 +5,26 @@ using System;
 using QTool.Serialize;
 #if Addressables
 using UnityEngine.AddressableAssets;
-namespace QTool.Async
+#endif
+namespace QTool.Resource
 {
   
-    public abstract class AsyncList<ClassT,ObjT> where ObjT:UnityEngine.Object where ClassT:AsyncList<ClassT,ObjT>
+    public abstract class ResourceList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:ResourceList<TLabel,TObj>
     {
-        public static Dictionary<string, ObjT> objDic = new Dictionary<string, ObjT>();
+        public static QDcitionary<string, TObj> objDic = new QDcitionary<string, TObj>();
         public static string Label
         {
             get
             {
-                return typeof(ClassT).ToString();
+                return typeof(TLabel).ToString();
             }
         }
-        public static bool LabelLoadOver = false;
+#if Addressables
+        public static bool LabelLoadOver{ get;private set; } = false;
+#else
+        public static bool LabelLoadOver { get => true; }
+#endif
+
         private static Action OnLabelLoadOver;
         public static void LoadOverRun(Action action)
         {
@@ -39,7 +45,7 @@ namespace QTool.Async
         {
             return ContainsKey(key);
         }
-        public static ObjT Get(string key)
+        public static TObj Get(string key)
         {
             if (ContainsKey(key))
             {
@@ -47,20 +53,30 @@ namespace QTool.Async
             }
             else
             {
-                Debug.LogError(Label + "找不到预制体[" + key + "]");
+#if Addressables
+                Debug.LogError(Label + "找不到资源[" + key + "]");
+                
                 return null;
+#else
+                var obj = Resources.Load<TObj>(Label + '/' + key);
+                if (obj == null)
+                {
+                    Debug.LogError("不找不到资源" + Label + '/' + key);
+                }
+                return obj;
+#endif
             }
         }
-        public static void AsyncGet(string key,Action<ObjT> loadOver)
+        #if Addressables
+        public static void AsyncGet(string key,Action<TObj> loadOver)
         {
-            var obj = Get(key);
-            if (obj!=null)
+            if (objDic.ContainsKey(key))
             {
-                loadOver?.Invoke(obj);
+                loadOver?.Invoke(Get(key));
             }
             else
             {
-                var load = Addressables.LoadAssetAsync<ObjT>(key);
+                var load = Addressables.LoadAssetAsync<TObj>(key);
                 load.Completed += (result) =>
                 {
                     if (result.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
@@ -75,45 +91,59 @@ namespace QTool.Async
                 };
             }
         }
-        public static void Set(string key,ObjT obj)
+    #endif
+
+        public static void Set(string key,TObj obj)
         {
-            if (!ContainsKey(key))
-            {
-                objDic.Add(key, obj);
-            }
-            else
-            {
-                objDic[key] = obj;
-            }
+            objDic[key] = obj;
         }
+#if Addressables
         public static IEnumerator AsyncLoadLabel()
         {
             if (LabelLoadOver) yield break;
-            Addressables.LoadAssetsAsync<ObjT>(Label, (result) =>
+
+            var laod = Addressables.LoadAssetsAsync<TObj>(Label, null);
+            laod.Completed += (loader) =>
             {
-                Set(result.name, result);
-                if(result is GameObject)
+                if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
-                    var qid= (result as GameObject).GetComponentInChildren<QId>();
-                    if (qid != null)
+                    foreach (var result in loader.Result)
                     {
-                        Set(qid.PrefabId, result);
+                        if (result == null) continue;
+                        Set(result.name, result);
+                        if (result is GameObject)
+                        {
+                            var qid = (result as GameObject).GetComponentInChildren<QId>();
+                            if (qid != null)
+                            {
+                                Set(qid.PrefabId, result);
+                            }
+                        }
+                    }
+                    Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                    LabelLoadOver = true;
+                    OnLabelLoadOver?.Invoke();
+                    OnLabelLoadOver = null;
+                }
+                else
+                {
+                    if (loader.OperationException != null)
+                    {
+                        Debug.LogError("加载资源表[" + Label + "]出错"+loader.OperationException);
                     }
                 }
-            }).Completed+=(results)=> {
-                Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
-                LabelLoadOver = true;
-                OnLabelLoadOver?.Invoke();
-                OnLabelLoadOver = null;
+
             };
+
             while (!LabelLoadOver)
             {
                 yield return null;
             }
         }
-   
+#endif
+
     }
-    public abstract class AsyncPrefabList<ClassT>: AsyncList<ClassT,GameObject> where ClassT:AsyncPrefabList<ClassT>
+    public abstract class PrefabResourceList<ClassT>: ResourceList<ClassT,GameObject> where ClassT:PrefabResourceList<ClassT>
     {
         static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
         static ObjectPool<GameObject> GetPool(string key)
@@ -199,5 +229,5 @@ namespace QTool.Async
         }
     }
 }
-#endif
+
 

@@ -171,7 +171,7 @@ namespace QTool.Test
         [ContextMenu("Name")]
         public void FullName()
         {
-            Debug.LogError(typeof(TestClass).Name);
+            UnityEngine.Debug.LogError(typeof(TestClass).Name);
         }
 
         public byte[] testBytes;
@@ -191,7 +191,7 @@ namespace QTool.Test
         [ContextMenu("解析类型测试")]
         public void CreateTest()
         {
-            Debug.LogError(QTestTypeInfo.Get(typeof(List<string>)));
+            UnityEngine.Debug.LogError(QTestTypeInfo.Get(typeof(List<string>)));
             var run = Assembly.GetExecutingAssembly();
             Tool.RunTimeCheck("系统创建", () =>
             {
@@ -209,7 +209,7 @@ namespace QTool.Test
                 }
             });
             creatObj = (TestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
-            Debug.LogError(creatObj);
+            UnityEngine.Debug.LogError(creatObj);
         }
         [ContextMenu("写入Test")]
         public void TestFunc()

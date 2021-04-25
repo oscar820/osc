@@ -3,16 +3,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum LengthType
-{
-    Byte,
-    Int16,
-    Int32,
-}
+
 namespace QTool.Binary
 {
 
- 
+    public enum LengthType
+    {
+        Byte,
+        Int16,
+        Int32,
+    }
     public class BinaryReader:PoolObject<BinaryReader>
     {
         public BinaryReader Reset(byte[] bytes)
