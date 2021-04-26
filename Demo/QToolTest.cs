@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using QTool;
-using Newtonsoft.Json;
 using System.Text;
 using System;
 using QTool.Serialize;
@@ -38,7 +37,7 @@ namespace QTool.Test
             x = vector2.x;
             y = vector2.y;
         }
-        [JsonIgnore]
+      //  [JsonIgnore]
         public Vector2 Vector2
         {
             get
@@ -232,7 +231,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    jsonBytes = JsonConvert.SerializeObject(test1).GetBytes();
+                   // jsonBytes = JsonConvert.SerializeObject(test1).GetBytes();
                 //info = QSerialize.Serialize(al);
                 //bl = QSerialize.Deserialize <List<IValueBase>>(info);
             }
@@ -273,7 +272,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    test2 = JsonConvert.DeserializeObject<TestClass>(jsonBytes.GetString());
+                 //   test2 = JsonConvert.DeserializeObject<TestClass>(jsonBytes.GetString());
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
                 //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
             }
