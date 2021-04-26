@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
 using System.IO;
 using System.Data;
 #if Addressable
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets;
 #endif
 namespace QTool.Resource {
     public static class AddressableTool
