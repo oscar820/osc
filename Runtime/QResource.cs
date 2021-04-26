@@ -16,7 +16,7 @@ namespace QTool.Resource
         {
             get
             {
-                return typeof(TLabel).ToString();
+                return typeof(TLabel).Name;
             }
         }
 #if Addressables
@@ -143,7 +143,7 @@ namespace QTool.Resource
 #endif
 
     }
-    public abstract class PrefabResourceList<ClassT>: ResourceList<ClassT,GameObject> where ClassT:PrefabResourceList<ClassT>
+    public abstract class PrefabResourceList<TLabel>: ResourceList<TLabel,GameObject> where TLabel:PrefabResourceList<TLabel>
     {
         static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
         static ObjectPool<GameObject> GetPool(string key)

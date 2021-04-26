@@ -5,7 +5,7 @@ using QTool.Resource;
 namespace QTool
 {
   
-    public abstract class InstanceBehaviour<T,ResourceType> : InstanceBehaviour<T> where ResourceType : PrefabResourceList<ResourceType> where T : InstanceBehaviour<T,ResourceType>
+    public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceBehaviour<T> where ResourceLabel : PrefabResourceList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
     {
         public new static T Instance
         {
@@ -16,7 +16,7 @@ namespace QTool
                     _instance = FindObjectOfType<T>();
                     if (_instance == null)
                     {
-                        PrefabResourceList<ResourceType>.LoadOverRun(() =>
+                        PrefabResourceList<ResourceLabel>.LoadOverRun(() =>
                         {
                             if (_instance == null)
                             {
@@ -30,26 +30,26 @@ namespace QTool
         }
         public static T GetNewInstance()
         {
-           return  PrefabResourceList<ResourceType>.Get(typeof( ResourceType).Name).GetComponent<T>();
+           return  PrefabResourceList<ResourceLabel>.Get(typeof( ResourceLabel).Name).GetComponent<T>();
         }
     }
-    public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>
+    public abstract class InstanceBehaviour<ResourceLabel> : MonoBehaviour where ResourceLabel : InstanceBehaviour<ResourceLabel>
     {
-        public static T Instance
+        public static ResourceLabel Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<T>();
+                    _instance = FindObjectOfType<ResourceLabel>();
                 }
                 return _instance;
             }
         }
-        protected static T _instance;
+        protected static ResourceLabel _instance;
         protected virtual void Awake()
         {
-            _instance = this as T;
+            _instance = this as ResourceLabel;
         }
     }
     public abstract class InstanceObject<T> where T : InstanceObject<T>,new()
