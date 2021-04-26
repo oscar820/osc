@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using QTool.Serialize;
+using System.Threading.Tasks;
 #if Addressables
 using UnityEngine.AddressableAssets;
 #endif
@@ -34,6 +35,9 @@ namespace QTool.Resource
             }
             else
             {
+#if Addressables
+                LoadLabelAsync();
+#endif
                 OnLabelLoadOver += action;
             }
         }
@@ -68,7 +72,7 @@ namespace QTool.Resource
             }
         }
         #if Addressables
-        public static void AsyncGet(string key,Action<TObj> loadOver)
+        public static async void GetAsync(string key,Action<TObj> loadOver)
         {
             if (objDic.ContainsKey(key))
             {
@@ -89,6 +93,7 @@ namespace QTool.Resource
                         loadOver?.Invoke(null);
                     }
                 };
+                await load.Task;
             }
         }
     #endif
@@ -98,12 +103,12 @@ namespace QTool.Resource
             objDic[key] = obj;
         }
 #if Addressables
-        public static IEnumerator AsyncLoadLabel()
+        static Task loaderTask;
+        public static async void LoadLabelAsync()
         {
-            if (LabelLoadOver) yield break;
-
-            var laod = Addressables.LoadAssetsAsync<TObj>(Label, null);
-            laod.Completed += (loader) =>
+            if (LabelLoadOver|| loaderTask!=null) return;
+            var load = Addressables.LoadAssetsAsync<TObj>(Label, null);
+            load.Completed += (loader) =>
             {
                 if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
@@ -129,19 +134,15 @@ namespace QTool.Resource
                 {
                     if (loader.OperationException != null)
                     {
-                        Debug.LogError("加载资源表[" + Label + "]出错"+loader.OperationException);
+                        Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
                     }
                 }
-
             };
-
-            while (!LabelLoadOver)
-            {
-                yield return null;
-            }
+            loaderTask = load.Task;
+            await load.Task;
+            
         }
 #endif
-
     }
     public abstract class PrefabResourceList<TLabel>: ResourceList<TLabel,GameObject> where TLabel:PrefabResourceList<TLabel>
     {

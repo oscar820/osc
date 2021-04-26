@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
 using QTool.Binary;
+using System.Threading.Tasks;
 #if Addressables
 using UnityEngine.AddressableAssets;
 # endif
@@ -246,40 +247,28 @@ namespace QTool.Data
            
         }
 #if Addressables
-        public static string AsyncloadPath(string key="")
+        public static string AsyncLoadPath(string key="")
         {
             return "Assets/" + GetSubPath(key);
         }
-        static IEnumerator AsyncLoad(string key="")
+        static QDcitionary<string, Task> loaderTasks = new QDcitionary<string, Task>();
+        public static async void LoadAsync(string key = "")
         {
-            var path = AsyncloadPath(key);
-            if (LoadOver(key, true))
+            var path = AsyncLoadPath(key);
+            if (LoadOver(key, true)||loaderTasks[key]!=null)
             {
-                yield break;
+                return;
             }
-            Addressables.LoadAssetAsync<TextAsset>(path).Completed += (result) =>
+            var loader= Addressables.LoadAssetAsync<TextAsset>(path);
+            loader.Completed += (result) =>
             {
                 var newList = FileManager.Deserialize<QList<string, T>>(result.Result.text);
                 Set(key, newList);
                 Debug.Log(TableName + "加载数据：" + newList.ToOneString());
                 InvokeLoadOver(key);
             };
-        }
-     
-        public static IEnumerator AsyncLoadList(params string[] keys)
-        {
-            if (keys.Length == 0)
-            {
-                yield return AsyncLoad();
-            }
-            else
-            {
-                foreach (var key in keys)
-                {
-                    yield return AsyncLoad(key);
-                }
-            }
-         
+            loaderTasks[key] = loader.Task;
+            await loader.Task;
         }
 #endif
         #endregion
