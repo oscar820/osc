@@ -173,7 +173,10 @@ namespace QTool.Resource
             {
                 return null;
             }
-            obj.transform.SetParent(parent);
+            if (parent != null)
+            {
+                obj.transform.SetParent(parent);
+            }
             if(obj.transform is RectTransform)
             {
                 var prefab = Get(key);
@@ -195,10 +198,6 @@ namespace QTool.Resource
             if (pool != null)
             {
                 obj = pool.Push(obj);
-                if (obj != null && obj.transform.parent != null)
-                {
-                    obj = pool.Push(obj.transform.parent.gameObject) == null ? null : obj;
-                }
             }
             if (obj != null)
             {
@@ -217,7 +216,7 @@ namespace QTool.Resource
             {
                 return null;
             }
-            return obj.GetComponentInChildren<CT>();
+            return obj.GetComponent<CT>();
         }
         public static CT GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
         {
@@ -226,7 +225,7 @@ namespace QTool.Resource
             {
                 return null;
             }
-            return obj.GetComponentInChildren<CT>();
+            return obj.GetComponent<CT>();
         }
     }
 }

@@ -19,7 +19,6 @@ public class AddressableTest : MonoBehaviour
         {
             text.text = "º”‘ÿÕÍ≥…:" + ResourceTest.objDic.Count + ResourceTest.objDic.ToOneString();
         });
-        StartCoroutine(ResourceTest.LoadLabel());
     }
 
     // Update is called once per frame
