@@ -9,7 +9,7 @@ using UnityEngine.AddressableAssets;
 #endif
 namespace QTool.Resource
 {
-  
+
     public abstract class ResourceList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:ResourceList<TLabel,TObj>
     {
         public static QDcitionary<string, TObj> objDic = new QDcitionary<string, TObj>();
@@ -58,6 +58,10 @@ namespace QTool.Resource
             else
             {
 #if Addressables
+                if (!LabelLoadOver)
+                {
+                    LoadLabelAsync();
+                }
                 Debug.LogError(Label + "找不到资源[" + key + "]");
                 
                 return null;
