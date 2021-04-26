@@ -32,7 +32,6 @@ namespace QTool
         {
            return  PrefabResourceList<ResourceType>.Get(typeof( ResourceType).Name).GetComponent<T>();
         }
-        protected abstract void InstanceInit();
     }
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>
     {
