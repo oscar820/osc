@@ -5,7 +5,7 @@ using QTool.Resource;
 namespace QTool
 {
   
-    public abstract class InstanceBehaviour<T,ResourceType> : InstanceBehaviour<T> where T : InstanceBehaviour<T,ResourceType> where ResourceType:PrefabResourceList<ResourceType>
+    public abstract class InstanceBehaviour<T,ResourceType> : InstanceBehaviour<T> where ResourceType : PrefabResourceList<ResourceType> where T : InstanceBehaviour<T,ResourceType>
     {
         public new static T Instance
         {
