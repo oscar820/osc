@@ -221,7 +221,9 @@ namespace QTool.Data
             var loadOver = _LoadOver(key);
             if (!loadOver)
             {
+#if Addressables
                 LoadAsync(key);
+#endif
             }
             return loadOver;
         }
