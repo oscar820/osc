@@ -253,19 +253,15 @@ namespace QTool.Data
            
         }
 #if Addressables
-        public static string AsyncLoadPath(string key="")
-        {
-            return "Assets/" + GetSubPath(key);
-        }
+      
         static QDcitionary<string, Task> loaderTasks = new QDcitionary<string, Task>();
         public static async Task LoadAsync(string key = "")
         {
-            var path = AsyncLoadPath(key);
             if (_loadOver(key)| loaderTasks[key]!=null)
             {
                 return;
             }
-            var loader= Addressables.LoadAssetAsync<TextAsset>(path);
+            var loader= Addressables.LoadAssetAsync<TextAsset>(key);
             loader.Completed += (result) =>
             {
                 var newList = FileManager.Deserialize<QList<string, T>>(result.Result.text);
@@ -274,6 +270,10 @@ namespace QTool.Data
 
                 _loadOverFile.Add(GetLoadOverKey(key));
                 InvokeLoadOver(key);
+            };
+            if (loader.OperationException != null)
+            {
+                Debug.LogError("异步加载表[" + key + "]出错:"+loader.OperationException);
             };
             loaderTasks[key] = loader.Task;
             await loader.Task;

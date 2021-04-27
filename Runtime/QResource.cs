@@ -89,8 +89,8 @@ namespace QTool.Resource
             }
             else
             {
-                var load = Addressables.LoadAssetAsync<TObj>(key);
-                load.Completed += (result) =>
+                var loader = Addressables.LoadAssetAsync<TObj>(key);
+                loader.Completed += (result) =>
                 {
                     if (result.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                     {
@@ -102,7 +102,11 @@ namespace QTool.Resource
                         loadOver?.Invoke(null);
                     }
                 };
-                await load.Task;
+                if (loader.OperationException != null)
+                {
+                    Debug.LogError("异步加载"+Label+ "资源[" + key + "]出错"+loader.OperationException);
+                };
+                await loader.Task;
             }
         }
     #endif
