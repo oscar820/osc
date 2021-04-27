@@ -20,25 +20,28 @@ namespace QTool.Resource
                 return typeof(TLabel).Name;
             }
         }
+        static bool _loadOver=false;
+        public static bool LoadOver() {
 #if Addressables
-        public static bool LabelLoadOver{ get;private set; } = false;
+            if (!_loadOver)
+            {
+                LoadAsync();
+            }
 #else
-        public static bool LabelLoadOver { get => true; }
+            _loadOver=true;
 #endif
-
-        private static Action OnLabelLoadOver;
+            return _loadOver;
+        }
+        private static Action OnLoadOver;
         public static void LoadOverRun(Action action)
         {
-            if (LabelLoadOver)
+            if (LoadOver())
             {
                 action?.Invoke();
             }
             else
             {
-#if Addressables
-                LoadLabelAsync();
-#endif
-                OnLabelLoadOver += action;
+                OnLoadOver += action;
             }
         }
         public static bool ContainsKey(string key)
@@ -58,12 +61,14 @@ namespace QTool.Resource
             else
             {
 #if Addressables
-                if (!LabelLoadOver)
+                 if(LoadOver())
                 {
-                    LoadLabelAsync();
+                    Debug.LogError(Label + "标签中不存在资源[" + key + "]");
                 }
-                Debug.LogError(Label + "找不到资源[" + key + "]");
-                
+                else
+                {
+                    Debug.LogError(Label + "找不到资源[" + key + "]");
+                }
                 return null;
 #else
                 var obj = Resources.Load<TObj>(Label + '/' + key);
@@ -108,9 +113,9 @@ namespace QTool.Resource
         }
 #if Addressables
         static Task loaderTask;
-        public static async void LoadLabelAsync()
+        public static async void LoadAsync()
         {
-            if (LabelLoadOver|| loaderTask!=null) return;
+            if (_loadOver|| loaderTask!=null) return;
             var load = Addressables.LoadAssetsAsync<TObj>(Label, null);
             load.Completed += (loader) =>
             {
@@ -130,9 +135,9 @@ namespace QTool.Resource
                         }
                     }
                     Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
-                    LabelLoadOver = true;
-                    OnLabelLoadOver?.Invoke();
-                    OnLabelLoadOver = null;
+                    _loadOver = true;
+                    OnLoadOver?.Invoke();
+                    OnLoadOver = null;
                 }
                 else
                 {

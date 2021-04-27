@@ -15,7 +15,7 @@ namespace QTool.Data
     //{
     //    public string string 
     //}
-    public class QData<T>: IKey<string>  where T :QData<T>, new()
+    public class QData<T>: IKey<string> where T :QData<T>, new()
     {
         #region 基础属性
 
@@ -177,11 +177,12 @@ namespace QTool.Data
         }
         static void LoadPath(string path,string key)
         {
-            if (LoadOver(key, true))
+            if (LoadOver(key))
             {
                 InvokeLoadOver(path);
                 return;
             }
+          
             try
             {
                 var data = FileManager.Load(path);
@@ -193,6 +194,7 @@ namespace QTool.Data
                         Set(key, item);
                     }
                     Debug.Log(TableName + "加载数据：" + loadList.Count + " 大小：" + (data.Length * 8).ComputeScale());
+                    _loadOverFile.Add(GetLoadOverKey(key));
                 }
             }
             catch (Exception e)
@@ -206,19 +208,23 @@ namespace QTool.Data
         {
             return string.IsNullOrWhiteSpace(key) ? "基础表" : key;
         }
-        public static bool LoadOver(string key, bool writeOver = false)
+        static bool _loadOver(string key = "")
         {
-            var loadOverKey = GetLoadOverKey(key);
-            var loadOver = _loadOverFile.Contains(loadOverKey);
-            if (writeOver && !loadOver)
+             return _loadOverFile.Contains(GetLoadOverKey(key));
+        }
+        public static bool LoadOver(string key="")
+        {
+            var loadOver = _loadOver(key);
+            if (!loadOver)
             {
-                _loadOverFile.Add(loadOverKey);
+                LoadAsync(key);
             }
             return loadOver;
         }
         static Dictionary<string, System.Action> LoadOverCallBack = new Dictionary<string, Action>();
         static void InvokeLoadOver(string key)
         {
+
             var loadKey = GetLoadOverKey(key);
             if (LoadOverCallBack.ContainsKey(loadKey))
             {
@@ -255,7 +261,7 @@ namespace QTool.Data
         public static async void LoadAsync(string key = "")
         {
             var path = AsyncLoadPath(key);
-            if (LoadOver(key, true)||loaderTasks[key]!=null)
+            if (_loadOver(key)| loaderTasks[key]!=null)
             {
                 return;
             }
@@ -265,6 +271,8 @@ namespace QTool.Data
                 var newList = FileManager.Deserialize<QList<string, T>>(result.Result.text);
                 Set(key, newList);
                 Debug.Log(TableName + "加载数据：" + newList.ToOneString());
+
+                _loadOverFile.Add(GetLoadOverKey(key));
                 InvokeLoadOver(key);
             };
             loaderTasks[key] = loader.Task;
