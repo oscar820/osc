@@ -181,7 +181,7 @@ namespace QTool.Data
         }
         static void LoadPath(string path,string key)
         {
-            if (LoadOver(key))
+            if (_LoadOver(key))
             {
                 InvokeLoadOver(path);
                 return;
@@ -212,13 +212,13 @@ namespace QTool.Data
         {
             return string.IsNullOrWhiteSpace(key) ? "基础表" : key;
         }
-        static bool _loadOver(string key = "")
+        static bool _LoadOver(string key = "")
         {
              return _loadOverFile.Contains(GetLoadOverKey(key));
         }
         public static bool LoadOver(string key="")
         {
-            var loadOver = _loadOver(key);
+            var loadOver = _LoadOver(key);
             if (!loadOver)
             {
                 LoadAsync(key);
@@ -261,7 +261,7 @@ namespace QTool.Data
         static QDcitionary<string, Task> loaderTasks = new QDcitionary<string, Task>();
         public static async Task LoadAsync(string key = "")
         {
-            if (_loadOver(key)| loaderTasks[key]!=null)
+            if (_LoadOver(key)| loaderTasks[key]!=null)
             {
                 return;
             }
@@ -277,7 +277,7 @@ namespace QTool.Data
             };
             if (loader.OperationException != null)
             {
-                Debug.LogError("异步加载表[" + key + "]出错:"+loader.OperationException);
+                Debug.LogError("异步加载表[" + GetName(key) + "]出错:"+loader.OperationException);
             };
             loaderTasks[key] = loader.Task;
             await loader.Task;
