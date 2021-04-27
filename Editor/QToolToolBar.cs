@@ -4,11 +4,31 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using System;
+using System.IO;
 namespace QTool
 {
     public static class QToolToolBar
     {
+        public static void DirectoryForeachFiles(this string rootPath, Action<string> action)
+        {
+            if (Directory.Exists(rootPath))
+            {
+                var paths = Directory.GetFiles(rootPath);
+                foreach (var path in paths)
+                {
+                    if (string.IsNullOrWhiteSpace(path)||path.EndsWith(".meta"))
+                    {
+                        continue;
+                    }
+                    action?.Invoke(path);
+                }
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("错误", "不存在文件夹" + rootPath, "确定");
+            }
+        }
         [MenuItem("QTool/Tool/显示日志")]
         public static void SwitchLog()
         {
