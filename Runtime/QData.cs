@@ -121,9 +121,13 @@ namespace QTool.Data
 
         #region 数据读取相关
 
+        static string GetName(string key = "")
+        {
+            return TableType + (string.IsNullOrWhiteSpace(key) ? "" : "/" + key);
+        }
         static string GetSubPath(string key = "")
         {
-            return "Data/" + TableType + (string.IsNullOrWhiteSpace(key) ? "" : "/" + key) + ".xml";
+            return "Data/" + GetName(key) + ".xml";
         }
 
         public static string GetPlayerDataPath(string key = "")
@@ -261,7 +265,7 @@ namespace QTool.Data
             {
                 return;
             }
-            var loader= Addressables.LoadAssetAsync<TextAsset>(key);
+            var loader= Addressables.LoadAssetAsync<TextAsset>(GetName(key));
             loader.Completed += (result) =>
             {
                 var newList = FileManager.Deserialize<QList<string, T>>(result.Result.text);
