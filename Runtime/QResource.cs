@@ -81,7 +81,7 @@ namespace QTool.Resource
             }
         }
         #if Addressables
-        public static async void GetAsync(string key,Action<TObj> loadOver)
+        public static async Task GetAsync(string key,Action<TObj> loadOver)
         {
             if (objDic.ContainsKey(key))
             {
@@ -113,7 +113,7 @@ namespace QTool.Resource
         }
 #if Addressables
         static Task loaderTask;
-        public static async void LoadAsync()
+        public static async Task LoadAsync()
         {
             if (_loadOver|| loaderTask!=null) return;
             var load = Addressables.LoadAssetsAsync<TObj>(Label, null);
@@ -149,7 +149,6 @@ namespace QTool.Resource
             };
             loaderTask = load.Task;
             await load.Task;
-            
         }
 #endif
     }

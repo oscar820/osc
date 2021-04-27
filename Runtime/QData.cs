@@ -258,7 +258,7 @@ namespace QTool.Data
             return "Assets/" + GetSubPath(key);
         }
         static QDcitionary<string, Task> loaderTasks = new QDcitionary<string, Task>();
-        public static async void LoadAsync(string key = "")
+        public static async Task LoadAsync(string key = "")
         {
             var path = AsyncLoadPath(key);
             if (_loadOver(key)| loaderTasks[key]!=null)
