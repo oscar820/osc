@@ -9,7 +9,7 @@ using System;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
 #endif
-namespace QTool.Resource {
+namespace QTool.Editor {
     public static class AddressableTool
     {
 #if Addressable
@@ -18,22 +18,24 @@ namespace QTool.Resource {
         {
             if(Selection.activeObject is DefaultAsset)
             {
-                var name = Selection.activeObject.name;
+                var groupName = Selection.activeObject.name;
                 var directory = AssetDatabase.GetAssetPath(Selection.activeObject);
                 if (EditorUtility.DisplayDialog("批量添加Addressable资源", 
-                    "以文件夹["+ directory + "] \n生成组名与标签为[" + name + "]的资源组"
+                    "以文件夹["+ directory + "] \n生成组名与标签为[" + groupName + "]的资源组"
                     , "确认", "取消"))
                 {
                    
-                    directory.DirectoryForeachFiles((path) =>
+                    directory.ForeachDirectoryFiles((path) =>
                     {
-                        SetAddresableGroup(path,name);
+                        var key = path.Substring(directory.Length + 1);
+                        key = key.Substring(0, key.LastIndexOf('.'));
+                        SetAddresableGroup(path,groupName, key);
                     });
                 }
                
             }
         }
-        public static void SetAddresableGroup(string assetPath,string groupName)
+        public static void SetAddresableGroup(string assetPath,string groupName,string key="")
         {
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             var group = settings.FindGroup(groupName);
@@ -45,7 +47,15 @@ namespace QTool.Resource {
             }
             var guid = AssetDatabase.AssetPathToGUID(assetPath);
             var entry = settings.CreateOrMoveEntry(guid, group);
-            entry.address = Path.GetFileNameWithoutExtension(assetPath);
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                entry.address = Path.GetFileNameWithoutExtension(assetPath);
+            }
+            else
+            {
+                entry.address = key;
+            }
+            entry.labels.Clear();
             entry.SetLabel(groupName, true, true);
 
         }

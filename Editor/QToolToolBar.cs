@@ -6,11 +6,38 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
 using System.IO;
-namespace QTool
+namespace QTool.Editor
 {
     public static class QToolToolBar
     {
-        public static void DirectoryForeachFiles(this string rootPath, Action<string> action)
+        public static void ForeachDirectoryFiles(this string rootPath,Action<string> action)
+        {
+            ForeachFiles(rootPath,action);
+            ForeachDirectory(rootPath, (path) =>
+            {
+                path.ForeachDirectoryFiles(action);
+            });
+        }
+        public static void ForeachDirectory(this string rootPath,Action<string> action)
+        {
+            if (Directory.Exists(rootPath))
+            {
+                var paths = Directory.GetDirectories(rootPath);
+                foreach (var path in paths)
+                {
+                    if (string.IsNullOrWhiteSpace(path))
+                    {
+                        continue;
+                    }
+                    action?.Invoke(path);
+                }
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("错误", "不存在文件夹" + rootPath, "确定");
+            }
+        }
+        public static void ForeachFiles(this string rootPath, Action<string> action)
         {
             if (Directory.Exists(rootPath))
             {
