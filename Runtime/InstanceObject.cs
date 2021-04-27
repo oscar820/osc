@@ -28,10 +28,7 @@ namespace QTool
                 return _instance;
             }
         }
-        protected virtual void OnValidate()
-        {
-            name = typeof(T).Name;
-        }
+       
         public static T GetNewInstance()
         {
            return  PrefabResourceList<ResourceLabel>.Get(typeof(T).Name).GetComponent<T>();
