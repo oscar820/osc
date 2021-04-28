@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QTool.Resource;
+using System;
+
 namespace QTool
 {
   
@@ -53,21 +55,12 @@ namespace QTool
             _instance = this as ResourceLabel;
         }
     }
-    public abstract class InstanceObject<T> where T : InstanceObject<T>,new()
+    public abstract class InstanceObject<T> where T : InstanceObject<T>
     {
-        public static T Instance
+        public static readonly T Instance = Activator.CreateInstance<T>();
+        protected InstanceObject()
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new T();
-                    _instance.InstanceInit();
-                }
-                return _instance;
-            }
+
         }
-        protected static T _instance;
-        protected abstract void InstanceInit();
     }
 }
