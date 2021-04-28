@@ -31,7 +31,7 @@ namespace QTool
        
         public static T GetNewInstance()
         {
-           return  PrefabResourceList<ResourceLabel>.Get(typeof(T).Name).GetComponent<T>();
+           return  PrefabResourceList<ResourceLabel>.GetInstance(typeof(T).Name).GetComponent<T>();
         }
     }
     public abstract class InstanceBehaviour<ResourceLabel> : MonoBehaviour where ResourceLabel : InstanceBehaviour<ResourceLabel>

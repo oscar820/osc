@@ -52,7 +52,7 @@ namespace QTool.Resource
         {
             return ContainsKey(key);
         }
-        public static TObj Get(string key)
+        public static TObj GetResource(string key)
         {
             if (ContainsKey(key))
             {
@@ -85,7 +85,7 @@ namespace QTool.Resource
         {
             if (objDic.ContainsKey(key))
             {
-                loadOver?.Invoke(Get(key));
+                loadOver?.Invoke(GetResource(key));
             }
             else
             {
@@ -164,7 +164,7 @@ namespace QTool.Resource
             var poolkey = key + "_ObjPool";
             if (!PoolDic.ContainsKey(poolkey))
             {
-                var prefab = Get(key) as GameObject;
+                var prefab = GetResource(key) as GameObject;
                 if (prefab == null)
                 {
                     new Exception(Label + "找不到预制体资源" + key);
@@ -191,7 +191,7 @@ namespace QTool.Resource
             }
             if(obj.transform is RectTransform)
             {
-                var prefab = Get(key);
+                var prefab = GetResource(key);
                 (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
             }
             obj.name = key;
