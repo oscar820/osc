@@ -240,20 +240,21 @@ namespace QTool.Data
         }
         public static void LoadOverRun(System.Action action, string key = "")
         {
-            key = GetLoadOverKey(key);
+           
             if (LoadOver(key))
             {
                 action?.Invoke();
             }
             else
             {
-                if (LoadOverCallBack.ContainsKey(key))
+                var laodOverkey = GetLoadOverKey(key);
+                if (LoadOverCallBack.ContainsKey(laodOverkey))
                 {
-                    LoadOverCallBack[key] += action;
+                    LoadOverCallBack[laodOverkey] += action;
                 }
                 else
                 {
-                    LoadOverCallBack.Add(key, action);
+                    LoadOverCallBack.Add(laodOverkey, action);
                 }
             }
            
