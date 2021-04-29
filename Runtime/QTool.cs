@@ -71,7 +71,8 @@ namespace QTool
             return "{" + Key + ":" + Value + "}";
         }
     }
-    public class QDcitionary<TKey, T> : QAutoList<TKey, QKeyValue<TKey, T>>
+    
+    public class QDictionary<TKey, T> : QAutoList<TKey, QKeyValue<TKey, T>>
     {
         public new T this[TKey key]
         {

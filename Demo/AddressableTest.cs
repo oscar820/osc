@@ -14,7 +14,7 @@ public class AddressableTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.LogError( ResourceTest.Get("test1"));
+        Debug.LogError( ResourceTest.GetResource("test1"));
         ResourceTest.LoadOverRun(() =>
         {
             text.text = "╪стьмЙЁи:" + ResourceTest.objDic.Count + ResourceTest.objDic.ToOneString();

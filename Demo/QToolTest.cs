@@ -127,7 +127,7 @@ namespace QTool.Test
     }
     public class QToolTest : MonoBehaviour
     {
-        public QDcitionary<string, string> qDcitionaryTest = new QDcitionary<string, string>();
+        public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         // Start is called before the first frame update
         void Start()
         {

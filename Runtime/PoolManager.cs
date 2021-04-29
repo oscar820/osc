@@ -44,7 +44,7 @@ namespace QTool
     {
       
         
-        static QDcitionary<string, PoolBase> poolDic = new QDcitionary<string, PoolBase>();
+        static QDictionary<string, PoolBase> poolDic = new QDictionary<string, PoolBase>();
 
         public static GameObject Get(string poolKey ,GameObject prefab)
         {

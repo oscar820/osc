@@ -37,7 +37,7 @@ namespace QTool
             }
         }
 
-        static QDcitionary<object, float> timeScaleList = new QDcitionary<object, float>();
+        static QDictionary<object, float> timeScaleList = new QDictionary<object, float>();
         public static void ChangeScale(object obj, float timeScale)
         {
             if (timeScale >= 0)

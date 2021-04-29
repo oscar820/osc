@@ -260,7 +260,7 @@ namespace QTool.Data
         }
 #if Addressables
       
-        static QDcitionary<string, Task> loaderTasks = new QDcitionary<string, Task>();
+        static QDictionary<string, Task> loaderTasks = new QDictionary<string, Task>();
         public static async Task LoadAsync(string key = "")
         {
             if (_LoadOver(key)| loaderTasks[key]!=null)

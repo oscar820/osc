@@ -12,7 +12,7 @@ namespace QTool.Resource
 
     public abstract class ResourceList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:ResourceList<TLabel,TObj>
     {
-        public static QDcitionary<string, TObj> objDic = new QDcitionary<string, TObj>();
+        public static QDictionary<string, TObj> objDic = new QDictionary<string, TObj>();
         public static string Label
         {
             get
