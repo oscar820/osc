@@ -34,6 +34,15 @@ namespace QTool
             }
             return list;
         }
+        public static List<ObjT> ToOneList<KeyT, ObjT>(this QDictionary<KeyT, List<ObjT>> objList)
+        {
+            var list = new List<ObjT>();
+            foreach (var kv in objList)
+            {
+                list.AddRange(kv.Value);
+            }
+            return list;
+        }
         public static void Save<SaveT,ObjT>(this ICollection<SaveT> saveList,ICollection<ObjT> objList) where SaveT : QSaveBase, new() where ObjT : IQSave<SaveT>
         {
             foreach (var obj in objList)
