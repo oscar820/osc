@@ -123,21 +123,21 @@ namespace QTool.Data
 
         static string GetName(string key = "")
         {
-            return TableType + (string.IsNullOrWhiteSpace(key) ? "" : "/" + key);
+            return TableType + (string.IsNullOrWhiteSpace(key) ? "" : '\\' + key);
         }
         static string GetSubPath(string key = "")
         {
-            return "Data/" + GetName(key) + ".xml";
+            return "Data\\" + GetName(key) + ".xml";
         }
 
         public static string GetPlayerDataPath(string key = "")
         {
             var usePersistentPath = (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer);
-            return (usePersistentPath ? Application.persistentDataPath : Application.streamingAssetsPath) + "/" + GetSubPath(key);
+            return (usePersistentPath ? Application.persistentDataPath : Application.streamingAssetsPath) + '\\' + GetSubPath(key);
         }
         public static string GetStaticTablePath(string key = "")
         {
-            return Application.dataPath + "/" + GetSubPath(key);
+            return Application.dataPath + '\\' + GetSubPath(key);
         }
 
         public static void DeletePlayerData(string key="")

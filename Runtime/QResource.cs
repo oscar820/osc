@@ -71,10 +71,10 @@ namespace QTool.Resource
                 }
                 return null;
 #else
-                var obj = Resources.Load<TObj>(Label + '/' + key);
+                var obj = Resources.Load<TObj>(Label + '\\' + key);
                 if (obj == null)
                 {
-                    Debug.LogError("不找不到资源" + Label + '/' + key);
+                    Debug.LogError("不找不到资源" + Label + '\\' + key);
                 }
                 return obj;
 #endif
