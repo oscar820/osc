@@ -36,23 +36,23 @@ namespace QTool
            return  PrefabResourceList<ResourceLabel>.GetInstance(typeof(T).Name).GetComponent<T>();
         }
     }
-    public abstract class InstanceBehaviour<ResourceLabel> : MonoBehaviour where ResourceLabel : InstanceBehaviour<ResourceLabel>
+    public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>
     {
-        public static ResourceLabel Instance
+        public static T Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<ResourceLabel>();
+                    _instance = FindObjectOfType<T>();
                 }
                 return _instance;
             }
         }
-        protected static ResourceLabel _instance;
+        protected static T _instance;
         protected virtual void Awake()
         {
-            _instance = this as ResourceLabel;
+            _instance = this as T;
         }
     }
     public abstract class InstanceObject<T> where T : InstanceObject<T>
