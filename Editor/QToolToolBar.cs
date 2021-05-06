@@ -18,6 +18,19 @@ namespace QTool.Editor
                 path.ForeachDirectoryFiles(action);
             });
         }
+        public static int DirectoryFileCount(this string rootPath)
+        {
+            var count = rootPath.FileCount();
+            rootPath.ForeachDirectory((path) =>
+            {
+                count += rootPath.FileCount();
+            });
+            return count;
+        }
+        public static int FileCount(this string rootPath)
+        {
+            return Directory.Exists(rootPath)? Directory.GetDirectories(rootPath).Length : 0;
+        }
         public static void ForeachDirectory(this string rootPath,Action<string> action)
         {
             if (Directory.Exists(rootPath))

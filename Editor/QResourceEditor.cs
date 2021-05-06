@@ -16,6 +16,7 @@ namespace QTool.Editor {
         [MenuItem("Assets/工具/批量生成Addressable资源",priority =0)]
         public static void AutoAddressableResource()
         {
+         
             if(Selection.activeObject is DefaultAsset)
             {
                 var groupName = Selection.activeObject.name;
@@ -24,13 +25,18 @@ namespace QTool.Editor {
                     "以文件夹["+ directory + "] \n生成组名与标签为[" + groupName + "]的资源组"
                     , "确认", "取消"))
                 {
-                   
+
+                    var count = directory.DirectoryFileCount();
+                    var index = 1f;
                     directory.ForeachDirectoryFiles((path) =>
                     {
+                        EditorUtility.DisplayProgressBar("批量添加Addressable资源", "生成资源:" + path, index / count);
                         var key = path.Substring(directory.Length + 1);
                         key = key.Substring(0, key.LastIndexOf('.'));
                         SetAddresableGroup(path,groupName, key);
+                        index++;
                     });
+                    EditorUtility.ClearProgressBar();
                 }
                
             }
