@@ -30,7 +30,7 @@ namespace QTool.Editor {
                     var index = 1f;
                     directory.ForeachDirectoryFiles((path) =>
                     {
-                        EditorUtility.DisplayProgressBar("批量添加Addressable资源", "生成资源:" + path, index / count);
+                        EditorUtility.DisplayProgressBar("批量添加Addressable资源", "添加资源("+ index+"/"+count+") : " + path, index / count);
                         var key = path.Substring(directory.Length + 1);
                         key = key.Substring(0, key.LastIndexOf('.'));
                         SetAddresableGroup(path,groupName, key);

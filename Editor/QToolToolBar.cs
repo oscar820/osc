@@ -29,7 +29,7 @@ namespace QTool.Editor
         }
         public static int FileCount(this string rootPath)
         {
-            return Directory.Exists(rootPath)? Directory.GetDirectories(rootPath).Length : 0;
+            return Directory.Exists(rootPath)? Directory.GetFiles(rootPath).Length/2 : 0;
         }
         public static void ForeachDirectory(this string rootPath,Action<string> action)
         {
