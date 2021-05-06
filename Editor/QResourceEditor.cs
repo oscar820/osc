@@ -55,10 +55,10 @@ namespace QTool.Editor {
                 {settings.DefaultGroup.Schemas[0],settings.DefaultGroup.Schemas[1] }, typeof(SchemaType));
                 }
             }
-            var guid = AssetDatabase.AssetPathToGUID(assetPath);
             var entry= settings.FindAssetEntry(assetPath);
             if (entry == null)
             {
+                var guid = AssetDatabase.AssetPathToGUID(assetPath);
                 entry = settings.CreateOrMoveEntry(guid, group);
             } else if (entry.parentGroup != group)
             {
