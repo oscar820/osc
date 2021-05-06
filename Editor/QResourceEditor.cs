@@ -42,6 +42,7 @@ namespace QTool.Editor {
             }
         }
         public static QDictionary<string, AddressableAssetGroup> groupDic = new QDictionary<string, AddressableAssetGroup>();
+        public static QDictionary<string, AddressableAssetEntry> entryDic = new QDictionary<string, AddressableAssetEntry>();
         public static void SetAddresableGroup(string assetPath,string groupName,string key="")
         {
             var settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -52,19 +53,29 @@ namespace QTool.Editor {
                 if (group == null)
                 {
                     group = settings.CreateGroup(groupName, false, false, false, new List<AddressableAssetGroupSchema>
-                {settings.DefaultGroup.Schemas[0],settings.DefaultGroup.Schemas[1] }, typeof(SchemaType));
+                    {settings.DefaultGroup.Schemas[0],settings.DefaultGroup.Schemas[1] }, typeof(SchemaType));
+                }
+                else
+                {
+                    foreach (var e in group.entries)
+                    {
+                        entryDic[e.guid] = e;
+                    }
                 }
             }
-            var entry= settings.FindAssetEntry(assetPath);
+            var guid = AssetDatabase.AssetPathToGUID(assetPath);
+            var entry= entryDic.ContainsKey(guid)?entryDic[guid]:settings.FindAssetEntry(guid);
             if (entry == null)
             {
-                var guid = AssetDatabase.AssetPathToGUID(assetPath);
                 entry = settings.CreateOrMoveEntry(guid, group);
             } else if (entry.parentGroup != group)
             {
                 settings.MoveEntry(entry, group);
             }
-
+            else
+            {
+                return;
+            }
             if (string.IsNullOrWhiteSpace(key))
             {
                 entry.address = Path.GetFileNameWithoutExtension(assetPath);
