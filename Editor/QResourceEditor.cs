@@ -41,18 +41,30 @@ namespace QTool.Editor {
                
             }
         }
+        public static QDictionary<string, AddressableAssetGroup> groupDic = new QDictionary<string, AddressableAssetGroup>();
         public static void SetAddresableGroup(string assetPath,string groupName,string key="")
         {
             var settings = AddressableAssetSettingsDefaultObject.Settings;
-            var group = settings.FindGroup(groupName);
+            var group = groupDic[groupName];
             if (group == null)
             {
-
-                group=settings.CreateGroup(groupName, false, false, false, new List<AddressableAssetGroupSchema>
+                group = settings.FindGroup(groupName);
+                if (group == null)
+                {
+                    group = settings.CreateGroup(groupName, false, false, false, new List<AddressableAssetGroupSchema>
                 {settings.DefaultGroup.Schemas[0],settings.DefaultGroup.Schemas[1] }, typeof(SchemaType));
+                }
             }
             var guid = AssetDatabase.AssetPathToGUID(assetPath);
-            var entry = settings.CreateOrMoveEntry(guid, group);
+            var entry= settings.FindAssetEntry(assetPath);
+            if (entry == null)
+            {
+                entry = settings.CreateOrMoveEntry(guid, group);
+            } else if (entry.parentGroup != group)
+            {
+                settings.MoveEntry(entry, group);
+            }
+
             if (string.IsNullOrWhiteSpace(key))
             {
                 entry.address = Path.GetFileNameWithoutExtension(assetPath);
@@ -61,9 +73,11 @@ namespace QTool.Editor {
             {
                 entry.address = key;
             }
-            entry.labels.Clear();
-            entry.SetLabel(groupName, true, true);
-
+            if (!entry.labels.Contains(groupName))
+            {
+                entry.labels.Clear();
+                entry.SetLabel(groupName, true, true);
+            }
         }
 #endif
     }
