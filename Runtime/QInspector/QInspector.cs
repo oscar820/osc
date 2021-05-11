@@ -138,6 +138,18 @@ namespace QTool.Inspector
         }
     }
     /// <summary>
+    /// 选取对象按钮显示 会调用函数CallFunc传入GameObject
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class SelectObjectButtonAttribute : ViewButtonAttribute
+    {
+
+        public SelectObjectButtonAttribute()
+        {
+            // order = 0;
+        }
+    }
+    /// <summary>
     /// 显示按钮 调用函数CallFunc 无参数
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
@@ -157,16 +169,5 @@ namespace QTool.Inspector
     {
         public string showControl = "";
     }
-    /// <summary>
-    /// 选取对象按钮显示 会调用函数CallFunc传入GameObject
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-    public class SelectObjectButtonAttribute : ViewButtonAttribute
-    {
-
-        public SelectObjectButtonAttribute()
-        {
-            // order = 0;
-        }
-    }
+ 
 }
