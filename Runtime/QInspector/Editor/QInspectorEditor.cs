@@ -447,9 +447,11 @@ namespace QTool.Inspector
         public QDictionary<EidtorInitInvokeAttribute, QFunctionInfo> initFunc = new QDictionary<EidtorInitInvokeAttribute, QFunctionInfo>();
         public QDictionary<SceneMouseEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneMouseEventAttribute, QFunctionInfo>();
         public QDictionary<ViewButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<ViewButtonAttribute, QFunctionInfo>();
-        
+
         protected override void Init(Type type)
         {
+            MemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic|BindingFlags.Static;
+            FunctionFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic|BindingFlags.Static;
             base.Init(type);
             foreach (var funcInfo in Functions)
             {
@@ -463,12 +465,12 @@ namespace QTool.Inspector
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<ContextMenu>())
                 {
-                    buttonFunc[new ViewButtonAttribute(att.menuItem) ] = funcInfo;
+                    buttonFunc[new ViewButtonAttribute(att.menuItem)] = funcInfo;
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EidtorInitInvokeAttribute>())
                 {
                     initFunc[att] = funcInfo;
-                }   
+                }
             }
         }
     }
