@@ -129,6 +129,8 @@ namespace QTool.Test
     public class QToolTest : MonoBehaviour
     {
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
+        [ViewToggle("alskjd")]
+        public bool togle;
         // Start is called before the first frame update
         void Start()
         {
@@ -147,7 +149,7 @@ namespace QTool.Test
 
         }
         [ReadOnly]
-        [ViewName(name ="索引")]
+        [ViewName(name ="索引"  )]
         public int index = 0;
 
         public void AsyncTest()
@@ -165,7 +167,7 @@ namespace QTool.Test
         public int[] b;
         public byte[] info;
 
-        [ContextMenu("ScreenSize")]
+        [ViewButton("ScreenSize",showControl = "togle")]
         public void SetSize()
         {
             QScreen.SetResolution(920, 630, false);

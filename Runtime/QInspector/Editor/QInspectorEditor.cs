@@ -428,7 +428,7 @@ namespace QTool.Inspector
         }
         public static QMemeberInfo GetMember(this object target,string key)
         {
-            return QInspectorType.Get(target.GetType()).GetMember(key);
+            return QInspectorType.Get(target.GetType()).Members[key];
         }
         public static bool IsShow(this QEditorAttribute att, object target)
         {
