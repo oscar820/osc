@@ -77,12 +77,11 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Field)]
     public class ToolbarListAttribute : QEditorAttribute
     {
-        public string GetListFunc;
-        public float height = 40f;
+        public string listMember;
         //  public bool ResourceImage = false;
-        public ToolbarListAttribute(string GetListFunc)
+        public ToolbarListAttribute(string name, string listMember, float height = 30, string showControl = "") : base(name, height, showControl)
         {
-            this.GetListFunc = GetListFunc;
+            this.listMember = listMember;
         }
     }
 
@@ -92,9 +91,13 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Field)]
     public class ToggleListAttribute : QEditorAttribute
     {
-        public string valueSetFunc;
         public string valueGetFunc;
-        public float height = 40f;
+        public string valueSetFunc;
+        public ToggleListAttribute(string name, string valueGetFunc,string valueSetFunc, float height = 30, string showControl = "") : base(name, height, showControl)
+        {
+            this.valueGetFunc = valueGetFunc;
+            this.valueSetFunc = valueSetFunc;
+        }
     }
     /// <summary>
     /// 当在scene视窗鼠标事件调用 传入3个参数 (Vector3 点击位置,Collider 点击碰撞物体,bool 是否按下shift键)
@@ -130,9 +133,7 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Method)]
     public class ViewButtonAttribute : QEditorAttribute
     {
-        public string name;
-        public float height = 20;
-        public ViewButtonAttribute()
+        public ViewButtonAttribute(string name, float height = 30, string showControl = "") : base(name, height, showControl)
         {
             // order = 0;
         }
@@ -143,10 +144,8 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class SelectObjectButtonAttribute : ViewButtonAttribute
     {
-
-        public SelectObjectButtonAttribute()
+        public SelectObjectButtonAttribute(string name, float height = 30, string showControl = "") : base(name,height, showControl)
         {
-            // order = 0;
         }
     }
     /// <summary>
@@ -155,11 +154,10 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class ViewToggleAttribute : QEditorAttribute
     {
-        public string name;
-        public float height = 30;
-        public ViewToggleAttribute()
+  
+        public ViewToggleAttribute(string name, float height = 30, string showControl="") :base(name, height, showControl)
         {
-            // order = 0;
+            
         }
 
     }
@@ -167,7 +165,14 @@ namespace QTool.Inspector
 
     public abstract class QEditorAttribute : PropertyAttribute
     {
+        public string name;
+        public float height = 30;
         public string showControl = "";
+        public QEditorAttribute(string name, float height = 30, string showControl="")
+        {
+            this.name = name;
+            this.showControl = showControl;
+        }
     }
  
 }

@@ -213,7 +213,6 @@ namespace QTool.Test
             creatObj = (TestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
             UnityEngine.Debug.LogError(creatObj);
         }
-        [ViewButton(name= "测试")]
         [ContextMenu("写入Test")]
         public void TestFunc()
         {

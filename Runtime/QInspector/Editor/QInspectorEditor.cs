@@ -426,6 +426,10 @@ namespace QTool.Inspector
             }
             return bounds;
         }
+        public static QMemeberInfo GetMember(this object target,string key)
+        {
+            return QInspectorType.Get(target.GetType()).GetMember(key);
+        }
         public static bool IsShow(this QEditorAttribute att, object target)
         {
             if (string.IsNullOrEmpty(att.showControl))
@@ -434,12 +438,8 @@ namespace QTool.Inspector
             }
             else
             {
-                return (bool)target.GetType().GetProperty(att.showControl).GetValue(target);
+                return (bool)target.GetMember(att.showControl).Get(target);
             }
-        }
-        public static object GetValueByName(this object target, string name)
-        {
-            return target.GetType().GetProperty(name).GetValue(target);
         }
     }
     public class QInspectorType : QTypeInfo<QInspectorType>
@@ -463,7 +463,7 @@ namespace QTool.Inspector
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<ContextMenu>())
                 {
-                    buttonFunc[new ViewButtonAttribute() {  name=att.menuItem}] = funcInfo;
+                    buttonFunc[new ViewButtonAttribute(att.menuItem) ] = funcInfo;
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EidtorInitInvokeAttribute>())
                 {
@@ -613,21 +613,20 @@ namespace QTool.Inspector
                 {
                     return true;
                 }
-                var GetListFunc = target.GetType().GetMethod(toolbar.GetListFunc);
+                var listMember = target.GetMember(toolbar.listMember);
                 var info = target.GetType().GetField(property.name);
 
                 var GuiList = new List<GUIContent>();
                 IList list = null;
                 try
                 {
-                    var obj = GetListFunc.Invoke(target, new object[] { });
-                    //    Debug.LogError(obj.GetType());
+                    var obj = listMember.Get(target);
                     list = obj as IList;
                     if (list == null) throw new Exception();
                 }
                 catch (Exception)
                 {
-                    GUILayout.Box("无法列表从【" + toolbar.GetListFunc + "】");
+                    GUILayout.Box("无法列表从【" + toolbar.listMember + "】");
                     return false;
                 }
 
@@ -674,12 +673,10 @@ namespace QTool.Inspector
                 var getFunc = target.GetType().GetMethod(att.valueGetFunc);
                 var setFunc = target.GetType().GetMethod(att.valueSetFunc);
 
-
-
-                var info = target.GetType().GetField(property.name);
+                var info = target.GetMember(property.name);
 
                 var GuiList = new List<GUIContent>();
-                var list = (info.GetValue(target) as IList);
+                var list = (info.Get(target) as IList);
 
                 if (getFunc != null && setFunc != null)
                 {
