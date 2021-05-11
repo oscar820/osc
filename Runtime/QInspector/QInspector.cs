@@ -79,7 +79,7 @@ namespace QTool.Inspector
     {
         public string listMember;
         //  public bool ResourceImage = false;
-        public ToolbarListAttribute(string name, string listMember, float height = 30, string showControl = "") : base(name, height, showControl)
+        public ToolbarListAttribute( string listMember, float height = 30, string showControl = "") : base("", height, showControl)
         {
             this.listMember = listMember;
         }
@@ -93,7 +93,7 @@ namespace QTool.Inspector
     {
         public string valueGetFunc;
         public string valueSetFunc;
-        public ToggleListAttribute(string name, string valueGetFunc,string valueSetFunc, float height = 30, string showControl = "") : base(name, height, showControl)
+        public ToggleListAttribute( string valueGetFunc,string valueSetFunc, float height = 30, string showControl = "") : base("", height, showControl)
         {
             this.valueGetFunc = valueGetFunc;
             this.valueSetFunc = valueSetFunc;

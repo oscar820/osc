@@ -468,7 +468,7 @@ namespace QTool.Inspector
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EidtorInitInvokeAttribute>())
                 {
                     initFunc[att] = funcInfo;
-                }
+                }   
             }
         }
     }
