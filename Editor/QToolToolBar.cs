@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
 using System.IO;
-namespace QTool.Editor
+namespace QTool
 {
     public static class QToolToolBar
     {
