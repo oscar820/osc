@@ -6,6 +6,7 @@ using System.Text;
 using System;
 using QTool.Serialize;
 using System.Reflection;
+using QTool.Inspector;
 using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Binary;
 using QTool.Reflection;
@@ -145,6 +146,8 @@ namespace QTool.Test
         {
 
         }
+        [ReadOnly]
+        [ViewName(name ="索引")]
         public int index = 0;
 
         public void AsyncTest()
@@ -210,6 +213,7 @@ namespace QTool.Test
             creatObj = (TestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
             UnityEngine.Debug.LogError(creatObj);
         }
+        [ViewButton(name= "测试")]
         [ContextMenu("写入Test")]
         public void TestFunc()
         {

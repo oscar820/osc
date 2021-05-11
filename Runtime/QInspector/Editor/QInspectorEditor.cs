@@ -461,6 +461,10 @@ namespace QTool.Inspector
                 {
                     buttonFunc[att] = funcInfo;
                 }
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<ContextMenu>())
+                {
+                    buttonFunc[new ViewButtonAttribute() {  name=funcInfo.Name}] = funcInfo;
+                }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EidtorInitInvokeAttribute>())
                 {
                     initFunc[att] = funcInfo;
