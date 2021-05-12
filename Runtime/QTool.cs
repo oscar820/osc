@@ -86,13 +86,24 @@ namespace QTool
                 base[key].Value=value;
             }
         }
+        public void Add(TKey key, T value)
+        {
+            this[key] = value;
+        }
     }
-    public class QList<TKey,T>:List<T> where T : IKey<TKey>
+    public class QList<TKey,T>:List<T>, ISerializationCallbackReceiver where T : IKey<TKey>
     {
+        [SerializeField]
+        private List<T> list = new List<T>();
         Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
         public virtual T Get(TKey key)
         {
             return this.Get<T, TKey>(key); 
+        }
+    
+        public void Remove(TKey key)
+        {
+            RemoveKey(key);
         }
         public T this[TKey key]
         {
@@ -132,6 +143,20 @@ namespace QTool
         {
             base.Clear();
             dic.Clear();
+        }
+
+        public void OnBeforeSerialize()
+        {
+            list = new List<T>(this);
+        }
+
+        public void OnAfterDeserialize()
+        {
+            Clear();
+            for (int i = 0; i < list.Count; i++)
+            {
+                Add(list[i]);
+            }
         }
     }
     public class QAutoList<KeyType, T> : QList<KeyType,T> where T :IKey<KeyType>, new()
@@ -181,7 +206,7 @@ namespace QTool
             }
         }
     }
-    public static class Tool
+    public static partial class Tool
     {
         public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null)
         {
