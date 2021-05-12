@@ -474,7 +474,7 @@ namespace QTool.Inspector
             }
         }
     }
-    [CustomEditor(typeof(MonoBehaviour), true, isFallback = true)]
+    [CustomEditor(typeof(UnityEngine.Object), true, isFallback = true)]
     [CanEditMultipleObjects]
     public class QInspectorEditor : Editor
     {

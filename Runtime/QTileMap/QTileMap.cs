@@ -18,6 +18,10 @@ namespace QTool.TileMap
     //    void MergeBoder();
     //    void ClearBorderCheck();
     //}
+    public class TileAsset:QTool.Resource.PrefabResourceList<TileAsset>
+    {
+
+    }
     [System.Serializable]
     public class PosObject : IKey<Pos>
     {
@@ -183,6 +187,13 @@ namespace QTool.TileMap
         {
 
 #if UNITY_EDITOR
+            TileAsset.LoadOverRun(() =>
+            {
+                foreach (var kv in TileAsset.objDic)
+                {
+                    tileBrushList.AddCheckExist(kv.Value);
+                }
+            });
             tileBrushList.RemoveAll((obj) => obj == null);
             foreach (var item in tileList)
             {

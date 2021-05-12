@@ -4,12 +4,87 @@ using UnityEngine;
 using System;
 using QTool.Serialize;
 using System.Threading.Tasks;
-#if Addressables
-using UnityEngine.AddressableAssets;
-#endif
+
+
 namespace QTool.Resource
 {
+#if Addressables
+    using UnityEngine.AddressableAssets;
+#if UNITY_EDITOR
+    using UnityEditor.AddressableAssets.Settings;
+    using UnityEditor.AddressableAssets;
+    using UnityEditor;
+    using System.IO;
 
+    public static  class AddressableTool
+    {
+        public static QDictionary<string, AddressableAssetGroup> groupDic = new QDictionary<string, AddressableAssetGroup>();
+        public static QDictionary<string, AddressableAssetEntry> entryDic = new QDictionary<string, AddressableAssetEntry>();
+        public static void SetAddresableGroup(string assetPath, string groupName, string key = "")
+        {
+            var group = GetGroup(groupName);
+            var guid = AssetDatabase.AssetPathToGUID(assetPath);
+            var entry = entryDic.ContainsKey(guid) ? entryDic[guid] : AssetSetting.FindAssetEntry(guid);
+            if (entry == null)
+            {
+                entry = AssetSetting.CreateOrMoveEntry(guid, group);
+            }
+            else if (entry.parentGroup != group)
+            {
+                AssetSetting.MoveEntry(entry, group);
+            }
+            else
+            {
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                entry.address = Path.GetFileNameWithoutExtension(assetPath);
+            }
+            else
+            {
+                entry.address = key;
+            }
+            if (!entry.labels.Contains(groupName))
+            {
+                entry.labels.Clear();
+                entry.SetLabel(groupName, true, true);
+            }
+        }
+       
+
+        public static AddressableAssetSettings AssetSetting
+        {
+            get
+            {
+                return AddressableAssetSettingsDefaultObject.Settings;
+            }
+        }
+        public static AddressableAssetGroup GetGroup(string groupName)
+        {
+            var group = groupDic[groupName];
+            if (group == null)
+            {
+                group = AssetSetting.FindGroup(groupName);
+                if (group == null)
+                {
+                    group = AssetSetting.CreateGroup(groupName, false, false, false, new List<AddressableAssetGroupSchema>
+                    {AssetSetting.DefaultGroup.Schemas[0],AssetSetting.DefaultGroup.Schemas[1] }, typeof(System.Data.SchemaType));
+                }
+                else
+                {
+                    foreach (var e in group.entries)
+                    {
+                        entryDic[e.guid] = e;
+                    }
+                }
+            }
+            return group;
+        }
+    }
+#endif
+
+#endif
     public abstract class ResourceList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:ResourceList<TLabel,TObj>
     {
         public static QDictionary<string, TObj> objDic = new QDictionary<string, TObj>();
@@ -119,40 +194,56 @@ namespace QTool.Resource
         static Task loaderTask;
         public static async Task LoadAsync()
         {
-            if (_loadOver|| loaderTask!=null) return;
-            var load = Addressables.LoadAssetsAsync<TObj>(Label, null);
-            load.Completed += (loader) =>
+            if (_loadOver || loaderTask != null) return;
+            if (Application.isPlaying)
             {
-                if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                var load = Addressables.LoadAssetsAsync<TObj>(Label, null);
+                load.Completed += (loader) =>
                 {
-                    foreach (var result in loader.Result)
+                    if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                     {
-                        if (result == null) continue;
-                        Set(result.name, result);
-                        if (result is GameObject)
+                        foreach (var result in loader.Result)
                         {
-                            var qid = (result as GameObject).GetComponentInChildren<QId>();
-                            if (qid != null)
+                            if (result == null) continue;
+                            Set(result.name, result);
+                            if (result is GameObject)
                             {
-                                Set(qid.PrefabId, result);
+                                var qid = (result as GameObject).GetComponentInChildren<QId>();
+                                if (qid != null)
+                                {
+                                    Set(qid.PrefabId, result);
+                                }
                             }
                         }
+                        Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                        _loadOver = true;
+                        OnLoadOver?.Invoke();
+                        OnLoadOver = null;
                     }
-                    Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
-                    _loadOver = true;
-                    OnLoadOver?.Invoke();
-                    OnLoadOver = null;
-                }
-                else
-                {
-                    if (loader.OperationException != null)
+                    else
                     {
-                        Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
+                        if (loader.OperationException != null)
+                        {
+                            Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
+                        }
                     }
+                };
+                loaderTask = load.Task;
+                await load.Task;
+            }
+            else
+            {
+#if UNITY_EDITOR
+                var group = AddressableTool.GetGroup(Label);
+                foreach (var entry in group.entries)
+                {
+                    Set(entry.address, entry.TargetAsset as TObj);
                 }
-            };
-            loaderTask = load.Task;
-            await load.Task;
+                _loadOver = true;
+                OnLoadOver?.Invoke();
+                OnLoadOver = null;
+#endif
+            }
         }
 #endif
     }
