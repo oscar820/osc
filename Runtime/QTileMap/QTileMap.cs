@@ -148,7 +148,7 @@ namespace QTool.TileMap
      
         [ToolbarList("editorMode", showControl = "EditorMode")]
         public int EditorModeIndex;
-        [ToolbarList("curBrushList", showControl = "EditorMode", pageSize = 5, name = "± À¢")]
+        [ToolbarList("curBrushList", showControl = "EditorMode", pageSize = 15, name = "± À¢")]
         public int PrefabIndex;
         [ToolbarList("tileBurshMode", showControl = "EditorMode")]
         public int tileBrushModeIndex;

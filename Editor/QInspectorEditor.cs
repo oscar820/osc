@@ -457,11 +457,11 @@ namespace QTool.Inspector
         {
             if (obj != null)
             {
-                if (obj is UnityEngine.Object)
+                if (obj is UnityEngine.GameObject)
                 {
-                    var uObj = obj as UnityEngine.Object;
+                    var uObj = obj as UnityEngine.GameObject;
                     var texture = AssetPreview.GetAssetPreview(uObj);
-                    list.Add(new GUIContent(texture, uObj.name));
+                    list.Add(new GUIContent(uObj.name,texture,uObj.name));
                 }
                 else
                 {
