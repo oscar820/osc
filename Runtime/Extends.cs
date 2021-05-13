@@ -38,17 +38,20 @@ namespace QTool
             UnityEditor.EditorUtility.SetDirty(obj);
 # endif
         }
+        public static void Record(this Object obj)
+        {
+            Undo.RecordObject(obj, "RecordObj"+obj.GetHashCode());
+        }
+
         public static T CheckInstantiate<T>(this Object recordObj,T prefab, Transform parent)where T: Object
         {
 
 #if UNITY_EDITOR
-            Undo.RecordObject(recordObj, "CheckInstantiate");
             var obj = PrefabUtility.InstantiatePrefab(prefab, parent) as T;
-            Undo.RegisterCreatedObjectUndo(obj, "CheckInstantiate");
 #else
             var obj = GameObject.Instantiate(prefab, parent);
 #endif
-            return obj;
+            return obj ;
         }
         public static GameObject GetPrefab(this GameObject obj)
         {
@@ -60,13 +63,11 @@ namespace QTool
         }
         public static void CheckDestory(this Object recordObj, Object obj)
         {
-
 #if UNITY_EDITOR
             if (obj != null)
             {
-               Undo.DestroyObjectImmediate(obj);
+                GameObject.DestroyImmediate(obj);
             }
-            Undo.RecordObject(recordObj, "CheckDestory");
 #else
               GameObject.Destroy(obj);
 #endif

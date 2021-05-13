@@ -8,12 +8,13 @@ namespace QTool.Inspector
     /// 数值更改时调用changeCallBack函数
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ChangeCallAttribute : ViewNameAttribute
+    public class ChangeCallAttribute : PropertyAttribute
     {
+        public bool change;
         public string changeCallBack;
-        public ChangeCallAttribute()
+        public ChangeCallAttribute(string changeCallBack)
         {
-
+            this.changeCallBack = changeCallBack;
         }
     }
     /// <summary>
@@ -34,9 +35,9 @@ namespace QTool.Inspector
     {
         public string title;
         public float height = 20;
-        public TitleAttribute()
+        public TitleAttribute(string title)
         {
-            // order = 0;
+            this.title = title;
         }
     }
 
@@ -78,10 +79,15 @@ namespace QTool.Inspector
     public class ToolbarListAttribute : QEditorAttribute
     {
         public string listMember;
+        public int pageSize= 0;
         //  public bool ResourceImage = false;
         public ToolbarListAttribute( string listMember, float height = 30, string showControl = "") : base("", height, showControl)
         {
             this.listMember = listMember;
+            if (name == default)
+            {
+                name = listMember;
+            }
         }
     }
 

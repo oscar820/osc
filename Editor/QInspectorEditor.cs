@@ -108,14 +108,13 @@ namespace QTool.Inspector
                 var boxstyle = new GUIStyle();
                 var back = new Texture2D(1, 1); ;
                 var color = GUI.color;
-                GUI.color = property.boolValue ? Color.grey : Color.white;
+                GUI.color = property.boolValue ? Color.Lerp( Color.black,Color.grey,0.3f) : Color.Lerp(Color.black, Color.grey, 0.7f);
                 boxstyle.normal.background = back;
                 property.boolValue = EditorGUI.Toggle(position, property.boolValue, boxstyle);
                 GUI.color = color;
                 var style = EditorStyles.largeLabel;
                 style.alignment = TextAnchor.MiddleCenter;
                 EditorGUI.LabelField(position, att.name, style);
-
             }
             else
             {
@@ -137,30 +136,7 @@ namespace QTool.Inspector
     }
 
 
-    [CustomPropertyDrawer(typeof(ChangeCallAttribute))]
-    public class ChangeCallAttributeDrawer : PropertyDrawBase<ChangeCallAttribute>
-    {
-        private bool Change = false;
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            if (Change)
-            {
-                property.Call(att.changeCallBack);
-                Change = false;
-            }
-            EditorGUI.BeginChangeCheck();
-            property.Draw(position, att.name + "[回调]");
-            EditorGUI.EndChangeCheck();
-            if (GUI.changed)
-            {
-                Change = true;
-            }
-        }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return property.GetHeight();
-        }
-    }
+ 
     [CustomPropertyDrawer(typeof(ViewEnumAttribute))]
     public class ViewEnumAttributeDrawer : PropertyDrawBase<ViewEnumAttribute>
     {
@@ -370,21 +346,40 @@ namespace QTool.Inspector
             }
             return method?.Invoke(obj, paramsList);
         }
-        public static void DrawLayout(this SerializedProperty property)
+        public static Action DrawLayout(this SerializedProperty property)
         {
-
-            if (property.HasAttribute<ReadOnlyAttribute>())
+            if (!property.IsShow())
             {
-                GUI.enabled = false;
-                EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
-                GUI.enabled = true;
+                return null;
             }
-            else
+            var changeCall = property.GetAttribute<ChangeCallAttribute>();
+            if (changeCall!=null)
             {
-
-                EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
+                EditorGUI.BeginChangeCheck(); ;
             }
+                if (property.HasAttribute<ReadOnlyAttribute>())
+                {
+                    GUI.enabled = false;
+                    EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
+                    GUI.enabled = true;
+                }
+                else
+                {
 
+                    EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
+                }
+            if (changeCall!=null)
+            {
+                if (EditorGUI.EndChangeCheck())
+                {
+                    return () =>
+                    {
+                        property.Call(changeCall.changeCallBack);
+                    };
+                }
+            }
+            return null;
+           
 
         }
         public static bool DrawToogleButton(this bool value, GUIContent guiContent, GUIStyle backStyle)
@@ -428,11 +423,16 @@ namespace QTool.Inspector
         }
         public static QMemeberInfo GetMember(this object target,string key)
         {
-            return QInspectorType.Get(target.GetType()).Members[key];
+            var memeberInfo= QInspectorType.Get(target.GetType()).Members[key];
+            if (memeberInfo == null)
+            {
+                Debug.LogError(target + "获取属性[" + key + "]出错");
+            }
+            return memeberInfo;
         }
-        public static bool IsShow(this QEditorAttribute att, object target)
+        public static bool IsShow(this QEditorAttribute att,object target)
         {
-            if (string.IsNullOrEmpty(att.showControl))
+            if ( string.IsNullOrWhiteSpace(att.showControl))
             {
                 return true;
             }
@@ -441,13 +441,44 @@ namespace QTool.Inspector
                 return (bool)target.GetMember(att.showControl).Get(target);
             }
         }
+        public static bool IsShow(this SerializedProperty property)
+        {
+            var att = property.GetAttribute<QEditorAttribute>();
+            if (att ==null)
+            {
+                return true;
+            }
+            else 
+            {
+                return att.IsShow(property.serializedObject.targetObject);
+            }
+        }
+        public static void AddObject(this List<GUIContent> list, object obj)
+        {
+            if (obj != null)
+            {
+                if (obj is UnityEngine.Object)
+                {
+                    var uObj = obj as UnityEngine.Object;
+                    var texture = AssetPreview.GetAssetPreview(uObj);
+                    list.Add(new GUIContent(texture, uObj.name));
+                }
+                else
+                {
+                    list.Add(new GUIContent(obj.ToString()));
+                }
+            }
+            else
+            {
+                list.Add(new GUIContent("空"));
+            }
+        }
     }
     public class QInspectorType : QTypeInfo<QInspectorType>
     {
         public QDictionary<EidtorInitInvokeAttribute, QFunctionInfo> initFunc = new QDictionary<EidtorInitInvokeAttribute, QFunctionInfo>();
         public QDictionary<SceneMouseEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneMouseEventAttribute, QFunctionInfo>();
         public QDictionary<ViewButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<ViewButtonAttribute, QFunctionInfo>();
-
         protected override void Init(Type type)
         {
             MemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic|BindingFlags.Static;
@@ -540,11 +571,14 @@ namespace QTool.Inspector
             EditorGUI.BeginChangeCheck();
             DrawAllProperties(serializedObject);
             DrawButton();
+        
             if (EditorGUI.EndChangeCheck())
             {
                 EditorUtility.SetDirty(target);
                 serializedObject.ApplyModifiedProperties();
+                ChangeCallBack?.Invoke();
             }
+
         }
      
         public void DrawButton()
@@ -603,8 +637,8 @@ namespace QTool.Inspector
             }
 
         }
-     
-
+      
+        QDictionary<int, int> tempIndex = new QDictionary<int, int>(-1);
         #region 将数组数据显示成工具栏
         public bool DrawToolbar(SerializedProperty property)
         {
@@ -616,7 +650,6 @@ namespace QTool.Inspector
                     return true;
                 }
                 var listMember = target.GetMember(toolbar.listMember);
-                var info = target.GetType().GetField(property.name);
 
                 var GuiList = new List<GUIContent>();
                 IList list = null;
@@ -631,29 +664,42 @@ namespace QTool.Inspector
                     GUILayout.Box("无法列表从【" + toolbar.listMember + "】");
                     return false;
                 }
-
-                for (int i = 0; i < list.Count; i++)
+                if (list.Count == 0)
                 {
-                    if (list[i] != null)
-                    {
-                        if (list[i] is UnityEngine.Object)
-                        {
-                            var uObj = list[i] as UnityEngine.Object;
-                            var texture = AssetPreview.GetAssetPreview(uObj);
-                            GuiList.Add(new GUIContent(texture, uObj.name));
-                        }
-                        else
-                        {
-                            GuiList.Add(new GUIContent(list[i].ToString()));
-                        }
-                    }
-                    else
-                    {
-                        GuiList.Add(new GUIContent("空"));
-                    }
-
+                    GUILayout.Toolbar(0, new string[] {toolbar.name+ "为空" }, GUILayout.Height(toolbar.height));
                 }
-                property.intValue = GUILayout.Toolbar(property.intValue, GuiList.ToArray(), GUILayout.Height(toolbar.height));
+                else if (toolbar.pageSize <= 0)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        GuiList.AddObject(list[i]);
+                    }
+                    property.intValue = GUILayout.Toolbar(property.intValue, GuiList.ToArray(), GUILayout.Height(toolbar.height));
+                }
+                else
+                {
+                    var pageList = new List<GUIContent>();
+                    for (int i = 0; i < list.Count/toolbar.pageSize+1; i++)
+                    {
+                        pageList.AddObject(i);
+                    }
+                    if (tempIndex[toolbar.GetHashCode()] <0)
+                    {
+                        tempIndex[toolbar.GetHashCode()] = property.intValue / toolbar.pageSize;
+                    }
+                   var start = tempIndex[toolbar.GetHashCode()] * toolbar.pageSize;
+                    for (int i = start; i < Mathf.Min(start+toolbar.pageSize,list.Count); i++)
+                    {
+                        GuiList.AddObject(list[i]);
+                    }
+                    if(list.Count> toolbar.pageSize)
+                    {
+                        tempIndex[toolbar.GetHashCode()] = GUILayout.Toolbar(tempIndex[toolbar.GetHashCode()], pageList.ToArray());
+                    }
+                    property.intValue = start+ GUILayout.Toolbar(property.intValue-start, GuiList.ToArray(), GUILayout.Height(toolbar.height));
+                }
+               
+               
 
                 return true;
 
@@ -723,10 +769,10 @@ namespace QTool.Inspector
         public void DrawArrayProperty(SerializedProperty property)
         {
             if (DrawToggleList(property)) return;
-            property.DrawLayout();
+            ChangeCallBack+=property.DrawLayout();
         }
         #endregion
-
+        Action ChangeCallBack;
         public int pickId = -1;
      
 
@@ -747,7 +793,7 @@ namespace QTool.Inspector
                 else
                 {
                     if (DrawToolbar(property)) return;
-                    property.DrawLayout();
+                    ChangeCallBack+= property.DrawLayout();
                 }
 
             }

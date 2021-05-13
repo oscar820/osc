@@ -86,9 +86,23 @@ namespace QTool
                 base[key].Value=value;
             }
         }
+        public QDictionary()
+        {
+
+        }
+        public T defaultValue { private set; get; } = default;
+        public QDictionary(T defaultValue)
+        {
+            this.defaultValue = defaultValue;
+        }
         public void Add(TKey key, T value)
         {
             this[key] = value;
+        }
+        public override void OnCreate(QKeyValue<TKey, T> obj)
+        {
+            obj.Value = defaultValue;
+            base.OnCreate(obj);
         }
     }
     public class QList<TKey,T>:List<T>, ISerializationCallbackReceiver where T : IKey<TKey>
@@ -163,7 +177,11 @@ namespace QTool
     {
         public override T Get(KeyType key)
         {
-            return this.GetAndCreate<T, KeyType>(key, creatCallback);
+            return this.GetAndCreate<T, KeyType>(key, OnCreate);
+        }
+        public virtual void OnCreate(T obj)
+        {
+            creatCallback?.Invoke(obj);
         }
         public event System.Action<T> creatCallback;
     }

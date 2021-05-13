@@ -47,7 +47,7 @@ namespace QTool.Resource
             }
             if (!entry.labels.Contains(groupName))
             {
-                entry.labels.Clear();
+             //   entry.labels.Clear();
                 entry.SetLabel(groupName, true, true);
             }
         }
@@ -94,6 +94,12 @@ namespace QTool.Resource
             {
                 return typeof(TLabel).Name;
             }
+        }
+        public static void Clear()
+        {
+            _loadOver = false;
+            loaderTask = null;
+            objDic.Clear();
         }
         static bool _loadOver=false;
         public static bool LoadOver() {
