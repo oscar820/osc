@@ -13,7 +13,7 @@ namespace QTool.TileMap
         空地=1<<1,
         相同地板=1<<2,
         不同地板 =1<<3,
-        任意地板=1<<4,
+        任意地板= 相同地板| 不同地板,
     }
  
     public interface IMergeBorder
