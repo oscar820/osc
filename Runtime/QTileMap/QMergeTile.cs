@@ -4,7 +4,7 @@ using UnityEngine;
 using QTool.Inspector;
 namespace QTool.TileMap
 {
-    public class QMergeTile : MonoBehaviour,IMergeTile
+    public class QMergeTile : MonoBehaviour, IMergeTile
     {
         public GameObject View;
         [ReadOnly]

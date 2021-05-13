@@ -177,6 +177,7 @@ namespace QTool.Inspector
         public QEditorAttribute(string name, float height = 30, string showControl="")
         {
             this.name = name;
+            this.height = height;
             this.showControl = showControl;
         }
     }

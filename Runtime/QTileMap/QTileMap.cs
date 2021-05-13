@@ -2,22 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QTool.Inspector;
+using System.Xml.Serialization;
 namespace QTool.TileMap
 {
     using Pos = Vector2Int;
-    //public interface ITileMapObj
-    //{
-    //    void StartState();
-    //}
-    //public interface MergeTile
-    //{
-    //    void Destory();
-    //}
-    //public interface BorderTile
-    //{
-    //    void MergeBoder();
-    //    void ClearBorderCheck();
-    //}
     public interface IMergeTile
     {
         void UnMerge();
@@ -28,24 +16,40 @@ namespace QTool.TileMap
     {
 
     }
+    public class ObjectBrush : QTool.Resource.PrefabResourceList<ObjectBrush>
+    {
+
+    }
     [System.Serializable]
     public class PosObject : IKey<Pos>
     {
+        [XmlElement("位置")]
         public Pos Key { get=>_key; set=>_key=value; }
+        [XmlElement("预制体")]
+        public string prefabKey { get; set; }
+        [XmlIgnore]
         public Pos _key;
+
+        [XmlIgnore]
         public Transform Value;
     }
     [System.Serializable]
     public class PosList: QAutoList<Pos, PosObject>
     {
     }
+    public class TileMapData:QTool.Data.QData<TileMapData>
+    {
+        [XmlArray("地图信息")]
+        public List<PosList> posList = new List<PosList>();
+    }
     public class QTileMap : MonoBehaviour
     {
+
         #region 基础属性
         [HideInInspector]
-        public PosList tileList { get => tileObjList[EditorModeIndex]; }
+        public PosList tileList { get => mapData.posList[EditorModeIndex]; }
         [HideInInspector]
-        public List<PosList> tileObjList = new List<PosList>();
+        public TileMapData mapData = new TileMapData();
         [HideInInspector]
         public int left = int.MaxValue;
         [HideInInspector]
@@ -94,40 +98,82 @@ namespace QTool.TileMap
                 return curBrushList[PrefabIndex];
             }
         }
+        public void ClearAll()
+        {
+            foreach (var list in mapData.posList)
+            {
+                foreach (var kv in list)
+                {
+                    if (kv.Value != null)
+                    {
+                        SetPrefab(list, kv.Key, null, false);
+                    }
+                }
+            }
+        }
+        public void Load(TileMapData newData)
+        {
+            ClearAll();
+            for (int i = 0; i < newData.posList.Count; i++)
+            {
+                foreach (var kv in newData.posList[i])
+                {
+                    SetPrefab(mapData.posList[i], kv.Key, GetBrush(i, kv.prefabKey), false);
+                }
+            }
+            CheckAllTileBorder();
+        }
+        //[ViewButton("保存")]
+        //public void SaveTest()
+        //{
+        //    save = FileManager.Serialize(mapData);
+        //}
+        //[ViewButton("加载测试")]
+        //public void LoadTest()
+        //{
+        //    Load(FileManager.Deserialize<TileMapData>( save));
+          
+        //}
      
-      
         public bool ContainsTile(Pos pos)
         {
             return tileList.ContainsKey(pos)&&tileList[pos].Value!=null;
         }
-
+      
         [ViewToggle("打开编辑模式")]
         public bool EditorMode;
         [ChangeCall("HideChild")]
         [ViewToggle("显示子物体", height = 20, showControl = "EditorMode")]
         public bool showChild = false;
-        [ToolbarList("tileBurshMode", height = 40, showControl = "EditorMode")]
-        public int tileBrushModeIndex;
+     
         [ToolbarList("editorMode", showControl = "EditorMode")]
         public int EditorModeIndex;
-        [ToolbarList("curBrushList", showControl = "EditorMode", pageSize =5, name = "笔刷")]
+        [ToolbarList("curBrushList", showControl = "EditorMode", pageSize = 5, name = "笔刷")]
         public int PrefabIndex;
-   
-
+        [ToolbarList("tileBurshMode", showControl = "EditorMode")]
+        public int tileBrushModeIndex;
         public static List<string> editorMode = new List<string> { "地板", "物体", };
         public virtual List<string> tileBurshMode { get; set; } = new List<string> { "画笔", "框选", };
         List<GameObject> curBrushList {
             get
             {
-                if (EditorModeIndex >= allBrushList.Count)
-                {
-                    Debug.LogError(":" + EditorModeIndex);
-                }
                 return allBrushList[EditorModeIndex];
             }
         }
         List<List<GameObject>> allBrushList = new List<List<GameObject>>();
 
+        public GameObject GetBrush(int brushType,string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) { return null; }
+            foreach (var item in allBrushList[brushType])
+            {
+                if (item.name == key)
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
         [ViewName("地板块大小")]
         public Vector2 tilePrefabSize = Vector2.one * 2;
         #endregion
@@ -149,7 +195,7 @@ namespace QTool.TileMap
         }
         public void HideChild()
         {
-            foreach (var list in tileObjList)
+            foreach (var list in mapData.posList)
             {
                 foreach (var obj in list)
                 {
@@ -179,9 +225,15 @@ namespace QTool.TileMap
                 up = pos.y;
             }
         }
+        [ViewButton("刷新笔刷",20,showControl ="EditorMode")]
         public virtual void FreshBrush()
         {
             TileBrush.Clear();
+            TileBrush.Clear();
+            InitBrush();
+        }
+        public virtual void InitBrush()
+        {
             TileBrush.LoadOverRun(() =>
             {
                 foreach (var kv in TileBrush.objDic)
@@ -189,8 +241,16 @@ namespace QTool.TileMap
                     allBrushList[0].AddCheckExist(kv.Value);
                 }
             });
+            ObjectBrush.LoadOverRun(() =>
+            {
+                foreach (var kv in ObjectBrush.objDic)
+                {
+                    allBrushList[1].AddCheckExist(kv.Value);
+                }
+            });
         }
-        public int GetTileObjType(GameObject obj)
+      
+        public int GetBrushType(GameObject obj,out string prefabKey)
         {
             GameObject prefab =obj.GetPrefab();
             for (int i = 0; i < allBrushList.Count; i++)
@@ -202,16 +262,18 @@ namespace QTool.TileMap
 
                         if (obj.name.Contains(brush.name))
                         {
+                            prefabKey = brush.name;
                             return i;
                         }
                     }
                 }
                 else if(allBrushList[i].Contains(prefab))
                 {
+                    prefabKey = prefab.name;
                     return i;
                 }
             }
-            Debug.LogError("-1");
+            prefabKey = "";
             return -1;
         }
         [EidtorInitInvoke]
@@ -222,28 +284,32 @@ namespace QTool.TileMap
             right = int.MinValue;
             down = int.MaxValue;
             up = int.MinValue;
-            tileObjList.Clear();
+            mapData.posList.Clear();
             allBrushList.Clear();
             for (int i = 0; i < editorMode.Count; i++)
             {
                 allBrushList.Add(new List<GameObject>());
-                tileObjList.Add(new PosList());
+                mapData.posList.Add(new PosList());
             }
-            FreshBrush();
+            InitBrush();
             for (int i = 0; i < transform.childCount; i++)
             {
                 var child = transform.GetChild(i);
-                var type = GetTileObjType(child.gameObject);
+                var key = "";
+                var type = GetBrushType(child.gameObject,out key);
                 if (type >= 0)
                 {
                     var pos = GetPos(child.position);
-                    tileObjList[type][pos].Value = child;
+                    mapData.posList[type][pos].Value = child;
+                    mapData.posList[type][pos].prefabKey= key;
                     ChangeSize(pos);
                 }
             }
 
+            CheckAllTileBorder();
+           
         }
-
+        
         public GameObject CheckInstantiate(GameObject prefab, Vector3 position, Transform parent)
         {
 
@@ -257,7 +323,7 @@ namespace QTool.TileMap
             new Pos(0,1),new Pos(1,1),new Pos(1,0),new Pos(1,-1),new Pos(0,-1),new Pos(-1,-1),new Pos(-1,0),new Pos(-1,1)
         };
 
-        [ViewButton("更新所有地板边界", 40, "EditorMode")]
+     //   [ViewButton("更新所有地板边界", 40, "EditorMode")]
         public async void CheckAllTileBorder()
         {
             foreach (var kv in tileList)
@@ -338,11 +404,13 @@ namespace QTool.TileMap
                 this.CheckDestory(dic[pos].Value.gameObject);
                 if (obj != null)
                 {
+                    dic[pos].prefabKey = prefab.name;
                     dic[pos].Value = obj.transform;
                 }
                 else
                 {
-                    dic.Remove(pos);
+                    dic[pos].prefabKey = "";
+                    dic[pos].Value = null;
                 }
 
             }
@@ -350,6 +418,7 @@ namespace QTool.TileMap
             {
                 if (obj != null)
                 {
+                    dic[pos].prefabKey = prefab.name;
                     dic[pos].Value = obj.transform;
                 }
             }

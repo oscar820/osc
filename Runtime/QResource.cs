@@ -18,6 +18,7 @@ namespace QTool.Resource
 
     public static  class AddressableTool
     {
+        public static QDictionary<string, List<AddressableAssetEntry>> labelDic = new QDictionary<string, List<AddressableAssetEntry>>();
         public static QDictionary<string, AddressableAssetGroup> groupDic = new QDictionary<string, AddressableAssetGroup>();
         public static QDictionary<string, AddressableAssetEntry> entryDic = new QDictionary<string, AddressableAssetEntry>();
         public static void SetAddresableGroup(string assetPath, string groupName, string key = "")
@@ -59,6 +60,29 @@ namespace QTool.Resource
             {
                 return AddressableAssetSettingsDefaultObject.Settings;
             }
+        }
+        public static List<AddressableAssetEntry> GetLabelList(string label)
+        {
+            if (labelDic[label] == null)
+            {
+                labelDic[label] = new List<AddressableAssetEntry>();
+            }
+            else
+            {
+                labelDic[label].Clear();
+            }
+            foreach (var group in AssetSetting.groups)
+            {
+                foreach (var item in group.entries)
+                {
+                    if (item.labels.Contains(label))
+                    {
+                        labelDic[label].Add(item);
+                    }
+                }
+            }
+            return labelDic[label];
+      
         }
         public static AddressableAssetGroup GetGroup(string groupName)
         {
@@ -240,8 +264,8 @@ namespace QTool.Resource
             else
             {
 #if UNITY_EDITOR
-                var group = AddressableTool.GetGroup(Label);
-                foreach (var entry in group.entries)
+                var list = AddressableTool.GetLabelList(Label);
+                foreach (var entry in list)
                 {
                     Set(entry.address, entry.TargetAsset as TObj);
                 }

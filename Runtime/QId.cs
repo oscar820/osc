@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using QTool.Inspector;
 namespace QTool
 {
    
@@ -106,7 +107,9 @@ namespace QTool
             return string.IsNullOrWhiteSpace(key) ? System.Guid.NewGuid().ToString("N") : System.Guid.Parse(key).ToString("N");
         }
         public string Key { get => InstanceId; set { } }
+        [ViewName("预制体Id")]
         public string PrefabId;
+        [ViewName("实例Id")]
         public string InstanceId;
         private void Awake()
         {
