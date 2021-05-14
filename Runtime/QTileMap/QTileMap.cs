@@ -88,7 +88,7 @@ namespace QTool.TileMap
         [XmlArray("地图信息")]
         public List<PosList> posList = new List<PosList>();
         [XmlArray("融合地板信息")]
-        public QDictionary<Pos,PosList> mergeTileList = new QDictionary<Pos,PosList>();
+        public QDictionary<Pos, PosList> mergeTileList = new QDictionary<Pos,PosList>();
     }
     public class QTileMap : MonoBehaviour
     {
@@ -326,7 +326,10 @@ namespace QTool.TileMap
             CheckAllTileBorder();
            
         }
-        
+        private void Awake()
+        {
+            EditorInit();
+        }
         public GameObject CheckInstantiate(GameObject prefab, Vector3 position, Transform parent)
         {
 
