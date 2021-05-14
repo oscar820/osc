@@ -306,6 +306,7 @@ namespace QTool.TileMap
                 if (type >= 0)
                 {
                     var pos = GetPos(child.position);
+                    child.name = key;
                     mapData.posList[type][pos].SetValue(key, child);
                     Bounds.Encapsulate(child.position);
                 }
