@@ -4,76 +4,68 @@ using UnityEngine;
 using QTool.Inspector;
 namespace QTool.TileMap
 {
-    public class QMergeTile : MonoBehaviour, IMergeTile
+    
+    public abstract class TileBase:MonoBehaviour
     {
-        public GameObject View;
-        [ReadOnly]
-        public List<QMergeTile> objList = new List<QMergeTile>();
-
-        public QMergeTile Master
+        private QTileMap map;
+        public QTileMap Map
         {
             get
             {
-                if (objList.Count == 0)
+                return map ?? (map = GetComponentInParent<QTileMap>());
+            }
+        }
+    }
+    public class QMergeTile : MergeTile<QMergeTile>
+    {
+        public GameObject View;
+
+        public Transform Master
+        {
+            get
+            {
+                if (posList.Count == 0)
                 {
                     return null;
                 }
-                return objList[0];
+                return posList[0].Value;
             }
         }
         public bool isMaster
         {
             get
             {
-                return this == Master;
+                return transform == Master;
             }
         }
-        public void UnMerge()
+        public override void UnMerge()
         {
-            if (isMaster)
-            {
-                foreach (var item in objList)
-                {
-                    item.View.gameObject.SetActive(true);
-                    item.View.transform.localPosition = Vector3.zero;
-                    item.View.transform.localScale = Vector3.one;
-                }
-                objList.Clear();
-            }
-            else
-            {
-                Master?.UnMerge();
-            }
+            if (posList == null || posList.Count == 0) return;
+            View.gameObject.SetActive(true);
+            View.transform.localPosition = Vector3.zero;
+            View.transform.localScale = Vector3.one;
+            posList = null;
 
         }
-        public void Merge(GameObject[] objects, Vector3 startPosition, Vector3 endPosition)
+        public override bool Merge(PosList objects)
         {
-            if (objects.Length > 1)
+            var value = base.Merge(objects);
+            if (value)
             {
-                UnMerge();
-                if (objects[0] == gameObject)
+                if (isMaster)
                 {
-
-                    for (int i = 0; i < objects.Length; i++)
-                    {
-                        objList.Add(objects[i].GetComponent<QMergeTile>());
-                    }
-                    var center = (startPosition + endPosition) / 2;
-                    var boxSize = endPosition - startPosition;
-                    var scale = new Vector3(Mathf.Abs(boxSize.x / transform.localScale.x) + 1, 1, Mathf.Abs(boxSize.z / transform.localScale.z) + 1);
-                    var TileView = objList[0].View;
-                    foreach (var tile in objList)
-                    {
-                        if (tile.View != TileView)
-                        {
-                            tile.View.SetActive(false);
-                        }
-                        tile.objList = objList;
-                    }
-                    TileView.transform.position = center;
-                    TileView.transform.localScale = scale;
+                    View.transform.position = bounds.center;
+                    var boxSize = bounds.size;
+                    View.transform.localScale = new Vector3(Mathf.Abs(boxSize.x / Map.tilePrefabSize.x) + 1, 1, Mathf.Abs(boxSize.z / Map.tilePrefabSize.y) + 1);
+                  
+                    View.SetActive(true);
+                }
+                else
+                {
+                    View.SetActive(false);
                 }
             }
+            return value;
         }
     }
 }

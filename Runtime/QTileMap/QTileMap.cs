@@ -6,10 +6,50 @@ using System.Xml.Serialization;
 namespace QTool.TileMap
 {
     using Pos = Vector2Int;
-    public interface IMergeTile
+    interface IMergeTile
     {
-        void UnMerge();
-        void Merge(GameObject[] objects, Vector3 startPosition, Vector3 endPosition);
+         PosList List { get; }
+        bool Merge(PosList objects);
+        void UnMergeAll();
+    }
+    public abstract class MergeTile<T>:TileBase , IMergeTile where T:MergeTile<T>
+    {
+        public void UnMergeAll()
+        {
+            if (posList == null || posList.Count == 0) return;
+            foreach (var item in posList)
+            {
+                if (item == null || item.Value == null) continue;
+                var mergeTile= item.Value.GetComponent<T>();
+                if (mergeTile == null) continue;
+                mergeTile.UnMerge();
+                mergeTile.posList = null;
+            }
+        }
+        public abstract void UnMerge();
+        protected Bounds bounds = new Bounds();
+        public PosList List { get => posList; }
+        [ReadOnly]
+        public PosList posList = new PosList();
+        public virtual bool Merge(PosList objects)
+        {
+            if (objects.Count > 1)
+            {
+                if (posList.Count == objects.Count&&posList[0].Value== objects[0].Value)
+                {
+                    return false;
+                }
+                UnMergeAll();
+                bounds = new Bounds(transform.position, Vector3.zero);
+                this.posList = objects;
+                for (int i = 0; i < posList.Count; i++)
+                {
+                    bounds.Encapsulate(posList[i].Value.position);
+                }
+                return true;
+            }
+            return false;
+        }
     }
   
     public class TileBrush:QTool.Resource.PrefabResourceList<TileBrush>
@@ -24,7 +64,7 @@ namespace QTool.TileMap
     public class PosObject : IKey<Pos>
     {
         [XmlElement("位置")]
-        public Pos Key { get=>_key; set=>_key=value; }
+        public Pos Key { get => _key; set => _key = value; }
         [XmlElement("预制体")]
         public string prefabKey { get; set; }
         [XmlIgnore]
@@ -32,15 +72,23 @@ namespace QTool.TileMap
 
         [XmlIgnore]
         public Transform Value;
+        public void SetValue(string brushKey, Transform value)
+        {
+            this.prefabKey = brushKey;
+            this.Value = value;
+        }
     }
     [System.Serializable]
     public class PosList: QAutoList<Pos, PosObject>
     {
+       
     }
     public class TileMapData:QTool.Data.QData<TileMapData>
     {
         [XmlArray("地图信息")]
         public List<PosList> posList = new List<PosList>();
+        [XmlArray("融合地板信息")]
+        public QDictionary<Pos,PosList> mergeTileList = new QDictionary<Pos,PosList>();
     }
     public class QTileMap : MonoBehaviour
     {
@@ -51,41 +99,7 @@ namespace QTool.TileMap
         [HideInInspector]
         public TileMapData mapData = new TileMapData();
         [HideInInspector]
-        public int left = int.MaxValue;
-        [HideInInspector]
-        public int right = int.MinValue;
-        [HideInInspector]
-        public int down = int.MaxValue;
-        [HideInInspector]
-        public int up = int.MinValue;
-        public float Left
-        {
-            get
-            {
-                return left * tilePrefabSize.x;
-            }
-        }
-        public float Right
-        {
-            get
-            {
-                return right * tilePrefabSize.x;
-            }
-        }
-        public float Down
-        {
-            get
-            {
-                return down * tilePrefabSize.y;
-            }
-        }
-        public float Up
-        {
-            get
-            {
-                return up * tilePrefabSize.y;
-            }
-        }
+        public Bounds Bounds = new Bounds();
       
         public GameObject tileBrush
         {
@@ -121,9 +135,21 @@ namespace QTool.TileMap
                     SetPrefab(mapData.posList[i], kv.Key, GetBrush(i, kv.prefabKey), false);
                 }
             }
+            foreach (var mergeList in newData.mergeTileList)
+            {
+                if (mergeList.Value.Count<=1) continue;
+                var posList = new List<Pos>();
+                foreach (var posObj in mergeList.Value)
+                {
+                    posList.Add(posObj.Key);
+                }
+                SetPrefab(mapData.posList[0], posList, GetBrush(0, mergeList.Value[0].prefabKey));
+            }
             CheckAllTileBorder();
         }
-        //[ViewButton("保存")]
+
+        //public string save;
+        //[ViewButton("保存测试")]
         //public void SaveTest()
         //{
         //    save = FileManager.Serialize(mapData);
@@ -131,10 +157,10 @@ namespace QTool.TileMap
         //[ViewButton("加载测试")]
         //public void LoadTest()
         //{
-        //    Load(FileManager.Deserialize<TileMapData>( save));
-          
+        //    Load(FileManager.Deserialize<TileMapData>(save));
+
         //}
-     
+
         public bool ContainsTile(Pos pos)
         {
             return tileList.ContainsKey(pos)&&tileList[pos].Value!=null;
@@ -206,25 +232,7 @@ namespace QTool.TileMap
                 }
             }
         }
-        public void ChangeSize(Pos pos)
-        {
-            if (pos.x < left)
-            {
-                left = pos.x;
-            }
-            if (pos.x > right)
-            {
-                right = pos.x;
-            }
-            if (pos.y < down)
-            {
-                down = pos.y;
-            }
-            if (pos.y > up)
-            {
-                up = pos.y;
-            }
-        }
+      
         [ViewButton("刷新笔刷",20,showControl ="EditorMode")]
         public virtual void FreshBrush()
         {
@@ -280,10 +288,8 @@ namespace QTool.TileMap
         public void EditorInit()
         {
             EditorMode = false;
-            left = int.MaxValue;
-            right = int.MinValue;
-            down = int.MaxValue;
-            up = int.MinValue;
+            Bounds = new Bounds();
+            mapData.mergeTileList.Clear();
             mapData.posList.Clear();
             allBrushList.Clear();
             for (int i = 0; i < editorMode.Count; i++)
@@ -300,9 +306,20 @@ namespace QTool.TileMap
                 if (type >= 0)
                 {
                     var pos = GetPos(child.position);
-                    mapData.posList[type][pos].Value = child;
-                    mapData.posList[type][pos].prefabKey= key;
-                    ChangeSize(pos);
+                    mapData.posList[type][pos].SetValue(key, child);
+                    Bounds.Encapsulate(child.position);
+                }
+            }
+            foreach (var tile in mapData.posList[0])
+            {
+                if (tile.Value == null) continue;
+                var mergeTile = tile.Value.GetComponent<IMergeTile>();
+                if (mergeTile != null&&mergeTile.List!=null&&mergeTile.List.Count>1)
+                {
+                    if (!mapData.mergeTileList.ContainsKey(mergeTile.List[0].Key))
+                    {
+                        mapData.mergeTileList[mergeTile.List[0].Key] =mergeTile.List;
+                    }
                 }
             }
 
@@ -389,9 +406,38 @@ namespace QTool.TileMap
                 borderTile.UpdateBorder(borderInfo.ToArray());
             }
         }
+        public void SetPrefab(QAutoList<Pos,PosObject> canvas,IList<Pos> posList,GameObject brush, bool checkMerge = true)
+        {
+            var mergetTileList = new PosList();
+            if (brush!=null)
+            {
+                foreach (var pos in posList)
+                {
+                    mergetTileList[pos].SetValue( brush.name, SetPrefab(canvas,pos,brush,checkMerge).transform);
+                }
+                if (mergetTileList.Count > 1)
+                {
+                    foreach (var merge in mergetTileList)
+                    {
+                        var mergeTile = merge.Value.GetComponent<IMergeTile>();
+                        if (mergeTile != null)
+                        {
+                            mergeTile.Merge(mergetTileList);
+                            mapData.mergeTileList[mergetTileList[0].Key] = mergetTileList;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var pos in posList)
+                {
+                    SetPrefab(canvas, pos, null, checkMerge);
+                }
+            }
+        }
         public GameObject SetPrefab(QAutoList<Pos, PosObject> dic, Pos pos, GameObject prefab, bool checkMerge = true)
         {
-            ChangeSize(pos);
             var obj = prefab == null ? null : CheckInstantiate(prefab, GetPosition(pos), transform);
             if (obj != null)
             {
@@ -399,34 +445,34 @@ namespace QTool.TileMap
             }
             if (dic[pos].Value!=null)
             {
-
-                dic[pos].Value.GetComponent<IMergeTile>()?.UnMerge();
+              
+                var mergeTile = dic[pos].Value.GetComponent<IMergeTile>();
+                if (mergeTile != null)
+                {
+                    if (mergeTile.List != null && mergeTile.List.Count > 0)
+                    {
+                        mapData.mergeTileList.RemoveKey(mergeTile.List[0].Key);
+                    }
+                    mergeTile?.UnMergeAll();
+                }
+              
                 this.CheckDestory(dic[pos].Value.gameObject);
-                if (obj != null)
-                {
-                    dic[pos].prefabKey = prefab.name;
-                    dic[pos].Value = obj.transform;
-                }
-                else
-                {
-                    dic[pos].prefabKey = "";
-                    dic[pos].Value = null;
-                }
-
+             
+            }
+            if (obj != null)
+            {
+                dic[pos].SetValue(prefab.name, obj.transform);
+                Bounds.Encapsulate(obj.transform.position);
             }
             else
             {
-                if (obj != null)
-                {
-                    dic[pos].prefabKey = prefab.name;
-                    dic[pos].Value = obj.transform;
-                }
+                dic[pos].SetValue("",null);
             }
             CheckBorder(pos);
             return obj;
         }
         bool selectBox = false;
-        List<Pos> selectPosList = new List<Pos>();
+      //  List<Pos> selectPosList = new List<Pos>();
         Pos startPos;
         [SceneMouseEvent(EventType.MouseDown)]
         public void MouseDown(Vector3 position, RaycastHit hit, bool shift)
@@ -443,46 +489,15 @@ namespace QTool.TileMap
             }
 
         }
-         List<GameObject> mergetTileList = new List<GameObject>();
+        
         [SceneMouseEvent(EventType.MouseUp)]
         public void MouseUp(Vector3 position, RaycastHit hit, bool shift)
         {
             if (!EditorMode) return;
-            //   selectBox = tileBrushModeIndex == 1;
-            if (!selectBox)
+            if (selectBox)
             {
-                //  Brush(position, hit, shift);
-            }
-            else
-            {
-
                 selectBox = false;
-                var endPos = GetPos(position);
-                selectPosList = GetBoxPos(startPos, endPos);
-                mergetTileList.Clear();
-               
-                if (!shift)
-                {
-                    foreach (var pos in selectPosList)
-                    {
-                        Draw(pos);
-                        mergetTileList.Add(Draw(pos));
-                      
-                    }
-                    if (mergetTileList.Count > 0)
-                    {
-                        mergetTileList[0]?.GetComponent<IMergeTile>()?.Merge(mergetTileList.ToArray(), GetPosition(startPos), GetPosition(endPos));
-                    }
-                }
-                else
-                {
-                    foreach (var pos in selectPosList)
-                    {
-                        Clear(pos);
-                    }
-
-                }
-                selectPosList.Clear();
+                Draw(selectList, shift);
             }
 
         }
@@ -503,20 +518,13 @@ namespace QTool.TileMap
             }
             return posList;
         }
-        public void Clear(Pos pos)
+        public void Draw(List<Pos> listPos,bool clear=false)
         {
-            SetPrefab(tileList, pos, null);
+            SetPrefab(tileList, listPos, clear?null:tileBrush);
         }
-        public GameObject Draw(Pos pos)
+        public GameObject Draw(Pos pos,bool clear=false)
         {
-            GameObject obj = null;
-            if (tileBrush != null)
-            {
-                obj = SetPrefab(tileList, pos, tileBrush);
-            }
-            //    StartState(obj);
-            return obj;
-
+            return SetPrefab(tileList, pos, clear?null:tileBrush);
         }
          Pos curPos;
         [SceneMouseEvent(EventType.MouseMove)]
@@ -525,26 +533,21 @@ namespace QTool.TileMap
             if (!EditorMode) return;
             curPos = GetPos(position);
         }
+         List<Pos> selectList = new List<Pos>();
         [SceneMouseEvent(EventType.MouseDrag)]
         public void Brush(Vector3 position, RaycastHit hit, bool shift)
         {
             if (!EditorMode) return;
+            selectList.Clear();
             if (selectBox)
             {
-                selectPosList = GetBoxPos(startPos, GetPos(position));
+                selectList = GetBoxPos(startPos, GetPos(position));
+              
             }
             else
             {
                 curPos = GetPos(position);
-                if (!shift)
-                {
-                    Draw(curPos);
-                }
-                else
-                {
-                    Clear(curPos);
-                }
-
+                Draw(curPos, shift);
             }
         }
         private void OnDrawGizmosSelected()
@@ -557,7 +560,8 @@ namespace QTool.TileMap
             Gizmos.DrawWireCube(GetPosition(curPos), new Vector3(tilePrefabSize.x, 0, tilePrefabSize.y));
             if (selectBox)
             {
-                foreach (var pos in selectPosList)
+            
+                foreach (var pos in selectList)
                 {
                     Gizmos.DrawWireCube(GetPosition(pos), new Vector3(tilePrefabSize.x, 0, tilePrefabSize.y));
                 }
