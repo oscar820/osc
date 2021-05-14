@@ -31,6 +31,7 @@ namespace QTool.TileMap
             if (borderView == null) return;
             foreach (var border in borderView)
             {
+                if (border == null) continue;
                 var merges = border.GetComponentsInChildren<IMergeBorder>();
 
                 foreach (var merge in merges)
@@ -48,7 +49,7 @@ namespace QTool.TileMap
             if (borderView == null) return;
             foreach (var border in borderView)
             {
-
+                if (border == null) continue;
                 var merges = border.GetComponentsInChildren<IMergeBorder>();
 
                 foreach (var merge in merges)
