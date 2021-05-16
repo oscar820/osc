@@ -683,18 +683,18 @@ namespace QTool.Inspector
                     {
                         pageList.AddObject(i);
                     }
-                    if (tempIndex[toolbar.GetHashCode()] <0)
+                    if (tempIndex[list.GetHashCode()] <0)
                     {
-                        tempIndex[toolbar.GetHashCode()] = property.intValue / toolbar.pageSize;
+                        tempIndex[list.GetHashCode()] = property.intValue / toolbar.pageSize;
                     }
-                   var start = tempIndex[toolbar.GetHashCode()] * toolbar.pageSize;
+                   var start = tempIndex[list.GetHashCode()] * toolbar.pageSize;
                     for (int i = start; i < Mathf.Min(start+toolbar.pageSize,list.Count); i++)
                     {
                         GuiList.AddObject(list[i]);
                     }
                     if(list.Count> toolbar.pageSize)
                     {
-                        tempIndex[toolbar.GetHashCode()] = GUILayout.Toolbar(tempIndex[toolbar.GetHashCode()], pageList.ToArray());
+                        tempIndex[list.GetHashCode()] = GUILayout.Toolbar(tempIndex[list.GetHashCode()], pageList.ToArray());
                     }
                     property.intValue = start+ GUILayout.Toolbar(property.intValue-start, GuiList.ToArray(), GUILayout.Height(toolbar.height));
                 }

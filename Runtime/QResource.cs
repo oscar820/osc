@@ -122,7 +122,9 @@ namespace QTool.Resource
         public static void Clear()
         {
             _loadOver = false;
+#if Addressables
             loaderTask = null;
+#endif
             objDic.Clear();
         }
         static bool _loadOver=false;
