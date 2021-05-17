@@ -36,7 +36,7 @@ namespace QTool
                 case Dir.Left:
                     return Pos.left;
                 case Dir.Down:
-                    return -Pos.right;
+                    return Pos.down;
                 default:
                     return Pos.zero;
             }
@@ -49,19 +49,19 @@ namespace QTool
         public static Dir ToDir(this Vector2 pos)
         {
             var dir = pos.normalized;
-            if (dir.x > 0.5f)
+            if (dir.x >= 0.5f)
             {
                 return Dir.Right;
             }
-            else if(dir.x<-0.5f)
+            else if(dir.x<=-0.5f)
             {
                 return Dir.Left;
             }
-            else if (dir.y > 0.5f)
+            else if (dir.y >= 0.5f)
             {
                 return Dir.Up;
             }
-            else if (dir.y <- 0.5f)
+            else if (dir.y <=- 0.5f)
             {
                 return Dir.Down;
             }
