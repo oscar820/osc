@@ -40,7 +40,9 @@ namespace QTool
         }
         public static void Record(this Object obj)
         {
+#if UNITY_EDITOR
             Undo.RecordObject(obj, "RecordObj"+obj.GetHashCode());
+#endif
         }
 
         public static T CheckInstantiate<T>(this Object recordObj,T prefab, Transform parent)where T: Object
