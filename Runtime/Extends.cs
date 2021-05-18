@@ -8,6 +8,11 @@ namespace QTool
 {
     public static partial class Tool
     {
+        public static Vector3 RayCastPlane(this Ray ray, Vector3 planeNormal, Vector3 planePoint)
+        {
+            float d = Vector3.Dot(planePoint - ray.origin, planeNormal) / Vector3.Dot(ray.direction, planeNormal);
+            return d * ray.direction + ray.origin;
+        }
         public static Bounds GetBounds(this GameObject obj)
         {
             return obj.transform.GetBounds();

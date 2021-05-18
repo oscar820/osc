@@ -258,12 +258,7 @@ namespace QTool.Inspector
     #endregion
     public static class QEditorTool
     {
-        public static Vector3 LineCastPlane(Vector3 point, Vector3 direct, Vector3 planeNormal, Vector3 planePoint)
-        {
-            float d = Vector3.Dot(planePoint - point, planeNormal) / Vector3.Dot(direct.normalized, planeNormal);
-
-            return d * direct.normalized + point;
-        }
+       
         public static Rect HorizontalRect(this Rect rect, float left, float right)
         {
             var leftOffset = left * rect.width;
@@ -546,7 +541,7 @@ namespace QTool.Inspector
                     }
                     else
                     {
-                        point = QEditorTool.LineCastPlane(mouseRay.origin, mouseRay.direction, Vector3.up, Vector3.zero);
+                        point = mouseRay.RayCastPlane(Vector3.up, Vector3.zero);
                     }
 
                     foreach (var kv in typeInfo.mouseEventFunc)
