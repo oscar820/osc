@@ -20,7 +20,11 @@ namespace QTool
     
     public static class PosExtends
     {
-      
+        public static readonly Pos undefined = Pos.one * int.MaxValue;
+        public static Pos Undefined(Pos pos)
+        {
+            return undefined;
+        }
         public static Vector2 ToVector2(this Pos pos)
         {
             return new Vector2(pos.x, pos.y);
