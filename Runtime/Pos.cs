@@ -25,6 +25,10 @@ namespace QTool
         {
             return undefined;
         }
+        public static bool IsUndefined(this Pos pos)
+        {
+            return pos == undefined;
+        }
         public static Vector2 ToVector2(this Pos pos)
         {
             return new Vector2(pos.x, pos.y);
