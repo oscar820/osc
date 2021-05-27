@@ -21,7 +21,7 @@ namespace QTool
     public static class PosExtends
     {
         public static readonly Pos undefined = Pos.one * int.MaxValue;
-        public static Pos Undefined(Pos pos)
+        public static Pos Undefined(this Pos pos)
         {
             return undefined;
         }
