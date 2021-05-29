@@ -234,7 +234,7 @@ namespace QTool.Resource
             if (obj is GameObject)
             {
                 var qid = (obj as GameObject).GetComponentInChildren<QId>();
-                if (qid != null)
+                if (qid != null&&qid.PrefabId!=key)
                 {
                     Set( obj, qid.PrefabId);
                 }
