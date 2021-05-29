@@ -10,65 +10,7 @@ namespace QTool
 {
     public static class QToolToolBar
     {
-        public static void ForeachDirectoryFiles(this string rootPath,Action<string> action)
-        {
-            ForeachFiles(rootPath,action);
-            ForeachDirectory(rootPath, (path) =>
-            {
-                path.ForeachDirectoryFiles(action);
-            });
-        }
-        public static int DirectoryFileCount(this string rootPath)
-        {
-            var count = rootPath.FileCount();
-            rootPath.ForeachDirectory((path) =>
-            {
-                count += rootPath.FileCount();
-            });
-            return count;
-        }
-        public static int FileCount(this string rootPath)
-        {
-            return Directory.Exists(rootPath)? Directory.GetFiles(rootPath).Length/2 : 0;
-        }
-        public static void ForeachDirectory(this string rootPath,Action<string> action)
-        {
-            if (Directory.Exists(rootPath))
-            {
-                var paths = Directory.GetDirectories(rootPath);
-                foreach (var path in paths)
-                {
-                    if (string.IsNullOrWhiteSpace(path))
-                    {
-                        continue;
-                    }
-                    action?.Invoke(path);
-                }
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("错误", "不存在文件夹" + rootPath, "确定");
-            }
-        }
-        public static void ForeachFiles(this string rootPath, Action<string> action)
-        {
-            if (Directory.Exists(rootPath))
-            {
-                var paths = Directory.GetFiles(rootPath);
-                foreach (var path in paths)
-                {
-                    if (string.IsNullOrWhiteSpace(path)||path.EndsWith(".meta"))
-                    {
-                        continue;
-                    }
-                    action?.Invoke(path);
-                }
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("错误", "不存在文件夹" + rootPath, "确定");
-            }
-        }
+     
         [MenuItem("QTool/Tool/显示日志")]
         public static void SwitchLog()
         {

@@ -172,12 +172,21 @@ namespace QTool.Resource
         protected static void LoadAll()
         {
             if (_loadOver) return;
- #if Addressables
+#if Addressables
             LoadAsync();
 #else
-            foreach (var obj in Resources.LoadAll<TObj>(Label))
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
             {
-                Set(obj.name, obj);
+                (Application.dataPath + "\\Resources\\" + Label).ForeachDirectoryFiles((path) =>
+                {
+                    Set( UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(Label));
+                });
+            }
+#endif
+            foreach (var obj in Resources.LoadAll<TObj>(Label))
+            {   
+                Set(obj);
             }
             _loadOver = true;
 #endif
@@ -196,7 +205,7 @@ namespace QTool.Resource
                 {
                     if (result.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                     {
-                        Set(key, result.Result);
+                        Set(result.Result,key);
                         loadOver?.Invoke(result.Result);
                     }
                     else
@@ -213,9 +222,13 @@ namespace QTool.Resource
         }
 #endif
 
-        public static void Set(string key,TObj obj)
+        public static void Set(TObj obj, string key="")
         {
             if (obj == null) return;
+            if (string.IsNullOrEmpty(key))
+            {
+                key = obj.name;
+            }
             objDic[key] = obj;
             ToolDebug.Log("资源缓存[" + key + "]:" + obj);
             if (obj is GameObject)
@@ -223,7 +236,7 @@ namespace QTool.Resource
                 var qid = (obj as GameObject).GetComponentInChildren<QId>();
                 if (qid != null)
                 {
-                    Set(qid.PrefabId, obj);
+                    Set( obj, qid.PrefabId);
                 }
             }
         }
@@ -241,7 +254,7 @@ namespace QTool.Resource
                     {
                         foreach (var result in loader.Result)
                         {
-                            Set(result.name, result);
+                            Set(result);
                         }
                         Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
                         _loadOver = true;
@@ -265,7 +278,7 @@ namespace QTool.Resource
                 var list = AddressableTool.GetLabelList(Label);
                 foreach (var entry in list)
                 {
-                    Set(entry.address, entry.TargetAsset as TObj);
+                    Set(entry.TargetAsset as TObj,entry.address);
                 }
                 _loadOver = true;
                 OnLoadOver?.Invoke();

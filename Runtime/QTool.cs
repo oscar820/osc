@@ -240,6 +240,7 @@ namespace QTool
             }
             Debug.LogError("【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds + (getLength == null ? "" : " 长度" + getLength().ComputeScale()));
         }
+   
     }
     public static class ArrayExtend
     {
@@ -419,12 +420,73 @@ namespace QTool
             }
         }
     }
-    public class FileManager
+    public static class FileManager
     {
         public static T Copy<T>(T target)
         {
             return Deserialize<T>(Serialize(target));
         }
+
+        public static void ForeachDirectoryFiles(this string rootPath, Action<string> action)
+        {
+            ForeachFiles(rootPath, action);
+            ForeachDirectory(rootPath, (path) =>
+            {
+                path.ForeachDirectoryFiles(action);
+            });
+        }
+        public static int DirectoryFileCount(this string rootPath)
+        {
+            var count = rootPath.FileCount();
+            rootPath.ForeachDirectory((path) =>
+            {
+                count += rootPath.FileCount();
+            });
+            return count;
+        }
+        public static int FileCount(this string rootPath)
+        {
+            return Directory.Exists(rootPath) ? Directory.GetFiles(rootPath).Length / 2 : 0;
+        }
+        public static void ForeachDirectory(this string rootPath, Action<string> action)
+        {
+            if (Directory.Exists(rootPath))
+            {
+                var paths = Directory.GetDirectories(rootPath);
+                foreach (var path in paths)
+                {
+                    if (string.IsNullOrWhiteSpace(path))
+                    {
+                        continue;
+                    }
+                    action?.Invoke(path);
+                }
+            }
+            else
+            {
+                Debug.LogError("错误" + " 不存在文件夹" + rootPath);
+            }
+        }
+        public static void ForeachFiles(this string rootPath, Action<string> action)
+        {
+            if (Directory.Exists(rootPath))
+            {
+                var paths = Directory.GetFiles(rootPath);
+                foreach (var path in paths)
+                {
+                    if (string.IsNullOrWhiteSpace(path) || path.EndsWith(".meta"))
+                    {
+                        continue;
+                    }
+                    action?.Invoke(path);
+                }
+            }
+            else
+            {
+                Debug.LogError("错误" + " 不存在文件夹" + rootPath);
+            }
+        }
+
         public static Dictionary<string, XmlSerializer> xmlSerDic = new Dictionary<string, XmlSerializer>();
         public static XmlSerializer GetSerializer(Type type, params Type[] extraTypes)
         {
