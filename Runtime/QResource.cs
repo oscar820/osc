@@ -165,23 +165,8 @@ namespace QTool.Resource
             }
             else
             {
-#if Addressables
-                 
                 Debug.LogError(Label + "找不到资源[" + key + "]");
                 return null;
-#else
-                var obj = Resources.Load<TObj>(Label + '\\' + key);
-                if (obj == null)
-                {
-                    Debug.LogError("不找不到资源" + Label + '\\' + key);
-                }
-                else
-                {
-                    objDic[key] = obj;
-                }
-
-                return obj;
-#endif
             }
         }
         protected static void LoadAll()
@@ -231,7 +216,8 @@ namespace QTool.Resource
         public static void Set(string key,TObj obj)
         {
             if (obj == null) return;
-            objDic[key] = obj; 
+            objDic[key] = obj;
+            ToolDebug.Log("资源缓存[" + key + "]:" + obj);
             if (obj is GameObject)
             {
                 var qid = (obj as GameObject).GetComponentInChildren<QId>();
