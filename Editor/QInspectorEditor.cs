@@ -89,11 +89,21 @@ namespace QTool.Inspector
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            property.Draw(position, att.name);
+            if (property.IsShow())
+            {
+                property.Draw(position, att.name);
+            }
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return property.GetHeight();
+            if (property.IsShow())
+            {
+                return property.GetHeight();
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
     [CustomPropertyDrawer(typeof(ViewToggleAttribute))]
@@ -159,7 +169,7 @@ namespace QTool.Inspector
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-
+            if (!property.IsShow()) return;
             if (property.propertyType == SerializedPropertyType.String)
             {
                 if (enumList == null)
@@ -203,6 +213,7 @@ namespace QTool.Inspector
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            if (!property.IsShow()) return 0;
             return property.GetHeight();
         }
     }
@@ -425,7 +436,7 @@ namespace QTool.Inspector
             }
             return memeberInfo;
         }
-        public static bool IsShow(this QEditorAttribute att,object target)
+        public static bool IsShow(this ViewNameAttribute att,object target)
         {
             if ( string.IsNullOrWhiteSpace(att.showControl))
             {
@@ -438,7 +449,7 @@ namespace QTool.Inspector
         }
         public static bool IsShow(this SerializedProperty property)
         {
-            var att = property.GetAttribute<QEditorAttribute>();
+            var att = property.GetAttribute<QHeightAttribute>();
             if (att ==null)
             {
                 return true;

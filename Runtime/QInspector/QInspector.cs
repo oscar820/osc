@@ -48,13 +48,16 @@ namespace QTool.Inspector
     public class ViewNameAttribute : PropertyAttribute
     {
         public string name;
+
+        public string showControl = "";
         public ViewNameAttribute()
         {
             //  order = 1;
         }
-        public ViewNameAttribute(string name)
+        public ViewNameAttribute(string name,string showControl="")
         {
             this.name = name;
+            this.showControl = showControl;
         }
     }
 
@@ -76,7 +79,7 @@ namespace QTool.Inspector
     /// 将数组显示为toolbar工具栏通过indexName来设置int值；
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ToolbarListAttribute : QEditorAttribute
+    public class ToolbarListAttribute : QHeightAttribute
     {
         public string listMember;
         public int pageSize= 0;
@@ -95,7 +98,7 @@ namespace QTool.Inspector
     /// 将数组显示为toolbar工具栏通过indexName来设置int值；
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ToggleListAttribute : QEditorAttribute
+    public class ToggleListAttribute : QHeightAttribute
     {
         public string valueGetFunc;
         public string valueSetFunc;
@@ -137,7 +140,7 @@ namespace QTool.Inspector
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class ViewButtonAttribute : QEditorAttribute
+    public class ViewButtonAttribute : QHeightAttribute
     {
         public ViewButtonAttribute(string name, float height = 30, string showControl = "") : base(name, height, showControl)
         {
@@ -158,7 +161,7 @@ namespace QTool.Inspector
     /// 显示按钮 调用函数CallFunc 无参数
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-    public class ViewToggleAttribute : QEditorAttribute
+    public class ViewToggleAttribute : QHeightAttribute
     {
   
         public ViewToggleAttribute(string name, float height = 30, string showControl="") :base(name, height, showControl)
@@ -168,17 +171,12 @@ namespace QTool.Inspector
 
     }
 
-
-    public abstract class QEditorAttribute : PropertyAttribute
+    public abstract class QHeightAttribute : ViewNameAttribute
     {
-        public string name;
         public float height = 30;
-        public string showControl = "";
-        public QEditorAttribute(string name, float height = 30, string showControl="")
+        public QHeightAttribute(string name, float height = 30, string showControl=""):base(name,showControl)
         {
-            this.name = name;
             this.height = height;
-            this.showControl = showControl;
         }
     }
  

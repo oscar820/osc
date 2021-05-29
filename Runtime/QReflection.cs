@@ -74,9 +74,9 @@ namespace QTool.Reflection
             return  "function " + Name + "(" + ParamType.ToOneString(",") + ") \t\t("+ ReturnType+")" ;
         }
     }
-    public class QTypeInfo<T>where T:QTypeInfo<T> ,new()
+    public class QTypeInfo<T>:IKey<string> where T:QTypeInfo<T> ,new()
     {
-        public string Name { get; private set; }
+        public string Key { get;  set; }
         public QList<string, QMemeberInfo> Members = new QList<string, QMemeberInfo>();
         public QList<string, QFunctionInfo> Functions = new QList<string, QFunctionInfo>();
         public bool IsList;
@@ -119,7 +119,7 @@ namespace QTool.Reflection
         }
         protected void CheckInit(Type type,Func<QMemeberInfo,bool> memeberCheck,Func<QFunctionInfo,bool> functionCheck)
         {
-            Name = type.Name;
+            Key = type.FullName;
             Type = type;
             Code = Type.GetTypeCode(type);
             if (TypeCode.Object.Equals(Code))
@@ -186,7 +186,7 @@ namespace QTool.Reflection
         }
         public override string ToString()
         {
-            return "Type " + Name + " \n{\n\t" + Members.ToOneString("\n\t") + "\n\t" + Functions.ToOneString("\n\t") + "}";
+            return "Type " + Key + " \n{\n\t" + Members.ToOneString("\n\t") + "\n\t" + Functions.ToOneString("\n\t") + "}";
         }
     }
 
