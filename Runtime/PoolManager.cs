@@ -69,21 +69,21 @@ namespace QTool
             {
                 if(poolDic[key] is ObjectPool<T>)
                 {
-                    return poolDic[key] as ObjectPool<T>;
+                    var pool= poolDic[key] as ObjectPool<T>;
+                    if (newFunc!=null&& pool.newFunc == null)
+                    {
+                        pool.newFunc = newFunc;
+                    }
+                    return pool;
                 }
                 else
                 {
                     throw new Exception("已存在重名不同类型对象池" + poolDic[key]);
                 }
                     
-            }
-            else if (newFunc == null)
+            }else
             {
-                throw new Exception("不能以空的创建函数初始化对象池[" + poolName+"]");
-            }
-            else
-            {
-                var pool = new ObjectPool<T>(newFunc, key);
+                var pool = new ObjectPool<T>(key,newFunc);
                 poolDic[key]= pool;
                 return pool;
             }
@@ -225,7 +225,10 @@ namespace QTool
             }
             else
             {
-        
+                if (newFunc == null)
+                {
+                    throw new Exception("对象池创建函数为空  " + this);
+                }
                 var obj = newFunc();
                 AllPool.Add(obj);
                 ToolDebug.Log("【" + Key + "】对象池当前池大小：" + AllCount);
@@ -278,7 +281,7 @@ namespace QTool
         public bool isPoolObj = false;
         public bool isMonobehaviour = false;
         public bool isGameObject = false;
-        public ObjectPool(Func<T> newFunc, string poolName)
+        public ObjectPool(string poolName,Func<T> newFunc=null)
         {
             var type = typeof(T);
             isPoolObj = typeof(IPoolObject).IsAssignableFrom(type);
