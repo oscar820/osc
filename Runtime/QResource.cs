@@ -169,7 +169,7 @@ namespace QTool.Resource
                 return null;
             }
         }
-        protected static void LoadAll()
+        public static void LoadAll()
         {
             if (_loadOver) return;
 #if Addressables

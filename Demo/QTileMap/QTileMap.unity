@@ -7350,11 +7350,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bounds:
-    m_Center: {x: 1, y: 0, z: -1}
-    m_Extent: {x: 10, y: 0, z: 14}
-  EditorMode: 0
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  EditorMode: 1
   showChild: 1
-  EditorModeIndex: 0
+  EditorModeIndex: 1
   PrefabIndex: 0
   tileBrushModeIndex: 1
   tilePrefabSize: {x: 2, y: 2}
