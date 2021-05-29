@@ -200,7 +200,7 @@ namespace QTool.TileMap
             }
             return null;
         }
-        [ViewName("地板块大小")]
+        [ViewName("地板块大小",showControl = "EditorMode")]
         public Vector2 tilePrefabSize = Vector2.one * 2;
         #endregion
         public Pos GetPos(Vector3 vector3)

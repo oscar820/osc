@@ -449,7 +449,7 @@ namespace QTool.Inspector
         }
         public static bool IsShow(this SerializedProperty property)
         {
-            var att = property.GetAttribute<QHeightAttribute>();
+            var att = property.GetAttribute<ViewNameAttribute>();
             if (att ==null)
             {
                 return true;
