@@ -129,14 +129,11 @@ namespace QTool.Resource
         }
         static bool _loadOver=false;
         public static bool LoadOver() {
-#if Addressables
+
             if (!_loadOver)
             {
-                LoadAsync();
+                LoadAll();
             }
-#else
-            _loadOver=true;
-#endif
             return _loadOver;
         }
         private static Action OnLoadOver;
@@ -161,6 +158,7 @@ namespace QTool.Resource
         }
         public static TObj GetResource(string key)
         {
+            LoadOver();
             if (ContainsKey(key))
             {
                 return objDic[key];
@@ -168,14 +166,8 @@ namespace QTool.Resource
             else
             {
 #if Addressables
-                 if(LoadOver())
-                {
-                    Debug.LogError(Label + "标签中不存在资源[" + key + "]");
-                }
-                else
-                {
-                    Debug.LogError(Label + "找不到资源[" + key + "]");
-                }
+                 
+                Debug.LogError(Label + "找不到资源[" + key + "]");
                 return null;
 #else
                 var obj = Resources.Load<TObj>(Label + '\\' + key);
@@ -183,11 +175,29 @@ namespace QTool.Resource
                 {
                     Debug.LogError("不找不到资源" + Label + '\\' + key);
                 }
+                else
+                {
+                    objDic[key] = obj;
+                }
+
                 return obj;
 #endif
             }
         }
-        #if Addressables
+        protected static void LoadAll()
+        {
+            if (_loadOver) return;
+ #if Addressables
+            LoadAsync();
+#else
+            foreach (var obj in Resources.LoadAll<TObj>(Label))
+            {
+                Set(obj.name, obj);
+            }
+            _loadOver = true;
+#endif
+        }
+#if Addressables
         public static async Task GetAsync(string key,Action<TObj> loadOver)
         {
             if (objDic.ContainsKey(key))
@@ -216,11 +226,20 @@ namespace QTool.Resource
                 await loader.Task;
             }
         }
-    #endif
+#endif
 
         public static void Set(string key,TObj obj)
         {
-            objDic[key] = obj;
+            if (obj == null) return;
+            objDic[key] = obj; 
+            if (obj is GameObject)
+            {
+                var qid = (obj as GameObject).GetComponentInChildren<QId>();
+                if (qid != null)
+                {
+                    Set(qid.PrefabId, obj);
+                }
+            }
         }
 #if Addressables
         static Task loaderTask;
@@ -236,16 +255,7 @@ namespace QTool.Resource
                     {
                         foreach (var result in loader.Result)
                         {
-                            if (result == null) continue;
                             Set(result.name, result);
-                            if (result is GameObject)
-                            {
-                                var qid = (result as GameObject).GetComponentInChildren<QId>();
-                                if (qid != null)
-                                {
-                                    Set(qid.PrefabId, result);
-                                }
-                            }
                         }
                         Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
                         _loadOver = true;
