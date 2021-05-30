@@ -422,7 +422,7 @@ namespace QTool
     }
     public static class FileManager
     {
-        public static T Copy<T>(T target)
+        public static T Copy<T>(this T target)
         {
             return Deserialize<T>(Serialize(target));
         }
