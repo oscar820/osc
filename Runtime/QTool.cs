@@ -109,6 +109,8 @@ namespace QTool
     {
         [SerializeField]
         private List<T> list = new List<T>();
+        [NonSerialized]
+        [XmlIgnore]
         Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
         public virtual T Get(TKey key)
         {
