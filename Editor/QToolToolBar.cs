@@ -15,7 +15,7 @@ namespace QTool
         public static void SwitchLog()
         {
             ToolDebug.ShowLog = !ToolDebug.ShowLog;
-            UnityEngine.Debug.Log(ToolDebug.ShowLog ? "显示PoolManager日志" : "隐藏PoolManager日志");
+            UnityEngine.Debug.Log(ToolDebug.ShowLog ? "显示"+ToolDebug.Key : "隐藏"+ ToolDebug.Key);
         }
         [MenuItem("QTool/Tool/清空PlayerPrefs存档")]
         public static void ClearPlayerPrefs()
