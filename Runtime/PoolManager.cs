@@ -18,7 +18,7 @@ namespace QTool
                 if (!Init)
                 {
                     Init = true;
-                    _show = PlayerPrefs.GetInt("PoolManager日志", 0) == 1;
+                    _show = PlayerPrefs.GetInt(Key+ "日志", 0) == 1;
                 }
                 return _show;
             }
@@ -29,7 +29,14 @@ namespace QTool
                     Init = true;
                 }
                 _show = value;
-                PlayerPrefs.SetInt("PoolManager日志", value ? 1 : 0);
+                PlayerPrefs.SetInt(Key + "日志", value ? 1 : 0);
+            }
+        }
+        public static string Key
+        {
+            get
+            {
+                return typeof(T).FullName;
             }
         }
         public static void Log(object log)
