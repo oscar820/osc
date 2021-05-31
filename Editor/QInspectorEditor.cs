@@ -704,7 +704,8 @@ namespace QTool.Inspector
                     }
                     if (GuiList.Count == 0)
                     {
-                        GUILayout.Toolbar(0, new string[] { toolbar.name+" 第" +tempIndex[list.GetHashCode()]+ "页为空" }, GUILayout.Height(toolbar.height));
+                      //  GUILayout.Toolbar(0, new string[] { toolbar.name+" 第" +tempIndex[list.GetHashCode()]+ "页为空" }, GUILayout.Height(toolbar.height));
+                        tempIndex[list.GetHashCode()] = 0;
                     }
                     else
                     {
