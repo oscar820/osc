@@ -177,7 +177,7 @@ namespace QTool.Data
             var xmlStr = FileManager.Serialize(saveList);
             var path = GetPlayerDataPath(key);
             FileManager.Save(path, xmlStr);
-            Debug.Log(TableName + "保存数据：" + Count + " 大小：" + (xmlStr.Length * 8).ComputeScale());
+            ToolDebug.Log(TableName + "保存数据：" + Count + " 大小：" + (xmlStr.Length * 8).ComputeScale());
         }
         static void LoadPath(string path,string key)
         {
@@ -197,7 +197,7 @@ namespace QTool.Data
                     {
                         Set(key, item);
                     }
-                    Debug.Log(TableName + "加载数据：" + loadList.Count + " 大小：" + (data.Length * 8).ComputeScale());
+                    ToolDebug.Log(TableName + "加载数据：" + loadList.Count + " 大小：" + (data.Length * 8).ComputeScale());
                     _loadOverFile.Add(GetLoadOverKey(key));
                 }
             }
@@ -273,7 +273,7 @@ namespace QTool.Data
             {
                 var newList = FileManager.Deserialize<QList<string, T>>(result.Result.text);
                 Set(key, newList);
-                Debug.Log(TableName + "加载数据：" + newList.ToOneString());
+                ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
 
                 _loadOverFile.Add(GetLoadOverKey(key));
                 InvokeLoadOver(key);
