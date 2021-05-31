@@ -514,7 +514,7 @@ namespace QTool
             {
                 if (t == null)
                 {
-                    Debug.LogError("序列化数据为空" + typeof(T));
+                   Debug.LogError("序列化数据为空" + typeof(T));
                     return null;
                 }
                 GetSerializer(typeof(T), extraTypes).Serialize(sw, t);
@@ -538,7 +538,7 @@ namespace QTool
             string data = "";
             if (!ExistsFile(path))
             {
-                Debug.LogError("不存在文件：" + path);
+               Debug.LogError("不存在文件：" + path);
                 return data;
             }
             using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
@@ -612,7 +612,7 @@ namespace QTool
             catch (Exception e)
             {
 
-                Debug.LogError("保存失败【" + path + "】" + e);
+               Debug.LogError("保存失败【" + path + "】" + e);
             }
 
             return path;

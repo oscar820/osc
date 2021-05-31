@@ -36,14 +36,14 @@ namespace QTool
         {
             get
             {
-                return typeof(T).FullName;
+                return "【" + typeof(T).Name + "】";
             }
         }
         public static void Log(object log)
         {
             if (ShowLog)
             {
-                Debug.Log(log);
+                Debug.Log(Key+":"+log);
             }
         }
     }

@@ -56,12 +56,12 @@ namespace QTool
                 var buildInfo = BuildPipeline.BuildPlayer(buildOption);
                 if (buildInfo.summary.result == BuildResult.Succeeded)
                 {
-                    Debug.Log("打包成功" + BasePath+WindowsLocalPath);
+                    ToolDebug.Log("打包成功" + BasePath+WindowsLocalPath);
                     System.Diagnostics.Process.Start(BasePath + WindowsLocalPath);
                 }
                 else
                 {
-                    Debug.LogError("打包失败");
+                   Debug.LogError("打包失败");
                 }
             }
         }

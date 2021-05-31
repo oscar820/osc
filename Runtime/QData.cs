@@ -144,7 +144,7 @@ namespace QTool.Data
         {
             var path = GetPlayerDataPath(key);
             System.IO.File.Delete(path);
-            Debug.LogError("删除" + path);
+           Debug.LogError("删除" + path);
         }
         public static void Load(string key = "")
         {

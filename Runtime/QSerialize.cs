@@ -342,7 +342,7 @@ namespace QTool.Serialize
                                 return obj;
                             }
                         default:
-                            Debug.LogError("反序列化类型[" + type + "]出错");
+                             Debug.LogError("反序列化类型[" + type + "]出错");
                             return null;
                     }
                 #region 基础类型
