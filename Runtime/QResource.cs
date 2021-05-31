@@ -232,21 +232,25 @@ namespace QTool.Resource
         }
 #endif
 
-        public static void Set(TObj obj, string key="")
+        public static void Set(TObj obj, string key="",bool checkQid=true)
         {
             if (obj == null) return;
-            if (string.IsNullOrEmpty(key))
+            var setKey = key;
+            if (string.IsNullOrEmpty(setKey))
             {
-                key = obj.name;
+                setKey = obj.name;
             }
-            objDic[key] = obj;
-            ToolDebug.Log("资源缓存[" + key + "]:" + obj);
-            if (obj is GameObject)
+            objDic[setKey] = obj;
+            ToolDebug.Log("资源缓存[" + setKey + "]:" + obj);
+            if (checkQid)
             {
-                var qid = (obj as GameObject).GetComponentInChildren<QId>();
-                if (qid != null&&qid.PrefabId!=key)
+                if (obj is GameObject)
                 {
-                    Set( obj, qid.PrefabId);
+                    var qid = (obj as GameObject).GetComponentInChildren<QId>();
+                    if (qid != null &&!string.IsNullOrWhiteSpace(qid.PrefabId) && qid.PrefabId != key)
+                    {
+                        Set(obj, qid.PrefabId, false);
+                    }
                 }
             }
         }
