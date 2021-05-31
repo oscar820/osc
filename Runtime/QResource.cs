@@ -270,7 +270,7 @@ namespace QTool.Resource
                         {
                             Set(result);
                         }
-                        Debug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                        ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
                         _loadOver = true;
                         OnLoadOver?.Invoke();
                         OnLoadOver = null;
