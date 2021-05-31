@@ -96,14 +96,10 @@ namespace QTool
             }
         }
 
-        public static T Push<T>(string poolName, T obj) where T : class
+        public static void Push<T>(string poolName, T obj) where T : class
         {
             var pool = GetPool<T>(poolName);
-            if (pool != null)
-            {
-                return pool.Push(obj);
-            }
-            return obj;
+            pool?.Push(obj);
         }
     }
     public abstract class PoolObject<T>:IPoolObject where T : PoolObject<T>,new()
@@ -119,9 +115,9 @@ namespace QTool
         {
             return Pool.Get();
         }
-        public static T Push(T obj)
+        public static void Push(T obj)
         {
-            return Pool.Push(obj);
+             Pool.Push(obj);
         }
         public void Recover()
         {
@@ -254,15 +250,14 @@ namespace QTool
                 return Get();
             }
         }
-        public  T Push(T obj)
+        public void Push(T obj)
         {
             if (AllPool.Contains(obj))
             {
-                if (isPoolObj) (obj as IPoolObject).OnPoolRecover();
-                CanUsePool.Push(CheckPush(obj));
-                return null;
+                AllPool.Add(obj);
             }
-            return obj;
+            if (isPoolObj) (obj as IPoolObject).OnPoolRecover();
+            CanUsePool.Push(CheckPush(obj));
         }
         public int CanUseCount
         {

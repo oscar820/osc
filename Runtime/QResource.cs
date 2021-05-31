@@ -352,16 +352,7 @@ namespace QTool.Resource
         }
         public static void Push(string key,GameObject obj)
         {
-            var pool = GetPool(key);
-            if (pool != null)
-            {
-                obj = pool.Push(obj);
-            }
-            if (obj != null)
-            {
-                GameObject.Destroy(obj);
-                Debug.LogError("强制删除[" + key + "]:" + obj.name);
-            }
+            GetPool(key)?.Push(obj);
         }
         public static void Push(GameObject obj)
         {
