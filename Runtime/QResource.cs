@@ -178,10 +178,20 @@ namespace QTool.Resource
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
-                (Application.dataPath + "\\Resources\\" + Label).ForeachDirectoryFiles((path) =>
+                Application.dataPath.ForeachDirectory((rootPath) =>
                 {
-                    Set( UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(Label));
+                    if (rootPath.EndsWith("\\Resources"))
+                    { 
+                        if(System.IO.Directory.Exists(rootPath + "\\" + Label))
+                        {
+                            (rootPath + "\\" + Label).ForeachDirectoryFiles((loadPath) =>
+                            {
+                                Set(UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(Label));
+                            });
+                        }
+                    }
                 });
+               
             }
 #endif
             foreach (var obj in Resources.LoadAll<TObj>(Label))

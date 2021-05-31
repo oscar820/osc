@@ -237,7 +237,7 @@ namespace QTool.TileMap
         public virtual void FreshBrush()
         {
             TileBrush.Clear();
-            TileBrush.Clear();
+            ObjectBrush.Clear();
             InitBrush();
         }
         public virtual void InitBrush()
