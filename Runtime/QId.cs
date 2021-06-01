@@ -96,14 +96,14 @@ namespace QTool
         {
             get
             {
-                return UnityEditor.PrefabUtility.IsAnyPrefabInstanceRoot(gameObject)&&!IsPrefabAssets||(Application.IsPlaying(gameObject)&& isPrefabObject);// || UnityEditor.PrefabUtility.ispreins(gameObject);
+                return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject) && !IsPrefabAssets;//||( Application.IsPlaying(gameObject)&& isPrefabObject);// || UnityEditor.PrefabUtility.ispreins(gameObject);
             }
         }
         private bool IsPrefabAssets
         {
             get
             {
-                return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject)|| (Application.IsPlaying(gameObject) && isPrefabObject);
+                return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject);
             }
         }
 
