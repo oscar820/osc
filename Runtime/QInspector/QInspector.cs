@@ -21,9 +21,9 @@ namespace QTool.Inspector
     /// 使数据在inspector视窗不可更改
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ReadOnlyAttribute : PropertyAttribute
+    public class ReadOnlyAttribute : ViewContorlAttribute
     {
-        public ReadOnlyAttribute()
+        public ReadOnlyAttribute(string control=""):base(control)
         {
         }
     }
@@ -45,21 +45,31 @@ namespace QTool.Inspector
     /// 更改显示的名字
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ViewNameAttribute : PropertyAttribute
+    public class ViewNameAttribute : ViewContorlAttribute
     {
         public string name;
 
-        public string showControl = "";
         public ViewNameAttribute()
         {
             //  order = 1;
         }
-        public ViewNameAttribute(string name,string showControl="")
+        public ViewNameAttribute(string name,string showControl=""):base(showControl)
         {
             this.name = name;
-            this.showControl = showControl;
         }
     }
+    public class ViewContorlAttribute : PropertyAttribute
+    {
+        public string control = "";
+        public ViewContorlAttribute()
+        {
+        }
+        public ViewContorlAttribute(string control = "")
+        {
+            this.control = control;
+        }
+    }
+
 
     /// <summary>
     /// 将字符传显示为枚举下拉款通过GetKeyListFunc获取所有可选择的字符串

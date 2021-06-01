@@ -167,7 +167,7 @@ namespace QTool.Test
         public int[] b;
         public byte[] info;
 
-        [ViewButton("ScreenSize",showControl = "togle")]
+        [ViewButton("ScreenSize",control = "togle")]
         public void SetSize()
         {
             QScreen.SetResolution(920, 630, false);

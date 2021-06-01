@@ -252,20 +252,7 @@ namespace QTool.Inspector
             return att.height + 10;
         }
     }
-    [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
-    public class ReadOnlyAttributeDrawer : PropertyDrawBase<ReadOnlyAttribute>
-    {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            GUI.enabled = false;
-            property.Draw(position, property.ViewName() + "[只读]");
-            GUI.enabled = true;
-        }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return property.GetHeight();
-        }
-    }
+  
     #endregion
     public static class QEditorTool
     {
@@ -363,11 +350,13 @@ namespace QTool.Inspector
             {
                 EditorGUI.BeginChangeCheck(); ;
             }
-                if (property.HasAttribute<ReadOnlyAttribute>())
+                var readonlyAtt= property.GetAttribute<ReadOnlyAttribute>();
+                if (readonlyAtt!=null&& readonlyAtt.Active(property.serializedObject.targetObject))
                 {
+                    var last = GUI.enabled;
                     GUI.enabled = false;
                     EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
-                    GUI.enabled = true;
+                    GUI.enabled = last;
                 }
                 else
                 {
@@ -427,24 +416,33 @@ namespace QTool.Inspector
             }
             return bounds;
         }
-        public static QMemeberInfo GetMember(this object target,string key)
+       // static QDictionary<object, QDictionary<string, bool>> tempBoolList = new QDictionary<object, QDictionary<string, bool>>();
+        public static bool GetBool(this object target,string key)
         {
-            var memeberInfo= QInspectorType.Get(target.GetType()).Members[key];
-            if (memeberInfo == null)
-            {
-                Debug.LogError(target + "获取属性[" + key + "]出错");
-            }
-            return memeberInfo;
-        }
-        public static bool IsShow(this ViewNameAttribute att,object target)
-        {
-            if ( string.IsNullOrWhiteSpace(att.showControl))
+            var info = GetMember(target, key);
+            if (info == null)
             {
                 return true;
             }
             else
             {
-                return (bool)target.GetMember(att.showControl).Get(target);
+                return (bool)info.Get(target);
+            }
+        }
+        public static QMemeberInfo GetMember(this object target,string key)
+        {
+            var memeberInfo= QInspectorType.Get(target.GetType()).Members[key];
+            return memeberInfo;
+        }
+        public static bool Active(this ViewContorlAttribute att,object target)
+        {
+            if ( string.IsNullOrWhiteSpace(att.control))
+            {
+                return true;
+            }
+            else
+            {
+                return (bool)target.GetBool(att.control);
             }
         }
         public static bool IsShow(this SerializedProperty property)
@@ -456,7 +454,7 @@ namespace QTool.Inspector
             }
             else 
             {
-                return att.IsShow(property.serializedObject.targetObject);
+                return att.Active(property.serializedObject.targetObject);
             }
         }
         public static void AddObject(this List<GUIContent> list, object obj)
@@ -592,7 +590,7 @@ namespace QTool.Inspector
             foreach (var kv in typeInfo.buttonFunc)
             {
                 var att = kv.Key;
-                if (att.IsShow(target))
+                if (att.Active(target))
                 {
                     if (att is SelectObjectButtonAttribute)
                     {
@@ -651,7 +649,7 @@ namespace QTool.Inspector
             var toolbar = property.GetAttribute<ToolbarListAttribute>();
             if (toolbar != null)
             {
-                if (!toolbar.IsShow(target))
+                if (!toolbar.Active(target))
                 {
                     return true;
                 }
@@ -729,7 +727,7 @@ namespace QTool.Inspector
             var att = property.GetAttribute<ToggleListAttribute>();
             if (att != null)
             {
-                if (!att.IsShow(target))
+                if (!att.Active(target))
                 {
                     return true;
                 }
