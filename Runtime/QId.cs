@@ -82,40 +82,48 @@ namespace QTool
                     SetPrefabId(UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(prefab)));
                 }
             }
-            isPrefabObject = HasPrefabId;
+        }
+      
+
+
+#endif
+        private bool IsPrefabInstance
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return (UnityEditor.PrefabUtility.IsAnyPrefabInstanceRoot(gameObject) && !IsPrefabAssets)|| Application.IsPlaying(gameObject);
+                
+#else
+                return false;
+#endif
+
+            }
         }
         private bool HasPrefabId
         {
             get
             {
-                isPrefabObject= IsPrefabInstance || IsPrefabAssets;
-                return isPrefabObject;
-            }
-        }
-        private bool IsPrefabInstance
-        {
-            get
-            {
-                return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject) && !IsPrefabAssets;//||( Application.IsPlaying(gameObject)&& isPrefabObject);// || UnityEditor.PrefabUtility.ispreins(gameObject);
+                return IsPrefabInstance || IsPrefabAssets;
+
             }
         }
         private bool IsPrefabAssets
         {
             get
             {
+#if UNITY_EDITOR
                 return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject);
+#else
+                return false;
+#endif
             }
         }
-
-        
-#endif
         public static string GetNewId(string key = "")
         {
             return string.IsNullOrWhiteSpace(key) ? System.Guid.NewGuid().ToString("N") : System.Guid.Parse(key).ToString("N");
         }
         public string Key { get => InstanceId; set { } }
-        [HideInInspector]
-        public bool isPrefabObject;
         [ReadOnly]
         [ViewName("预制体Id", "HasPrefabId")]
         public string PrefabId;
