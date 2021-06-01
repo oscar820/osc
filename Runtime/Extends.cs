@@ -52,10 +52,11 @@ namespace QTool
                 };
             }
         }
-        static float editorDeltaTime;
+       
         static bool updateEditorTime = false;
         static double lastTime;
 #endif
+        static float editorDeltaTime;
         public static float EditorDeltaTime
         {
             get
