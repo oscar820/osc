@@ -8,6 +8,7 @@ namespace QTool
 {
     public static partial class Tool
     {
+        
         public static Vector3 RayCastPlane(this Ray ray, Vector3 planeNormal, Vector3 planePoint)
         {
             float d = Vector3.Dot(planePoint - ray.origin, planeNormal) / Vector3.Dot(ray.direction, planeNormal);
@@ -37,6 +38,35 @@ namespace QTool
             }
             return bounds;
         }
+
+#if UNITY_EDITOR
+        static void StartUpdateEditorTime()
+        {
+            if (!updateEditorTime)
+            {
+                updateEditorTime = true;
+                UnityEditor.EditorApplication.update += () =>
+                {
+                    editorDeltaTime = (float)(UnityEditor.EditorApplication.timeSinceStartup - lastTime);
+                    lastTime = UnityEditor.EditorApplication.timeSinceStartup;
+                };
+            }
+        }
+        static float editorDeltaTime;
+        static bool updateEditorTime = false;
+        static double lastTime;
+#endif
+        public static float EditorDeltaTime
+        {
+            get
+            {
+#if UNITY_EDITOR
+                StartUpdateEditorTime();
+#endif
+                return editorDeltaTime;
+            }
+        }
+
         public static void SetDirty(this Object obj)
         {
 #if UNITY_EDITOR
