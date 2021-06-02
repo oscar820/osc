@@ -34,16 +34,15 @@ namespace QTool
         {
             PlayerPrefs.DeleteAll();
         }
-      
-
         [MenuItem("QTool/清空缓存/清空QData缓存")]
         public static void ClearQData()
         {
             foreach (var type in typeof(QData<>).GetAllTypes())
             {
                 type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static| BindingFlags.Public, null,null,new object[0]);
-
+                Debug.LogError("清空" + type.Name);
             };
+           
         }
         [MenuItem("QTool/清空缓存/清空ResourcesList缓存")]
         public static void ClearResourcesList()
@@ -51,6 +50,7 @@ namespace QTool
             foreach (var type in typeof(ResourceList<,>).GetAllTypes())
             {
                 type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, new object[0]);
+                Debug.LogError("清空" + type.Name);
             };
         }
         public static string BasePath

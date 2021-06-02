@@ -200,7 +200,19 @@ namespace QTool.Reflection
             typeList.AddRange(Assembly.GetAssembly(rootType).GetTypes());
             typeList.RemoveAll((type) =>
             {
-                return type.IsAbstract || !type.IsSubclassOf(rootType);
+                var baseType = type.BaseType;
+                while (baseType != null && !type.IsAbstract)
+                {
+                    if (baseType.Name == rootType.Name)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        baseType = baseType.BaseType;
+                    }
+                }
+                return true;
             });
             return typeList;
         }
