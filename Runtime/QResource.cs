@@ -200,6 +200,7 @@ namespace QTool.Resource
                 Set(obj);
             }
             _loadOver = true;
+            OnLoadOver?.Invoke();
 #endif
         }
 #if Addressables
