@@ -196,7 +196,9 @@ namespace QTool.Reflection
         public static List<Type> GetAllTypes(this Type rootType)
         {
             List<Type> typeList = new List<Type>();
-            typeList.AddRange( Assembly.GetEntryAssembly().GetTypes());
+            typeList.AddRange( Assembly.GetCallingAssembly().GetTypes());
+            typeList.AddRange(Assembly.GetExecutingAssembly().GetTypes());
+            typeList.AddRange(Assembly.GetAssembly(rootType).GetTypes());
             typeList.RemoveAll((type) =>
             {
                 var baseType = type.BaseType;
