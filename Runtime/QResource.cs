@@ -126,6 +126,7 @@ namespace QTool.Resource
             loaderTask = null;
 #endif
             objDic.Clear();
+            ToolDebug.Log("清空ResourceList<" + Label+">");
         }
         static bool _loadOver=false;
         public static bool LoadOver() {
