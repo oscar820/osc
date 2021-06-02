@@ -198,7 +198,22 @@ namespace QTool.Reflection
         {
             return AppDomain.CurrentDomain.GetAssemblies();
         }
-
+        public static void InvokeStaticFunction(this Type type,string name,params object[] param)
+        {
+            while (type.BaseType!=null)
+            {
+                var funcInfo = type.GetMethod(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (funcInfo != null)
+                {
+                    funcInfo.Invoke(null, param);
+                    return;
+                }
+                else
+                {
+                    type = type.BaseType;
+                }
+            }
+        }
         public static List<Type> GetAllTypes(this Type rootType)
         {
             List<Type> typeList = new List<Type>();

@@ -39,7 +39,7 @@ namespace QTool
         {
             foreach (var type in typeof(QData<>).GetAllTypes())
             {
-                type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static| BindingFlags.Public, null,null,new object[0]);
+                type.InvokeStaticFunction("Clear");
                 Debug.LogError("清空" + type.Name);
             };
            
@@ -49,7 +49,7 @@ namespace QTool
         {
             foreach (var type in typeof(ResourceList<,>).GetAllTypes())
             {
-                type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, new object[0]);
+                type.InvokeStaticFunction("Clear");
                 Debug.LogError("清空" + type.Name);
             };
         }
