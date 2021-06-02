@@ -9,6 +9,8 @@ using System.IO;
 using QTool.Resource;
 using QTool.Data;
 using QTool.Reflection;
+using System.Reflection;
+
 namespace QTool
 {
     public static class QToolToolBar
@@ -20,7 +22,7 @@ namespace QTool
             ToolDebug.ShowLog = !ToolDebug.ShowLog;
             UnityEngine.Debug.Log(ToolDebug.ShowLog ? "显示"+ToolDebug.Key : "隐藏"+ ToolDebug.Key);
         }
-        [MenuItem("QTool/清空缓存")]
+        [MenuItem("QTool/清空缓存/清空全部缓存")]
         public static void ClearMemery()
         {
             ClearPlayerPrefs();
@@ -32,12 +34,15 @@ namespace QTool
         {
             PlayerPrefs.DeleteAll();
         }
+      
+
         [MenuItem("QTool/清空缓存/清空QData缓存")]
         public static void ClearQData()
         {
             foreach (var type in typeof(QData<>).GetAllTypes())
             {
-                type.GetMethod("Clear").Invoke(null,null);
+                type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static| BindingFlags.Public, null,null,new object[0]);
+
             };
         }
         [MenuItem("QTool/清空缓存/清空ResourcesList缓存")]
@@ -45,7 +50,7 @@ namespace QTool
         {
             foreach (var type in typeof(ResourceList<,>).GetAllTypes())
             {
-                type.GetMethod("Clear").Invoke(null, null);
+                type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, new object[0]);
             };
         }
         public static string BasePath

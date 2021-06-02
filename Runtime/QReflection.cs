@@ -195,11 +195,11 @@ namespace QTool.Reflection
     {
         public static List<Type> GetAllTypes(this Type rootType)
         {
-            var types= Assembly.GetCallingAssembly().GetTypes();
+            var types= Assembly.GetAssembly(rootType).GetTypes();
             List<Type> typeList = new List<Type>();
             foreach (var type in types)
             {
-               if(type.IsSubclassOf(rootType))
+                if (!type.IsAbstract&&type.IsSubclassOf(rootType))
                 {
                     typeList.Add(type);
                 }

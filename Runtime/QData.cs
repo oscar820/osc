@@ -11,11 +11,8 @@ using UnityEngine.AddressableAssets;
 # endif
 namespace QTool.Data
 {
-    //public static class QDataPathManager
-    //{
-    //    public string string 
-    //}
-    public class QData<T>: IKey<string> where T :QData<T>, new()
+   
+    public abstract class QData<T>: IKey<string> where T :QData<T>, new()
     {
         #region 基础属性
 
@@ -23,7 +20,6 @@ namespace QTool.Data
         public string Key { get; set; }
 
         #endregion
-
         #region 数据表相关
         public static QList<string, T> list = new QList<string, T>();
         public static string TableType
