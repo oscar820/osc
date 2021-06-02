@@ -37,6 +37,7 @@ namespace QTool
         [MenuItem("QTool/清空缓存/清空QData缓存")]
         public static void ClearQData()
         {
+            Debug.LogError("尝试清空QData");
             foreach (var type in typeof(QData<>).GetAllTypes())
             {
                 type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static| BindingFlags.Public, null,null,new object[0]);
@@ -47,6 +48,7 @@ namespace QTool
         [MenuItem("QTool/清空缓存/清空ResourcesList缓存")]
         public static void ClearResourcesList()
         {
+            Debug.LogError("尝试清空ResourcesList");
             foreach (var type in typeof(ResourceList<,>).GetAllTypes())
             {
                 type.BaseType.InvokeMember("Clear", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, new object[0]);
