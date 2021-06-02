@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
 using System.IO;
-using QTool.Resource;
+using QTool.Asset;
 using QTool.Data;
 using QTool.Reflection;
 using System.Reflection;
@@ -47,7 +47,7 @@ namespace QTool
         [MenuItem("QTool/清空缓存/清空ResourcesList缓存")]
         public static void ClearResourcesList()
         {
-            foreach (var type in typeof(ResourceList<,>).GetAllTypes())
+            foreach (var type in typeof(AssetList<,>).GetAllTypes())
             {
                 type.InvokeStaticFunction("Clear");
                 Debug.LogError("清空" + type.Name);

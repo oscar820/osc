@@ -6,12 +6,13 @@ using System.Xml.Serialization;
 using UnityEngine;
 using QTool.Binary;
 using System.Threading.Tasks;
-#if Addressables
-using UnityEngine.AddressableAssets;
-# endif
+using QTool.Asset;
 namespace QTool.Data
 {
-   
+    public class DataAsset:AssetList<DataAsset,TextAsset>
+    {
+
+    }
     public abstract class QData<T>: IKey<string> where T :QData<T>, new()
     {
         #region 基础属性
@@ -124,7 +125,7 @@ namespace QTool.Data
         }
         static string GetSubPath(string key = "")
         {
-            return "Data\\" + GetName(key) + ".xml";
+            return "DataAsset\\" + GetName(key) + ".xml";
         }
 
         public static string GetPlayerDataPath(string key = "")
@@ -178,12 +179,10 @@ namespace QTool.Data
         }
         static void LoadPath(string path,string key)
         {
-            if (_LoadOver(key))
+            if (LoadOver(key))
             {
-                InvokeLoadOver(path);
                 return;
             }
-          
             try
             {
                 var data = FileManager.Load(path);
@@ -195,7 +194,7 @@ namespace QTool.Data
                         Set(key, item);
                     }
                     ToolDebug.Log(TableName + "加载数据：" + loadList.Count + " 大小：" + (data.Length * 8).ComputeScale());
-                    _loadOverFile.Add(GetLoadOverKey(key));
+                    _loadOverFile.Add(GetName(key));
                 }
             }
             catch (Exception e)
@@ -205,84 +204,60 @@ namespace QTool.Data
           
         }
         static List<string> _loadOverFile = new List<string>();
-        static string GetLoadOverKey(string key)
+        static bool LoadOver(string key = "")
         {
-            return string.IsNullOrWhiteSpace(key) ? "基础表" : key;
+             return _loadOverFile.Contains(GetName(key));
         }
-        static bool _LoadOver(string key = "")
-        {
-             return _loadOverFile.Contains(GetLoadOverKey(key));
-        }
-        public static bool LoadOver(string key="")
-        {
-            var loadOver = _LoadOver(key);
-            if (!loadOver)
-            {
-#if Addressables
-                LoadAsync(key);
-#endif
-            }
-            return loadOver;
-        }
-        static Dictionary<string, System.Action> LoadOverCallBack = new Dictionary<string, Action>();
-        static void InvokeLoadOver(string key)
-        {
-
-            var loadKey = GetLoadOverKey(key);
-            if (LoadOverCallBack.ContainsKey(loadKey))
-            {
-                LoadOverCallBack[loadKey]?.Invoke();
-                LoadOverCallBack[loadKey] = null;
-            }
-        }
-        public static void LoadOverRun(System.Action action, string key = "")
-        {
-           
-            if (LoadOver(key))
-            {
-                action?.Invoke();
-            }
-            else
-            {
-                var laodOverkey = GetLoadOverKey(key);
-                if (LoadOverCallBack.ContainsKey(laodOverkey))
-                {
-                    LoadOverCallBack[laodOverkey] += action;
-                }
-                else
-                {
-                    LoadOverCallBack.Add(laodOverkey, action);
-                }
-            }
-           
-        }
-#if Addressables
       
+
+       //// static Dictionary<string, System.Action> LoadOverCallBack = new Dictionary<string, Action>();
+       // static void InvokeLoadOver(string key)
+       // {
+
+       //     var loadKey = GetName(key);
+       //     if (LoadOverCallBack.ContainsKey(loadKey))
+       //     {
+       //         LoadOverCallBack[loadKey]?.Invoke();
+       //         LoadOverCallBack[loadKey] = null;
+       //     }
+       // }
+        //public static void LoadOverRun(System.Action action, string key = "")
+        //{
+           
+        //    if (LoadOver(key))
+        //    {
+        //        action?.Invoke();
+        //    }
+        //    else
+        //    {
+        //        var laodOverkey = GetName(key);
+        //        if (LoadOverCallBack.ContainsKey(laodOverkey))
+        //        {
+        //            LoadOverCallBack[laodOverkey] += action;
+        //        }
+        //        else
+        //        {
+        //            LoadOverCallBack.Add(laodOverkey, action);
+        //        }
+        //    }
+           
+        //}
         static QDictionary<string, Task> loaderTasks = new QDictionary<string, Task>();
         public static async Task LoadAsync(string key = "")
         {
-            if (_LoadOver(key)| loaderTasks[key]!=null)
+            if (LoadOver(key)| loaderTasks[key]!=null)
             {
                 return;
             }
-            var loader= Addressables.LoadAssetAsync<TextAsset>(GetName(key));
-            loader.Completed += (result) =>
-            {
-                var newList = FileManager.Deserialize<QList<string, T>>(result.Result.text);
-                Set(key, newList);
-                ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
-
-                _loadOverFile.Add(GetLoadOverKey(key));
-                InvokeLoadOver(key);
-            };
-            if (loader.OperationException != null)
-            {
-                Debug.LogError("异步加载表[" + GetName(key) + "]出错:"+loader.OperationException);
-            };
-            loaderTasks[key] = loader.Task;
-            await loader.Task;
+            var task= DataAsset.GetAsync(GetName(key));
+            loaderTasks[key] = task;
+            var asset = await task;
+            var newList = FileManager.Deserialize<QList<string, T>>(asset.text);
+            Set(key, newList);
+            ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
+            _loadOverFile.Add(GetName(key));
+            await task;
         }
-#endif
         #endregion
     }
 }

@@ -9,7 +9,7 @@ using System;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
 #endif
-namespace QTool.Resource {
+namespace QTool.Asset {
     public static  class AddressableToolEditor
     {
 #if Addressable

@@ -1,15 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using QTool.Resource;
+using QTool.Asset;
 using System;
 
 namespace QTool
 {
   
-    public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceBehaviour<T> where ResourceLabel : PrefabResourceList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
+    public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceBehaviour<T> where ResourceLabel : PrefabAssetList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
     {
-        public new static T Instance
+        public  new static T Instance
         {
             get
             {
@@ -18,22 +18,19 @@ namespace QTool
                     _instance = FindObjectOfType<T>();
                     if (_instance == null)
                     {
-                        PrefabResourceList<ResourceLabel>.LoadOverRun(() =>
+                        if (_instance == null)
                         {
-                            if (_instance == null)
-                            {
-                                _instance = GetNewInstance();
-                            }
-                        });
+                             GetNewInstance();
+                        }
                     }
                 }
                 return _instance;
             }
         }
        
-        public static T GetNewInstance()
+        public static async void GetNewInstance()
         {
-           return  PrefabResourceList<ResourceLabel>.GetInstance(typeof(T).Name).GetComponent<T>();
+            _instance=(await PrefabAssetList<ResourceLabel>.GetInstance(typeof(T).Name)).GetComponent<T>();
         }
     }
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>

@@ -6,7 +6,7 @@ using QTool.Serialize;
 using System.Threading.Tasks;
 
 
-namespace QTool.Resource
+namespace QTool.Asset
 {
 #if Addressables
     using UnityEngine.AddressableAssets;
@@ -109,7 +109,7 @@ namespace QTool.Resource
 #endif
 
 #endif
-    public abstract class ResourceList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:ResourceList<TLabel,TObj>
+    public abstract class AssetList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:AssetList<TLabel,TObj>
     {
         public static QDictionary<string, TObj> objDic = new QDictionary<string, TObj>();
         public static string Label
@@ -128,113 +128,12 @@ namespace QTool.Resource
             objDic.Clear();
             ToolDebug.Log("清空ResourceList<" + Label+">");
         }
-        static bool _loadOver=false;
-        public static bool LoadOver() {
-
-            if (!_loadOver)
-            {
-                LoadAll();
-            }
-            return _loadOver;
-        }
-        private static Action OnLoadOver;
-        public static void LoadOverRun(Action action)
-        {
-            if (LoadOver())
-            {
-                action?.Invoke();
-            }
-            else
-            {
-                OnLoadOver += action;
-            }
-        }
+       
         public static bool ContainsKey(string key)
         {
             return objDic.ContainsKey(key);
         }
-        public static bool Contains(string key)
-        {
-            return ContainsKey(key);
-        }
-        public static TObj GetResource(string key)
-        {
-            LoadOver();
-            if (ContainsKey(key))
-            {
-                return objDic[key];
-            }
-            else
-            {
-                Debug.LogError(Label + "找不到资源[" + key + "]");
-                return null;
-            }
-        }
-        public static void LoadAll()
-        {
-            if (_loadOver) return;
-#if Addressables
-            LoadAsync();
-#else
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                Application.dataPath.ForeachDirectory((rootPath) =>
-                {
-                    if (rootPath.EndsWith("\\Resources"))
-                    { 
-                        if(System.IO.Directory.Exists(rootPath + "\\" + Label))
-                        {
-                            (rootPath + "\\" + Label).ForeachDirectoryFiles((loadPath) =>
-                            {
-                                Set(UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(Label));
-                            });
-                        }
-                    }
-                });
-               
-            }
-#endif
-            foreach (var obj in Resources.LoadAll<TObj>(Label))
-            {   
-                Set(obj);
-            }
-            _loadOver = true;
-            OnLoadOver?.Invoke();
-#endif
-        }
-#if Addressables
-        public static async Task GetAsync(string key,Action<TObj> loadOver)
-        {
-            if (objDic.ContainsKey(key))
-            {
-                loadOver?.Invoke(GetResource(key));
-            }
-            else
-            {
-                var loader = Addressables.LoadAssetAsync<TObj>(key);
-                loader.Completed += (result) =>
-                {
-                    if (result.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-                    {
-                        Set(result.Result,key);
-                        loadOver?.Invoke(result.Result);
-                    }
-                    else
-                    {
-                        loadOver?.Invoke(null);
-                    }
-                };
-                if (loader.OperationException != null)
-                {
-                    Debug.LogError("异步加载"+Label+ "资源[" + key + "]出错"+loader.OperationException);
-                };
-                await loader.Task;
-            }
-        }
-#endif
-
-        public static void Set(TObj obj, string key="",bool checkQid=true)
+        public static void Set(TObj obj, string key = "", bool checkQid = true)
         {
             if (obj == null) return;
             var setKey = key;
@@ -249,44 +148,114 @@ namespace QTool.Resource
                 if (obj is GameObject)
                 {
                     var qid = (obj as GameObject).GetComponentInChildren<QId>();
-                    if (qid != null &&!string.IsNullOrWhiteSpace(qid.PrefabId) && qid.PrefabId != key)
+                    if (qid != null && !string.IsNullOrWhiteSpace(qid.PrefabId) && qid.PrefabId != key)
                     {
                         Set(obj, qid.PrefabId, false);
                     }
                 }
             }
         }
-#if Addressables
-        static Task loaderTask;
-        public static async Task LoadAsync()
+
+        public static async Task<TObj> GetAsync(string key)
         {
-            if (_loadOver || loaderTask != null) return;
-            if (Application.isPlaying)
+            if (objDic.ContainsKey(key))
             {
-                var load = Addressables.LoadAssetsAsync<TObj>(Label, null);
-                load.Completed += (loader) =>
+                return objDic[key];
+            }
+            else
+            {
+#if Addressables
+                return await AddressableGetAsync(key);
+#else
+                return ResourceGet(key);
+#endif
+            }
+        }
+
+        static bool _loadOver = false;
+        public static async Task LoadAllAsync()
+        {
+            if (_loadOver) return;
+#if Addressables
+            await AddressableLoadAll();
+#else
+            ResourceLoadAll();
+#endif
+        }
+
+
+ 
+#if Addressables
+        #region Addressable加载
+
+        static async Task<TObj> AddressableGetAsync(string key)
+        {
+            if (objDic.ContainsKey(key))
+            {
+                return objDic[key];
+            }
+            else
+            {
+                if (Application.isPlaying)
                 {
-                    if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                    var loader = Addressables.LoadAssetAsync<TObj>(key);
+                    var obj = await loader.Task;
+                    if(loader.Status== UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                     {
-                        foreach (var result in loader.Result)
-                        {
-                            Set(result);
-                        }
-                        ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
-                        _loadOver = true;
-                        OnLoadOver?.Invoke();
-                        OnLoadOver = null;
+
+                        Set(obj, key);
                     }
                     else
                     {
                         if (loader.OperationException != null)
                         {
-                            Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
+                            Debug.LogError("异步加载" + Label + "资源[" + key + "]出错" + loader.OperationException);
                         }
                     }
-                };
-                loaderTask = load.Task;
-                await load.Task;
+                    return obj;
+
+                }
+                else
+                {
+                    await AddressableLoadAll();
+                    if (objDic.ContainsKey(key))
+                    {
+                        return objDic[key];
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+        static Task loaderTask;
+        public static async Task AddressableLoadAll()
+        {
+            if (_loadOver || loaderTask != null) return;
+            if (Application.isPlaying)
+            {
+                var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
+                loaderTask = loader.Task;
+                var obj = await loader.Task;
+                if(loader.Status== UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                {
+
+                    foreach (var result in loader.Result)
+                    {
+                        Set(result);
+                    }
+                    ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                    _loadOver = true; 
+                }
+                else
+                {
+                    if (loader.OperationException != null)
+                    {
+                        Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
+                    }
+                }
+             
             }
             else
             {
@@ -294,25 +263,75 @@ namespace QTool.Resource
                 var list = AddressableTool.GetLabelList(Label);
                 foreach (var entry in list)
                 {
-                    Set(entry.TargetAsset as TObj,entry.address);
+                    Set(entry.TargetAsset as TObj, entry.address);
                 }
                 _loadOver = true;
-                OnLoadOver?.Invoke();
-                OnLoadOver = null;
 #endif
             }
         }
+
+
+        #endregion
+#else
+        #region Resource加载
+
+        static TObj ResourceGet(string key)
+        {
+            ResourceLoadAll();
+            if (objDic.ContainsKey(key)) {
+                return objDic[key];
+            }
+            else
+            {
+                Debug.LogError("不存在资源 Resources\\" + Label + '\\' + key);
+                return null;
+            }
+        }
+        static void ResourceLoadAll()
+        {
+            if (_loadOver)
+            {
+                return;
+            }
+            if (!Application.isPlaying)
+            {
+#if UNITY_EDITOR
+                Application.dataPath.ForeachDirectory((rootPath) =>
+                {
+                    if (rootPath.EndsWith("\\Resources"))
+                    {
+                        if (System.IO.Directory.Exists(rootPath + "\\" + Label))
+                        {
+                            (rootPath + "\\" + Label).ForeachDirectoryFiles((loadPath) =>
+                            {
+                                Set(UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(Label));
+                            });
+                        }
+                    }
+                });
+#endif
+            }
+            else
+            {
+                foreach (var obj in Resources.LoadAll<TObj>(Label))
+                {
+                    Set(obj);
+                }
+            }
+            _loadOver = true;
+        }
+        #endregion
 #endif
     }
-    public abstract class PrefabResourceList<TLabel>: ResourceList<TLabel,GameObject> where TLabel:PrefabResourceList<TLabel>
+    public abstract class PrefabAssetList<TLabel>: AssetList<TLabel,GameObject> where TLabel:PrefabAssetList<TLabel>
     {
         static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
-        static ObjectPool<GameObject> GetPool(string key)
+        static async Task<ObjectPool<GameObject>> GetPool(string key)
         {
             var poolkey = key + "_ObjPool";
             if (!PoolDic.ContainsKey(poolkey))
             {
-                var prefab = GetResource(key) as GameObject;
+                var prefab =await GetAsync(key) as GameObject;
                 if (prefab == null)
                 {
                     new Exception(Label + "找不到预制体资源" + key);
@@ -326,9 +345,10 @@ namespace QTool.Resource
             }
             return PoolDic[poolkey];
         }
-        public static GameObject GetInstance(string key,Transform parent = null)
+        public static async Task<GameObject> GetInstance(string key,Transform parent = null)
         {
-            var obj = GetPool(key)?.Get();
+            var pool =await GetPool(key);
+            var obj= pool.Get();
             if (obj == null)
             {
                 return null;
@@ -339,39 +359,39 @@ namespace QTool.Resource
             }
             if(obj.transform is RectTransform)
             {
-                var prefab = GetResource(key);
+                var prefab =await GetAsync(key);
                 (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
             }
             obj.name = key;
             return obj;
         }
-        public static GameObject GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
+        public static async Task<GameObject> GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
         {
-            var obj = GetInstance(key, parent);
+            var obj =await GetInstance(key, parent);
             obj.transform.position = position;
             obj.transform.localRotation = rotation;
             return obj;
         }
-        public static void Push(string key,GameObject obj)
+        public static async void Push(string key,GameObject obj)
         {
-            GetPool(key)?.Push(obj);
+            (await GetPool(key))?.Push(obj);
         }
         public static void Push(GameObject obj)
         {
             Push(obj.name, obj);
         }
-        public static CT GetInstance<CT>(string key, Transform parent = null) where CT : Component
+        public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
         {
-            var obj = GetInstance(key, parent);
+            var obj =await GetInstance(key, parent);
             if (obj == null)
             {
                 return null;
             }
             return obj.GetComponent<CT>();
         }
-        public static CT GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
+        public async static Task<CT> GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
         {
-            var obj = GetInstance(key, pos, rotation, parent);
+            var obj =await GetInstance(key, pos, rotation, parent);
             if (obj == null)
             {
                 return null;
