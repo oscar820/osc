@@ -195,15 +195,13 @@ namespace QTool.Reflection
     {
         public static List<Type> GetAllTypes(this Type rootType)
         {
-            var types= Assembly.GetAssembly(rootType).GetTypes();
             List<Type> typeList = new List<Type>();
-            foreach (var type in types)
+            typeList.AddRange(Assembly.GetCallingAssembly().GetTypes());
+            typeList.AddRange(Assembly.GetAssembly(rootType).GetTypes());
+            typeList.RemoveAll((type) =>
             {
-                if (!type.IsAbstract&&type.IsSubclassOf(rootType))
-                {
-                    typeList.Add(type);
-                }
-            }
+                return type.IsAbstract || !type.IsSubclassOf(rootType);
+            });
             return typeList;
         }
         static Dictionary<string, Type> typeDic = new Dictionary<string, Type>();
