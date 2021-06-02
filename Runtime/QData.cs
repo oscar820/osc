@@ -60,7 +60,7 @@ namespace QTool.Data
             return Contains(enumKey.ToString());
         }
 
-        public static void ClearTable()
+        public static void Clear()
         {
             _loadOverFile.Clear();
             list.Clear();

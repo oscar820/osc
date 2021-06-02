@@ -193,6 +193,19 @@ namespace QTool.Reflection
     #endregion
     public static class QReflection
     {
+        public static List<Type> GetAllTypes(this Type rootType)
+        {
+            var types= Assembly.GetCallingAssembly().GetTypes();
+            List<Type> typeList = new List<Type>();
+            foreach (var type in types)
+            {
+               if(type.IsSubclassOf(rootType))
+                {
+                    typeList.Add(type);
+                }
+            }
+            return typeList;
+        }
         static Dictionary<string, Type> typeDic = new Dictionary<string, Type>();
         public static Type ParseType(string typeString)
         {
