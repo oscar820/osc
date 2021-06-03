@@ -155,7 +155,26 @@ namespace QTool.Asset
                 }
             }
         }
-
+        public static TObj Get(string key)
+        {
+            if (!_loadOver)
+            {
+                LoadAllAsync();
+            }
+            if (objDic.ContainsKey(key))
+            {
+                return objDic[key];
+            }
+            else if(_loadOver)
+            {
+                Debug.LogError("不存在资源" + Label + '\\' + key);
+            }
+            else
+            {
+                Debug.LogError("未初始化" + Label);
+            }
+            return null;
+        }
         public static async Task<TObj> GetAsync(string key)
         {
             if (objDic.ContainsKey(key))
