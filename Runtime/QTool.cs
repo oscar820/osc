@@ -390,7 +390,6 @@ namespace QTool
                 }
             }
         }
-      
         public static void RemoveKey<T, KeyType>(this ICollection<T> array, KeyType key) where T : IKey<KeyType>
         {
             var old = array.Get(key);

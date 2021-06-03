@@ -380,6 +380,13 @@ namespace QTool.Asset
         {
             Push(obj.name, obj);
         }
+        public static void Push(List<GameObject> objList)
+        {
+            foreach (var obj in objList)
+            {
+                Push(obj);
+            }
+        }
         public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
         {
             var obj =await GetInstance(key, parent);

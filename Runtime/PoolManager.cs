@@ -95,7 +95,10 @@ namespace QTool
                 return pool;
             }
         }
-
+        public static void Push(GameObject gameObject)
+        {
+            Push(gameObject.name, gameObject);
+        }
         public static void Push<T>(string poolName, T obj) where T : class
         {
             var pool = GetPool<T>(poolName);
