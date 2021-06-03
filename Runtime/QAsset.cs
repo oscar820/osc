@@ -203,7 +203,7 @@ namespace QTool.Asset
         }
 
 
- 
+
 #if Addressables
         #region Addressable加载
 
@@ -257,6 +257,7 @@ namespace QTool.Asset
                 var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
                 loaderTask = loader.Task;
                 var obj = await loader.Task;
+                loaderTask=null;
                 if(loader.Status== UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
 
@@ -364,26 +365,7 @@ namespace QTool.Asset
             }
             return PoolDic[poolkey];
         }
-        public static async Task<GameObject> GetInstance(string key,Transform parent = null)
-        {
-            var pool =await GetPool(key);
-            var obj= pool.Get();
-            if (obj == null)
-            {
-                return null;
-            }
-            if (parent != null)
-            {
-                obj.transform.SetParent(parent);
-            }
-            if(obj.transform is RectTransform)
-            {
-                var prefab =await GetAsync(key);
-                (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
-            }
-            obj.name = key;
-            return obj;
-        }
+      
         public static async Task<GameObject> GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
         {
             var obj =await GetInstance(key, parent);
@@ -406,6 +388,26 @@ namespace QTool.Asset
                 Push(obj);
             }
             objList.Clear();
+        }
+        public static async Task<GameObject> GetInstance(string key, Transform parent = null)
+        {
+            var pool = await GetPool(key);
+            var obj = pool.Get();
+            if (obj == null)
+            {
+                return null;
+            }
+            if (parent != null)
+            {
+                obj.transform.SetParent(parent);
+            }
+            if (obj.transform is RectTransform)
+            {
+                var prefab = await GetAsync(key);
+                (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
+            }
+            obj.name = key;
+            return obj;
         }
         public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
         {

@@ -252,6 +252,7 @@ namespace QTool.Data
             var task= DataAsset.GetAsync(GetName(key));
             loaderTasks[key] = task;
             var asset = await task;
+            loaderTasks[key] = null;
             var newList = FileManager.Deserialize<QList<string, T>>(asset.text);
             Set(key, newList);
             ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
