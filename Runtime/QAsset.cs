@@ -386,6 +386,7 @@ namespace QTool.Asset
             {
                 Push(obj);
             }
+            objList.Clear();
         }
         public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
         {
