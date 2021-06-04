@@ -180,6 +180,32 @@ namespace QTool.Inspector
         }
 
     }
+    /// <summary>
+    /// 显示按钮 调用函数CallFunc 无参数
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
+    public class HorizontalGroupAttribute : GroupAttribute
+    {
+
+        public HorizontalGroupAttribute(string name, string showControl = "") : base(name, showControl)
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// 显示按钮 调用函数CallFunc 无参数
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field| AttributeTargets.Method, AllowMultiple = true)]
+    public abstract class GroupAttribute : ViewContorlAttribute
+    {
+        public string name;
+        public GroupAttribute(string name, string showControl = "")
+        {
+            this.name = name;
+            this.control = showControl;
+        }
+    }
 
     public abstract class QHeightAttribute : ViewNameAttribute
     {

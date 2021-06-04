@@ -572,10 +572,12 @@ namespace QTool.Inspector
         public Dictionary<string, ReorderableList> listArray = new Dictionary<string, ReorderableList>();
         public override void OnInspectorGUI()
         {
+            GroupList.Clear();
             EditorGUI.BeginChangeCheck();
             DrawAllProperties(serializedObject);
+           
             DrawButton();
-        
+            DrawGroup();
             if (EditorGUI.EndChangeCheck())
             {
                 EditorUtility.SetDirty(target);
@@ -584,11 +586,26 @@ namespace QTool.Inspector
             }
 
         }
+        public void DrawGroup()
+        {
+            foreach (var kv in GroupList)
+            {
+                if (kv.Value.group is HorizontalGroupAttribute)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        kv.Value.func?.Invoke();
+                    }
+                }
+            }
+        }
+        
      
         public void DrawButton()
         {
             foreach (var kv in typeInfo.buttonFunc)
             {
+                CheckGroup(kv.Value.MethodInfo.GetCustomAttribute<GroupAttribute>(), () => { 
                 var att = kv.Key;
                 if (att.Active(target))
                 {
@@ -623,7 +640,8 @@ namespace QTool.Inspector
                     }
 
                 }
-            
+                });
+
             }
         }
         public void DrawAllProperties(SerializedObject serializedObject)
@@ -787,29 +805,54 @@ namespace QTool.Inspector
         #endregion
         Action ChangeCallBack;
         public int pickId = -1;
-     
-
-        public void DrawProperty(SerializedProperty property)
+        public void CheckGroup(GroupAttribute group,Action func)
         {
-            if (property.name.Equals("m_Script"))
+            if (group == null)
             {
-                GUI.enabled = false;
-                EditorGUILayout.PropertyField(property, true);
-                GUI.enabled = true;
+                func();
             }
             else
             {
-                if (property.isArray)
+                if (GroupList[group.name] == null)
                 {
-                    DrawArrayProperty(property);
+                    GroupList[group.name] = new GroupInfo()
+                    {
+                        group = group
+                    };
+                }
+                GroupList[group.name].func += func;
+            }
+        }
+        public class GroupInfo
+        {
+            public GroupAttribute group;
+            public Action func;
+        }
+        public QDictionary<string, GroupInfo> GroupList = new QDictionary<string, GroupInfo>();
+        public void DrawProperty(SerializedProperty property)
+        {
+            CheckGroup(property.GetAttribute<GroupAttribute>(), () =>
+            {
+                if (property.name.Equals("m_Script"))
+                {
+                    GUI.enabled = false;
+                    EditorGUILayout.PropertyField(property, true);
+                    GUI.enabled = true;
                 }
                 else
                 {
-                    if (DrawToolbar(property)) return;
-                    ChangeCallBack+= property.DrawLayout();
-                }
+                    if (property.isArray)
+                    {
+                        DrawArrayProperty(property);
+                    }
+                    else
+                    {
+                        if (DrawToolbar(property)) return;
+                        ChangeCallBack += property.DrawLayout();
+                    }
 
-            }
+                }
+            });
         }
     }
 }

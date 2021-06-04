@@ -67,6 +67,7 @@ namespace QTool.Test
     public class TestClass//:IQSerialize
     {
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
+
         public List<float> list;
         public string asdl;
         public float p2;
@@ -179,7 +180,10 @@ namespace QTool.Test
         }
 
         public byte[] testBytes;
+
+         [HorizontalGroup("t1")]
         public TestClass test1;
+        [HorizontalGroup("t1")]
         public TestClass test2;
         public byte[] xmlBytes;
         public byte[] jsonBytes;
