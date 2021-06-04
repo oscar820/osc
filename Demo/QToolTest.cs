@@ -130,8 +130,8 @@ namespace QTool.Test
     public class QToolTest : MonoBehaviour
     {
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
-        [ViewToggle("alskjd")]
-        public bool togle;
+        //[ViewToggle("开关")]
+        public bool toggle;
         // Start is called before the first frame update
         void Start()
         {
@@ -181,9 +181,9 @@ namespace QTool.Test
 
         public byte[] testBytes;
 
-         [HorizontalGroup("t1")]
+         [HorizontalGroup("t1", "toggle")]
         public TestClass test1;
-        [HorizontalGroup("t1")]
+        [HorizontalGroup("t1", "toggle")]
         public TestClass test2;
         public byte[] xmlBytes;
         public byte[] jsonBytes;

@@ -594,7 +594,10 @@ namespace QTool.Inspector
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        kv.Value.func?.Invoke();
+                        if (kv.Value.group.Active(target))
+                        {
+                            kv.Value.func?.Invoke();
+                        }
                     }
                 }
             }
