@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using UnityEngine;
-
+using System.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -9,7 +9,10 @@ namespace QTool
 {
     public static class QScreen
     {
-
+        public static async Task<Texture> Capture()
+        {
+            return await QToolDelay.Instance.Capture();
+        }
         public static void SetResolution(int width, int height, bool fullScreen)
         {
 #if UNITY_EDITOR

@@ -42,11 +42,17 @@ namespace QTool
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<T>();
+                    if (_instance == null)
+                    {
+                       var obj = new GameObject(typeof(T).Name);
+                        _instance = obj.AddComponent<T>();
+                    }
                 }
                 return _instance;
             }
         }
         protected static T _instance;
+        
         protected virtual void Awake()
         {
             _instance = this as T;
