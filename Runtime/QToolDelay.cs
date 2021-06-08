@@ -21,6 +21,7 @@ namespace QTool
             Camera.main.targetTexture = renderTexture;
             yield return new WaitForEndOfFrame();
             Camera.main.targetTexture = null;
+            captureOver = true;
 
         }
         bool captureOver=false;
