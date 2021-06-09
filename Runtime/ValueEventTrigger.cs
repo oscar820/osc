@@ -64,30 +64,21 @@ public class StringEventTrigger :EventTriggerBase<StringEvent>
 public class ObjectEventTrigger : EventTriggerBase<ObjectEvent>
 {
 }
-[System.Serializable]
-public class GameObjectKeyValue : IKey<string>
-{
-    public string name;
-    public string Key { get => name; set => name = value; }
-    public GameObject gameObject;
-}
+//[System.Serializable]
+//public class GameObjectKeyValue : IKey<string>
+//{
+//    public string name;
+//    public string Key { get => name; set => name = value; }
+//    public GameObject gameObject;
+//}
 [System.Serializable]
 public class ValueEventTrigger : MonoBehaviour
 {
     public List<ActionEventTrigger> actionEventList=new List<ActionEventTrigger>();
     public List<StringEventTrigger> stringEventList=new List<StringEventTrigger>();
-  //  public List<SpriteEventTrigger> spriteEventList=new List<SpriteEventTrigger>();
     public List<BoolEventTrigger> boolEventList=new List<BoolEventTrigger>();
     public List<FloatEventTrigger> floatEventList=new List<FloatEventTrigger>();
     public List<ObjectEventTrigger> objectEventList=new List<ObjectEventTrigger>();
-    public List<GameObjectKeyValue> objectList = new List<GameObjectKeyValue>();
-  
-    
-    public GameObject GetObject(string name)
-    {
-        var kv = objectList.Get(name);
-        return kv == null ? null : kv.gameObject;
-    }
     public void Invoke<T>(string eventName, T value) where T: class
     {
         var type = typeof(T);
@@ -139,17 +130,6 @@ public static class ValueEventTriggerExtends
         }
         var tigger = obj.transform.parent.GetComponentInParent<ValueEventTrigger>();
         return tigger;
-    }
-    public static GameObject GetObject(this GameObject obj, string objName) {
-        var trigger = obj.GetTrigger();
-        if (trigger == null)
-        {
-            return null;
-        }
-        else
-        {
-            return trigger.GetObject(objName);
-        }
     }
     public static void InvokeEvent(this GameObject obj, string eventName) 
     {
