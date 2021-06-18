@@ -245,8 +245,13 @@ namespace QTool.Data
         static QDictionary<string, Task> loaderTasks = new QDictionary<string, Task>();
         public static async Task LoadAsync(string key = "")
         {
-            if (LoadOver(key)| loaderTasks[key]!=null)
+            if (LoadOver(key) )
             {
+                return;
+            }
+            if(loaderTasks[key] != null)
+            {
+                await loaderTasks[key];
                 return;
             }
             var task= DataAsset.GetAsync(GetName(key));
@@ -257,7 +262,6 @@ namespace QTool.Data
             Set(key, newList);
             ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
             _loadOverFile.Add(GetName(key));
-            await task;
         }
         #endregion
     }
