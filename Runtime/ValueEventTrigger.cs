@@ -98,11 +98,11 @@ public class ValueEventTrigger : MonoBehaviour
     //}
     public void Invoke(string eventName,string value)
     {
-        stringEventList.Get(eventName)?.eventAction.Invoke(value);
+        stringEventList.Get(eventName)?.eventAction?.Invoke(value);
     }
     public void Invoke(string eventName)
     {
-        actionEventList.Get(eventName)?.eventAction.Invoke();
+        actionEventList.Get(eventName)?.eventAction?.Invoke();
     }
     public void Invoke(string eventName, bool value)
     {
