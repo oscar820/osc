@@ -34,10 +34,10 @@ public class StringEvent : UnityEvent<string>
 public class SpriteEvent : UnityEvent<Sprite>
 {
 }
-[System.Serializable]
-public class ObjectEvent : UnityEvent<object>
-{
-}
+//[System.Serializable]
+//public class ObjectEvent : UnityEvent<object>
+//{
+//}
 
 [System.Serializable]
 public class FloatEventTrigger : EventTriggerBase<FloatEvent>
@@ -60,10 +60,10 @@ public class StringEventTrigger :EventTriggerBase<StringEvent>
 //public class SpriteEventTrigger : EventTriggerBase<SpriteEvent>
 //{
 //}
-[System.Serializable]
-public class ObjectEventTrigger : EventTriggerBase<ObjectEvent>
-{
-}
+//[System.Serializable]
+//public class ObjectEventTrigger : EventTriggerBase<ObjectEvent>
+//{
+//}
 //[System.Serializable]
 //public class GameObjectKeyValue : IKey<string>
 //{
@@ -78,23 +78,27 @@ public class ValueEventTrigger : MonoBehaviour
     public List<StringEventTrigger> stringEventList=new List<StringEventTrigger>();
     public List<BoolEventTrigger> boolEventList=new List<BoolEventTrigger>();
     public List<FloatEventTrigger> floatEventList=new List<FloatEventTrigger>();
-    public List<ObjectEventTrigger> objectEventList=new List<ObjectEventTrigger>();
-    public void Invoke<T>(string eventName, T value) where T: class
-    {
-        var type = typeof(T);
-        if (type == typeof(string))
-        {
-            stringEventList.Get(eventName)?.eventAction?.Invoke(value as string);
-        }
-        //else if(type == typeof(Sprite))
-        //{
-        //    spriteEventList.Get(eventName)?.eventAction?.Invoke(value as Sprite);
-        //}
-        else
-        {
-            objectEventList.Get(eventName)?.eventAction?.Invoke(value);
-        }
+    //  public List<ObjectEventTrigger> objectEventList=new List<ObjectEventTrigger>();
+    //public void Invoke<T>(string eventName, T value) where T: class
+    //{
+    //    var type = typeof(T);
+    //    if (type == typeof(string))
+    //    {
+    //        stringEventList.Get(eventName)?.eventAction?.Invoke(value as string);
+    //    }
+    //    //else if(type == typeof(Sprite))
+    //    //{
+    //    //    spriteEventList.Get(eventName)?.eventAction?.Invoke(value as Sprite);
+    //    //}
+    //    else
+    //    {
+    //        objectEventList.Get(eventName)?.eventAction?.Invoke(value);
+    //    }
 
+    //}
+    public void Invoke(string eventName,string value)
+    {
+        stringEventList.Get(eventName)?.eventAction.Invoke(value);
     }
     public void Invoke(string eventName)
     {
@@ -135,10 +139,6 @@ public static class ValueEventTriggerExtends
     {
         obj.GetTrigger()?.Invoke(eventName.Trim());
     }
-    public static void InvokeEvent<T>(this GameObject obj, string eventName,T value) where T:class
-    {
-        obj.GetTrigger()?.Invoke(eventName.Trim(), value);
-    }
     public static void InvokeEvent(this GameObject obj, string eventName, bool value) 
     {
         obj.GetTrigger()?.Invoke(eventName.Trim(), value);
@@ -147,20 +147,23 @@ public static class ValueEventTriggerExtends
     {
         obj.GetTrigger()?.Invoke(eventName.Trim(), value);
     }
-  
+    public static void InvokeEvent(this GameObject obj, string eventName, string value)
+    {
+        obj.GetTrigger()?.Invoke(eventName.Trim(), value);
+    }
     public static void InvokeParentEvent(this GameObject obj, string eventName)
     {
         obj.GetParentTrigger()?.Invoke(eventName.Trim());
-    }
-    public static void InvokeParentEvent<T>(this GameObject obj, string eventName, T value) where T : class
-    {
-        obj.GetParentTrigger()?.Invoke(eventName.Trim(), value);
     }
     public static void InvokeParentEvent(this GameObject obj, string eventName, bool value)
     {
         obj.GetParentTrigger()?.Invoke(eventName.Trim(), value);
     }
     public static void InvokeParentEvent(this GameObject obj, string eventName, float value)
+    {
+        obj.GetParentTrigger()?.Invoke(eventName.Trim(), value);
+    }
+    public static void InvokeParentEvent(this GameObject obj, string eventName, string value)
     {
         obj.GetParentTrigger()?.Invoke(eventName.Trim(), value);
     }
