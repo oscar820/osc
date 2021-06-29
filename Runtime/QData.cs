@@ -15,6 +15,11 @@ namespace QTool.Data
     }
     public abstract class QData<T>: IKey<string> where T :QData<T>, new()
     {
+        public override string ToString()
+        {
+            return "[" + Key + "]";
+        }
+
         #region 基础属性
 
         [XmlElement("关键名")]
