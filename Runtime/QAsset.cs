@@ -67,7 +67,7 @@ namespace QTool.Asset
             {
                 labelDic[label] = new List<AddressableAssetEntry>();
             }
-            if (AssetSetting == null)
+            if (AssetSetting != null)
             {
 
                 labelDic[label].Clear();
