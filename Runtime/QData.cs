@@ -263,9 +263,16 @@ namespace QTool.Data
             loaderTasks[key] = task;
             var asset = await task;
             loaderTasks[key] = null;
-            var newList = FileManager.Deserialize<QList<string, T>>(asset.text);
-            Set(key, newList);
-            ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
+            if (asset != null)
+            {
+                var newList = FileManager.Deserialize<QList<string, T>>(asset.text);
+                Set(key, newList);
+                ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
+            }
+            else
+            {
+                Debug.LogError("加载文件[" + GetName(key) + "]出错");
+            }
             _loadOverFile.Add(GetName(key));
         }
         #endregion
