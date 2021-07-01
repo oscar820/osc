@@ -67,17 +67,18 @@ namespace QTool.Asset
             {
                 labelDic[label] = new List<AddressableAssetEntry>();
             }
-            else
+            if (AssetSetting == null)
             {
+
                 labelDic[label].Clear();
-            }
-            foreach (var group in AssetSetting.groups)
-            {
-                foreach (var item in group.entries)
+                foreach (var group in AssetSetting.groups)
                 {
-                    if (item.labels.Contains(label))
+                    foreach (var item in group.entries)
                     {
-                        labelDic[label].Add(item);
+                        if (item.labels.Contains(label))
+                        {
+                            labelDic[label].Add(item);
+                        }
                     }
                 }
             }
