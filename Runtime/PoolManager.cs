@@ -255,11 +255,11 @@ namespace QTool
         }
         public void Push(T obj)
         {
-            if (AllPool.Contains(obj))
+            if (!AllPool.Contains(obj))
             {
                 AllPool.Add(obj);
             }
-            if (isPoolObj) (obj as IPoolObject).OnPoolRecover();
+           // if (isPoolObj) (obj as IPoolObject).OnPoolRecover();
             CanUsePool.Push(CheckPush(obj));
         }
         public int CanUseCount
