@@ -79,6 +79,10 @@ namespace QTool.Serialize
                     {
                         state = QTypeState.Dynamic;
                     }
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        Debug.LogError("不支持序列化【" + type + "】Nullable类型");
+                    }
                     Members.RemoveAll((info) =>
                     {
                         return !IsQSValue(info.MemeberInfo)||info.Key=="Item"||info.Set==null||info.Get==null;
