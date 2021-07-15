@@ -191,7 +191,7 @@ namespace QTool
                 }
             }
             else if (isPoolObj) (obj as IPoolObject).OnPoolReset();
-            UsingPool.Add(obj);
+            UsingPool.AddCheckExist(obj);
             return obj;
         }
         private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
@@ -250,7 +250,6 @@ namespace QTool
                     throw new Exception("对象池创建函数为空  " + this);
                 }
                 var obj = newFunc();
-                UsingPool.Add(obj);
                 ToolDebug.Log(()=> {
                     var info ="【" + Key + "】对象池当前池大小：" + AllCount+'\n';
                     foreach (var item in UsingPool)
@@ -276,6 +275,7 @@ namespace QTool
         }
         public void Push(T obj)
         {
+            if (CanUsePool.Contains(obj)) return;
             CanUsePool.Push(CheckPush(obj));
         }
         public int CanUseCount
