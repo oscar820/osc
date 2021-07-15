@@ -46,6 +46,13 @@ namespace QTool
                 Debug.Log(Key+":"+log);
             }
         }
+        public static void Log(Func<object> logFunc)
+        {
+            if (ShowLog)
+            {
+                Debug.Log(Key + ":" + logFunc?.Invoke());
+            }
+        }
     }
     public static class PoolManager
     {
@@ -145,8 +152,15 @@ namespace QTool
     }
     public class ObjectPool<T> : PoolBase where T : class
     {
-        public List<T> AllPool = new List<T>();
-        List<T> CanUsePool = new List<T>();
+        public readonly List<T> UsingPool = new List<T>();
+        public readonly List<T> CanUsePool = new List<T>();
+        public int AllCount
+        {
+            get
+            {
+                return UsingPool.Count + CanUsePool.Count;
+            }
+        }
         T CheckGet(T obj)
         {
 
@@ -154,7 +168,7 @@ namespace QTool
             {
                 if ((obj as T).Equals(null))
                 {
-                    AllPool.Remove(obj);
+                    UsingPool.Remove(obj);
                     obj = Get();
                 }
                 GameObject gameObj = null;
@@ -177,6 +191,7 @@ namespace QTool
                 }
             }
             else if (isPoolObj) (obj as IPoolObject).OnPoolReset();
+            UsingPool.Add(obj);
             return obj;
         }
         private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
@@ -195,7 +210,6 @@ namespace QTool
         }
         T CheckPush(T obj)
         {
-          
             GameObject gameObj=null;
             if (isGameObject)
             {
@@ -217,15 +231,15 @@ namespace QTool
             else if (isPoolObj)
             {
                 (obj as IPoolObject).OnPoolRecover();
-
             }
+
+            UsingPool.Remove(obj);
             return obj;
         }
         public  T Get()
         {
             if (CanUsePool.Count > 0)
             {
-                var index = AllPool.IndexOf(CanUsePool.StackPeek());
                 var obj = CanUsePool.Pop();
                 return CheckGet(obj);
             }
@@ -236,8 +250,15 @@ namespace QTool
                     throw new Exception("对象池创建函数为空  " + this);
                 }
                 var obj = newFunc();
-                AllPool.Add(obj);
-                ToolDebug.Log("【" + Key + "】对象池当前池大小：" + AllCount);
+                UsingPool.Add(obj);
+                ToolDebug.Log(()=> {
+                    var info ="【" + Key + "】对象池当前池大小：" + AllCount+'\n';
+                    foreach (var item in UsingPool)
+                    {
+                        info += "[" + item + "]" + GetHashCode()+"\n";
+                    }
+                    return info;
+                });
                 return CheckGet(obj);
             }
         }
@@ -255,11 +276,6 @@ namespace QTool
         }
         public void Push(T obj)
         {
-            if (!AllPool.Contains(obj))
-            {
-                AllPool.Add(obj);
-            }
-           // if (isPoolObj) (obj as IPoolObject).OnPoolRecover();
             CanUsePool.Push(CheckPush(obj));
         }
         public int CanUseCount
@@ -269,16 +285,9 @@ namespace QTool
                 return CanUsePool.Count;
             }
         }
-        public int AllCount
-        {
-            get
-            {
-                return AllPool.Count;
-            }
-        }
         public void Clear()
         {
-            AllPool.Clear();
+            UsingPool.Clear();
             CanUsePool.Clear();
         }
 
