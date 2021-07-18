@@ -131,10 +131,19 @@ namespace QTool.Binary
         {
             var length = ReadLength(lengthType);
             var bytes = new byte[length];
-            for (int i = 0; i < length; i++)
+            try
             {
-                bytes[i] = ReadByte();
+                for (int i = 0; i < length; i++)
+                {
+                    bytes[i] = ReadByte();
+                }
             }
+            catch (Exception e)
+            {
+
+                throw new Exception("读取Byte数组出错【" + length + "】 ", e);
+            }
+          
          
             return bytes;
         }
