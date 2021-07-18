@@ -46,6 +46,13 @@ namespace QTool
                 Debug.Log(Key+":"+log);
             }
         }
+        public static void LogWarning(object log)
+        {
+            if (ShowLog)
+            {
+                Debug.LogWarning(Key + ":" + log);
+            }
+        }
     }
     public static class PoolManager
     {
