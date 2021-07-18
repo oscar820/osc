@@ -175,9 +175,14 @@ namespace QTool.Binary
             byteList.Clear();
         }
 
-        public byte[] ToArray()
+        public byte[] ToArray(bool recover)
         {
-            return byteList.ToArray();
+            var array= byteList.ToArray();
+            if (recover)
+            {
+                Recover();
+            }
+            return array;
         }
         public BinaryWriter Write(byte value)
         {

@@ -105,9 +105,7 @@ namespace QTool.Serialize
         {
             var writer = BinaryWriter.Get();
             writer.WriteObjectType(value,type);
-            var bytes = writer.ToArray();
-            BinaryWriter.Push(writer);
-            return bytes;
+            return writer.ToArray(true);
         }
     
         public static T Deserialize<T>(byte[] bytes, T targetObj = default)
