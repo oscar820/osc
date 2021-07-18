@@ -46,11 +46,25 @@ namespace QTool
                 Debug.Log(Key+":"+log);
             }
         }
+        public static void Log(Func<object> log)
+        {
+            if (ShowLog)
+            {
+                Debug.Log(Key + ":" + log?.Invoke());
+            }
+        }
         public static void LogWarning(object log)
         {
             if (ShowLog)
             {
                 Debug.LogWarning(Key + ":" + log);
+            }
+        }
+        public static void LogWarning(Func<object> log)
+        {
+            if (ShowLog)
+            {
+                Debug.LogWarning(Key + ":" + log?.Invoke());
             }
         }
     }
