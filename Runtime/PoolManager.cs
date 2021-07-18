@@ -182,7 +182,10 @@ namespace QTool
             {
                 if ((obj as T).Equals(null))
                 {
-                    UsingPool.Remove(obj);
+                    lock (UsingPool)
+                    {
+                        UsingPool.Remove(obj);
+                    }
                     obj = Get();
                 }
                 GameObject gameObj = null;
@@ -205,7 +208,10 @@ namespace QTool
                 }
             }
             else if (isPoolObj) (obj as IPoolObject).OnPoolReset();
-            UsingPool.AddCheckExist(obj);
+            lock (UsingPool)
+            {
+                UsingPool.AddCheckExist(obj);
+            }
             return obj;
         }
         private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
@@ -246,62 +252,64 @@ namespace QTool
             {
                 (obj as IPoolObject).OnPoolRecover();
             }
-
-            UsingPool.Remove(obj);
-            return obj;
-        }
-        public  T Get()
-        {
-            lock (this)
+            lock (UsingPool)
             {
 
-                if (CanUsePool.Count > 0)
+                UsingPool.Remove(obj);
+            }
+            return obj;
+        }
+        public T Get()
+        {
+
+            if (CanUsePool.Count > 0)
+            {
+                lock (CanUsePool)
                 {
                     var obj = CanUsePool.Pop();
                     return CheckGet(obj);
                 }
-                else
+            }
+            else
+            {
+                if (newFunc == null)
                 {
-                    if (newFunc == null)
-                    {
-                        throw new Exception("对象池创建函数为空  " + this);
-                    }
-                    var obj = newFunc();
-                    ToolDebug.Log(() =>
-                    {
-                        var info = "【" + Key + "】对象池当前池大小：" + AllCount + '\n';
-                        foreach (var item in UsingPool)
-                        {
-                            info += "[" + item + "]" + item.GetType() + "|" + item.GetHashCode() + "\n";
-                        }
-                        return info;
-                    });
-                    return CheckGet(obj);
+                    throw new Exception("对象池创建函数为空  " + this);
                 }
+                var obj = newFunc();
+                ToolDebug.Log(() =>
+                {
+                    var info = "【" + Key + "】对象池当前池大小：" + AllCount + '\n';
+                    foreach (var item in UsingPool)
+                    {
+                        info += "[" + item + "]" + item.GetType() + "|" + item.GetHashCode() + "\n";
+                    }
+                    return info;
+                });
+                return CheckGet(obj);
             }
         }
-        public  T Get(T obj)
+        public T Get(T obj)
         {
-            lock (this)
+
+            if (CanUsePool.Contains(obj))
             {
-                if (CanUsePool.Contains(obj))
-                {
-                    CanUsePool.Remove(obj);
-                    return CheckGet(obj);
-                }
-                else
-                {
-                    return Get();
-                }
+                CanUsePool.Remove(obj);
+                return CheckGet(obj);
+            }
+            else
+            {
+                return Get();
             }
         }
         public void Push(T obj)
         {
-            lock (this)
+            lock (CanUsePool)
             {
                 if (CanUsePool.Contains(obj)) return;
                 CanUsePool.Push(CheckPush(obj));
             }
+          
         }
         public int CanUseCount
         {
