@@ -137,15 +137,24 @@ namespace QTool
         }
         public static T Get()
         {
-            return Pool.Get();
+            lock (Pool)
+            {
+                return Pool.Get();
+            }
         }
         public static void Push(T obj)
         {
-             Pool.Push(obj);
+            lock (Pool)
+            {
+                Pool.Push(obj);
+            }
         }
         public void Recover()
         {
-            Pool.Push(this as T);
+            lock (Pool)
+            {
+                Pool.Push(this as T);
+            }
         }
         public abstract void OnPoolRecover();
         public abstract void OnPoolReset();
@@ -182,10 +191,8 @@ namespace QTool
             {
                 if ((obj as T).Equals(null))
                 {
-                    lock (UsingPool)
-                    {
+                
                         UsingPool.Remove(obj);
-                    }
                     obj = Get();
                 }
                 GameObject gameObj = null;
@@ -208,10 +215,7 @@ namespace QTool
                 }
             }
             else if (isPoolObj) (obj as IPoolObject).OnPoolReset();
-            lock (UsingPool)
-            {
                 UsingPool.AddCheckExist(obj);
-            }
             return obj;
         }
         private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
@@ -252,11 +256,7 @@ namespace QTool
             {
                 (obj as IPoolObject).OnPoolRecover();
             }
-            lock (UsingPool)
-            {
-
                 UsingPool.Remove(obj);
-            }
             return obj;
         }
         public T Get()
@@ -264,11 +264,8 @@ namespace QTool
 
             if (CanUsePool.Count > 0)
             {
-                lock (CanUsePool)
-                {
                     var obj = CanUsePool.Pop();
                     return CheckGet(obj);
-                }
             }
             else
             {
@@ -304,11 +301,9 @@ namespace QTool
         }
         public void Push(T obj)
         {
-            lock (CanUsePool)
-            {
+            
                 if (CanUsePool.Contains(obj)) return;
                 CanUsePool.Push(CheckPush(obj));
-            }
           
         }
         public int CanUseCount
