@@ -161,10 +161,6 @@ namespace QTool.Binary
         public override void OnPoolReset()
         {
         }
-        public void Recover()
-        {
-            Push(this);
-        }
         public override void OnPoolRecover()
         {
             index = 0;
@@ -178,12 +174,7 @@ namespace QTool.Binary
         {
             byteList.Clear();
         }
-        public byte[] Recover()
-        {
-            var array= ToArray();
-            Push(this);
-            return array;
-        }
+
         public byte[] ToArray()
         {
             return byteList.ToArray();

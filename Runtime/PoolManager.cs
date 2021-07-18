@@ -252,45 +252,56 @@ namespace QTool
         }
         public  T Get()
         {
-            if (CanUsePool.Count > 0)
+            lock (this)
             {
-                var obj = CanUsePool.Pop();
-                return CheckGet(obj);
-            }
-            else
-            {
-                if (newFunc == null)
+
+                if (CanUsePool.Count > 0)
                 {
-                    throw new Exception("对象池创建函数为空  " + this);
+                    var obj = CanUsePool.Pop();
+                    return CheckGet(obj);
                 }
-                var obj = newFunc();
-                ToolDebug.Log(()=> {
-                    var info ="【" + Key + "】对象池当前池大小：" + AllCount+'\n';
-                    foreach (var item in UsingPool)
+                else
+                {
+                    if (newFunc == null)
                     {
-                        info += "[" + item + "]" +item.GetType()+"|"+ item.GetHashCode()+"\n";
+                        throw new Exception("对象池创建函数为空  " + this);
                     }
-                    return info;
-                });
-                return CheckGet(obj);
+                    var obj = newFunc();
+                    ToolDebug.Log(() =>
+                    {
+                        var info = "【" + Key + "】对象池当前池大小：" + AllCount + '\n';
+                        foreach (var item in UsingPool)
+                        {
+                            info += "[" + item + "]" + item.GetType() + "|" + item.GetHashCode() + "\n";
+                        }
+                        return info;
+                    });
+                    return CheckGet(obj);
+                }
             }
         }
         public  T Get(T obj)
         {
-            if (CanUsePool.Contains(obj))
+            lock (this)
             {
-                CanUsePool.Remove(obj);
-                return CheckGet(obj);
-            }
-            else
-            {
-                return Get();
+                if (CanUsePool.Contains(obj))
+                {
+                    CanUsePool.Remove(obj);
+                    return CheckGet(obj);
+                }
+                else
+                {
+                    return Get();
+                }
             }
         }
         public void Push(T obj)
         {
-            if (CanUsePool.Contains(obj)) return;
-            CanUsePool.Push(CheckPush(obj));
+            lock (this)
+            {
+                if (CanUsePool.Contains(obj)) return;
+                CanUsePool.Push(CheckPush(obj));
+            }
         }
         public int CanUseCount
         {
