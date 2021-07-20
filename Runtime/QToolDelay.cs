@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 namespace QTool
 {
-    public class QToolDelay : InstanceManager<QToolDelay>
+    public class QToolDelay : InstanceBehaviourAutoCreate<QToolDelay>
     {
         protected override void Awake()
         {

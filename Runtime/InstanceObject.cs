@@ -7,7 +7,7 @@ using System;
 namespace QTool
 {
   
-    public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceManager<T> where ResourceLabel : PrefabAssetList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
+    public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceBehaviour<T> where ResourceLabel : PrefabAssetList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
     {
         public  new static T Instance
         {
@@ -33,7 +33,7 @@ namespace QTool
             _instance=(await PrefabAssetList<ResourceLabel>.GetInstance(typeof(T).Name)).GetComponent<T>();
         }
     }
-    public abstract class InstanceManager<T> : MonoBehaviour where T : InstanceManager<T>
+    public abstract class InstanceBehaviourAutoCreate<T> : MonoBehaviour where T : InstanceBehaviourAutoCreate<T>
     {
         public static T Instance
         {
