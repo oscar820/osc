@@ -252,7 +252,12 @@ namespace QTool.Asset
         static Task loaderTask;
         public static async Task AddressableLoadAll()
         {
-            if (_loadOver || loaderTask != null) return;
+            if (_loadOver) return;
+            if (  loaderTask != null)
+            {
+                await loaderTask;
+                return;
+            }
             if (Application.isPlaying)
             {
                 var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
