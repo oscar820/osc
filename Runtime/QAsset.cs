@@ -236,7 +236,7 @@ namespace QTool.Asset
                 }
                 else
                 {
-                    await AddressableLoadAll();
+                    await LoadAllAsync();
                     if (objDic.ContainsKey(key))
                     {
                         return objDic[key];
@@ -249,9 +249,8 @@ namespace QTool.Asset
             }
         }
         static Task loaderTask;
-        public static async Task AddressableLoadAll()
+        static async Task AddressableLoadAll()
         {
-            if (_loadOver) return;
             if (  loaderTask != null)
             {
                 await loaderTask;
@@ -302,7 +301,7 @@ namespace QTool.Asset
 
         static TObj ResourceGet(string key)
         {
-            ResourceLoadAll();
+            LoadAllAsync();
             if (objDic.ContainsKey(key)) {
                 return objDic[key];
             }
@@ -314,10 +313,6 @@ namespace QTool.Asset
         }
         static void ResourceLoadAll()
         {
-            if (_loadOver)
-            {
-                return;
-            }
             if (!Application.isPlaying)
             {
 #if UNITY_EDITOR
