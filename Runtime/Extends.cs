@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading.Tasks;
 #if UNITY_EDITOR
 using UnityEditor;
 # endif
@@ -8,7 +9,11 @@ namespace QTool
 {
     public static partial class Tool
     {
-       
+        public static async void DelayInvoke(this float time,System.Action action)
+        {
+            await Task.Delay((int)(time * 1000));
+            action?.Invoke();
+        }
         public static Vector3 RayCastPlane(this Ray ray, Vector3 planeNormal, Vector3 planePoint)
         {
             float d = Vector3.Dot(planePoint - ray.origin, planeNormal) / Vector3.Dot(ray.direction, planeNormal);
