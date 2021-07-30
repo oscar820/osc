@@ -329,7 +329,7 @@ namespace QTool.Asset
                        
                         (rootPath + '\\' + Label).ForeachDirectoryFiles((loadPath) =>
                         {
-                            Set(AssetDatabase.LoadAssetAtPath<TObj>(loadPath.Substring(loadPath.IndexOf("Assets"))));
+                            Set(UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(loadPath.Substring(loadPath.IndexOf("Assets"))));
                         });
                      }
                  });
