@@ -196,10 +196,9 @@ namespace QTool.Asset
         public static async Task LoadAllAsync()
         {
             if (_loadOver) return;
-#if Addressables
-            await AddressableLoadAll();
-#else
             ResourceLoadAll();
+#if Addressables
+            await AddressableLoadAll();     
 #endif
         }
 
@@ -298,7 +297,7 @@ namespace QTool.Asset
 
 
         #endregion
-#else
+#endif
         #region Resource加载
 
         static TObj ResourceGet(string key)
@@ -322,19 +321,18 @@ namespace QTool.Asset
             if (!Application.isPlaying)
             {
 #if UNITY_EDITOR
-                Application.dataPath.ForeachDirectory((rootPath) =>
-                {
-                    if (rootPath.EndsWith("\\Resources"))
-                    {
-                        if (System.IO.Directory.Exists(rootPath + "\\" + Label))
+                Application.dataPath.ForeachAllDirectoryWith("\\Resources", (rootPath) =>
+                 {
+                    
+                     if (System.IO.Directory.Exists(rootPath + '\\' + Label))
+                     {
+                       
+                        (rootPath + '\\' + Label).ForeachDirectoryFiles((loadPath) =>
                         {
-                            (rootPath + "\\" + Label).ForeachDirectoryFiles((loadPath) =>
-                            {
-                                Set(UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(Label));
-                            });
-                        }
-                    }
-                });
+                            Set(AssetDatabase.LoadAssetAtPath<TObj>(loadPath.Substring(loadPath.IndexOf("Assets"))));
+                        });
+                     }
+                 });
 #endif
             }
             else
@@ -347,7 +345,6 @@ namespace QTool.Asset
             _loadOver = true;
         }
         #endregion
-#endif
     }
     public abstract class PrefabAssetList<TLabel>: AssetList<TLabel,GameObject> where TLabel:PrefabAssetList<TLabel>
     {

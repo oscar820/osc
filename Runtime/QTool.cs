@@ -449,6 +449,20 @@ namespace QTool
         {
             return Directory.Exists(rootPath) ? Directory.GetFiles(rootPath).Length / 2 : 0;
         }
+        public static void ForeachAllDirectoryWith(this string rootPath,string endsWith, Action<string> action)
+        {
+            rootPath.ForeachDirectory((path) =>
+            {
+                if (path.EndsWith(endsWith))
+                {
+                    action?.Invoke(path);
+                }
+                else
+                {
+                    path.ForeachAllDirectoryWith(endsWith, action);
+                }
+            });
+        }
         public static void ForeachDirectory(this string rootPath, Action<string> action)
         {
             if (Directory.Exists(rootPath))
