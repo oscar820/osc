@@ -287,7 +287,18 @@ namespace QTool.Asset
                 var list = AddressableTool.GetLabelList(Label);
                 foreach (var entry in list)
                 {
-                    Set(entry.TargetAsset as TObj, entry.address);
+
+                    if (entry.TargetAsset is TObj)
+                    {
+                        Set(entry.TargetAsset as TObj, entry.address);
+                    }
+                    else if(typeof(TObj)==typeof(Sprite))
+                    {
+                        if(entry.TargetAsset is Texture2D)
+                        {
+                            Set(AssetDatabase.LoadAssetAtPath<Sprite>(entry.AssetPath) as TObj, entry.address);
+                        }
+                    }
                 }
                 _loadOver = true;
 #endif
