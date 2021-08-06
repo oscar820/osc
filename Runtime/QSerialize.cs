@@ -271,7 +271,7 @@ namespace QTool.Serialize
 
                 case TypeCode.Object:
                     QSerializeType typeInfo = null;
-                    if (!reader.memory.CanRead)
+                    if (reader.memory.Position>=reader.memory.Length)
                     {
                         return null;
                     }
