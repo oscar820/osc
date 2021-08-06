@@ -72,7 +72,7 @@ namespace QTool.Test
         public string asdl;
         public float p2;
         public TestClass2 child;
-        public void Read(BinaryReader read)
+        public void Read(QBinaryReader read)
         {
             // list = read.ReadObject(list);
             p2 = read.ReadSingle();
@@ -80,7 +80,7 @@ namespace QTool.Test
             asdl = read.ReadString();
         }
 
-        public void Write(BinaryWriter write)
+        public void Write(QBinaryWriter write)
         {
             write.WriteObject(list);
             write.Write(p2);
@@ -104,7 +104,7 @@ namespace QTool.Test
         public string asdl;
         public float p1;
 
-        public void Read(BinaryReader read)
+        public void Read(QBinaryReader read)
         {
             //  list = read.ReadObject(list);
             p1 = read.ReadSingle();
@@ -112,7 +112,7 @@ namespace QTool.Test
             asdl = read.ReadString();
         }
 
-        public void Write(BinaryWriter write)
+        public void Write(QBinaryWriter write)
         {
             write.WriteObject(list);
             write.Write(p1);

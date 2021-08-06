@@ -9,8 +9,8 @@ namespace QTool.Serialize
 {
     public interface IQSerialize
     {
-        void Write(BinaryWriter write);
-        void Read(BinaryReader read);
+        void Write(QBinaryWriter write);
+        void Read(QBinaryReader read);
     }
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
     public class QTypeAttribute : Attribute
@@ -103,9 +103,11 @@ namespace QTool.Serialize
         }
         public static System.Byte[] SerializeType(object value,Type type)
         {
-            var writer = BinaryWriter.Get();
-            writer.WriteObjectType(value,type);
-            return writer.ToArray(true);
+            using (var writer = new QBinaryWriter())
+            {
+                writer.WriteObjectType(value, type);
+                return writer.ToArray();
+            }
         }
     
         public static T Deserialize<T>(byte[] bytes, T targetObj = default)
@@ -114,11 +116,11 @@ namespace QTool.Serialize
         }
         public static object DeserializeType(byte[] bytes,Type type, object targetObj = default)
         {
-            var reader = BinaryReader.Get();
-            reader.Reset(bytes);
-            var obj = reader.ReadObjectType(type, targetObj);
-            BinaryReader.Push(reader);
-            return obj;
+            using (var reader=new QBinaryReader(bytes))
+            {
+                var obj = reader.ReadObjectType(type, targetObj);
+                return obj;
+            }
         }
       
         static void ForeachArray(Array array, int deep, int[] indexArray, Action<int[]> Call)
@@ -148,7 +150,7 @@ namespace QTool.Serialize
         }
        
       
-        public static BinaryWriter WriteObjectType(this BinaryWriter writer, object value, Type type)
+        public static QBinaryWriter WriteObjectType(this QBinaryWriter writer, object value, Type type)
         {
             TypeCode typeCode = Type.GetTypeCode(type);
             switch (typeCode)
@@ -192,9 +194,9 @@ namespace QTool.Serialize
                                 writer.Write((byte)typeInfo.Members.Count);
                                 foreach (var item in typeInfo.Members)
                                 {
-                                    writer.Write(item.Name, LengthType.Byte);
+                                    writer.Write(item.Name);
                                     var memberObj = item.Get(value);
-                                    writer.Write(SerializeType(memberObj, item.Type), LengthType.Byte);
+                                    writer.Write(SerializeType(memberObj, item.Type));
                                 }
                                 break;
                             default:
@@ -261,7 +263,7 @@ namespace QTool.Serialize
             }
             return writer;
         }
-        public static object ReadObjectType(this BinaryReader reader, Type type, object target = null)
+        public static object ReadObjectType(this QBinaryReader reader, Type type, object target = null)
         {
             TypeCode typeCode = Type.GetTypeCode(type);
             switch (typeCode)
@@ -269,7 +271,7 @@ namespace QTool.Serialize
 
                 case TypeCode.Object:
                     QSerializeType typeInfo = null;
-                    if (reader.IsEnd)
+                    if (!reader.memory.CanRead)
                     {
                         return null;
                     }
@@ -327,14 +329,14 @@ namespace QTool.Serialize
                             {
                                 if (typeInfo.state == QTypeState.Dynamic)
                                 {
-                                    var typeName = reader.ReadString(LengthType.Byte);
+                                    var typeName = reader.ReadString();
                                 }
                                 var obj = CreateInstance(type, target);
                                 var memberCount = reader.ReadByte();
                                 for (int i = 0; i < memberCount; i++)
                                 {
-                                    var name = reader.ReadString(LengthType.Byte);
-                                    var bytes = reader.ReadBytes(LengthType.Byte);
+                                    var name = reader.ReadString();
+                                    var bytes = reader.ReadBytes();
                                     if (typeInfo.Members.ContainsKey(name))
                                     {
                                         var memeberInfo = typeInfo.Members[name];

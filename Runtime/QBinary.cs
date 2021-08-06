@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.IO;
 namespace QTool.Binary
 {
 
@@ -13,300 +13,60 @@ namespace QTool.Binary
         Int16,
         Int32,
     }
-    public class BinaryReader:PoolObject<BinaryReader>
+    public class QBinaryReader:BinaryReader
     {
-        public BinaryReader Reset(byte[] bytes)
+        public T ReadObject<T>(T obj=default) 
         {
-            this.bytes = bytes;
-            index = 0;
-            TagIndex = 0;
-            return this;
+            return (T)this.ReadObjectType(typeof(T), obj) ;
         }
-        public int TagIndex { protected set; get; }
-        public byte[] bytes { protected set; get; }
-        public int index { protected set; get; }
-        public bool IsEnd
+        public QBinaryReader(byte[] bytes):base(new MemoryStream(bytes))
         {
-            get
+        }
+        public MemoryStream memory => BaseStream as MemoryStream;
+      
+        public override byte[] ReadBytes(int count=-1)
+        {
+            if (count < 0)
             {
-                return index >= bytes.Length;
+                count= base.ReadInt32();
             }
+            return base.ReadBytes(count);
         }
-        public byte ReadByte()
+        protected override void Dispose(bool disposing)
         {
-            var value = bytes[index];
-            index++;
-            return value;
+            base.Dispose(disposing);
+            BaseStream?.Dispose();
+           
         }
-        public int ReadInt32()
-        {
-            var value = bytes.GetInt32(index);
-            index += 4;
-            return value;
-        }
-        public Int64 ReadInt64()
-        {
-            var value = bytes.GetInt64(index);
-            index += 8;
-            return value;
-        }
-
-        public bool ReadBoolean()
-        {
-            var value = bytes.GetBoolean(index);
-            index += 1;
-            return value;
-        }
-
-        public char ReadChar()
-        {
-            var value = bytes.GetChar(index);
-            index += 1;
-            return value;
-        }
-
-        public double ReadDouble()
-        {
-            var value = bytes.GetDouble(index);
-            index += 8;
-            return value;
-        }
-
-        public Int16 ReadInt16()
-        {
-            var value = bytes.GetInt16(index);
-            index += 2;
-            return value;
-        }
-
-        public SByte ReadSByte()
-        {
-            return (sbyte)ReadByte();
-        }
-
-        public float ReadSingle()
-        {
-            var value = bytes.GetSingle(index);
-            index += 4;
-            return value;
-        }
-    
-
-
-        public UInt16 ReadUInt16()
-        {
-            var value = bytes.GetUInt16(index);
-            index += 2;
-            return value;
-        }
-
-        public UInt32 ReadUInt32()
-        {
-            var value = bytes.GetUInt32(index);
-            index += 4;
-            return value;
-        }
-
-        public object ReadUInt64()
-        {
-            var value = bytes.GetUInt64(index);
-            index += 5;
-            return value;
-        }
-        protected int ReadLength(LengthType lengthType)
-        {
-            switch (lengthType)
-            {
-                case LengthType.Byte:
-                    return ReadByte();
-                case LengthType.Int16:
-                    return ReadInt16();
-                case LengthType.Int32:
-                    return ReadInt32();
-                default:
-                    return 0;
-            }
-        }
-        public byte[] ReadBytes(LengthType lengthType = LengthType.Int32)
-        {
-            var length = ReadLength(lengthType);
-            var bytes = new byte[length];
-            try
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    bytes[i] = ReadByte();
-                }
-            }
-            catch (Exception e)
-            {
-
-                throw new Exception("读取Byte数组出错【" + length + "】 ", e);
-            }
-          
-         
-            return bytes;
-        }
-        public string ReadString(LengthType lengthType= LengthType.Int32)
-        {
-            var length = ReadLength(lengthType);
-            var value = bytes.GetString(index, length);
-            index +=  length;
-            return value;
-        }
-        public T ReadObject<T>(T targetObj=default)
-        {
-            return (T)this.ReadObjectType(typeof(T),targetObj);
-        }
-        public override void OnPoolReset()
-        {
-        }
-        public override void OnPoolRecover()
-        {
-            index = 0;
-        }
-
     }
-    public class BinaryWriter : PoolObject<BinaryWriter>
+    public class QBinaryWriter : BinaryWriter
     {
-        public List<byte> byteList { protected set; get; } = new List<byte>();
-        public void Clear()
-        {
-            byteList.Clear();
-        }
-
-        public byte[] ToArray(bool recover)
-        {
-            var array= byteList.ToArray();
-            if (recover)
-            {
-                Recover();
-            }
-            return array;
-        }
-        public BinaryWriter Write(byte value)
-        {
-            byteList.Add(value);
-            return this;
-        }
-        public BinaryWriter Write(Int16 value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(Int32 value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(Int64 value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(UInt16 value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(UInt32 value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(UInt64 value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-
-        public BinaryWriter Write(bool value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(char value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-        public BinaryWriter Write(double value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
-
-        public BinaryWriter Write(sbyte value)
-        {
-            byteList.Add(((byte)value));
-            return this;
-        }
-        public BinaryWriter Write(float value)
-        {
-            byteList.AddRange(value.GetBytes());
-            return this;
-        }
      
-        protected void WriteLengh(int length, LengthType lengthType= LengthType.Int32)
+        public QBinaryWriter() : base(new MemoryStream())
         {
-            switch (lengthType)
-            {
-                case LengthType.Byte:
-                    if (length > byte.MaxValue)
-                    {
-                        Debug.LogError("长度[" + length + "]大于" + byte.MaxValue);
-                    }
-                    Write((byte)length);
-                    break;
-                case LengthType.Int16:
-                    if (length > Int16.MaxValue)
-                    {
-                        Debug.LogError("长度[" + length + "]大于" + Int16.MaxValue);
-                    }
-                    Write((Int16)length);
-                    break;
-                case LengthType.Int32:
-                    if (length > Int32.MaxValue)
-                    {
-                        Debug.LogError("长度[" + length + "]大于" + Int32.MaxValue);
-                    }
-                    Write((Int32)length);
-                    break;
-                default:
-                    break;
-            }
         }
-        public BinaryWriter Write(byte[] bytes, LengthType lengthType = LengthType.Int32)
+        public void WriteObject<T>(T obj)
         {
-            var length = bytes.Length;
-            WriteLengh(length, lengthType);
-            byteList.AddRange(bytes);
-            return this;
+            this.WriteObjectType(obj, typeof(T));
         }
-        public BinaryWriter Write(string value, LengthType lengthType = LengthType.Int32)
+        public byte[] ToArray()
         {
-            var bytes = value.GetBytes();
-            var length = bytes.Length;
-            WriteLengh(length, lengthType);
-            byteList.AddRange(bytes);
-            return this;
+            return (BaseStream as MemoryStream).ToArray();
         }
-        public BinaryWriter WriteObject<T>(T value)
+        public override void Write(byte[] buffer)
         {
-            return this.WriteObjectType(value,typeof(T)); 
+            base.Write(buffer.Length);
+            base.Write(buffer);
         }
-
-        public override void OnPoolReset()
+        protected override void Dispose(bool disposing)
         {
-
-        }
-        public override void OnPoolRecover()
-        {
-            byteList.Clear();
+            base.Dispose(disposing);
+            BaseStream?.Dispose();
         }
     }
     public static class QBinaryExtends
     {
+       
         public static byte[] GetBytes(this string value)
         {
             if (value == null)
