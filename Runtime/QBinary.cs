@@ -48,6 +48,14 @@ namespace QTool.Binary
         {
             return (BaseStream as MemoryStream).ToArray();
         }
+        public  void Write(byte[] buffer,bool writeLength)
+        {
+            if (writeLength)
+            {
+                base.Write(buffer.Length);
+            }
+            base.Write(buffer);
+        }
         public override void Write(byte[] buffer)
         {
             base.Write(buffer.Length);
