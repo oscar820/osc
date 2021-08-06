@@ -7,12 +7,7 @@ using System.IO;
 namespace QTool.Binary
 {
 
-    public enum LengthType
-    {
-        Byte,
-        Int16,
-        Int32,
-    }
+  
     public class QBinaryReader:BinaryReader
     {
         public T ReadObject<T>(T obj=default) 
