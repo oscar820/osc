@@ -258,11 +258,11 @@ namespace QTool.Serialize
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {
                 TypeCode typeCode = Type.GetTypeCode(type);
-                var typeCodeStr = reader.ReadString();
-                if (typeCodeStr != typeCode.ToString())
-                {
-                    Debug.LogError("类型出错 " + typeCodeStr + ":" + typeCode);
-                }
+                //var typeCodeStr = reader.ReadString();
+                //if (typeCodeStr != typeCode.ToString())
+                //{
+                //    Debug.LogError("类型出错 " + typeCodeStr + ":" + typeCode);
+                //}
                 switch (typeCode)
                 {
 

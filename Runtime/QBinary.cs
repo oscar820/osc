@@ -12,7 +12,11 @@ namespace QTool.Binary
     {
         public T ReadObject<T>(T obj = default)
         {
-            return (T)QSerialize.DeserializeType(ReadBytes(),typeof(T), obj);
+            return QSerialize.Deserialize<T>(ReadBytes(), obj);
+        }
+        public object ReadObjectType(Type type ,object obj = default)
+        {
+            return QSerialize.DeserializeType(ReadBytes(), type, obj);
         }
         public QBinaryReader(byte[] bytes):base(new MemoryStream(bytes))
         {
@@ -43,6 +47,10 @@ namespace QTool.Binary
         public void WriteObject<T>(T obj)
         {
             this.Write(QSerialize.Serialize( obj));
+        }
+        public void WriteObjectType(object obj,Type type)
+        {
+            this.Write(QSerialize.SerializeType(obj,type));
         }
         public byte[] ToArray()
         {

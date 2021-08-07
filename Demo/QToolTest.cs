@@ -74,7 +74,7 @@ namespace QTool.Test
         public TestClass2 child;
         public void Read(QBinaryReader read)
         {
-            // list = read.ReadObject(list);
+            list = read.ReadObject(list);
             p2 = read.ReadSingle();
             // list = read.ReadObject<List<float>>();
             asdl = read.ReadString();
@@ -106,7 +106,7 @@ namespace QTool.Test
 
         public void Read(QBinaryReader read)
         {
-            //  list = read.ReadObject(list);
+            list = read.ReadObject(list);
             p1 = read.ReadSingle();
             // list = read.ReadObject<List<float>>();
             asdl = read.ReadString();
@@ -290,7 +290,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    test2 = QSerialize.Deserialize<TestClass>(testBytes, test2);
+                    test2 = QSerialize.Deserialize<TestClass>(testBytes);
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
                 //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
             }
