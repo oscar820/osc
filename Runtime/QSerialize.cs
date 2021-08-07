@@ -153,15 +153,12 @@ namespace QTool.Serialize
         public static QBinaryWriter WriteObjectType(this QBinaryWriter writer, object value, Type type)
         {
             TypeCode typeCode = Type.GetTypeCode(type);
+            writer.Write(typeCode.ToString());
             switch (typeCode)
             {
                 case TypeCode.Object:
                     {
-                        var IsNull = object.Equals(value, null);
-                        if (IsNull)
-                        {
-                            return writer;
-                        }
+                        writer.Write(object.Equals(value, null));
                         QSerializeType typeInfo = QSerializeType.Get(type);
                         switch (typeInfo.state)
                         {
@@ -185,7 +182,7 @@ namespace QTool.Serialize
                                 }
                                 ForeachArray(array, 0, typeInfo.IndexArray, (indexArray) => { writer.WriteObjectType(array.GetValue(indexArray), typeInfo.ElementType); });
                                 break;
-                            case QTypeState.Dynamic:
+                         //   case QTypeState.Dynamic:
                             case QTypeState.Normal:
                                 if(typeInfo.state== QTypeState.Dynamic)
                                 {
@@ -266,12 +263,17 @@ namespace QTool.Serialize
         public static object ReadObjectType(this QBinaryReader reader, Type type, object target = null)
         {
             TypeCode typeCode = Type.GetTypeCode(type);
+            var typeCodeStr= reader.ReadString();
+            if (typeCodeStr != typeCode.ToString())
+            {
+                Debug.LogError("类型出错 " + typeCodeStr + ":" + typeCode);
+            }
             switch (typeCode)
             {
 
                 case TypeCode.Object:
                     QSerializeType typeInfo = null;
-                    if (reader.memory.Position>=reader.memory.Length)
+                    if (reader.ReadBoolean())
                     {
                         return null;
                     }
@@ -324,7 +326,7 @@ namespace QTool.Serialize
                                 serObj.Read(reader);
                                 return serObj;
                             }
-                        case QTypeState.Dynamic:
+                       // case QTypeState.Dynamic:
                         case QTypeState.Normal:
                             {
                                 if (typeInfo.state == QTypeState.Dynamic)
