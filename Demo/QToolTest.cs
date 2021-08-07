@@ -231,7 +231,7 @@ namespace QTool.Test
                 for (int i = 0; i < 10000; i++)
                 {
                     xmlBytes = FileManager.Serialize(test1).GetBytes();
-                    if (i == 0) FileManager.Save(Application.dataPath + "/Test/xmlTest.xml", FileManager.Serialize(test1));
+                   // if (i == 0) FileManager.Save(Application.dataPath + "/Test/xmlTest.xml", FileManager.Serialize(test1));
                 //info = QSerialize.Serialize(al);
                 //bl = QSerialize.Deserialize <List<IValueBase>>(info);
             }
@@ -240,7 +240,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                   // jsonBytes = JsonConvert.SerializeObject(test1).GetBytes();
+                   jsonBytes = JsonUtility.ToJson(test1).GetBytes();
                 //info = QSerialize.Serialize(al);
                 //bl = QSerialize.Deserialize <List<IValueBase>>(info);
             }
