@@ -15,9 +15,9 @@ namespace QTool.Binary
         {
             return QSerialize.Deserialize<T>(ReadBytes(), obj);
         }
-        public object ReadObjectType(Type type ,object obj = default)
+        public object ReadObjectType(Type type ,object obj = default,bool checkCustom=true)
         {
-            if (customReadType == null)
+            if (customReadType == null|| !checkCustom )
             {
                 return QSerialize.DeserializeType(ReadBytes(), type, obj);
             }
@@ -56,9 +56,10 @@ namespace QTool.Binary
         {
             this.Write(QSerialize.Serialize( obj));
         }
-        public void WriteObjectType(object obj,Type type)
+
+        public void WriteObjectType(object obj,Type type,bool checkCustom=true)
         {
-            if (customWriteType == null)
+            if ( customWriteType == null||!checkCustom)
             {
                 this.Write(QSerialize.SerializeType(obj, type));
             }
