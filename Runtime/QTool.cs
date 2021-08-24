@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Xml.Serialization;
+//using System.Xml.Serialization;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using Newtonsoft.Json;
 namespace QTool
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -110,7 +110,8 @@ namespace QTool
         [SerializeField]
         private List<T> list = new List<T>();
         [NonSerialized]
-        [XmlIgnore]
+       // [XmlIgnore]
+        [JsonIgnore]
         Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
         public virtual T Get(TKey key)
         {
@@ -502,45 +503,48 @@ namespace QTool
             }
         }
 
-        public static Dictionary<string, XmlSerializer> xmlSerDic = new Dictionary<string, XmlSerializer>();
-        public static XmlSerializer GetSerializer(Type type, params Type[] extraTypes)
-        {
-            var key = type.FullName;
-            foreach (var item in extraTypes)
-            {
-                key += " " + item.FullName;
-            }
-            if (xmlSerDic.ContainsKey(key))
-            {
-                return xmlSerDic[key];
-            }
-            else
-            {
-                XmlSerializer xz = new XmlSerializer(type, extraTypes);
-                xmlSerDic.Add(key, xz);
-                return xz;
-            }
-        }
+        //public static Dictionary<string, XmlSerializer> xmlSerDic = new Dictionary<string, XmlSerializer>();
+        //public static XmlSerializer GetSerializer(Type type, params Type[] extraTypes)
+        //{
+        //    var key = type.FullName;
+        //    foreach (var item in extraTypes)
+        //    {
+        //        key += " " + item.FullName;
+        //    }
+        //    if (xmlSerDic.ContainsKey(key))
+        //    {
+        //        return xmlSerDic[key];
+        //    }
+        //    else
+        //    {
+        //        XmlSerializer xz = new XmlSerializer(type, extraTypes);
+        //        xmlSerDic.Add(key, xz);
+        //        return xz;
+        //    }
+        //}
+     
         public static string Serialize<T>(T t, params Type[] extraTypes)
         {
-            using (StringWriter sw = new StringWriter())
-            {
-                if (t == null)
-                {
-                   Debug.LogError("序列化数据为空" + typeof(T));
-                    return null;
-                }
-                GetSerializer(typeof(T), extraTypes).Serialize(sw, t);
-                return sw.ToString();
-            }
+            return JsonConvert.SerializeObject(t);
+            //using (StringWriter sw = new StringWriter())
+            //{
+            //    if (t == null)
+            //    {
+            //       Debug.LogError("序列化数据为空" + typeof(T));
+            //        return null;
+            //    }
+            //    GetSerializer(typeof(T), extraTypes).Serialize(sw, t);
+            //    return sw.ToString();
+            //}
         }
         public static T Deserialize<T>(string s, params Type[] extraTypes)
         {
-            using (StringReader sr = new StringReader(s))
-            {
-                XmlSerializer xz = GetSerializer(typeof(T), extraTypes);
-                return (T)xz.Deserialize(sr);
-            }
+            return JsonConvert.DeserializeObject<T>(s);
+            //using (StringReader sr = new StringReader(s))
+            //{
+            //    XmlSerializer xz = GetSerializer(typeof(T), extraTypes);
+            //    return (T)xz.Deserialize(sr);
+            //}
         }
         public static bool ExistsFile(string path)
         {

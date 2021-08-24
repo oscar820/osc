@@ -226,7 +226,7 @@ namespace QTool.Test
             // list = new List<IValueBase>();
             //  list.Add(new IntValue { value = 4654 });
 
-            Tool.RunTimeCheck("Xml写入", () =>
+            Tool.RunTimeCheck("FileManager写入", () =>
             {
                 for (int i = 0; i < 10000; i++)
                 {
@@ -268,7 +268,7 @@ namespace QTool.Test
             //   list = new List<IValueBase>();
             //  list.Add(new IntValue { value = 431 });
 
-            Tool.RunTimeCheck("Xml读取", () =>
+            Tool.RunTimeCheck("FileManager读取", () =>
             {
                 for (int i = 0; i < 10000; i++)
                 {
