@@ -226,11 +226,11 @@ namespace QTool.Test
             // list = new List<IValueBase>();
             //  list.Add(new IntValue { value = 4654 });
 
-            Tool.RunTimeCheck("FileManager写入", () =>
+            Tool.RunTimeCheck("Xml写入", () =>
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    xmlBytes = FileManager.Serialize(test1).GetBytes();
+                    xmlBytes = FileManager.XmlSerialize(test1).GetBytes();
                    // if (i == 0) FileManager.Save(Application.dataPath + "/Test/xmlTest.xml", FileManager.Serialize(test1));
                 //info = QSerialize.Serialize(al);
                 //bl = QSerialize.Deserialize <List<IValueBase>>(info);
@@ -240,7 +240,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                   jsonBytes = JsonUtility.ToJson(test1).GetBytes();
+                   jsonBytes = FileManager.JsonSerialize(test1).GetBytes();
                 //info = QSerialize.Serialize(al);
                 //bl = QSerialize.Deserialize <List<IValueBase>>(info);
             }
@@ -268,11 +268,11 @@ namespace QTool.Test
             //   list = new List<IValueBase>();
             //  list.Add(new IntValue { value = 431 });
 
-            Tool.RunTimeCheck("FileManager读取", () =>
+            Tool.RunTimeCheck("Xml读取", () =>
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    test2 = FileManager.Deserialize<TestClass>(xmlBytes.GetString());
+                    test2 = FileManager.XmlDeserialize<TestClass>(xmlBytes.GetString());
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
                 //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
             }

@@ -162,7 +162,7 @@ namespace QTool.Data
             QList<string, T> list = new QList<string, T>();
             list.Add(DefaultData==null?new T():DefaultData);
             var path = GetStaticTablePath(key);
-            var xmlStr = FileManager.Serialize(list);
+            var xmlStr = FileManager.XmlSerialize(list);
             FileManager.Save(path, xmlStr);
             Debug.LogError(TableName + "保存示例静态表成功：" + path);
         }
@@ -177,7 +177,7 @@ namespace QTool.Data
                     return !obj.Key.StartsWith(key + ".");
                 });
             }
-            var xmlStr = FileManager.Serialize(saveList);
+            var xmlStr = FileManager.XmlSerialize(saveList);
             var path = GetPlayerDataPath(key);
             FileManager.Save(path, xmlStr);
             ToolDebug.Log(TableName + "保存数据：" + Count + " 大小：" + (xmlStr.Length * 8).ComputeScale());
@@ -193,7 +193,7 @@ namespace QTool.Data
                 var data = FileManager.Load(path);
                 if (data != null)
                 {
-                    var loadList = FileManager.Deserialize<QList<string, T>>(data);
+                    var loadList = FileManager.XmlDeserialize<QList<string, T>>(data);
                     foreach (var item in loadList)
                     {
                         Set(key, item);
@@ -265,7 +265,7 @@ namespace QTool.Data
             loaderTasks[key] = null;
             if (asset != null)
             {
-                var newList = FileManager.Deserialize<QList<string, T>>(asset.text);
+                var newList = FileManager.XmlDeserialize<QList<string, T>>(asset.text);
                 Set(key, newList);
                 ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
             }
