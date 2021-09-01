@@ -2,48 +2,206 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-namespace QTool
+namespace QTool.QFixed
 {
-   
+    /// <summary>
+    /// 定点数数学类
+    /// </summary>
+    public static class FixedMath
+    {
+        public static Fixed ToFixed(this int x)
+        {
+            return new Fixed(x);
+        }
+        public static Fixed ToFixed(this float x)
+        {
+            return new Fixed(x);
+        }
+        private static int tabCount = 18 * 4;
+        /// <summary>
+        /// sin值对应表
+        /// </summary>
+        private static readonly List<Fixed> sinTab = new List<Fixed>();
+        public static readonly Fixed PI = new Fixed(3.14159265f);
+        static FixedMath()
+        {
+            sinTab.Add(new Fixed(0f));//0
+            sinTab.Add(new Fixed(0.08715f));
+            sinTab.Add(new Fixed(0.17364f));
+            sinTab.Add(new Fixed(0.25881f));
+            sinTab.Add(new Fixed(0.34202f));//20
+            sinTab.Add(new Fixed(0.42261f));
+            sinTab.Add(new Fixed(0.5f));
+
+            sinTab.Add(new Fixed(0.57357f));//35
+            sinTab.Add(new Fixed(0.64278f));
+            sinTab.Add(new Fixed(0.70710f));
+            sinTab.Add(new Fixed(0.76604f));
+            sinTab.Add(new Fixed(0.81915f));//55
+            sinTab.Add(new Fixed(0.86602f));//60
+
+            sinTab.Add(new Fixed(0.90630f));
+            sinTab.Add(new Fixed(0.93969f));
+            sinTab.Add(new Fixed(0.96592f));
+            sinTab.Add(new Fixed(0.98480f));//80
+            sinTab.Add(new Fixed(0.99619f));
+
+            sinTab.Add(new Fixed(1f));
+        }
+        public static Fixed Lerp(Fixed a, Fixed b, Fixed t)
+        {
+            return a + (b - a) * t;
+        }
+        private static Fixed GetSinTab(Fixed r)
+        {
+
+            Fixed i = new Fixed(r.ToInt());
+            if (i.ToInt() == sinTab.Count - 1)
+            {
+                return sinTab[(int)i.ToInt()];
+            }
+            else
+            {
+                return Lerp(sinTab[i.ToInt()], sinTab[i.ToInt() + 1], r - i);
+            }
+        }
+        private static Fixed GetAsinTab(Fixed sin)
+        {
+            for (int i = sinTab.Count - 1; i >= 0; i--)
+            {
+                if (sin > sinTab[i])
+                {
+                    if (i == sinTab.Count - 1)
+                    {
+                        return new Fixed(i) / (tabCount / 4) * (PI / 2);
+                    }
+                    else
+                    {
+                        return Lerp(new Fixed(i), new Fixed(i + 1), (sin - sinTab[i]) / (sinTab[i + 1] - sinTab[i])) / (tabCount / 4) * (PI / 2);
+                    }
+                }
+            }
+            return new Fixed();
+        }
+        public static Fixed PiToAngel(Fixed pi)
+        {
+            return pi / PI * 180;
+        }
+        public static Fixed Asin(Fixed sin)
+        {
+            if (sin < -1 || sin > 1) { return new Fixed(); }
+            if (sin >= 0)
+            {
+                return GetAsinTab(sin);
+            }
+            else
+            {
+                return -GetAsinTab(-sin);
+            }
+        }
+        public static Fixed Sin(Fixed r)
+        {
+
+            Fixed result = new Fixed();
+            r = (r * tabCount / 2 / PI);
+            while (r < Fixed.zero)
+            {
+                r += tabCount;
+            }
+            while (r > tabCount)
+            {
+                r -= tabCount;
+            }
+            if (r >= 0 && r <= tabCount / 4)                // 0 ~ PI/2
+            {
+                result = GetSinTab(r);
+            }
+            else if (r > tabCount / 4 && r < tabCount / 2)       // PI/2 ~ PI
+            {
+                r -= new Fixed(tabCount / 4);
+                result = GetSinTab(new Fixed(tabCount / 4) - r);
+            }
+            else if (r >= tabCount / 2 && r < 3 * tabCount / 4)    // PI ~ 3/4*PI
+            {
+                r -= new Fixed(tabCount / 2);
+                result = -GetSinTab(r);
+            }
+            else if (r >= 3 * tabCount / 4 && r < tabCount)      // 3/4*PI ~ 2*PI
+            {
+                r = new Fixed(tabCount) - r;
+                result = -GetSinTab(r);
+            }
+            return result;
+        }
+        public static Fixed Abs(Fixed ratio)
+        {
+            return Fixed.Abs(ratio);
+        }
+        public static Fixed Sqrt(Fixed r)
+        {
+            return Fixed.Sqrt(r);
+        }
+
+        public static Fixed Cos(Fixed r)
+        {
+            return Sin(r + PI / 2);
+        }
+        public static Fixed SinAngle(Fixed angle)
+        {
+            return Sin(angle / 180 * PI);
+        }
+        public static Fixed CosAngle(Fixed angle)
+        {
+            return Cos(angle / 180 * PI);
+        }
+    }
     [System.Serializable]
     public struct Fixed
     {
         public const int FixScale = 10000;
         public readonly static Fixed zero = new Fixed(0);
         public const long MaxValue = long.MaxValue / FixScale;
-        float ToFloat()
+        public float ToFloat()
         {
-            return LongValue / FixScale;
+            return longValue*1f / FixScale;
         }
-        public long LongValue { get; set; }
-        public Fixed(int x)
+        public long longValue;
+        public int ToInt()
         {
-            LongValue = x * FixScale;
+            return (int)(longValue / FixScale);
+        }
+        public Fixed(int x=0)
+        {
+            longValue = x * FixScale;
         }
         public Fixed(float x)
         {
-            LongValue = (long)Math.Round(x * FixScale);
+            longValue = (long)Math.Round(x * FixScale);
+        }
+        public static Fixed Get(long value)
+        {
+            return new Fixed(value);
         }
         private Fixed(long value)
         {
-            this.LongValue = value;
+            this.longValue = value;
         }
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            return LongValue == ((Fixed)obj).LongValue;
+            return longValue == ((Fixed)obj).longValue;
         }
         public override int GetHashCode()
         {
-            return LongValue.GetHashCode();
+            return longValue.GetHashCode();
         }
         public static Fixed Max(Fixed a,Fixed b)
         {
-            return new Fixed(Math.Max(a.LongValue, b.LongValue));
+            return new Fixed(Math.Max(a.longValue, b.longValue));
         }
         public static Fixed Min(Fixed a, Fixed b)
         {
-            return new Fixed(Math.Min(a.LongValue, b.LongValue));
+            return new Fixed(Math.Min(a.longValue, b.longValue));
         }
         public override string ToString()
         {
@@ -63,60 +221,104 @@ namespace QTool
         }
         public static Fixed operator +(Fixed a, Fixed b)
         {
-            return new Fixed(a.LongValue + b.LongValue);
+            return new Fixed(a.longValue + b.longValue);
+        }
+        public static Fixed operator +(Fixed a, int b)
+        {
+            return a + new Fixed(b);
         }
         public static Fixed operator -(Fixed a)
         {
-            return new Fixed(-a.LongValue);
+            return new Fixed(-a.longValue);
         }
         public static Fixed operator -(Fixed a, Fixed b)
         {
-            return new Fixed(a.LongValue - b.LongValue);
+            return new Fixed(a.longValue - b.longValue);
+        }
+        public static Fixed operator -(Fixed a, int b)
+        {
+            return a + b.ToFixed();
         }
         public static Fixed operator *(Fixed a, Fixed b)
         {
-            return new Fixed(a.LongValue * b.LongValue / FixScale);
+            return new Fixed(a.longValue * b.longValue / FixScale);
         }
+        public static Fixed operator *(Fixed a, int b)
+        {
+            return new Fixed(a.longValue * b);
+        }
+        //public static Fixed operator *(int a, Fixed b)
+        //{
+        //    return b * a;
+        //}
         public static Fixed operator /(Fixed a, Fixed b)
         {
             if (b == zero)
             {
                 new Exception("错误Fixed("+a+")不能除0");
             }
-            return new Fixed(a.LongValue * FixScale / b.LongValue);
+            return new Fixed(a.longValue * FixScale / b.longValue);
         }
-       
+        public static Fixed operator /(Fixed a, int b)
+        {
+            return new Fixed(a.longValue / b);
+        }
         public static bool operator >(Fixed p1, Fixed p2)
         {
-            return (p1.LongValue > p2.LongValue) ? true : false;
+            return (p1.longValue > p2.longValue) ? true : false;
         }
+        public static bool operator >(Fixed p1, int p2)
+        {
+            return p1 > p2.ToFixed();
+        }
+     
         public static bool operator <(Fixed p1, Fixed p2)
         {
-            return (p1.LongValue < p2.LongValue) ? true : false;
+            return (p1.longValue < p2.longValue) ? true : false;
+        }
+        public static bool operator <(Fixed p1, int p2)
+        {
+            return p1 < p2.ToFixed();
         }
         public static bool operator <=(Fixed p1, Fixed p2)
         {
-            return (p1.LongValue <= p2.LongValue) ? true : false;
+            return (p1.longValue <= p2.longValue) ? true : false;
+        }
+        public static bool operator >=(Fixed p1, int p2)
+        {
+            return p1 >= p2.ToFixed();
         }
         public static bool operator >=(Fixed p1, Fixed p2)
         {
-            return (p1.LongValue >= p2.LongValue) ? true : false;
+            return (p1.longValue >= p2.longValue) ? true : false;
+        }
+        public static bool operator <=(Fixed p1, int p2)
+        {
+            return p1 <= p2.ToFixed();
         }
         public static bool operator ==(Fixed a, Fixed b)
         {
-            return a.LongValue == b.LongValue;
+            return a.longValue == b.longValue;
+        }
+        public static bool operator ==(Fixed p1, int p2)
+        {
+            return p1 == p2.ToFixed();
         }
         public static bool operator !=(Fixed a, Fixed b)
         {
-            return a.LongValue != b.LongValue;
+            return a.longValue != b.longValue;
+        }
+        public static bool operator !=(Fixed p1, int p2)
+        {
+            return p1 != p2.ToFixed();
         }
         public static Fixed Abs( Fixed x)
         {
-            return new Fixed(Math.Abs(x.LongValue));
+            return new Fixed(Math.Abs(x.longValue));
         }
         public static Fixed Sqrt( Fixed x)
         {
-            return new Fixed((long)Math.Sqrt(x.LongValue * Fixed.FixScale));
+            return new Fixed((long)Math.Sqrt(x.longValue * Fixed.FixScale));
         }
     }
     [System.Serializable]
@@ -128,8 +330,8 @@ namespace QTool
         public readonly static Fixed2 up = new Fixed2(0, 1);
         public readonly static Fixed2 down = new Fixed2(0, -1);
         public readonly static Fixed2 zero = new Fixed2(0, 0);
-        public Fixed x { private set; get; }
-        public Fixed y { private set; get; }
+        public Fixed x;
+        public Fixed y;
 
         public Fixed2(float x, float y)
         {
@@ -223,6 +425,7 @@ namespace QTool
             return base.GetHashCode();
         }
     }
+    [System.Serializable]
     public struct Fixed3
     {
         public static readonly Fixed3 left = new Fixed3(-1, 0);
@@ -230,21 +433,9 @@ namespace QTool
         public static readonly Fixed3 up = new Fixed3(0, 1);
         public static readonly Fixed3 down = new Fixed3(0, -1);
         public static readonly Fixed3 zero = new Fixed3(0, 0);
-        public Fixed x
-        {
-            get;
-            private set;
-        }
-        public Fixed y
-        {
-            get;
-            private set;
-        }
-        public Fixed z
-        {
-            get;
-            private set;
-        }
+        public Fixed x;
+        public Fixed y;
+        public Fixed z;
 
         public Fixed3(int x = 0, int y = 0, int z = 0)
         {

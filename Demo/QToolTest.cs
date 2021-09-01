@@ -10,6 +10,7 @@ using QTool.Inspector;
 using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Binary;
 using QTool.Reflection;
+using QTool.QFixed;
 namespace QTool.Test
 {
     [Flags]
@@ -129,6 +130,8 @@ namespace QTool.Test
     }
     public class QToolTest : MonoBehaviour
     {
+        public Fixed fiexd1;
+        public Fixed2 fixed2;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         //[ViewToggle("开关")]
         public bool toggle;

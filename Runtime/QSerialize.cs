@@ -140,7 +140,6 @@ namespace QTool.Serialize
             return Activator.CreateInstance(type, args);
         }
 
-
         public static byte[] SerializeType(object value, Type type)
         {
             using (var writer=new QBinaryWriter())
