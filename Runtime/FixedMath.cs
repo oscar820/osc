@@ -332,7 +332,10 @@ namespace QTool.QFixed
         public readonly static Fixed2 zero = new Fixed2(0, 0);
         public Fixed x;
         public Fixed y;
-
+        public UnityEngine.Vector2 ToVector2()
+        {
+            return new UnityEngine.Vector2(x.ToFloat(), y.ToFloat());
+        }
         public Fixed2(float x, float y)
         {
             this.x = new Fixed(x);
@@ -436,7 +439,10 @@ namespace QTool.QFixed
         public Fixed x;
         public Fixed y;
         public Fixed z;
-
+        public UnityEngine.Vector3 ToVector3()
+        {
+            return new UnityEngine.Vector3(x.ToFloat(), y.ToFloat(),z.ToFloat());
+        }
         public Fixed3(int x = 0, int y = 0, int z = 0)
         {
             this.x = new Fixed(x);
