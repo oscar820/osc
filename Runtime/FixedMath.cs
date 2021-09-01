@@ -17,6 +17,14 @@ namespace QTool.QFixed
         {
             return new Fixed(x);
         }
+        public static Fixed2 ToFixed2(this UnityEngine.Vector2 v2)
+        {
+            return new Fixed2(v2.x,v2.y);
+        }
+        public static Fixed3 ToFixed3(this UnityEngine.Vector3 v3)
+        {
+            return new Fixed3(v3.x,v3.y,v3.z);
+        }
         private static int tabCount = 18 * 4;
         /// <summary>
         /// sin值对应表
