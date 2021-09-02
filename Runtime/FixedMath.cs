@@ -483,7 +483,7 @@ namespace QTool.QFixed
         
         public static Fixed Dot(Fixed3 a, Fixed3 b)
         {
-            return a.x * b.x + b.y * a.y;
+            return a.x * b.x + b.y * a.y+a.z+b.z;
         }
         public static Fixed3 Cross(Fixed3 a, Fixed3 b)
         {
