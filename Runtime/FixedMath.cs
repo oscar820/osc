@@ -354,12 +354,6 @@ namespace QTool.QFixed
             this.x = x;
             this.y = y;
         }
-        public static bool DistanceLess(Fixed2 a, Fixed2 b, Fixed len)
-        {
-            var xLen = a.x - b.x;
-            var yLen = a.y - b.y;
-            return (xLen * xLen + yLen * yLen) < len * len;
-        }
         public static Fixed2 operator +(Fixed2 a, Fixed2 b)
         {
             return new Fixed2(a.x + b.x, a.y + b.y);
@@ -378,15 +372,12 @@ namespace QTool.QFixed
 
             get
             {
-                if (x == Fixed.zero && y == Fixed.zero)
-                {
-                    return new Fixed2();
-                }
                 Fixed n = Magnitude;
-                if (n == Fixed.zero) return new Fixed2();
+                if (n == Fixed.zero) return zero;
                 return new Fixed2(x / n, y / n);
             }
         }
+        public Fixed SqrMagnitude => (x * x) + (y * y);
         public Fixed Magnitude
         {
             get
@@ -395,7 +386,7 @@ namespace QTool.QFixed
                 {
                     return Fixed.zero;
                 }
-                return Fixed.Sqrt(((x * x) + (y * y)));
+                return Fixed.Sqrt(SqrMagnitude);
             }
         }
         public Fixed Dot(Fixed2 b)
@@ -406,7 +397,6 @@ namespace QTool.QFixed
         {
             return a.x * b.x + b.y * a.y;
         }
-
         public static Fixed2 operator -(Fixed2 a)
         {
             return new Fixed2(-a.x, -a.y);
@@ -447,6 +437,7 @@ namespace QTool.QFixed
         {
             return new UnityEngine.Vector3(x.ToFloat(), y.ToFloat(),z.ToFloat());
         }
+      
         public Fixed3(int x = 0, int y = 0, int z = 0)
         {
             this.x = new Fixed(x);
@@ -466,11 +457,27 @@ namespace QTool.QFixed
             this.y = y;
             this.z = z;
         }
-
-        //public static V3 GetV3(Ratio x, Ratio y)
-        //{
-        //    return new V3(x, y);
-        //}
+        public Fixed3 Normalized
+        {
+            get
+            {
+                Fixed n = Magnitude;
+                if (n == Fixed.zero) return zero;
+                return new Fixed3(x / n, y / n,z/n);
+            }
+        }
+        public Fixed SqrMagnitude =>((x* x) + (y* y) + (z* z));
+        public Fixed Magnitude
+        {
+            get
+            {
+                if (x == Fixed.zero && y == Fixed.zero&&z==Fixed.zero)
+                {
+                    return Fixed.zero;
+                }
+                return Fixed.Sqrt(SqrMagnitude);
+            }
+        }
         public static Fixed3 operator +(Fixed3 a, Fixed3 b)
         {
             return new Fixed3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -479,8 +486,6 @@ namespace QTool.QFixed
         {
             return new Fixed3(a.x - b.x, a.y - b.y, a.z - b.z);
         }
-
-        
         public static Fixed Dot(Fixed3 a, Fixed3 b)
         {
             return a.x * b.x + b.y * a.y+a.z*b.z;
