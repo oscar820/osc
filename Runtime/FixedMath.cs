@@ -9,6 +9,7 @@ namespace QTool.QFixed
     /// </summary>
     public static class FixedMath
     {
+    
         public static Fixed ToFixed(this int x)
         {
             return new Fixed(x);
@@ -168,7 +169,8 @@ namespace QTool.QFixed
     {
         public const int FixScale = 10000;
         public readonly static Fixed zero = new Fixed(0);
-        public const long MaxValue = long.MaxValue / FixScale;
+        public readonly static Fixed MaxValue =Fixed.Get( long.MaxValue);
+        public readonly static Fixed MinValue = Fixed.Get( long.MinValue);
         public float ToFloat()
         {
             return longValue*1f / FixScale;
@@ -482,9 +484,18 @@ namespace QTool.QFixed
         {
             return new Fixed3(a.x + b.x, a.y + b.y, a.z + b.z);
         }
+      
         public static Fixed3 operator -(Fixed3 a, Fixed3 b)
         {
             return new Fixed3(a.x - b.x, a.y - b.y, a.z - b.z);
+        }
+        public static Fixed3 operator *(Fixed3 a, Fixed b)
+        {
+            return new Fixed3(a.x *b, a.y *b, a.z *b);
+        }
+        public static Fixed3 operator /(Fixed3 a, Fixed b)
+        {
+            return new Fixed3(a.x / b, a.y / b, a.z / b);
         }
         public static Fixed Dot(Fixed3 a, Fixed3 b)
         {
