@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-
+using UnityEngine;
 namespace QTool.QFixed
 {
     /// <summary>
@@ -411,10 +411,6 @@ namespace QTool.QFixed
         {
             return new Fixed2(-a.x, -a.y);
         }
-        //public static Fixed3 operator *(Fixed2 a, Fixed2 b)
-        //{
-        //    return new Fixed3(new Fixed(), new Fixed(), a.x * b.y - a.y * b.x);
-        //}
         public static bool operator ==(Fixed2 a, Fixed2 b)
         {
             return a.x == b.x && a.y == b.y;
@@ -489,14 +485,14 @@ namespace QTool.QFixed
         {
             return a.x * b.x + b.y * a.y;
         }
+        public static Fixed3 Cross(Fixed3 a, Fixed3 b)
+        {
+            return new Fixed3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+        }
 
         public static Fixed3 operator -(Fixed3 a)
         {
             return new Fixed3(-a.x, -a.y, -a.z);
-        }
-        public static Fixed2 operator *(Fixed3 a, Fixed2 b)
-        {
-            return new Fixed2(-a.z * b.y, a.z * b.x);
         }
         public override string ToString()
         {
