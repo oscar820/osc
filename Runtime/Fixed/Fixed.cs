@@ -221,7 +221,7 @@ namespace QTool.QFixed
         }
         public override int GetHashCode()
         {
-            return x.GetHashCode()^y.GetHashCode();
+            return x.GetHashCode()+y.GetHashCode();
         }
     }
     [System.Serializable]
@@ -327,6 +327,14 @@ namespace QTool.QFixed
             result.x = num0;
             result.y = num1;
             result.z = num2;
+        }
+        public override bool Equals(object obj)
+        {
+            return obj is Fixed3 && (Fixed3)obj == this;
+        }
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() + y.GetHashCode() + z.GetHashCode();
         }
         public override string ToString()
         {
