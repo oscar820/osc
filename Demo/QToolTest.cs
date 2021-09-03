@@ -222,6 +222,28 @@ namespace QTool.Test
             creatObj = (TestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
             UnityEngine.Debug.LogError(creatObj);
         }
+        [ContextMenu("输出三角函数值")]
+        public void SinTabFunc()
+        {
+            var str = "sin : ";
+            for (double i = 0; i < 360; i++)
+            {
+                str += Math.Sin(2 * Math.PI * i / 360).ToString("f4")+" , ";
+            }
+            Debug.LogError(str);
+             str = "cos : ";
+            for (double i = 0; i < 360; i++)
+            {
+                str += Math.Cos(2 * Math.PI * i / 360).ToString("f4") + " , ";
+            }
+            Debug.LogError(str);
+            str = "tan : ";
+            for (double i = 0; i < 360; i++)
+            {
+                str += Math.Tan(2 * Math.PI * i / 360).ToString("f4") + " , ";
+            }
+            Debug.LogError(str);
+        }
         [ContextMenu("写入Test")]
         public void TestFunc()
         {

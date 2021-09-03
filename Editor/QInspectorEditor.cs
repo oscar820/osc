@@ -15,8 +15,8 @@ namespace QTool.Inspector
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var longValue= property.FindPropertyRelative("longValue");
-            longValue.longValue=new Fixed( EditorGUILayout.FloatField(label, Fixed.Get( longValue.longValue).ToFloat())).longValue;
+            var longValue= property.FindPropertyRelative("rawValue");
+            longValue.longValue=new Fixed( EditorGUILayout.FloatField(label, Fixed.Get( longValue.longValue).ToFloat())).RawValue;
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
