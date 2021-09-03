@@ -221,7 +221,7 @@ namespace QTool.QFixed
         }
         public override int GetHashCode()
         {
-            return x.GetHashCode()+y.GetHashCode();
+            return base.GetHashCode();
         }
     }
     [System.Serializable]
@@ -334,7 +334,7 @@ namespace QTool.QFixed
         }
         public override int GetHashCode()
         {
-            return x.GetHashCode() + y.GetHashCode() + z.GetHashCode();
+            return base.GetHashCode();
         }
         public override string ToString()
         {
@@ -606,7 +606,7 @@ namespace QTool.QFixed
       
         public override int GetHashCode()
         {
-            return x.GetHashCode() ^ y.GetHashCode() ^ z.GetHashCode() ^ w.GetHashCode();
+            return base.GetHashCode();
         }
        
         public void Negate()

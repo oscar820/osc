@@ -635,15 +635,7 @@ namespace QTool.QFixed
 
         public override int GetHashCode()
         {
-            return M11.GetHashCode() ^
-                M12.GetHashCode() ^
-                M13.GetHashCode() ^
-                M21.GetHashCode() ^
-                M22.GetHashCode() ^
-                M23.GetHashCode() ^
-                M31.GetHashCode() ^
-                M32.GetHashCode() ^
-                M33.GetHashCode();
+            return base.GetHashCode();
         }
 
         /// <summary>
