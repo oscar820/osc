@@ -606,7 +606,7 @@ namespace QTool.QFixed
       
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return x.GetHashCode() + y.GetHashCode() + z.GetHashCode() + w.GetHashCode();
         }
        
         public void Negate()
