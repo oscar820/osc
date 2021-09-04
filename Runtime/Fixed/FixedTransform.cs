@@ -311,9 +311,9 @@ namespace QTool.QFixed
         {
             if (transform.hasChanged)
             {
-                _position = transform.position.ToFixed3();
-                _rotation = transform.rotation.ToFixedQuaternion();
-                _scale = transform.lossyScale.ToFixed3();
+                position = transform.position.ToFixed3();
+                rotation = transform.rotation.ToFixedQuaternion();
+                scale = transform.lossyScale.ToFixed3();
 
                 _localPosition = transform.localPosition.ToFixed3();
                 _localRotation = transform.localRotation.ToFixedQuaternion();
