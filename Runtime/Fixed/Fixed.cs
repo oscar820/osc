@@ -5,7 +5,7 @@ namespace QTool.QFixed
     [System.Serializable]
     public struct Fixed
     {
-        public const int FixScale = 1000;
+        public const int FixScale = 10000;
         public readonly static Fixed zero = new Fixed(0);
         public readonly static Fixed one = new Fixed(1);
         public readonly static Fixed half = new Fixed(0.5f);
@@ -231,6 +231,7 @@ namespace QTool.QFixed
         public static readonly Fixed3 zero = new Fixed3(0, 0,0 );
         public static readonly Fixed3 forward = new Fixed3(0,0, 1);
         public static readonly Fixed3 back = new Fixed3(0, 0,- 1);
+        public static readonly Fixed3 one = new Fixed3(1, 1, 1);
         public Fixed x;
         public Fixed y;
         public Fixed z;
