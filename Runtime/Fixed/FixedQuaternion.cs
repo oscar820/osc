@@ -13,7 +13,22 @@ namespace QTool.QFixed
         public Fixed y;
         public Fixed z;
         public Fixed w;
-
+        public static bool operator ==(FixedQuaternion a, FixedQuaternion b)
+        {
+            return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+        }
+        public static bool operator !=(FixedQuaternion a, FixedQuaternion b)
+        {
+            return a.x != b.x && a.y != b.y && a.z != b.z && a.w != b.w;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
         public static readonly FixedQuaternion identity = new FixedQuaternion(0, 0, 0, 1);
 
         static FixedQuaternion()

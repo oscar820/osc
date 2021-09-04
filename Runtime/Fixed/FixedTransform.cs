@@ -36,14 +36,16 @@ namespace QTool.QFixed
             }
             set
             {
+                if (value == _position) return;
                 _position = value;
+                OnTransformChange?.Invoke();
                 transform.position = _position.ToVector3();
                 UpdateChildPosition();
             }
         }
         [SerializeField, HideInInspector]
         private FixedQuaternion _localRotation = FixedQuaternion.identity;
-
+        public System.Action OnTransformChange;
         public FixedQuaternion localRotation
         {
             get
@@ -66,7 +68,9 @@ namespace QTool.QFixed
             }
             set
             {
+                if (value == _rotation) return;
                 _rotation = value;
+                OnTransformChange?.Invoke();
                 UpdateChildRotation();
             }
         }
@@ -80,6 +84,8 @@ namespace QTool.QFixed
             }
             set
             {
+                if (value == _scale) return;
+                OnTransformChange?.Invoke();
                 _scale = value;
             }
         }
@@ -300,6 +306,7 @@ namespace QTool.QFixed
                 UpdateEditMode();
             }
         }
+
         private void UpdateEditMode()
         {
             if (transform.hasChanged)
