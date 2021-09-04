@@ -153,7 +153,7 @@ namespace QTool.Test
         [ContextMenu("旋转测试")]
         public void RotateTest()
         {
-            ftransform.Rotate(Fixed3.up * 0.5f);
+            ftransform.Rotate(Fixed3.up*10);
         }
         // Update is called once per frame
         void Update()

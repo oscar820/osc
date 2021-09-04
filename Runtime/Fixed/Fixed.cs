@@ -5,7 +5,7 @@ namespace QTool.QFixed
     [System.Serializable]
     public struct Fixed
     {
-        public const int FixScale = 10000;
+        public const int FixScale = 1000;
         public readonly static Fixed zero = new Fixed(0);
         public readonly static Fixed one = new Fixed(1);
         public readonly static Fixed half = new Fixed(0.5f);
@@ -50,7 +50,7 @@ namespace QTool.QFixed
         }
         public override int GetHashCode()
         {
-            return rawValue.GetHashCode();
+            return base.GetHashCode();
         }
         public static Fixed Max(Fixed a, Fixed b)
         {
@@ -94,11 +94,11 @@ namespace QTool.QFixed
         }
         public static Fixed operator /(Fixed a, Fixed b)
         {
-            if (b == zero)
+            if (b==Fixed.zero)
             {
-                new Exception("错误Fixed(" + a + ")不能除0");
+                throw new Exception("错误Fixed(" + a + ")不能除0");
             }
-            return new Fixed(a.rawValue * FixScale / b.rawValue);
+            return new Fixed((a.rawValue * FixScale )/ b.rawValue);
         }
         public static bool operator >(Fixed p1, Fixed p2)
         {

@@ -90,7 +90,7 @@ namespace QTool.QFixed
         public static FixedMatrix3x3 CreateRotationX(Fixed radians)
         {
             FixedMatrix3x3 matrix;
-            Fixed num2 = MathFixed.Sin(radians);
+            Fixed num2 = MathFixed.Cos(radians);
             Fixed num = MathFixed.Sin(radians);
             matrix.M11 = Fixed.one;
             matrix.M12 = Fixed.zero;
@@ -106,7 +106,7 @@ namespace QTool.QFixed
 
         public static void CreateRotationX(Fixed radians, out FixedMatrix3x3 result)
         {
-            Fixed num2 = MathFixed.Sin(radians);
+            Fixed num2 = MathFixed.Cos(radians);
             Fixed num = MathFixed.Sin(radians);
             result.M11 = Fixed.one;
             result.M12 = Fixed.zero;
@@ -122,7 +122,7 @@ namespace QTool.QFixed
         public static FixedMatrix3x3 CreateRotationY(Fixed radians)
         {
             FixedMatrix3x3 matrix;
-            Fixed num2 = MathFixed.Sin(radians);
+            Fixed num2 = MathFixed.Cos(radians);
             Fixed num = MathFixed.Sin(radians);
             matrix.M11 = num2;
             matrix.M12 = Fixed.zero;
@@ -138,7 +138,7 @@ namespace QTool.QFixed
 
         public static void CreateRotationY(Fixed radians, out FixedMatrix3x3 result)
         {
-            Fixed num2 = MathFixed.Sin(radians);
+            Fixed num2 = MathFixed.Cos(radians);
             Fixed num = MathFixed.Sin(radians);
             result.M11 = num2;
             result.M12 = Fixed.zero;
@@ -154,7 +154,7 @@ namespace QTool.QFixed
         public static FixedMatrix3x3 CreateRotationZ(Fixed radians)
         {
             FixedMatrix3x3 matrix;
-            Fixed num2 = MathFixed.Sin(radians);
+            Fixed num2 = MathFixed.Cos(radians);
             Fixed num = MathFixed.Sin(radians);
             matrix.M11 = num2;
             matrix.M12 = num;
@@ -171,7 +171,7 @@ namespace QTool.QFixed
 
         public static void CreateRotationZ(Fixed radians, out FixedMatrix3x3 result)
         {
-            Fixed num2 = MathFixed.Sin(radians);
+            Fixed num2 = MathFixed.Cos(radians);
             Fixed num = MathFixed.Sin(radians);
             result.M11 = num2;
             result.M12 = num;
@@ -659,7 +659,7 @@ namespace QTool.QFixed
             Fixed y = axis.y;
             Fixed z = axis.z;
             Fixed num2 = MathFixed.Sin(angle);
-            Fixed num = MathFixed.Sin(angle);
+            Fixed num = MathFixed.Cos(angle);
             Fixed num11 = x * x;
             Fixed num10 = y * y;
             Fixed num9 = z * z;

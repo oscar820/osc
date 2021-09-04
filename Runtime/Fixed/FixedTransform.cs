@@ -175,6 +175,7 @@ namespace QTool.QFixed
             }
             result.Normalize();
             this.rotation = result;
+            Debug.LogError(rotation);
         }
         public Fixed3 forward => Fixed3.Transform(Fixed3.forward, FixedMatrix3x3.CreateFromQuaternion(rotation));
         public Fixed3 right => Fixed3.Transform(Fixed3.right, FixedMatrix3x3.CreateFromQuaternion(rotation));

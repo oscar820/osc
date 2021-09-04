@@ -162,7 +162,7 @@ namespace QTool.QFixed
 
             FixedQuaternion rotation;
             FixedQuaternion.CreateFromYawPitchRoll(y, x, z, out rotation);
-
+ 
             return rotation;
         }
 
@@ -184,22 +184,23 @@ namespace QTool.QFixed
             rotation.x = axis.x * sin;
             rotation.y = axis.y * sin;
             rotation.z = axis.z * sin;
-            rotation.w = MathFixed.Sin(halfAngle);
+            rotation.w = MathFixed.Cos(halfAngle);
 
             return rotation;
         }
 
-        public static void CreateFromYawPitchRoll(Fixed yaw, Fixed pitch, Fixed roll, out FixedQuaternion result)
+        public static void CreateFromYawPitchRoll(Fixed x, Fixed y, Fixed z, out FixedQuaternion result)
         {
-            Fixed num9 = roll * Fixed.half;
+          
+            Fixed num9 = z * Fixed.half;
             Fixed num6 = MathFixed.Sin(num9);
-            Fixed num5 = MathFixed.Sin(num9);
-            Fixed num8 = pitch * Fixed.half;
+            Fixed num5 = MathFixed.Cos(num9);
+            Fixed num8 = y * Fixed.half;
             Fixed num4 = MathFixed.Sin(num8);
-            Fixed num3 = MathFixed.Sin(num8);
-            Fixed num7 = yaw * Fixed.half;
+            Fixed num3 = MathFixed.Cos(num8);
+            Fixed num7 = x * Fixed.half;
             Fixed num2 = MathFixed.Sin(num7);
-            Fixed num = MathFixed.Sin(num7);
+            Fixed num = MathFixed.Cos(num7);
             result.x = ((num * num4) * num5) + ((num2 * num3) * num6);
             result.y = ((num2 * num3) * num5) - ((num * num4) * num6);
             result.z = ((num * num3) * num6) - ((num2 * num4) * num5);

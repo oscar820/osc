@@ -135,6 +135,10 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.7581
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.9
       objectReference: {fileID: 0}
@@ -176,7 +180,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5357789590763392153, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_Name
-      value: Cube (1)
+      value: A
       objectReference: {fileID: 0}
     - target: {fileID: 7211509801118715592, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: PrefabId
@@ -298,7 +302,7 @@ MonoBehaviour:
     y:
       rawValue: 0
   toggle: 0
-  ftransform: {fileID: 0}
+  ftransform: {fileID: 797409364}
   index: 0
   v3: {x: 1, y: 2, z: 3}
   b: 
@@ -378,50 +382,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _localPosition:
     x:
-      rawValue: -9000
+      rawValue: -900
     y:
-      rawValue: 7400
+      rawValue: 740
     z:
       rawValue: 0
   _position:
     x:
-      rawValue: -9000
+      rawValue: -900
     y:
-      rawValue: 7400
+      rawValue: 740
     z:
       rawValue: 0
   _localRotation:
     x:
-      rawValue: -6939
+      rawValue: -694
     y:
-      rawValue: 1658
+      rawValue: 166
     z:
-      rawValue: 1146
+      rawValue: 115
     w:
-      rawValue: 6913
+      rawValue: 691
   _rotation:
     x:
-      rawValue: -6939
+      rawValue: -694
     y:
-      rawValue: 1658
+      rawValue: 166
     z:
-      rawValue: 1146
+      rawValue: 115
     w:
-      rawValue: 6913
+      rawValue: 691
   _scale:
     x:
-      rawValue: 10000
+      rawValue: 2758
     y:
-      rawValue: 10000
+      rawValue: 1000
     z:
-      rawValue: 10000
+      rawValue: 1000
   _localScale:
     x:
-      rawValue: 10000
+      rawValue: 2758
     y:
-      rawValue: 10000
+      rawValue: 1000
     z:
-      rawValue: 10000
+      rawValue: 1000
   fixedParent: {fileID: 0}
   fixedChildren: []
 --- !u!4 &797409369 stripped
@@ -755,16 +759,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.58862984
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.6235
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.6235
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.35
+      value: 0.618
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.14
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.64
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -772,7 +788,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: -0.000000029802322
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalRotation.y
@@ -831,18 +847,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _localPosition:
     x:
-      rawValue: 13500
+      rawValue: 618
     y:
-      rawValue: 0
+      rawValue: -140
     z:
-      rawValue: 6400
+      rawValue: 40
   _position:
     x:
-      rawValue: 3852
+      rawValue: 723
     y:
-      rawValue: 12817
+      rawValue: 656
     z:
-      rawValue: -5357
+      rawValue: -534
   _localRotation:
     x:
       rawValue: 0
@@ -851,30 +867,30 @@ MonoBehaviour:
     z:
       rawValue: 0
     w:
-      rawValue: 10000
+      rawValue: 1000
   _rotation:
     x:
-      rawValue: -6939
+      rawValue: -694
     y:
-      rawValue: 1658
+      rawValue: 166
     z:
-      rawValue: 1146
+      rawValue: 115
     w:
-      rawValue: 6913
+      rawValue: 691
   _scale:
     x:
-      rawValue: 10000
+      rawValue: 1624
     y:
-      rawValue: 10000
+      rawValue: 1623
     z:
-      rawValue: 10000
+      rawValue: 1623
   _localScale:
     x:
-      rawValue: 10000
+      rawValue: 589
     y:
-      rawValue: 10000
+      rawValue: 1623
     z:
-      rawValue: 10000
+      rawValue: 1623
   fixedParent: {fileID: 0}
   fixedChildren: []
 --- !u!1001 &2123784209611813739
