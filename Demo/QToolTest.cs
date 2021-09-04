@@ -11,6 +11,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Binary;
 using QTool.Reflection;
 using QTool.QFixed;
+using System.Threading.Tasks;
+
 namespace QTool.Test
 {
     [Flags]
@@ -135,6 +137,8 @@ namespace QTool.Test
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         //[ViewToggle("开关")]
         public bool toggle;
+
+        public FixedTransform ftransform;
         // Start is called before the first frame update
         void Start()
         {
@@ -146,7 +150,11 @@ namespace QTool.Test
             //var reader = new BinaryReader().Reset(writer.ToArray());
             // Debug.LogError(reader.ReadVector3()+":"+ reader.ReadVector3());
         }
-
+        [ContextMenu("旋转测试")]
+        public void RotateTest()
+        {
+            ftransform.Rotate(Fixed3.up * 0.5f);
+        }
         // Update is called once per frame
         void Update()
         {
@@ -222,27 +230,42 @@ namespace QTool.Test
             creatObj = (TestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
             UnityEngine.Debug.LogError(creatObj);
         }
+        public void GetTable(string startStr, Func<double, double> sinFunc)
+        {
+            var str = startStr;
+            for (double i = -180; i <= 180; i++)
+            {
+                var value = sinFunc(2 * Math.PI * i / 360);
+                str +=value.ToString("f4") + " , ";
+            }
+            Debug.LogError(str);
+        }
+        public void SinTest(string startStr,Func<double, double> sinFunc,Func<double,double> asinFunc)
+        {
+            var str = startStr;
+            for (double i = -180; i <= 180; i++)
+            {
+                var value = sinFunc(2 * Math.PI * i / 360);
+               // asinFunc(value).ToString("f4");
+                str +=asinFunc(value).ToString("f4")+":"+  value.ToString("f4") + " , ";
+            }
+            Debug.LogError(str);
+        }
         [ContextMenu("输出三角函数值")]
         public void SinTabFunc()
         {
-            var str = "sin : ";
-            for (double i = 0; i < 360; i++)
-            {
-                str += Math.Sin(2 * Math.PI * i / 360).ToString("f4")+" , ";
-            }
-            Debug.LogError(str);
-             str = "cos : ";
-            for (double i = 0; i < 360; i++)
-            {
-                str += Math.Cos(2 * Math.PI * i / 360).ToString("f4") + " , ";
-            }
-            Debug.LogError(str);
-            str = "tan : ";
-            for (double i = 0; i < 360; i++)
-            {
-                str += Math.Tan(2 * Math.PI * i / 360).ToString("f4") + " , ";
-            }
-            Debug.LogError(str);
+           // Task.Run(() =>
+           // {
+                //GetTable("SinTable:", Math.Sin);
+                //GetTable("CosTable:", Math.Cos);
+                //GetTable("TanTable:", Math.Tan);
+                SinTest("Sin:", Math.Sin, Math.Asin);
+                SinTest("Cos:", Math.Cos, Math.Acos);
+                SinTest("Tan:", Math.Tan, Math.Atan);
+                SinTest("FixedSin:", (a) => MathFixed.Sin(a).ToFloat(), (a) => MathFixed.Asin(a).ToFloat());
+                SinTest("FixedCos:", (a) => MathFixed.Cos(a).ToFloat(), (a) => MathFixed.Acos(a).ToFloat());
+                SinTest("FixedTan:", (a) => MathFixed.Tan(a).ToFloat(), (a) => MathFixed.Atan(a).ToFloat());
+           // });
         }
         [ContextMenu("写入Test")]
         public void TestFunc()

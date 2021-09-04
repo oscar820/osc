@@ -1,20 +1,17 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 namespace QTool.QFixed
 {
     [System.Serializable]
     public struct Fixed
     {
-        public const int FixScale = 1000;
-        public readonly static Fixed Zero = new Fixed(0);
-        public readonly static Fixed One = new Fixed(1);
-        public readonly static Fixed Half = new Fixed(0.5f);
-        public readonly static Fixed MaxValue =Get(long.MaxValue-1);
-        public readonly static Fixed MinValue =Get(long.MinValue+2);
+        public const int FixScale = 10000;
+        public readonly static Fixed zero = new Fixed(0);
+        public readonly static Fixed one = new Fixed(1);
+        public readonly static Fixed half = new Fixed(0.5f);
+        public readonly static Fixed MaxValue =Get(long.MaxValue);
+        public readonly static Fixed MinValue =Get(long.MinValue);
         public readonly static Fixed PositiveInfinity = Get(long.MaxValue);
-        public readonly static Fixed NegativeInfinity = Get(long.MinValue+1);
         public readonly static Fixed NaN = Get(long.MinValue);
         public float ToFloat()
         {
@@ -97,7 +94,7 @@ namespace QTool.QFixed
         }
         public static Fixed operator /(Fixed a, Fixed b)
         {
-            if (b == Zero)
+            if (b == zero)
             {
                 new Exception("´íÎóFixed(" + a + ")²»ÄÜ³ý0");
             }
@@ -175,7 +172,7 @@ namespace QTool.QFixed
             get
             {
                 Fixed n = Magnitude;
-                if (n == Fixed.Zero) return zero;
+                if (n == Fixed.zero) return zero;
                 return new Fixed2(x / n, y / n);
             }
         }
@@ -184,9 +181,9 @@ namespace QTool.QFixed
         {
             get
             {
-                if (x == Fixed.Zero && y == Fixed.Zero)
+                if (x == Fixed.zero && y == Fixed.zero)
                 {
-                    return Fixed.Zero;
+                    return Fixed.zero;
                 }
                 return Fixed.Sqrt(SqrMagnitude);
             }
@@ -251,7 +248,7 @@ namespace QTool.QFixed
             get
             {
                 Fixed n = Magnitude;
-                if (n == Fixed.Zero) return zero;
+                if (n == Fixed.zero) return zero;
                 return new Fixed3(x / n, y / n, z / n);
             }
         }
@@ -267,9 +264,9 @@ namespace QTool.QFixed
         {
             get
             {
-                if (x == Fixed.Zero && y == Fixed.Zero && z == Fixed.Zero)
+                if (x == Fixed.zero && y == Fixed.zero && z == Fixed.zero)
                 {
-                    return Fixed.Zero;
+                    return Fixed.zero;
                 }
                 return Fixed.Sqrt(SqrMagnitude);
             }
@@ -504,14 +501,14 @@ namespace QTool.QFixed
       
         public void MakeZero()
         {
-            x = Fixed.Zero;
-            y = Fixed.Zero;
-            z = Fixed.Zero;
-            w = Fixed.Zero;
+            x = Fixed.zero;
+            y = Fixed.zero;
+            z = Fixed.zero;
+            w = Fixed.zero;
         }
         public bool IsZero()
         {
-            return (this.SqrMagnitude == Fixed.Zero);
+            return (this.SqrMagnitude == Fixed.zero);
         }
 
 
@@ -645,7 +642,7 @@ namespace QTool.QFixed
         public void Normalize()
         {
             Fixed num2 = ((this.x * this.x) + (this.y * this.y)) + (this.z * this.z) + (this.w * this.w);
-            Fixed num = Fixed.One / Fixed.Sqrt(num2);
+            Fixed num = Fixed.one / Fixed.Sqrt(num2);
             this.x *= num;
             this.y *= num;
             this.z *= num;
@@ -656,7 +653,7 @@ namespace QTool.QFixed
         public static void Normalize(ref Fixed4 value, out Fixed4 result)
         {
             Fixed num2 = ((value.x * value.x) + (value.y * value.y)) + (value.z * value.z) + (value.w * value.w);
-            Fixed num = Fixed.One / Fixed.Sqrt(num2);
+            Fixed num = Fixed.one / Fixed.Sqrt(num2);
             result.x = value.x * num;
             result.y = value.y * num;
             result.z = value.z * num;

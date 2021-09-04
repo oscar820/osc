@@ -136,7 +136,7 @@ namespace QTool.QFixed
         {
             Fixed3 vector = this.position;
             Fixed3 vector2 = vector - point;
-            vector2 = Fixed3.Transform(vector2, FixedMatrix3x3.AngleAxis(angle * MathFixed.Deg2Rad, axis));
+            vector2 = Fixed3.Transform(vector2, FixedMatrix3x3.AngleAxis(angle * MathFixed.PI2Rad, axis));
             vector = point + vector2;
             this.position = vector;
             Rotate(axis, angle);
@@ -181,7 +181,7 @@ namespace QTool.QFixed
         public Fixed3 up => Fixed3.Transform(Fixed3.up, FixedMatrix3x3.CreateFromQuaternion(rotation));
         public Fixed4 TransformPoint(Fixed4 point)
         {
-            Debug.Assert(point.w == Fixed.One);
+            Debug.Assert(point.w == Fixed.one);
             return Fixed4.Transform(point, localToWorldMatrix);
         }
         public Fixed3 TransformPoint(Fixed3 point)
@@ -190,7 +190,7 @@ namespace QTool.QFixed
         }
         public Fixed4 InverseTransformPoint(Fixed4 point)
         {
-            Debug.Assert(point.w == Fixed.One);
+            Debug.Assert(point.w == Fixed.one);
             return Fixed4.Transform(point, worldToLocalMatrix);
         }
 
@@ -200,46 +200,46 @@ namespace QTool.QFixed
         }
         public Fixed4 TransformDirection(Fixed4 direction)
         {
-            Debug.Assert(direction.w == Fixed.Zero);
+            Debug.Assert(direction.w == Fixed.zero);
             FixedMatrix4x4 matrix = FixedMatrix4x4.Translate(position) * FixedMatrix4x4.Rotate(rotation);
             return Fixed4.Transform(direction, matrix);
         }
 
         public Fixed3 TransformDirection(Fixed3 direction)
         {
-            return TransformDirection(new Fixed4(direction.x, direction.y, direction.z, Fixed.Zero)).ToFixed3();
+            return TransformDirection(new Fixed4(direction.x, direction.y, direction.z, Fixed.zero)).ToFixed3();
         }
 
         public Fixed4 InverseTransformDirection(Fixed4 direction)
         {
-            Debug.Assert(direction.w == Fixed.Zero);
+            Debug.Assert(direction.w == Fixed.zero);
             FixedMatrix4x4 matrix = FixedMatrix4x4.Translate(position) * FixedMatrix4x4.Rotate(rotation);
             return Fixed4.Transform(direction, FixedMatrix4x4.Inverse(matrix));
         }
 
         public Fixed3 InverseTransformDirection(Fixed3 direction)
         {
-            return InverseTransformDirection(new Fixed4(direction.x, direction.y, direction.z, Fixed.Zero)).ToFixed3();
+            return InverseTransformDirection(new Fixed4(direction.x, direction.y, direction.z, Fixed.zero)).ToFixed3();
         }
         public Fixed4 TransformVector(Fixed4 vector)
         {
-            Debug.Assert(vector.w == Fixed.Zero);
+            Debug.Assert(vector.w == Fixed.zero);
             return Fixed4.Transform(vector, localToWorldMatrix);
         }
 
         public Fixed3 TransformVector(Fixed3 vector)
         {
-            return TransformVector(new Fixed4(vector.x, vector.y, vector.z, Fixed.Zero)).ToFixed3();
+            return TransformVector(new Fixed4(vector.x, vector.y, vector.z, Fixed.zero)).ToFixed3();
         }
         public Fixed4 InverseTransformVector(Fixed4 vector)
         {
-            Debug.Assert(vector.w == Fixed.Zero);
+            Debug.Assert(vector.w == Fixed.zero);
             return Fixed4.Transform(vector, worldToLocalMatrix);
         }
 
         public Fixed3 InverseTransformVector(Fixed3 vector)
         {
-            return InverseTransformVector(new Fixed4(vector.x, vector.y, vector.z, Fixed.Zero)).ToFixed3();
+            return InverseTransformVector(new Fixed4(vector.x, vector.y, vector.z, Fixed.zero)).ToFixed3();
         }
 
         void UpdateChildRotation()

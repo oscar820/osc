@@ -83,10 +83,10 @@ namespace QTool.QFixed
             Zero = new FixedMatrix4x4();
 
             Identity = new FixedMatrix4x4();
-            Identity.M11 = Fixed.One;
-            Identity.M22 = Fixed.One;
-            Identity.M33 = Fixed.One;
-            Identity.M44 = Fixed.One;
+            Identity.M11 = Fixed.one;
+            Identity.M22 = Fixed.one;
+            Identity.M33 = Fixed.one;
+            Identity.M44 = Fixed.one;
 
             InternalIdentity = Identity;
         }
@@ -400,7 +400,7 @@ namespace QTool.QFixed
 
             Fixed det = a * a11 + b * a12 + c * a13 + d * a14;
 
-            if (det == Fixed.Zero)
+            if (det == Fixed.zero)
             {
                 result.M11 = Fixed.PositiveInfinity;
                 result.M12 = Fixed.PositiveInfinity;
@@ -422,7 +422,7 @@ namespace QTool.QFixed
             }
             else
             {
-                Fixed invDet = Fixed.One / det;
+                Fixed invDet = Fixed.one / det;
 
                 result.M11 = a11 * invDet;
                 result.M21 = a12 * invDet;
@@ -533,22 +533,22 @@ namespace QTool.QFixed
             Fixed wz = quaternion.w * z;
 
             // Calculate 3x3 matrix from orthonormal basis
-            result.M11 = Fixed.One - (yy + zz);
+            result.M11 = Fixed.one - (yy + zz);
             result.M21 = xy + wz;
             result.M31 = xz - wy;
-            result.M41 = Fixed.Zero;
+            result.M41 = Fixed.zero;
             result.M12 = xy - wz;
-            result.M22 = Fixed.One - (xx + zz);
+            result.M22 = Fixed.one - (xx + zz);
             result.M32 = yz + wx;
-            result.M42 = Fixed.Zero;
+            result.M42 = Fixed.zero;
             result.M13 = xz + wy;
             result.M23 = yz - wx;
-            result.M33 = Fixed.One - (xx + yy);
-            result.M43 = Fixed.Zero;
-            result.M14 = Fixed.Zero;
-            result.M24 = Fixed.Zero;
-            result.M34 = Fixed.Zero;
-            result.M44 = Fixed.One;
+            result.M33 = Fixed.one - (xx + yy);
+            result.M43 = Fixed.zero;
+            result.M14 = Fixed.zero;
+            result.M24 = Fixed.zero;
+            result.M34 = Fixed.zero;
+            result.M44 = Fixed.one;
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace QTool.QFixed
         public static FixedMatrix4x4 operator -(FixedMatrix4x4 value1, FixedMatrix4x4 value2)
         {
             FixedMatrix4x4 result;
-            FixedMatrix4x4.Multiply(ref value2, -Fixed.One, out value2);
+            FixedMatrix4x4.Multiply(ref value2, -Fixed.one, out value2);
             FixedMatrix4x4.Add(ref value1, ref value2, out result);
             return result;
         }
@@ -729,21 +729,21 @@ namespace QTool.QFixed
 
         public override int GetHashCode()
         {
-            return M11.GetHashCode() ^
-                M12.GetHashCode() ^
-                M13.GetHashCode() ^
-                M14.GetHashCode() ^
-                M21.GetHashCode() ^
-                M22.GetHashCode() ^
-                M23.GetHashCode() ^
-                M24.GetHashCode() ^
-                M31.GetHashCode() ^
-                M32.GetHashCode() ^
-                M33.GetHashCode() ^
-                M34.GetHashCode() ^
-                M41.GetHashCode() ^
-                M42.GetHashCode() ^
-                M43.GetHashCode() ^
+            return M11.GetHashCode() +
+                M12.GetHashCode() +
+                M13.GetHashCode() +
+                M14.GetHashCode() +
+                M21.GetHashCode() +
+                M22.GetHashCode() +
+                M23.GetHashCode() +
+                M24.GetHashCode() +
+                M31.GetHashCode() +
+                M32.GetHashCode() +
+                M33.GetHashCode() +
+                M34.GetHashCode() +
+                M41.GetHashCode() +
+                M42.GetHashCode() +
+                M43.GetHashCode() +
                 M44.GetHashCode();
         }
 
@@ -758,10 +758,10 @@ namespace QTool.QFixed
         {
             FixedMatrix4x4 result;
 
-            result.M11 = Fixed.One; result.M12 = Fixed.Zero; result.M13 = Fixed.Zero; result.M14 = xPosition;
-            result.M21 = Fixed.Zero; result.M22 = Fixed.One; result.M23 = Fixed.Zero; result.M24 = yPosition;
-            result.M31 = Fixed.Zero; result.M32 = Fixed.Zero; result.M33 = Fixed.One; result.M34 = zPosition;
-            result.M41 = Fixed.Zero; result.M42 = Fixed.Zero; result.M43 = Fixed.Zero; result.M44 = Fixed.One;
+            result.M11 = Fixed.one; result.M12 = Fixed.zero; result.M13 = Fixed.zero; result.M14 = xPosition;
+            result.M21 = Fixed.zero; result.M22 = Fixed.one; result.M23 = Fixed.zero; result.M24 = yPosition;
+            result.M31 = Fixed.zero; result.M32 = Fixed.zero; result.M33 = Fixed.one; result.M34 = zPosition;
+            result.M41 = Fixed.zero; result.M42 = Fixed.zero; result.M43 = Fixed.zero; result.M44 = Fixed.one;
 
             return result;
         }
@@ -782,10 +782,10 @@ namespace QTool.QFixed
         {
             FixedMatrix4x4 result;
 
-            result.M11 = xScale; result.M12 = Fixed.Zero; result.M13 = Fixed.Zero; result.M14 = Fixed.Zero;
-            result.M21 = Fixed.Zero; result.M22 = yScale; result.M23 = Fixed.Zero; result.M24 = Fixed.Zero;
-            result.M31 = Fixed.Zero; result.M32 = Fixed.Zero; result.M33 = zScale; result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero; result.M42 = Fixed.Zero; result.M43 = Fixed.Zero; result.M44 = Fixed.One;
+            result.M11 = xScale; result.M12 = Fixed.zero; result.M13 = Fixed.zero; result.M14 = Fixed.zero;
+            result.M21 = Fixed.zero; result.M22 = yScale; result.M23 = Fixed.zero; result.M24 = Fixed.zero;
+            result.M31 = Fixed.zero; result.M32 = Fixed.zero; result.M33 = zScale; result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero; result.M42 = Fixed.zero; result.M43 = Fixed.zero; result.M44 = Fixed.one;
 
             return result;
         }
@@ -802,14 +802,14 @@ namespace QTool.QFixed
         {
             FixedMatrix4x4 result;
 
-            Fixed tx = centerPoint.x * (Fixed.One - xScale);
-            Fixed ty = centerPoint.y * (Fixed.One - yScale);
-            Fixed tz = centerPoint.z * (Fixed.One - zScale);
+            Fixed tx = centerPoint.x * (Fixed.one - xScale);
+            Fixed ty = centerPoint.y * (Fixed.one - yScale);
+            Fixed tz = centerPoint.z * (Fixed.one - zScale);
 
-            result.M11 = xScale; result.M12 = Fixed.Zero; result.M13 = Fixed.Zero; result.M14 = Fixed.Zero;
-            result.M21 = Fixed.Zero; result.M22 = yScale; result.M23 = Fixed.Zero; result.M24 = Fixed.Zero;
-            result.M31 = Fixed.Zero; result.M32 = Fixed.Zero; result.M33 = zScale; result.M34 = Fixed.Zero;
-            result.M41 = tx; result.M42 = ty; result.M43 = tz; result.M44 = Fixed.One;
+            result.M11 = xScale; result.M12 = Fixed.zero; result.M13 = Fixed.zero; result.M14 = Fixed.zero;
+            result.M21 = Fixed.zero; result.M22 = yScale; result.M23 = Fixed.zero; result.M24 = Fixed.zero;
+            result.M31 = Fixed.zero; result.M32 = Fixed.zero; result.M33 = zScale; result.M34 = Fixed.zero;
+            result.M41 = tx; result.M42 = ty; result.M43 = tz; result.M44 = Fixed.one;
 
             return result;
         }
@@ -872,22 +872,22 @@ namespace QTool.QFixed
             // [  0  c  s  0 ]
             // [  0 -s  c  0 ]
             // [  0  0  0  1 ]
-            result.M11 = Fixed.One;
-            result.M12 = Fixed.Zero;
-            result.M13 = Fixed.Zero;
-            result.M14 = Fixed.Zero;
-            result.M21 = Fixed.Zero;
+            result.M11 = Fixed.one;
+            result.M12 = Fixed.zero;
+            result.M13 = Fixed.zero;
+            result.M14 = Fixed.zero;
+            result.M21 = Fixed.zero;
             result.M22 = c;
             result.M23 = s;
-            result.M24 = Fixed.Zero;
-            result.M31 = Fixed.Zero;
+            result.M24 = Fixed.zero;
+            result.M31 = Fixed.zero;
             result.M32 = -s;
             result.M33 = c;
-            result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero;
-            result.M42 = Fixed.Zero;
-            result.M43 = Fixed.Zero;
-            result.M44 = Fixed.One;
+            result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero;
+            result.M42 = Fixed.zero;
+            result.M43 = Fixed.zero;
+            result.M44 = Fixed.one;
 
             return result;
         }
@@ -905,29 +905,29 @@ namespace QTool.QFixed
             Fixed c = MathFixed.Cos(radians);
             Fixed s = MathFixed.Sin(radians);
 
-            Fixed y = centerPoint.y * (Fixed.One - c) + centerPoint.z * s;
-            Fixed z = centerPoint.z * (Fixed.One - c) - centerPoint.y * s;
+            Fixed y = centerPoint.y * (Fixed.one - c) + centerPoint.z * s;
+            Fixed z = centerPoint.z * (Fixed.one - c) - centerPoint.y * s;
 
             // [  1  0  0  0 ]
             // [  0  c  s  0 ]
             // [  0 -s  c  0 ]
             // [  0  y  z  1 ]
-            result.M11 = Fixed.One;
-            result.M12 = Fixed.Zero;
-            result.M13 = Fixed.Zero;
-            result.M14 = Fixed.Zero;
-            result.M21 = Fixed.Zero;
+            result.M11 = Fixed.one;
+            result.M12 = Fixed.zero;
+            result.M13 = Fixed.zero;
+            result.M14 = Fixed.zero;
+            result.M21 = Fixed.zero;
             result.M22 = c;
             result.M23 = s;
-            result.M24 = Fixed.Zero;
-            result.M31 = Fixed.Zero;
+            result.M24 = Fixed.zero;
+            result.M31 = Fixed.zero;
             result.M32 = -s;
             result.M33 = c;
-            result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero;
+            result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero;
             result.M42 = y;
             result.M43 = z;
-            result.M44 = Fixed.One;
+            result.M44 = Fixed.one;
 
             return result;
         }
@@ -949,21 +949,21 @@ namespace QTool.QFixed
             // [  s  0  c  0 ]
             // [  0  0  0  1 ]
             result.M11 = c;
-            result.M12 = Fixed.Zero;
+            result.M12 = Fixed.zero;
             result.M13 = -s;
-            result.M14 = Fixed.Zero;
-            result.M21 = Fixed.Zero;
-            result.M22 = Fixed.One;
-            result.M23 = Fixed.Zero;
-            result.M24 = Fixed.Zero;
+            result.M14 = Fixed.zero;
+            result.M21 = Fixed.zero;
+            result.M22 = Fixed.one;
+            result.M23 = Fixed.zero;
+            result.M24 = Fixed.zero;
             result.M31 = s;
-            result.M32 = Fixed.Zero;
+            result.M32 = Fixed.zero;
             result.M33 = c;
-            result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero;
-            result.M42 = Fixed.Zero;
-            result.M43 = Fixed.Zero;
-            result.M44 = Fixed.One;
+            result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero;
+            result.M42 = Fixed.zero;
+            result.M43 = Fixed.zero;
+            result.M44 = Fixed.one;
 
             return result;
         }
@@ -981,29 +981,29 @@ namespace QTool.QFixed
             Fixed c = MathFixed.Cos(radians);
             Fixed s = MathFixed.Sin(radians);
 
-            Fixed x = centerPoint.x * (Fixed.One - c) - centerPoint.z * s;
-            Fixed z = centerPoint.x * (Fixed.One - c) + centerPoint.x * s;
+            Fixed x = centerPoint.x * (Fixed.one - c) - centerPoint.z * s;
+            Fixed z = centerPoint.x * (Fixed.one - c) + centerPoint.x * s;
 
             // [  c  0 -s  0 ]
             // [  0  1  0  0 ]
             // [  s  0  c  0 ]
             // [  x  0  z  1 ]
             result.M11 = c;
-            result.M12 = Fixed.Zero;
+            result.M12 = Fixed.zero;
             result.M13 = -s;
-            result.M14 = Fixed.Zero;
-            result.M21 = Fixed.Zero;
-            result.M22 = Fixed.One;
-            result.M23 = Fixed.Zero;
-            result.M24 = Fixed.Zero;
+            result.M14 = Fixed.zero;
+            result.M21 = Fixed.zero;
+            result.M22 = Fixed.one;
+            result.M23 = Fixed.zero;
+            result.M24 = Fixed.zero;
             result.M31 = s;
-            result.M32 = Fixed.Zero;
+            result.M32 = Fixed.zero;
             result.M33 = c;
-            result.M34 = Fixed.Zero;
+            result.M34 = Fixed.zero;
             result.M41 = x;
-            result.M42 = Fixed.Zero;
+            result.M42 = Fixed.zero;
             result.M43 = z;
-            result.M44 = Fixed.One;
+            result.M44 = Fixed.one;
 
             return result;
         }
@@ -1026,20 +1026,20 @@ namespace QTool.QFixed
             // [  0  0  0  1 ]
             result.M11 = c;
             result.M12 = s;
-            result.M13 = Fixed.Zero;
-            result.M14 = Fixed.Zero;
+            result.M13 = Fixed.zero;
+            result.M14 = Fixed.zero;
             result.M21 = -s;
             result.M22 = c;
-            result.M23 = Fixed.Zero;
-            result.M24 = Fixed.Zero;
-            result.M31 = Fixed.Zero;
-            result.M32 = Fixed.Zero;
-            result.M33 = Fixed.One;
-            result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero;
-            result.M42 = Fixed.Zero;
-            result.M43 = Fixed.Zero;
-            result.M44 = Fixed.One;
+            result.M23 = Fixed.zero;
+            result.M24 = Fixed.zero;
+            result.M31 = Fixed.zero;
+            result.M32 = Fixed.zero;
+            result.M33 = Fixed.one;
+            result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero;
+            result.M42 = Fixed.zero;
+            result.M43 = Fixed.zero;
+            result.M44 = Fixed.one;
 
             return result;
         }
@@ -1066,20 +1066,20 @@ namespace QTool.QFixed
             // [  x  y  0  1 ]
             result.M11 = c;
             result.M12 = s;
-            result.M13 = Fixed.Zero;
-            result.M14 = Fixed.Zero;
+            result.M13 = Fixed.zero;
+            result.M14 = Fixed.zero;
             result.M21 = -s;
             result.M22 = c;
-            result.M23 = Fixed.Zero;
-            result.M24 = Fixed.Zero;
-            result.M31 = Fixed.Zero;
-            result.M32 = Fixed.Zero;
-            result.M33 = Fixed.One;
-            result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero;
-            result.M42 = Fixed.Zero;
-            result.M43 = Fixed.Zero;
-            result.M44 = Fixed.One;
+            result.M23 = Fixed.zero;
+            result.M24 = Fixed.zero;
+            result.M31 = Fixed.zero;
+            result.M32 = Fixed.zero;
+            result.M33 = Fixed.one;
+            result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero;
+            result.M42 = Fixed.zero;
+            result.M43 = Fixed.zero;
+            result.M44 = Fixed.one;
 
             return result;
         }
@@ -1122,22 +1122,22 @@ namespace QTool.QFixed
             Fixed xx = x * x, yy = y * y, zz = z * z;
             Fixed xy = x * y, xz = x * z, yz = y * z;
 
-            result.M11 = xx + ca * (Fixed.One - xx);
+            result.M11 = xx + ca * (Fixed.one - xx);
             result.M12 = xy - ca * xy + sa * z;
             result.M13 = xz - ca * xz - sa * y;
-            result.M14 = Fixed.Zero;
+            result.M14 = Fixed.zero;
             result.M21 = xy - ca * xy - sa * z;
-            result.M22 = yy + ca * (Fixed.One - yy);
+            result.M22 = yy + ca * (Fixed.one - yy);
             result.M23 = yz - ca * yz + sa * x;
-            result.M24 = Fixed.Zero;
+            result.M24 = Fixed.zero;
             result.M31 = xz - ca * xz + sa * y;
             result.M32 = yz - ca * yz - sa * x;
-            result.M33 = zz + ca * (Fixed.One - zz);
-            result.M34 = Fixed.Zero;
-            result.M41 = Fixed.Zero;
-            result.M42 = Fixed.Zero;
-            result.M43 = Fixed.Zero;
-            result.M44 = Fixed.One;
+            result.M33 = zz + ca * (Fixed.one - zz);
+            result.M34 = Fixed.zero;
+            result.M41 = Fixed.zero;
+            result.M42 = Fixed.zero;
+            result.M43 = Fixed.zero;
+            result.M44 = Fixed.one;
         }
 
         /// <summary>

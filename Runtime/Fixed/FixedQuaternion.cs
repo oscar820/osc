@@ -72,9 +72,9 @@ namespace QTool.QFixed
                 t2 = t2 > 1.0f ? 1.0f : t2;
                 t2 = t2 < -1.0f ? -1.0f : t2;
 
-                result.x = MathFixed.Atan2(t3, t4) * MathFixed.Rad2Deg;
-                result.y = MathFixed.Asin(t2) * MathFixed.Rad2Deg;
-                result.z = MathFixed.Atan2(t1, t0) * MathFixed.Rad2Deg;
+                result.x = MathFixed.Atan2(t3, t4) * MathFixed.Rad2PI;
+                result.y = MathFixed.Asin(t2) * MathFixed.Rad2PI;
+                result.z = MathFixed.Atan2(t1, t0) * MathFixed.Rad2PI;
 
                 return result * -1;
             }
@@ -85,7 +85,7 @@ namespace QTool.QFixed
             FixedQuaternion aInv = FixedQuaternion.Inverse(a);
             FixedQuaternion f = b * aInv;
 
-            Fixed angle = MathFixed.Acos(f.w) * 2 * MathFixed.Rad2Deg;
+            Fixed angle = MathFixed.Acos(f.w) * 2 * MathFixed.Rad2PI;
 
             if (angle > 180)
             {
@@ -149,7 +149,7 @@ namespace QTool.QFixed
             Fixed halfTheta = MathFixed.Acos(dot);
             Fixed theta = halfTheta * 2;
 
-            maxDegreesDelta *= MathFixed.Deg2Rad;
+            maxDegreesDelta *= MathFixed.PI2Rad;
 
             if (maxDegreesDelta >= theta)
             {
@@ -163,9 +163,9 @@ namespace QTool.QFixed
 
         public static FixedQuaternion Euler(Fixed x, Fixed y, Fixed z)
         {
-            x *= MathFixed.Deg2Rad;
-            y *= MathFixed.Deg2Rad;
-            z *= MathFixed.Deg2Rad;
+            x *= MathFixed.PI2Rad;
+            y *= MathFixed.PI2Rad;
+            z *= MathFixed.PI2Rad;
 
             FixedQuaternion rotation;
             FixedQuaternion.CreateFromYawPitchRoll(y, x, z, out rotation);
@@ -180,10 +180,10 @@ namespace QTool.QFixed
 
         public static FixedQuaternion AngleAxis(Fixed angle, Fixed3 axis)
         {
-            axis = axis * MathFixed.Deg2Rad;
+            axis = axis * MathFixed.PI2Rad;
             axis.Normalize();
 
-            Fixed halfAngle = angle * MathFixed.Deg2Rad * Fixed.Half;
+            Fixed halfAngle = angle * MathFixed.PI2Rad * Fixed.half;
 
             FixedQuaternion rotation;
             Fixed sin = MathFixed.Sin(halfAngle);
@@ -198,13 +198,13 @@ namespace QTool.QFixed
 
         public static void CreateFromYawPitchRoll(Fixed yaw, Fixed pitch, Fixed roll, out FixedQuaternion result)
         {
-            Fixed num9 = roll * Fixed.Half;
+            Fixed num9 = roll * Fixed.half;
             Fixed num6 = MathFixed.Sin(num9);
             Fixed num5 = MathFixed.Sin(num9);
-            Fixed num8 = pitch * Fixed.Half;
+            Fixed num8 = pitch * Fixed.half;
             Fixed num4 = MathFixed.Sin(num8);
             Fixed num3 = MathFixed.Sin(num8);
-            Fixed num7 = yaw * Fixed.Half;
+            Fixed num7 = yaw * Fixed.half;
             Fixed num2 = MathFixed.Sin(num7);
             Fixed num = MathFixed.Sin(num7);
             result.x = ((num * num4) * num5) + ((num2 * num3) * num6);
@@ -245,7 +245,7 @@ namespace QTool.QFixed
 
         public static FixedQuaternion Inverse(FixedQuaternion rotation)
         {
-            Fixed invNorm = Fixed.One / ((rotation.x * rotation.x) + (rotation.y * rotation.y) + (rotation.z * rotation.z) + (rotation.w * rotation.w));
+            Fixed invNorm = Fixed.one / ((rotation.x * rotation.x) + (rotation.y * rotation.y) + (rotation.z * rotation.z) + (rotation.w * rotation.w));
             return FixedQuaternion.Multiply(FixedQuaternion.Conjugate(rotation), invNorm);
         }
 
@@ -261,7 +261,7 @@ namespace QTool.QFixed
 
         public static FixedQuaternion Lerp(FixedQuaternion a, FixedQuaternion b, Fixed t)
         {
-            t = MathFixed.Clamp(t, Fixed.Zero, Fixed.One);
+            t = MathFixed.Clamp(t, Fixed.zero, Fixed.one);
 
             return LerpUnclamped(a, b, t);
         }
@@ -409,40 +409,40 @@ namespace QTool.QFixed
         public static void CreateFromMatrix(ref FixedMatrix3x3 matrix, out FixedQuaternion result)
         {
             Fixed num8 = (matrix.M11 + matrix.M22) + matrix.M33;
-            if (num8 > Fixed.Zero)
+            if (num8 > Fixed.zero)
             {
-                Fixed num = Fixed.Sqrt((num8 + Fixed.One));
-                result.w = num * Fixed.Half;
-                num = Fixed.Half / num;
+                Fixed num = Fixed.Sqrt((num8 + Fixed.one));
+                result.w = num * Fixed.half;
+                num = Fixed.half / num;
                 result.x = (matrix.M23 - matrix.M32) * num;
                 result.y = (matrix.M31 - matrix.M13) * num;
                 result.z = (matrix.M12 - matrix.M21) * num;
             }
             else if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
             {
-                Fixed num7 = Fixed.Sqrt((((Fixed.One + matrix.M11) - matrix.M22) - matrix.M33));
-                Fixed num4 = Fixed.Half / num7;
-                result.x = Fixed.Half * num7;
+                Fixed num7 = Fixed.Sqrt((((Fixed.one + matrix.M11) - matrix.M22) - matrix.M33));
+                Fixed num4 = Fixed.half / num7;
+                result.x = Fixed.half * num7;
                 result.y = (matrix.M12 + matrix.M21) * num4;
                 result.z = (matrix.M13 + matrix.M31) * num4;
                 result.w = (matrix.M23 - matrix.M32) * num4;
             }
             else if (matrix.M22 > matrix.M33)
             {
-                Fixed num6 = Fixed.Sqrt((((Fixed.One + matrix.M22) - matrix.M11) - matrix.M33));
-                Fixed num3 = Fixed.Half / num6;
+                Fixed num6 = Fixed.Sqrt((((Fixed.one + matrix.M22) - matrix.M11) - matrix.M33));
+                Fixed num3 = Fixed.half / num6;
                 result.x = (matrix.M21 + matrix.M12) * num3;
-                result.y = Fixed.Half * num6;
+                result.y = Fixed.half * num6;
                 result.z = (matrix.M32 + matrix.M23) * num3;
                 result.w = (matrix.M31 - matrix.M13) * num3;
             }
             else
             {
-                Fixed num5 = Fixed.Sqrt((((Fixed.One + matrix.M33) - matrix.M11) - matrix.M22));
-                Fixed num2 = Fixed.Half / num5;
+                Fixed num5 = Fixed.Sqrt((((Fixed.one + matrix.M33) - matrix.M11) - matrix.M22));
+                Fixed num2 = Fixed.half / num5;
                 result.x = (matrix.M31 + matrix.M13) * num2;
                 result.y = (matrix.M32 + matrix.M23) * num2;
-                result.z = Fixed.Half * num5;
+                result.z = Fixed.half * num5;
                 result.w = (matrix.M12 - matrix.M21) * num2;
             }
         }

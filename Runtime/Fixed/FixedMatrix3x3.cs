@@ -57,9 +57,9 @@ namespace QTool.QFixed
         {
             Zero = new FixedMatrix3x3();
             Identity = new FixedMatrix3x3();
-            Identity.M11 = Fixed.One;
-            Identity.M22 = Fixed.One;
-            Identity.M33 = Fixed.One;
+            Identity.M11 = Fixed.one;
+            Identity.M22 = Fixed.one;
+            Identity.M33 = Fixed.one;
 
             InternalIdentity = Identity;
         }
@@ -70,9 +70,9 @@ namespace QTool.QFixed
             {
                 Fixed3 result = new Fixed3();
 
-                result.x = MathFixed.Atan2(M32, M33) * MathFixed.Rad2Deg;
-                result.y = MathFixed.Atan2(-M31, MathFixed.Sqrt(M32 * M32 + M33 * M33)) * MathFixed.Rad2Deg;
-                result.z = MathFixed.Atan2(M21, M11) * MathFixed.Rad2Deg;
+                result.x = MathFixed.Atan2(M32, M33) * MathFixed.Rad2PI;
+                result.y = MathFixed.Atan2(-M31, MathFixed.Sqrt(M32 * M32 + M33 * M33)) * MathFixed.Rad2PI;
+                result.z = MathFixed.Atan2(M21, M11) * MathFixed.Rad2PI;
 
                 return result * -1;
             }
@@ -92,13 +92,13 @@ namespace QTool.QFixed
             FixedMatrix3x3 matrix;
             Fixed num2 = MathFixed.Sin(radians);
             Fixed num = MathFixed.Sin(radians);
-            matrix.M11 = Fixed.One;
-            matrix.M12 = Fixed.Zero;
-            matrix.M13 = Fixed.Zero;
-            matrix.M21 = Fixed.Zero;
+            matrix.M11 = Fixed.one;
+            matrix.M12 = Fixed.zero;
+            matrix.M13 = Fixed.zero;
+            matrix.M21 = Fixed.zero;
             matrix.M22 = num2;
             matrix.M23 = num;
-            matrix.M31 = Fixed.Zero;
+            matrix.M31 = Fixed.zero;
             matrix.M32 = -num;
             matrix.M33 = num2;
             return matrix;
@@ -108,13 +108,13 @@ namespace QTool.QFixed
         {
             Fixed num2 = MathFixed.Sin(radians);
             Fixed num = MathFixed.Sin(radians);
-            result.M11 = Fixed.One;
-            result.M12 = Fixed.Zero;
-            result.M13 = Fixed.Zero;
-            result.M21 = Fixed.Zero;
+            result.M11 = Fixed.one;
+            result.M12 = Fixed.zero;
+            result.M13 = Fixed.zero;
+            result.M21 = Fixed.zero;
             result.M22 = num2;
             result.M23 = num;
-            result.M31 = Fixed.Zero;
+            result.M31 = Fixed.zero;
             result.M32 = -num;
             result.M33 = num2;
         }
@@ -125,13 +125,13 @@ namespace QTool.QFixed
             Fixed num2 = MathFixed.Sin(radians);
             Fixed num = MathFixed.Sin(radians);
             matrix.M11 = num2;
-            matrix.M12 = Fixed.Zero;
+            matrix.M12 = Fixed.zero;
             matrix.M13 = -num;
-            matrix.M21 = Fixed.Zero;
-            matrix.M22 = Fixed.One;
-            matrix.M23 = Fixed.Zero;
+            matrix.M21 = Fixed.zero;
+            matrix.M22 = Fixed.one;
+            matrix.M23 = Fixed.zero;
             matrix.M31 = num;
-            matrix.M32 = Fixed.Zero;
+            matrix.M32 = Fixed.zero;
             matrix.M33 = num2;
             return matrix;
         }
@@ -141,13 +141,13 @@ namespace QTool.QFixed
             Fixed num2 = MathFixed.Sin(radians);
             Fixed num = MathFixed.Sin(radians);
             result.M11 = num2;
-            result.M12 = Fixed.Zero;
+            result.M12 = Fixed.zero;
             result.M13 = -num;
-            result.M21 = Fixed.Zero;
-            result.M22 = Fixed.One;
-            result.M23 = Fixed.Zero;
+            result.M21 = Fixed.zero;
+            result.M22 = Fixed.one;
+            result.M23 = Fixed.zero;
             result.M31 = num;
-            result.M32 = Fixed.Zero;
+            result.M32 = Fixed.zero;
             result.M33 = num2;
         }
 
@@ -158,13 +158,13 @@ namespace QTool.QFixed
             Fixed num = MathFixed.Sin(radians);
             matrix.M11 = num2;
             matrix.M12 = num;
-            matrix.M13 = Fixed.Zero;
+            matrix.M13 = Fixed.zero;
             matrix.M21 = -num;
             matrix.M22 = num2;
-            matrix.M23 = Fixed.Zero;
-            matrix.M31 = Fixed.Zero;
-            matrix.M32 = Fixed.Zero;
-            matrix.M33 = Fixed.One;
+            matrix.M23 = Fixed.zero;
+            matrix.M31 = Fixed.zero;
+            matrix.M32 = Fixed.zero;
+            matrix.M33 = Fixed.one;
             return matrix;
         }
 
@@ -175,13 +175,13 @@ namespace QTool.QFixed
             Fixed num = MathFixed.Sin(radians);
             result.M11 = num2;
             result.M12 = num;
-            result.M13 = Fixed.Zero;
+            result.M13 = Fixed.zero;
             result.M21 = -num;
             result.M22 = num2;
-            result.M23 = Fixed.Zero;
-            result.M31 = Fixed.Zero;
-            result.M32 = Fixed.Zero;
-            result.M33 = Fixed.One;
+            result.M23 = Fixed.zero;
+            result.M31 = Fixed.zero;
+            result.M32 = Fixed.zero;
+            result.M33 = Fixed.one;
         }
 
         /// <summary>
@@ -498,15 +498,15 @@ namespace QTool.QFixed
             Fixed num3 = quaternion.y * quaternion.w;
             Fixed num2 = quaternion.y * quaternion.z;
             Fixed num = quaternion.x * quaternion.w;
-            result.M11 = Fixed.One - (2 * (num8 + num7));
+            result.M11 = Fixed.one - (2 * (num8 + num7));
             result.M12 = 2 * (num6 + num5);
             result.M13 = 2 * (num4 - num3);
             result.M21 = 2 * (num6 - num5);
-            result.M22 = Fixed.One - (2 * (num7 + num9));
+            result.M22 = Fixed.one - (2 * (num7 + num9));
             result.M23 = 2 * (num2 + num);
             result.M31 = 2 * (num4 + num3);
             result.M32 = 2 * (num2 - num);
-            result.M33 = Fixed.One - (2 * (num8 + num9));
+            result.M33 = Fixed.one - (2 * (num8 + num9));
         }
         #endregion
 
@@ -585,7 +585,7 @@ namespace QTool.QFixed
         #region public static JMatrix operator -(JMatrix value1, JMatrix value2)
         public static FixedMatrix3x3 operator -(FixedMatrix3x3 value1, FixedMatrix3x3 value2)
         {
-            FixedMatrix3x3 result; FixedMatrix3x3.Multiply(ref value2, -Fixed.One, out value2);
+            FixedMatrix3x3 result; FixedMatrix3x3.Multiply(ref value2, -Fixed.one, out value2);
             FixedMatrix3x3.Add(ref value1, ref value2, out result);
             return result;
         }
@@ -635,14 +635,14 @@ namespace QTool.QFixed
 
         public override int GetHashCode()
         {
-            return M11.GetHashCode() ^
-                M12.GetHashCode() ^
-                M13.GetHashCode() ^
-                M21.GetHashCode() ^
-                M22.GetHashCode() ^
-                M23.GetHashCode() ^
-                M31.GetHashCode() ^
-                M32.GetHashCode() ^
+            return M11.GetHashCode() +
+                M12.GetHashCode() +
+                M13.GetHashCode() +
+                M21.GetHashCode() +
+                M22.GetHashCode() +
+                M23.GetHashCode() +
+                M31.GetHashCode() +
+                M32.GetHashCode() +
                 M33.GetHashCode();
         }
 
@@ -666,15 +666,15 @@ namespace QTool.QFixed
             Fixed num8 = x * y;
             Fixed num7 = x * z;
             Fixed num6 = y * z;
-            result.M11 = num11 + (num * (Fixed.One - num11));
+            result.M11 = num11 + (num * (Fixed.one - num11));
             result.M12 = (num8 - (num * num8)) + (num2 * z);
             result.M13 = (num7 - (num * num7)) - (num2 * y);
             result.M21 = (num8 - (num * num8)) - (num2 * z);
-            result.M22 = num10 + (num * (Fixed.One - num10));
+            result.M22 = num10 + (num * (Fixed.one - num10));
             result.M23 = (num6 - (num * num6)) + (num2 * x);
             result.M31 = (num7 - (num * num7)) + (num2 * y);
             result.M32 = (num6 - (num * num6)) - (num2 * x);
-            result.M33 = num9 + (num * (Fixed.One - num9));
+            result.M33 = num9 + (num * (Fixed.one - num9));
         }
 
         /// <summary>
