@@ -41,8 +41,8 @@ namespace QTool.QFixed
                 UpdateChildPosition();
             }
         }
-        [SerializeField,HideInInspector]
-        private FixedQuaternion _localRotation;
+        [SerializeField, HideInInspector]
+        private FixedQuaternion _localRotation = FixedQuaternion.identity;
 
         public FixedQuaternion localRotation
         {
@@ -57,7 +57,7 @@ namespace QTool.QFixed
         }
 
         [SerializeField]
-        private FixedQuaternion _rotation;
+        private FixedQuaternion _rotation = FixedQuaternion.identity;
         public FixedQuaternion rotation
         {
             get

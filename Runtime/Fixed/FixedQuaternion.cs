@@ -4,27 +4,20 @@ using UnityEngine;
 using System;
 namespace QTool.QFixed
 {
-    /// <summary>
-    /// A Quaternion representing an orientation.
-    /// </summary>
+ 
     [Serializable]
     public struct FixedQuaternion
     {
 
-        /// <summary>The X component of the quaternion.</summary>
         public Fixed x;
-        /// <summary>The Y component of the quaternion.</summary>
         public Fixed y;
-        /// <summary>The Z component of the quaternion.</summary>
         public Fixed z;
-        /// <summary>The W component of the quaternion.</summary>
         public Fixed w;
 
-        public static readonly FixedQuaternion identity;
+        public static readonly FixedQuaternion identity = new FixedQuaternion(0, 0, 0, 1);
 
         static FixedQuaternion()
         {
-            identity = new FixedQuaternion(0, 0, 0, 1);
         }
 
         /// <summary>
