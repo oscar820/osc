@@ -231,6 +231,10 @@ namespace QTool.QFixed
         {
             return Dot(this, b);
         }
+        public static implicit operator Fixed2(Vector2 value)
+        {
+            return new Fixed2(value.x, value.y);
+        }
         public static Fixed Dot(Fixed2 a, Fixed2 b)
         {
             return a.x * b.x + b.y * a.y;
@@ -320,9 +324,17 @@ namespace QTool.QFixed
         {
             return new Fixed3(a.x - b.x, a.y - b.y, a.z - b.z);
         }
+        public static implicit operator Fixed3(Vector3 value)
+        {
+            return new Fixed3(value.x, value.y, value.z);
+        }
         public static Fixed3 operator *(Fixed3 a, Fixed b)
         {
             return new Fixed3(a.x * b, a.y * b, a.z * b);
+        }
+        public static Fixed3 operator *(Fixed a, Fixed3 b)
+        {
+            return b * a;
         }
         public static Fixed3 operator /(Fixed3 a, Fixed b)
         {
