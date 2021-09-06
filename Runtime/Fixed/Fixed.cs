@@ -133,6 +133,45 @@ namespace QTool.QFixed
             return new Fixed((long)Math.Sqrt(x.rawValue * Fixed.FixScale));
         }
     }
+    public class FixedWaitTime
+    {
+        public Fixed Time { get; protected set; }
+        public Fixed CurTime { get; protected set; }
+
+        public void Clear()
+        {
+            CurTime = 0;
+        }
+        public void Over()
+        {
+            CurTime = Time;
+        }
+        public void Reset(Fixed time, bool startOver = false)
+        {
+            this.Time = time;
+            CurTime = 0;
+            if (startOver) Over();
+        }
+        public FixedWaitTime(Fixed time, bool startOver = false)
+        {
+            Reset(time, startOver);
+        }
+
+        public bool Check(Fixed deltaTime, bool autoClear = true)
+        {
+            CurTime += deltaTime;
+            var subTime = CurTime - Time;
+            if (subTime >= 0)
+            {
+                if (autoClear) { CurTime = subTime; }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
     [System.Serializable]
     public struct Fixed2
     {
