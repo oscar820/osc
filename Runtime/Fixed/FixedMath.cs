@@ -4,91 +4,7 @@ using System;
 using UnityEngine;
 namespace QTool.QFixed
 {
-    public class ValueTable
-    {
-        public Fixed[] table;
-        public Fixed start;
-        public Fixed end;
-     
-        public Fixed length;
-        public int keyStart;
-        public int keyEnd;
-        public Fixed min = Fixed.MinValue;
-        public Fixed max = Fixed.MaxValue;
-        public ValueTable(Fixed start, Fixed end,Fixed invStart,Fixed invEnd, Fixed[] table)
-        {
-            this.table = table;
-            this.start = start;
-            this.end = end;
-            length = end - start;
-            keyStart = (( invStart-start)/length * (table.Length)).ToInt();
-            keyEnd = ((invEnd - start) / length * (table.Length)).ToInt();
-            foreach (var value in table)
-            {
-                min = Fixed.Min(value, min);
-            }
-            foreach (var value in table)
-            {
-                max = Fixed.Max(value, max);
-            }
-        }
-        public Fixed GetKey(Fixed value)
-        {
-            if (value < min || value > max)
-            {
-                throw new Exception("Value:"+value + "不在区间[" + start + "," + end + "]");
-            }
-            
-            var key= Find(value, keyStart,keyEnd-1);
-            return (key/ (table.Length-1)) * length+start;
-        }
-        private Fixed Find(Fixed value, int start, int end)
-        {
-            if (end- start  <=1)
-            {
-               return start+ (value-table[start])/(table[end] - table[start]);
-            }
-            var mid = (start + end)/2;
-            var midValue = table[mid];
-            if (value >= midValue)
-            {
-                return Find(value, mid, end);
-            }
-            else
-            {
-                return Find(value, start, mid);
-            }
-        }
-        public Fixed GetValue(Fixed key)
-        {
-
-            while (key < start)
-            {
-                key += length;
-            }
-            while (key > end)
-            {
-                key -= length;
-            }
-  
-            var t =( key-start) / length * (table.Length-1);
-            var index = t.ToInt();
-            if (index == t)
-            {
-                return table[index];
-            }
-            else
-            {
-                var nextIndex = index + 1;
-                if (nextIndex>=table.Length)
-                {
-                    nextIndex = 0;
-                }
-                return MathFixed.Lerp(table[index], table[nextIndex], t - index);
-            }
-        }
-    }
-
+   
     /// <summary>
     /// 定点数数学类
     /// </summary>
@@ -188,5 +104,117 @@ namespace QTool.QFixed
             return Atan(y/x);
         }
     }
-  
+    public static class FixedRandom
+    {
+
+        static System.Random _random;
+        static System.Random Random
+        {
+            get
+            {
+                if (_random == null)
+                {
+                    throw new Exception ("未初始化随机种子无法获取随机数");
+                }
+                return _random;
+            }
+        }
+        public static void SetSeed(int seed)
+        {
+            _random = new System.Random(seed);
+        }
+        public static int Range(int start,int end)
+        {
+            return Random.Next(start,end);
+        }
+        public static Fixed Range(Fixed start, Fixed end)
+        {
+            return Fixed.Get( Random.Next((int)start.RawValue,(int) end.RawValue));
+        }
+    }
+    public class ValueTable
+    {
+        public Fixed[] table;
+        public Fixed start;
+        public Fixed end;
+
+        public Fixed length;
+        public int keyStart;
+        public int keyEnd;
+        public Fixed min = Fixed.MinValue;
+        public Fixed max = Fixed.MaxValue;
+        public ValueTable(Fixed start, Fixed end, Fixed invStart, Fixed invEnd, Fixed[] table)
+        {
+            this.table = table;
+            this.start = start;
+            this.end = end;
+            length = end - start;
+            keyStart = ((invStart - start) / length * (table.Length)).ToInt();
+            keyEnd = ((invEnd - start) / length * (table.Length)).ToInt();
+            foreach (var value in table)
+            {
+                min = Fixed.Min(value, min);
+            }
+            foreach (var value in table)
+            {
+                max = Fixed.Max(value, max);
+            }
+        }
+        public Fixed GetKey(Fixed value)
+        {
+            if (value < min || value > max)
+            {
+                throw new Exception("Value:" + value + "不在区间[" + start + "," + end + "]");
+            }
+
+            var key = Find(value, keyStart, keyEnd - 1);
+            return (key / (table.Length - 1)) * length + start;
+        }
+        private Fixed Find(Fixed value, int start, int end)
+        {
+            if (end - start <= 1)
+            {
+                return start + (value - table[start]) / (table[end] - table[start]);
+            }
+            var mid = (start + end) / 2;
+            var midValue = table[mid];
+            if (value >= midValue)
+            {
+                return Find(value, mid, end);
+            }
+            else
+            {
+                return Find(value, start, mid);
+            }
+        }
+        public Fixed GetValue(Fixed key)
+        {
+
+            while (key < start)
+            {
+                key += length;
+            }
+            while (key > end)
+            {
+                key -= length;
+            }
+
+            var t = (key - start) / length * (table.Length - 1);
+            var index = t.ToInt();
+            if (index == t)
+            {
+                return table[index];
+            }
+            else
+            {
+                var nextIndex = index + 1;
+                if (nextIndex >= table.Length)
+                {
+                    nextIndex = 0;
+                }
+                return MathFixed.Lerp(table[index], table[nextIndex], t - index);
+            }
+        }
+    }
+
 }

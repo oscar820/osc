@@ -302,7 +302,6 @@ MonoBehaviour:
     y:
       rawValue: 0
   toggle: 0
-  ftransform: {fileID: 797409364}
   index: 0
   v3: {x: 1, y: 2, z: 3}
   b: 
@@ -381,51 +380,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _localPosition:
-    x:
-      rawValue: -900
-    y:
-      rawValue: 740
-    z:
-      rawValue: 0
+    x: {}
+    y: {}
+    z: {}
   _position:
-    x:
-      rawValue: -900
-    y:
-      rawValue: 740
-    z:
-      rawValue: 0
+    x: {}
+    y: {}
+    z: {}
+  _prevPosition:
+    x: {}
+    y: {}
+    z: {}
   _localRotation:
-    x:
-      rawValue: -694
-    y:
-      rawValue: 166
-    z:
-      rawValue: 115
-    w:
-      rawValue: 691
+    x: {}
+    y: {}
+    z: {}
+    w: {}
   _rotation:
-    x:
-      rawValue: -694
-    y:
-      rawValue: 166
-    z:
-      rawValue: 115
-    w:
-      rawValue: 691
+    x: {}
+    y: {}
+    z: {}
+    w: {}
   _scale:
-    x:
-      rawValue: 2758
-    y:
-      rawValue: 1000
-    z:
-      rawValue: 1000
+    x: {}
+    y: {}
+    z: {}
   _localScale:
-    x:
-      rawValue: 2758
-    y:
-      rawValue: 1000
-    z:
-      rawValue: 1000
+    x: {}
+    y: {}
+    z: {}
   fixedParent: {fileID: 0}
   fixedChildren: []
 --- !u!4 &797409369 stripped
@@ -772,15 +755,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.618
+      value: 0.61799484
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.14
+      value: -0.14002055
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.04
+      value: 0.0399822
       objectReference: {fileID: 0}
     - target: {fileID: 4473334594295032771, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -846,51 +829,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _localPosition:
-    x:
-      rawValue: 618
-    y:
-      rawValue: -140
-    z:
-      rawValue: 40
+    x: {}
+    y: {}
+    z: {}
   _position:
-    x:
-      rawValue: 723
-    y:
-      rawValue: 656
-    z:
-      rawValue: -534
+    x: {}
+    y: {}
+    z: {}
+  _prevPosition:
+    x: {}
+    y: {}
+    z: {}
   _localRotation:
-    x:
-      rawValue: 0
-    y:
-      rawValue: 0
-    z:
-      rawValue: 0
-    w:
-      rawValue: 1000
+    x: {}
+    y: {}
+    z: {}
+    w: {}
   _rotation:
-    x:
-      rawValue: -694
-    y:
-      rawValue: 166
-    z:
-      rawValue: 115
-    w:
-      rawValue: 691
+    x: {}
+    y: {}
+    z: {}
+    w: {}
   _scale:
-    x:
-      rawValue: 1624
-    y:
-      rawValue: 1623
-    z:
-      rawValue: 1623
+    x: {}
+    y: {}
+    z: {}
   _localScale:
-    x:
-      rawValue: 589
-    y:
-      rawValue: 1623
-    z:
-      rawValue: 1623
+    x: {}
+    y: {}
+    z: {}
   fixedParent: {fileID: 0}
   fixedChildren: []
 --- !u!1001 &2123784209611813739
