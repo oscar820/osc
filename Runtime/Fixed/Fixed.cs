@@ -231,10 +231,6 @@ namespace QTool.QFixed
         {
             return Dot(this, b);
         }
-        public static implicit operator Fixed2(Vector2 value)
-        {
-            return new Fixed2(value.x, value.y);
-        }
         public static implicit operator Vector2(Fixed2 value)
         {
             return new Vector2(value.x.ToFloat(), value.y.ToFloat());
