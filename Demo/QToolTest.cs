@@ -137,8 +137,6 @@ namespace QTool.Test
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         //[ViewToggle("开关")]
         public bool toggle;
-
-        public FixedTransform ftransform;
         // Start is called before the first frame update
         void Start()
         {
@@ -150,11 +148,7 @@ namespace QTool.Test
             //var reader = new BinaryReader().Reset(writer.ToArray());
             // Debug.LogError(reader.ReadVector3()+":"+ reader.ReadVector3());
         }
-        [ContextMenu("旋转测试")]
-        public void RotateTest()
-        {
-            ftransform.Rotate(Fixed3.up*10);
-        }
+    
         // Update is called once per frame
         void Update()
         {

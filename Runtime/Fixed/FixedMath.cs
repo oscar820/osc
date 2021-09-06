@@ -88,6 +88,7 @@ namespace QTool.QFixed
             }
         }
     }
+
     /// <summary>
     /// 定点数数学类
     /// </summary>
@@ -114,14 +115,7 @@ namespace QTool.QFixed
         {
             return new Vector3(value.x.ToFloat(), value.y.ToFloat(), value.z.ToFloat());
         }
-        public static Quaternion ToQuaternion(this FixedQuaternion value)
-        {
-            return new Quaternion(value.x.ToFloat(), value.y.ToFloat(), value.z.ToFloat(), value.w.ToFloat());
-        }
-        public static FixedQuaternion ToFixedQuaternion(this Quaternion value)
-        {
-            return new FixedQuaternion(value.x, value.y, value.z, value.w);
-        }
+     
         public static readonly Fixed PI = new Fixed(3.14159265f);
         public static readonly Fixed PIDiv2 = PI / 2;
         public static readonly Fixed PIMul2 = PI * 2;
