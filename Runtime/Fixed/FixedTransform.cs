@@ -12,6 +12,7 @@ namespace QTool.QFixed
     [ExecuteInEditMode]
     public class FixedTransform : MonoBehaviour
     {
+        public static System.Action SyncAllTransform;
         [SerializeField,HideInInspector]
         private Fixed3 _localPosition;
 
@@ -103,7 +104,20 @@ namespace QTool.QFixed
             }
         }
 
+        public void SyncTransform()
+        {
+            position = transform.position.ToFixed3();
+            rotation = transform.rotation.ToFixedQuaternion();
+            scale = transform.lossyScale.ToFixed3();
 
+            _localPosition = transform.localPosition.ToFixed3();
+            _localRotation = transform.localRotation.ToFixedQuaternion();
+            _localScale = transform.localScale.ToFixed3();
+        }
+        private void OnDestroy()
+        {
+            SyncAllTransform -= SyncTransform;
+        }
 
         [HideInInspector]
         public FixedTransform fixedParent;
@@ -286,6 +300,7 @@ namespace QTool.QFixed
             {
                 return;
             }
+            SyncAllTransform += SyncTransform;
             foreach (Transform child in transform)
             {
                 FixedTransform tsChild = child.GetComponent<FixedTransform>();
@@ -311,13 +326,7 @@ namespace QTool.QFixed
         {
             if (transform.hasChanged)
             {
-                position = transform.position.ToFixed3();
-                rotation = transform.rotation.ToFixedQuaternion();
-                scale = transform.lossyScale.ToFixed3();
-
-                _localPosition = transform.localPosition.ToFixed3();
-                _localRotation = transform.localRotation.ToFixedQuaternion();
-                _localScale = transform.localScale.ToFixed3();
+                SyncTransform();
             }
         }
         private void UpdatePlayMode()
