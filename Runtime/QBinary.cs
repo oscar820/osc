@@ -78,7 +78,7 @@ namespace QTool.Binary
         {
             return (BaseStream as MemoryStream).ToArray();
         }
-        public void WriteByteLengthBytes(byte[] buffer, bool writeLength)
+        public void WriteByteLengthBytes(byte[] buffer)
         {
             if (buffer != null)
             {
@@ -102,7 +102,7 @@ namespace QTool.Binary
             }
             else
             {
-                base.Write(buffer.Length);
+                base.Write(0);
             }
           
         }
