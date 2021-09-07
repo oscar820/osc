@@ -90,21 +90,16 @@ namespace QTool.Binary
                 base.Write((byte)0);
             }
         }
-        public  void Write(byte[] buffer,bool writeLength)
+        public void Write(byte[] buffer,bool writeLength)
         {
-            if (buffer != null)
+            if (writeLength)
             {
-                if (writeLength)
-                {
-                    base.Write(buffer.Length);
-                }
-                base.Write(buffer);
+                Write(buffer);
             }
             else
             {
-                base.Write(0);
+                base.Write(buffer);
             }
-          
         }
         public override void Write(byte[] buffer)
         {
