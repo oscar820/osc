@@ -33,7 +33,7 @@ namespace QTool.Binary
         public byte[] ReadByteLengthBytes()
         {
 
-            var count = base.ReadInt32();
+            var count = base.ReadByte();
             return base.ReadBytes(count);
         }
         public override byte[] ReadBytes(int count=-1)
