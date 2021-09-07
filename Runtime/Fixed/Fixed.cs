@@ -5,7 +5,7 @@ namespace QTool.QFixed
     [System.Serializable]
     public struct Fixed
     {
-        public const int FixScale = 10000;
+        public const int FixScale = 1<<32;
         public readonly static Fixed zero = new Fixed(0);
         public readonly static Fixed one = new Fixed(1);
         public readonly static Fixed half = new Fixed(0.5f);
