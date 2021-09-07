@@ -30,18 +30,18 @@ namespace QTool.Binary
         {
         }
         public MemoryStream memory => BaseStream as MemoryStream;
-      
+        public byte[] ReadByteLengthBytes()
+        {
+
+            var count = base.ReadInt32();
+            return base.ReadBytes(count);
+        }
         public override byte[] ReadBytes(int count=-1)
         {
             if (count < 0)
             {
                 count= base.ReadInt32();
             }
-            return base.ReadBytes(count);
-        }
-        public byte[] ReadByteLengthBytes()
-        {
-            var count = base.ReadByte();
             return base.ReadBytes(count);
         }
         protected override void Dispose(bool disposing)
@@ -51,7 +51,6 @@ namespace QTool.Binary
            
         }
     }
-    
     public class QBinaryWriter : BinaryWriter
     {
         public static Action<QBinaryWriter,object, Type> customWriteType;
@@ -80,30 +79,20 @@ namespace QTool.Binary
         }
         public void WriteByteLengthBytes(byte[] buffer)
         {
-            if (buffer != null)
+            if (buffer == null)
+            {
+                base.Write((byte)0);
+            }
+            else
             {
                 base.Write((byte)buffer.Length);
                 base.Write(buffer);
             }
-            else
-            {
-                base.Write((byte)0);
-            }
-        }
-        public void Write(byte[] buffer,bool writeLength)
-        {
-            if (writeLength)
-            {
-                Write(buffer);
-            }
-            else
-            {
-                base.Write(buffer);
-            }
+
         }
         public override void Write(byte[] buffer)
         {
-            if (buffer != null)
+            if (buffer == null)
             {
                 base.Write(0);
             }
@@ -112,7 +101,7 @@ namespace QTool.Binary
                 base.Write(buffer.Length);
                 base.Write(buffer);
             }
-          
+           
         }
         protected override void Dispose(bool disposing)
         {
