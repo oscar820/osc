@@ -39,6 +39,11 @@ namespace QTool.Binary
             }
             return base.ReadBytes(count);
         }
+        public byte[] ReadByteLengthBytes()
+        {
+            var count = base.ReadByte();
+            return base.ReadBytes(count);
+        }
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -46,6 +51,7 @@ namespace QTool.Binary
            
         }
     }
+    
     public class QBinaryWriter : BinaryWriter
     {
         public static Action<QBinaryWriter,object, Type> customWriteType;
@@ -72,6 +78,11 @@ namespace QTool.Binary
         {
             return (BaseStream as MemoryStream).ToArray();
         }
+        public void WriteByteLengthBytes(byte[] buffer, bool writeLength)
+        {
+            base.Write((byte)buffer.Length);
+            base.Write(buffer);
+        }
         public  void Write(byte[] buffer,bool writeLength)
         {
             if (writeLength)
@@ -82,8 +93,16 @@ namespace QTool.Binary
         }
         public override void Write(byte[] buffer)
         {
-            base.Write(buffer.Length);
-            base.Write(buffer);
+            if (buffer != null)
+            {
+                base.Write(0);
+            }
+            else
+            {
+                base.Write(buffer.Length);
+                base.Write(buffer);
+            }
+          
         }
         protected override void Dispose(bool disposing)
         {
