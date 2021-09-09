@@ -4,11 +4,10 @@ using UnityEngine;
 using QTool;
 using System.Text;
 using System;
-using QTool.Serialize;
+using QTool.Binary;
 using System.Reflection;
 using QTool.Inspector;
 using System.Runtime.Serialization.Formatters.Binary;
-using QTool.Binary;
 using QTool.Reflection;
 using QTool.QFixed;
 using System.Threading.Tasks;
@@ -65,7 +64,7 @@ namespace QTool.Test
         }
     }
 
-    [QType()]
+    //[QType()]
     [System.Serializable]
     public class TestClass//:IQSerialize
     {
@@ -99,7 +98,7 @@ namespace QTool.Test
         }
     }
 
-    [QType()]
+    //[QType()]
     [System.Serializable]
     public class TestClass2//:IQSerialize
     {
@@ -186,9 +185,9 @@ namespace QTool.Test
 
         public byte[] testBytes;
 
-         [HorizontalGroup("t1", "toggle")]
+      //   [HorizontalGroup("t1", "toggle")]
         public TestClass test1;
-        [HorizontalGroup("t1", "toggle")]
+     //   [HorizontalGroup("t1", "toggle")]
         public TestClass test2;
         public byte[] xmlBytes;
         public byte[] jsonBytes;
@@ -244,6 +243,18 @@ namespace QTool.Test
                 str +=asinFunc(value).ToString("f4")+":"+  value.ToString("f4") + " , ";
             }
             Debug.LogError(str);
+        }
+        public byte[] scenebytes;
+        [ContextMenu("保存场景")]
+        public void SaveAll()
+        {
+          
+            scenebytes = QId.SaveAllInstance();
+        }
+        [ContextMenu("读取场景")]
+        public void LoadAll()
+        {
+            QId.LoadAllInstance(scenebytes);
         }
         [ContextMenu("输出三角函数值")]
         public void SinTabFunc()

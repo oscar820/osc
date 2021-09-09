@@ -1,8 +1,9 @@
-﻿using QTool.Binary;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using QTool.Binary;
+using QTool.Binary;
 using QTool.Inspector;
 namespace QTool
 {
@@ -28,7 +29,7 @@ namespace QTool
         }
     }
     [DisallowMultipleComponent]
-    public class QId : MonoBehaviour,IKey<string>
+    public class QId : MonoBehaviour,IKey<string>,IQSerialize
     {
 #if UNITY_EDITOR
         private void OnValidate()
@@ -52,7 +53,6 @@ namespace QTool
                 InstanceIdList[id] = this;
             }
         }
-        public static QDictionary<string, object> InstanceIdList = new QDictionary<string, object>();
         private void InitId()
         {
             if (Application.IsPlaying(gameObject)) return;
@@ -119,6 +119,43 @@ namespace QTool
 #endif
             }
         }
+
+        public static QDictionary<string, QId> InstanceIdList = new QDictionary<string, QId>();
+        public static byte[] SaveAllInstance()
+        {
+            using (QBinaryWriter writer=new QBinaryWriter())
+            {
+                var shortCount = (short)InstanceIdList.Count;
+             
+                writer.Write(shortCount);
+                for (int i = 0; i < shortCount; i++)
+                {
+                     var kv = InstanceIdList[i];
+                     writer.Write(kv.Key);
+                    writer.WriteObject(kv.Value);
+                }
+                return writer.ToArray();
+            }
+        }
+        public static void LoadAllInstance(byte[] bytes)
+        {
+           using (QBinaryReader reader=new QBinaryReader(bytes))
+            {
+                var shortCount = reader.ReadInt16();
+                for (int i = 0; i < shortCount; i++)
+                {
+                    var key = reader.ReadString();
+                    if (InstanceIdList.ContainsKey(key))
+                    {
+                        reader.ReadObject(InstanceIdList[key]);
+                    }
+                    else
+                    {
+                        Debug.LogError("不存在【" + key + "】");
+                    }
+                }
+            }
+        }
         public static string GetNewId(string key = "")
         {
             return string.IsNullOrWhiteSpace(key) ? System.Guid.NewGuid().ToString("N") : System.Guid.Parse(key).ToString("N");
@@ -130,13 +167,51 @@ namespace QTool
         [ReadOnly]
         [ViewName("实例Id", "IsPrefabInstance")]
         public string InstanceId;
-        private void Awake()
+
+        public List<IQSerialize> qSerializes = new List<IQSerialize>();
+        protected virtual void Awake()
         {
             if (string.IsNullOrWhiteSpace(InstanceId))
             {
                 InstanceId = GetNewId();
             }
+            InstanceIdList[InstanceId] = this;
+            qSerializes.Clear();
+            qSerializes.AddRange( GetComponents<IQSerialize>());
+            qSerializes.Remove(this);
         }
-  
+
+        public void Write(QBinaryWriter writer)
+        {
+            var byteLength = (byte)qSerializes.Count;
+            writer.Write(byteLength);
+            for (int i = 0; i < byteLength; i++)
+            {
+                writer.WriteObject(qSerializes[i]);
+            }
+          
+        }
+        public override string ToString()
+        {
+            return name;
+        }
+
+        public void Read(QBinaryReader reader)
+        {
+            var byteLength = reader.ReadByte();
+            if (qSerializes.Count == byteLength)
+            {
+                for (int i = 0; i < byteLength; i++)
+                {
+                 
+                    reader.ReadObject(qSerializes[i]);
+                }
+            }
+            else
+            {
+                Debug.LogError("读取序列化数据失败脚本数不匹配"+qSerializes.Count);
+            }
+           
+        }
     }
 }

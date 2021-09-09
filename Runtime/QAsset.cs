@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using QTool.Serialize;
+using QTool.Binary;
 using System.Threading.Tasks;
 
 

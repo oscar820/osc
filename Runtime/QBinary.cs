@@ -1,4 +1,4 @@
-﻿using QTool.Serialize;
+﻿using QTool.Binary;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,21 +10,21 @@ namespace QTool.Binary
   
     public class QBinaryReader:BinaryReader
     {
-        public static Func<QBinaryReader, Type,object, object> customReadType;
+      //  public static Func<QBinaryReader, Type,object, object> customReadType;
         public T ReadObject<T>(T obj = default)
         {
-            return QSerialize.Deserialize<T>(ReadBytes(), obj);
+            return (T)ReadObjectType(typeof(T), obj);
         }
-        public object ReadObjectType(Type type ,object obj = default,bool checkCustom=true)
+        public object ReadObjectType(Type type ,object obj = default)
         {
-            if (customReadType == null|| !checkCustom )
-            {
-                return QSerialize.DeserializeType(ReadBytes(), type, obj);
-            }
-            else
-            {
-                return customReadType(this, type, obj);
-            }
+            //if (customReadType == null|| !checkCustom )
+            //{
+                return this.DeserializeType(type, obj);
+            //}
+            //else
+            //{
+            //    return customReadType(this, type, obj);
+            //}
         }
         public QBinaryReader(byte[] bytes):base(new MemoryStream(bytes))
         {
@@ -53,25 +53,25 @@ namespace QTool.Binary
     }
     public class QBinaryWriter : BinaryWriter
     {
-        public static Action<QBinaryWriter,object, Type> customWriteType;
+       // public static Action<QBinaryWriter,object, Type> customWriteType;
         public QBinaryWriter() : base(new MemoryStream())
         {
         }
         public void WriteObject<T>(T obj)
         {
-            this.Write(QSerialize.Serialize( obj));
+            WriteObjectType(obj, typeof(T));
         }
 
-        public void WriteObjectType(object obj,Type type,bool checkCustom=true)
+        public void WriteObjectType(object obj,Type type)
         {
-            if ( customWriteType == null||!checkCustom)
-            {
-                this.Write(QSerialize.SerializeType(obj, type));
-            }
-            else
-            {
-                customWriteType(this,obj, type);
-            }
+            //if ( customWriteType == null||!checkCustom)
+            //{
+            this.SerializeType(obj, type);
+            //}
+            //else
+            //{
+            //    customWriteType(this,obj, type);
+            //}
         }
         public byte[] ToArray()
         {
@@ -221,35 +221,6 @@ namespace QTool.Binary
         {
             return BitConverter.ToSingle(value, start);
         }
-
-
-        public static byte[] GetBytes(this Vector3 value)
-        {
-            var bytes = new byte[4 * 3];
-            Array.Copy(value.x.GetBytes(), 0, bytes, 0, 4);
-            Array.Copy(value.y.GetBytes(), 0, bytes, 4*1, 4);
-            Array.Copy(value.z.GetBytes(), 0, bytes, 4*2, 4);
-            return bytes;
-        }
-        public static Vector3 GetVector3(this byte[] value, int start = 0)
-        {
-            return new Vector3(value.GetSingle(start+0), value.GetSingle(start+4 * 1), value.GetSingle(start+4 * 2));
-        }
-
-        public static byte[] GetBytes(this Quaternion value)
-        {
-            var bytes = new byte[4 * 4];
-            Array.Copy(value.x.GetBytes(), 0, bytes, 0, 4);
-            Array.Copy(value.y.GetBytes(), 0, bytes, 4*1, 4);
-            Array.Copy(value.z.GetBytes(), 0, bytes, 4*2, 4);
-            Array.Copy(value.w.GetBytes(), 0, bytes, 4*3, 4);
-            return bytes;
-        }
-        public static Quaternion GetQuaternion(this byte[] value, int start = 0)
-        {
-            return new Quaternion(value.GetSingle(start+0), value.GetSingle(start+4 * 1), value.GetSingle(start+4 * 2), value.GetSingle(start+4 * 3));
-        }
-
 
         public static byte[] GetBytes(this double value)
         {

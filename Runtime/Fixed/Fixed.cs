@@ -1,9 +1,11 @@
 using System;
 using UnityEngine;
+using QTool.Binary;
+
 namespace QTool.QFixed
 {
     [System.Serializable]
-    public struct Fixed
+    public struct Fixed:IQSerialize
     {
         public const long FixScale = 100000000;
         public readonly static Fixed zero = new Fixed(0);
@@ -132,6 +134,16 @@ namespace QTool.QFixed
         {
             return new Fixed((long)Math.Sqrt(x.rawValue * Fixed.FixScale));
         }
+
+        public void Write(QBinaryWriter write)
+        {
+            write.Write(rawValue);
+        }
+
+        public void Read(QBinaryReader read)
+        {
+            rawValue = read.ReadInt64();
+        }
     }
     public class FixedWaitTime
     {
@@ -173,7 +185,7 @@ namespace QTool.QFixed
         }
     }
     [System.Serializable]
-    public struct Fixed2
+    public struct Fixed2:IQSerialize
     {
         public readonly static Fixed2 one = new Fixed2(1, 1);
         public readonly static Fixed2 left = new Fixed2(-1, 0);
@@ -267,9 +279,21 @@ namespace QTool.QFixed
         {
             return x.GetHashCode() + y.GetHashCode();
         }
+
+        public void Write(QBinaryWriter writer)
+        {
+            writer.WriteObject(x);
+            writer.WriteObject(y);
+        }
+
+        public void Read(QBinaryReader reader)
+        {
+            x = reader.ReadObject(x);
+            y = reader.ReadObject(x);
+        }
     }
     [System.Serializable]
-    public struct Fixed3
+    public struct Fixed3:IQSerialize
     {
         public static readonly Fixed3 left = new Fixed3(-1, 0,0);
         public static readonly Fixed3 right = new Fixed3(1, 0,0);
@@ -380,6 +404,20 @@ namespace QTool.QFixed
         public override string ToString()
         {
             return "{" + x.ToString() + "," + y.ToString() + "," + z.ToString() + "}";
+        }
+
+        public void Write(QBinaryWriter writer)
+        {
+            writer.WriteObject(x);
+            writer.WriteObject(y);
+            writer.WriteObject(z);
+        }
+
+        public void Read(QBinaryReader reader)
+        {
+            x = reader.ReadObject(x);
+            y = reader.ReadObject(x);
+            z = reader.ReadObject(z);
         }
     }
 
