@@ -109,10 +109,10 @@ namespace QTool
     {
         [SerializeField]
         private List<T> list = new List<T>();
-        [NonSerialized]
-        [XmlIgnore]
-        [JsonIgnore]
-        Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
+        //[NonSerialized]
+        //[XmlIgnore]
+        //[JsonIgnore]
+        //Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
         public virtual T Get(TKey key)
         {
             return this.Get<T, TKey>(key); 
@@ -126,31 +126,31 @@ namespace QTool
         {
             get
             {
-                if (dic.ContainsKey(key))
-                {
-                    return dic[key];
-                }
-                else
+                //if (dic.ContainsKey(key)&&dic[key]!=null)
+                //{
+                //    return dic[key];
+                //}
+                //else
                 {
                     var value = Get(key);
-                    dic.Add(key, value);
+                   // dic.Add(key, value);
                     return value;
                 }
             }
             set
             {
                 this.RemoveKey(key);
-                if (dic.ContainsKey(key))
-                {
-                    dic[key] = value;
-                }
+                //if (dic.ContainsKey(key))
+                //{
+                //    dic[key] = value;
+                //}
                 this.Set(key, value);
             }
         }
         public new void Remove(T obj)
         {
             base.Remove(obj);
-            dic.Remove(obj.Key);
+           // dic.Remove(obj.Key);
         }
         public void RemoveKey(TKey key)
         {
@@ -159,7 +159,7 @@ namespace QTool
         public new void Clear()
         {
             base.Clear();
-            dic.Clear();
+            //dic.Clear();
         }
 
         public void OnBeforeSerialize()
