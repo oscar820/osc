@@ -41,7 +41,7 @@ namespace QTool
             if (id != PrefabId)
             {
                 PrefabId = id;
-                UnityEditor.EditorUtility.SetDirty(this);
+                this.SetDirty();
             }
         }
         private void SetInstanceId(string id)
@@ -49,7 +49,7 @@ namespace QTool
             if (id != InstanceId)
             {
                 InstanceId = id;
-                UnityEditor.EditorUtility.SetDirty(this);
+                this.SetDirty();
                 InstanceIdList[id] = this;
             }
         }
