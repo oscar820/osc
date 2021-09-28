@@ -1,9 +1,7 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
-using System;
-using QTool.Binary;
 using System.Threading.Tasks;
+using UnityEngine;
 
 
 namespace QTool.Asset
@@ -193,12 +191,31 @@ namespace QTool.Asset
         }
 
         static bool _loadOver = false;
+        static bool _loading = false;
         public static async Task LoadAllAsync()
         {
+          
             if (_loadOver) return;
             ResourceLoadAll();
+
 #if Addressables
-            await AddressableLoadAll();     
+            
+           if (_loading)
+            {
+                await Task.Run(async () =>
+                {
+                    while (_loading)
+                    {
+                        await Task.Delay(10);
+                    }
+                });
+            }
+            else
+            {
+                _loading = true;
+                await AddressableLoadAll();
+                _loading = false;
+            }
 #endif
         }
 
@@ -251,11 +268,11 @@ namespace QTool.Asset
         static Task loaderTask;
         static async Task AddressableLoadAll()
         {
-            //if (  loaderTask != null)
-            //{
-            //    await loaderTask;
-            //    return;
-            //}
+            if (  loaderTask != null)
+            {
+                await loaderTask;
+                return;
+            }
             if (Application.isPlaying)
             {
                 var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
