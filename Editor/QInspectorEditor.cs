@@ -350,6 +350,7 @@ namespace QTool.Inspector
             var method = objType.GetMethod(funcName, binding);
             if (method == null)
             {
+                Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
                 return null;
             }
             return method?.Invoke(method.IsStatic?null:obj, paramsList);
