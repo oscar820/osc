@@ -213,12 +213,9 @@ namespace QTool.Inspector
                     UpdateList(property.stringValue);
                 }
                 selectIndex = EditorGUI.Popup(position.HorizontalRect(0.7f, 1), selectIndex, enumList.ToArray());
-                if (GUI.changed)
+                if (selectIndex != 0)
                 {
-                    if (selectIndex != 0)
-                    {
-                        property.stringValue = selectValue;
-                    }
+                    property.stringValue = selectValue;
                 }
 
             }
