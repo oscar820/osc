@@ -55,15 +55,15 @@ namespace QTool
 
         protected virtual void Awake()
         {
-            if (_instance != null)
-            {
-                Debug.LogWarning("已存在 " + _instance+" 自动删除 "+this);
-                Destroy(gameObject); ;
-            }
-            else
-            {
+            //if (_instance != null)
+            //{
+            //    Debug.LogWarning("已存在 " + _instance+" 自动删除 "+this);
+            //    Destroy(gameObject); ;
+            //}
+            //else
+            //{
                 _instance = this as T;
-            }
+            //}
         }
     }
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>
@@ -78,15 +78,15 @@ namespace QTool
         protected static T _instance;
         protected virtual void Awake()
         {
-            if (_instance != null)
-            {
-                Debug.LogWarning("已存在 " + _instance + " 自动删除 " + this);
-                Destroy(gameObject);;
-            }
-            else
-            {
+            //if (_instance != null)
+            //{
+            //    Debug.LogWarning("已存在 " + _instance + " 自动删除 " + this);
+            //    Destroy(gameObject);;
+            //}
+            //else
+            //{
                 _instance = this as T;
-            }
+           // }
         }
     }
     public abstract class InstanceObject<T> where T : InstanceObject<T>
