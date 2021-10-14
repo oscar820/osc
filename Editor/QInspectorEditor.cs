@@ -346,13 +346,13 @@ namespace QTool.Inspector
             }
             object obj = property.serializedObject.targetObject;
             Type objType = obj.GetType();
-            var binding = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var binding = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic|BindingFlags.Static;
             var method = objType.GetMethod(funcName, binding);
             if (method == null)
             {
                 return null;
             }
-            return method?.Invoke(obj, paramsList);
+            return method?.Invoke(method.IsStatic?null:obj, paramsList);
         }
         public static Action DrawLayout(this SerializedProperty property)
         {
