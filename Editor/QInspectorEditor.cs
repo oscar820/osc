@@ -204,7 +204,10 @@ namespace QTool.Inspector
                     UpdateList(property.stringValue);
                 }
                 EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), att.name);
-                property.stringValue = EditorGUI.TextField(position.HorizontalRect(0.4f, 0.7f), property.stringValue);
+                if (att.CanWriteString)
+                {
+                    property.stringValue = EditorGUI.TextField(position.HorizontalRect(0.4f, 0.7f), property.stringValue);
+                }
                 if (GUI.changed)
                 {
                     UpdateList(property.stringValue);
