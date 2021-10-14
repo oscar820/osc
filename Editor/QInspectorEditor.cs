@@ -346,12 +346,15 @@ namespace QTool.Inspector
             }
             object obj = property.serializedObject.targetObject;
             Type objType = obj.GetType();
-            var binding = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic|BindingFlags.Static;
-            var method = objType.GetMethod(funcName, binding);
+            var method = objType.GetMethod(funcName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (method == null)
             {
-                Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
-                return null;
+                method = objType.GetMethod(funcName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (method==null)
+                {
+                    Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
+                    return null;
+                }
             }
             return method?.Invoke(method.IsStatic?null:obj, paramsList);
         }
