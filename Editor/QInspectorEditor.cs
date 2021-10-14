@@ -349,7 +349,7 @@ namespace QTool.Inspector
             var method = objType.GetMethod(funcName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (method == null)
             {
-                method = objType.GetMethod(funcName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                method = objType.GetStaticMethod(funcName);
                 if (method==null)
                 {
                     Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
