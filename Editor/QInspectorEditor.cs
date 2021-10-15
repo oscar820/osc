@@ -166,7 +166,7 @@ namespace QTool.Inspector
     public class ViewEnumAttributeDrawer : PropertyDrawBase<ViewEnumAttribute>
     {
         public List<string> enumList = null;
-        public int selectIndex = 0;
+        public int selectIndex =0;
         public string selectValue
         {
             get
@@ -177,10 +177,7 @@ namespace QTool.Inspector
         public void UpdateList(string input)
         {
             selectIndex = enumList.IndexOf(input);
-            if (selectIndex < 0)
-            {
-                selectIndex = 0;
-            }
+         
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -211,6 +208,11 @@ namespace QTool.Inspector
                 if (GUI.changed)
                 {
                     UpdateList(property.stringValue);
+                }
+                if (selectIndex < 0)
+                {
+                    selectIndex = 0;
+                    property.stringValue = selectValue;
                 }
                 
                 var newIndex = EditorGUI.Popup(position.HorizontalRect(0.7f, 1), selectIndex, enumList.ToArray());
