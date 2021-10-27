@@ -368,11 +368,11 @@ namespace QTool.Inspector
             {
                 return null;
             }
-            var changeCall = property.GetAttribute<ChangeCallAttribute>();
-            if (changeCall != null)
-            {
-                EditorGUI.BeginChangeCheck(); ;
-            }
+           // var changeCall = property.GetAttribute<ChangeCallAttribute>();
+            //if (changeCall != null)
+            //{
+            //    EditorGUI.BeginChangeCheck(); ;
+            //}
             var readonlyAtt = property.GetAttribute<ReadOnlyAttribute>();
             if (readonlyAtt != null && readonlyAtt.Active(property.serializedObject.targetObject))
             {
@@ -386,16 +386,16 @@ namespace QTool.Inspector
 
                 EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
             }
-            if (changeCall != null)
-            {
-                if (EditorGUI.EndChangeCheck())
-                {
-                    return () =>
-                    {
-                        property.Call(changeCall.changeCallBack);
-                    };
-                }
-            }
+            //if (changeCall != null)
+            //{
+            //    if (EditorGUI.EndChangeCheck())
+            //    {
+            //        return () =>
+            //        {
+            //            property.Call(changeCall.changeCallBack);
+            //        };
+            //    }
+            //}
             return null;
 
 
@@ -596,7 +596,7 @@ namespace QTool.Inspector
         public override void OnInspectorGUI()
         {
             GroupList.Clear();
-            EditorGUI.BeginChangeCheck();
+           // EditorGUI.BeginChangeCheck();
             DrawAllProperties(serializedObject);
 
             DrawButton();
@@ -605,7 +605,7 @@ namespace QTool.Inspector
             {
                 EditorUtility.SetDirty(target);
                 serializedObject.ApplyModifiedProperties();
-                ChangeCallBack?.Invoke();
+              //  ChangeCallBack?.Invoke();
             }
 
         }
@@ -827,7 +827,8 @@ namespace QTool.Inspector
         public void DrawArrayProperty(SerializedProperty property)
         {
             if (DrawToggleList(property)) return;
-            ChangeCallBack += property.DrawLayout();
+         //   ChangeCallBack += 
+                property.DrawLayout();
         }
         #endregion
         Action ChangeCallBack;
@@ -875,7 +876,8 @@ namespace QTool.Inspector
                     else
                     {
                         if (DrawToolbar(property)) return;
-                        ChangeCallBack += property.DrawLayout();
+                       // ChangeCallBack +=
+                        property.DrawLayout();
                     }
 
                 }
