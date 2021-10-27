@@ -368,11 +368,11 @@ namespace QTool.Inspector
             {
                 return null;
             }
-            //var changeCall = property.GetAttribute<ChangeCallAttribute>();
-            //if (changeCall != null)
-            //{
-            //    EditorGUI.BeginChangeCheck(); ;
-            //}
+            var changeCall = property.GetAttribute<ChangeCallAttribute>();
+            if (changeCall != null)
+            {
+                EditorGUI.BeginChangeCheck(); ;
+            }
             var readonlyAtt = property.GetAttribute<ReadOnlyAttribute>();
             if (readonlyAtt != null && readonlyAtt.Active(property.serializedObject.targetObject))
             {
@@ -386,16 +386,16 @@ namespace QTool.Inspector
 
                 EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
             }
-            //if (changeCall != null)
-            //{
-            //    if (EditorGUI.EndChangeCheck())
-            //    {
-            //        return () =>
-            //        {
-            //            property.Call(changeCall.changeCallBack);
-            //        };
-            //    }
-            //}
+            if (changeCall != null)
+            {
+                if (EditorGUI.EndChangeCheck())
+                {
+                    return () =>
+                    {
+                        property.Call(changeCall.changeCallBack);
+                    };
+                }
+            }
             return null;
 
 
