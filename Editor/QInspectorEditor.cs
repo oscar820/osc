@@ -605,7 +605,7 @@ namespace QTool.Inspector
             {
                 EditorUtility.SetDirty(target);
                 serializedObject.ApplyModifiedProperties();
-               // ChangeCallBack?.Invoke();
+                ChangeCallBack?.Invoke();
             }
 
         }
@@ -827,11 +827,10 @@ namespace QTool.Inspector
         public void DrawArrayProperty(SerializedProperty property)
         {
             if (DrawToggleList(property)) return;
-           // ChangeCallBack +=
-                property.DrawLayout();
+            ChangeCallBack += property.DrawLayout();
         }
         #endregion
-        //Action ChangeCallBack;
+        Action ChangeCallBack;
         public int pickId = -1;
         public void CheckGroup(GroupAttribute group, Action func)
         {
@@ -876,8 +875,7 @@ namespace QTool.Inspector
                     else
                     {
                         if (DrawToolbar(property)) return;
-                        //ChangeCallBack += 
-                        property.DrawLayout();
+                        ChangeCallBack += property.DrawLayout();
                     }
 
                 }

@@ -165,11 +165,12 @@ namespace QTool.Test
         {
 
         }
-        public Vector3 v3 = new Vector3();
         // public TestClass a = new TestClass { };
         // public Dictionary<string, float> aDic = new Dictionary<string, float>();
         // public Dictionary<string, float> bDic = new Dictionary<string, float>();
         public int[] b;
+
+        public Vector3 v3 = new Vector3();
         public byte[] info;
 
         [ViewButton("ScreenSize",control = "togle")]
