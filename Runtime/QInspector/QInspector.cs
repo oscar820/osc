@@ -4,19 +4,19 @@ using UnityEngine;
 using System;
 namespace QTool.Inspector
 {
-    /// <summary>
-    /// 数值更改时调用changeCallBack函数
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    public class ChangeCallAttribute : PropertyAttribute
-    {
-        public bool change;
-        public string changeCallBack;
-        public ChangeCallAttribute(string changeCallBack)
-        {
-            this.changeCallBack = changeCallBack;
-        }
-    }
+    ///// <summary>
+    ///// 数值更改时调用changeCallBack函数
+    ///// </summary>
+    //[AttributeUsage(AttributeTargets.Field)]
+    //public class ChangeCallAttribute : PropertyAttribute
+    //{
+    //    public bool change;
+    //    public string changeCallBack;
+    //    public ChangeCallAttribute(string changeCallBack)
+    //    {
+    //        this.changeCallBack = changeCallBack;
+    //    }
+    //}
     /// <summary>
     /// 使数据在inspector视窗不可更改
     /// </summary>
