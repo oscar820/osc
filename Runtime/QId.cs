@@ -32,10 +32,8 @@ namespace QTool
     public class QId : MonoBehaviour,IKey<string>,IQSerialize
     {
 #if UNITY_EDITOR
-        private void OnValidate()
-        {
-            InitId();
-        }
+     
+       
         private void SetPrefabId(string id)
         {
             if (id != PrefabId)
@@ -53,6 +51,7 @@ namespace QTool
                 InstanceIdList[id] = this;
             }
         }
+        [ContextMenu("更新ID")]
         private void InitId()
         {
             if (Application.IsPlaying(gameObject)) return;
