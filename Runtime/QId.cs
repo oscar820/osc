@@ -32,14 +32,20 @@ namespace QTool
     public class QId : MonoBehaviour,IKey<string>,IQSerialize
     {
 #if UNITY_EDITOR
-     
-       
+
+        private void OnValidate()
+        {
+            if (!Application.isPlaying)
+            {
+                InitId();
+            }
+        }
         private void SetPrefabId(string id)
         {
             if (id != PrefabId)
             {
                 PrefabId = id;
-                this.SetDirty();
+                //this.SetDirty();
             }
         }
         private void SetInstanceId(string id)
@@ -47,7 +53,7 @@ namespace QTool
             if (id != InstanceId)
             {
                 InstanceId = id;
-                this.SetDirty();
+                //this.SetDirty();
                 InstanceIdList[id] = this;
             }
         }
