@@ -24,14 +24,7 @@ namespace QTool.Asset
             var group = GetGroup(groupName);
             var guid = AssetDatabase.AssetPathToGUID(assetPath);
             var entry = entryDic.ContainsKey(guid) ? entryDic[guid] : AssetSetting.FindAssetEntry(guid);
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                entry.address = Path.GetFileNameWithoutExtension(assetPath);
-            }
-            else if(entry.address!=key)
-            {
-                entry.address = key;
-            }
+          
             if (entry == null)
             {
                 entry = AssetSetting.CreateOrMoveEntry(guid, group);
@@ -40,11 +33,14 @@ namespace QTool.Asset
             {
                 AssetSetting.MoveEntry(entry, group);
             }
-            else
+            if (string.IsNullOrWhiteSpace(key))
             {
-                return;
+                entry.address = Path.GetFileNameWithoutExtension(assetPath);
             }
-            
+            else if (entry.address != key)
+            {
+                entry.address = key;
+            }
             if (!entry.labels.Contains(groupName))
             {
              //   entry.labels.Clear();
