@@ -5,7 +5,6 @@ using System.Xml.Serialization;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Newtonsoft.Json;
 namespace QTool
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -543,14 +542,14 @@ namespace QTool
                 return (T)xz.Deserialize(sr);
             }
         }
-        public static string JsonSerialize<T>(T t, params Type[] extraTypes)
-        {
-            return JsonConvert.SerializeObject(t);
-        }
-        public static T JsonDeserialize<T>(string s, params Type[] extraTypes)
-        {
-            return JsonConvert.DeserializeObject<T>(s);
-        }
+        //public static string JsonSerialize<T>(T t, params Type[] extraTypes)
+        //{
+        //    return JsonConvert.SerializeObject(t);
+        //}
+        //public static T JsonDeserialize<T>(string s, params Type[] extraTypes)
+        //{
+        //    return JsonConvert.DeserializeObject<T>(s);
+        //}
         public static bool ExistsFile(string path)
         {
             return File.Exists(path);
