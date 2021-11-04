@@ -40,7 +40,23 @@ namespace QTool.Asset {
 
             }
         }
-
+        [MenuItem("Assets/工具/添加Addressable资源", priority = 0)]
+        public static void AddAddressableResource()
+        {
+            var index = 0;
+            foreach (var obj in Selection.objects)
+            {
+                if (obj == null) continue;
+                index++;
+                var path= AssetDatabase.GetAssetPath(obj);
+                EditorUtility.DisplayProgressBar("添加Addressable资源", "添加资源: " + path, index/Selection.objects.Length);
+                //var key = path.Substring(path.Length + 1);
+                var start = path.LastIndexOf('/')+1;
+                 var key = path.Substring(start, path.LastIndexOf('.')- start);
+                AddressableTool.SetAddresableGroup(path, "Default", key);
+            }
+            EditorUtility.ClearProgressBar();
+        }
 
 #endif
     }
