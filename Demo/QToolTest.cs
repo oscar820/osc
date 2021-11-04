@@ -290,15 +290,15 @@ namespace QTool.Test
                 //bl = QSerialize.Deserialize <List<IValueBase>>(info);
             }
             }, () => xmlBytes.Length);
-            Tool.RunTimeCheck("Json写入", () =>
-            {
-                for (int i = 0; i < 10000; i++)
-                {
-                   jsonBytes = FileManager.JsonSerialize(test1).GetBytes();
-                //info = QSerialize.Serialize(al);
-                //bl = QSerialize.Deserialize <List<IValueBase>>(info);
-            }
-            }, () => jsonBytes.Length);
+            //Tool.RunTimeCheck("Json写入", () =>
+            //{
+            //    for (int i = 0; i < 10000; i++)
+            //    {
+            //       jsonBytes = FileManager.JsonSerialize(test1).GetBytes();
+            //    //info = QSerialize.Serialize(al);
+            //    //bl = QSerialize.Deserialize <List<IValueBase>>(info);
+            //}
+            //}, () => jsonBytes.Length);
             Tool.RunTimeCheck("QSerialize写入", () =>
             {
                 for (int i = 0; i < 10000; i++)
