@@ -5,6 +5,8 @@ using System.Xml.Serialization;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+
 namespace QTool
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
@@ -242,7 +244,24 @@ namespace QTool
             }
             Debug.LogError("【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds + (getLength == null ? "" : " 长度" + getLength().ComputeScale()));
         }
-   
+
+        public static async Task DelayGameTime(float second, bool ignoreTimeScale = false)
+        {
+            var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
+
+            while (startTime + second > (ignoreTimeScale ? Time.unscaledTime : Time.time) && Application.isPlaying)
+            {
+                await Task.Yield();
+            }
+        }
+        public static async Task Wait(Func<bool> flagFunc)
+        {
+            if (flagFunc == null) return;
+            while (!flagFunc.Invoke() && Application.isPlaying)
+            {
+                await Task.Yield();
+            }
+        }
     }
     public static class ArrayExtend
     {
