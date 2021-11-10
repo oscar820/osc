@@ -80,13 +80,13 @@ namespace QTool
         {
             //if (_instance != null)
             //{
-            //    Debug.LogWarning("已存在 " + _instance + " 自动删除 " + this);
-            //    Destroy(gameObject);;
+            //    Debug.LogWarning("单例已存在 " + _instance + " 自动删除 " + this);
+            //    Destroy(gameObject); ;
             //}
             //else
             //{
-                _instance = this as T;
-           // }
+            _instance = this as T;
+            //}
         }
     }
     public abstract class InstanceObject<T> where T : InstanceObject<T>

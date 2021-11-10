@@ -119,4 +119,42 @@ namespace QTool
 #endif
         }
     }
+    public static class RectTransformExtend
+    {
+        public static Vector2 UpRightRectOffset(this RectTransform rectTransform)
+        {
+            return new Vector2(rectTransform.Width() * (1 - rectTransform.pivot.x), rectTransform.Height() * (1 - rectTransform.pivot.y));
+        }
+        public static Vector2 DownLeftRectOffset(this RectTransform rectTransform)
+        {
+            return new Vector2(rectTransform.Width() * (rectTransform.pivot.x), rectTransform.Height() * (rectTransform.pivot.y));
+        }
+
+        public static float Height(this RectTransform rectTransform)
+        {
+            return rectTransform.rect.size.y;
+        }
+        public static float Width(this RectTransform rectTransform)
+        {
+            return rectTransform.rect.size.x;
+        }
+        public static Vector2 Size(this RectTransform rectTransform)
+        {
+            return rectTransform.rect.size;
+        }
+
+        public static RectTransform RectTransform(this Transform transform)
+        {
+            return transform as RectTransform;
+        }
+        public static Vector2 UpRight(this RectTransform rectTransform)
+        {
+            return new Vector2(rectTransform.position.x, rectTransform.position.y) + rectTransform.UpRightRectOffset();
+        }
+        public static Vector2 DownLeft(this RectTransform rectTransform)
+        {
+            return new Vector2(rectTransform.position.x, rectTransform.position.y) - rectTransform.DownLeftRectOffset();
+        }
+
+    }
 }
