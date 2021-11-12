@@ -96,7 +96,7 @@ namespace QTool
         {
             this.defaultValue = defaultValue;
         }
-        public void Add(TKey key, T value)
+        public void Set(TKey key, T value)
         {
             this[key] = value;
         }
@@ -106,52 +106,113 @@ namespace QTool
             base.OnCreate(obj);
         }
     }
-    public class QList<TKey,T>:List<T>, ISerializationCallbackReceiver where T : IKey<TKey>
+    public class QList<TKey,T>:List<T> where T : IKey<TKey>
     {
-        [SerializeField]
-        private List<T> list = new List<T>();
-        //[NonSerialized]
-        //[XmlIgnore]
+        //[SerializeField]
+        //public List<T> list = new List<T>();
+        [NonSerialized]
+        [XmlIgnore]
         //[JsonIgnore]
-        //Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
+        protected Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
+        public new void Add(T value)
+        {
+            if (value != null)
+            {
+                Set(value.Key, value);
+            }
+        }
+        public new void Sort(Comparison<T> comparison)
+        {
+            dic.Clear();
+            base.Sort(comparison);
+        }
+        public new void Sort(int index, int count, IComparer<T> comparer)
+        {
+            dic.Clear();
+            base.Sort(index,count, comparer);
+        }
+        public new void Sort()
+        {
+            dic.Clear();
+            base.Sort();
+        }
+        public new void Contains(T value)
+        {
+            base.Contains(value);
+        }
+        public bool ContainsKey(TKey key)
+        {
+            if (dic.ContainsKey(key))
+            {
+                return true;
+            }
+            else
+            {
+                return this.ContainsKey<T, TKey>(key);
+            }
+        }
         public virtual T Get(TKey key)
         {
-            return this.Get<T, TKey>(key); 
+            if (!dic.ContainsKey(key))
+            {
+                dic[key] = this.Get<T, TKey>(key);
+            }
+            return dic[key];
         }
-    
+        public virtual void Set(TKey key,T value)
+        {
+            if (dic.ContainsKey(key))
+            {
+                dic[key] = value;
+            }
+            else
+            {
+                dic.Add(key, value);
+            }
+            this.Set<T,TKey>(key, value);
+        }
         public void Remove(TKey key)
         {
             RemoveKey(key);
+        }
+        List<TKey> keyList = new List<TKey>();
+        public new void RemoveAll(Predicate<T> match)
+        {
+            keyList.Clear();
+            if (match != null)
+            {
+                foreach (var item in this)
+                {
+                    if (item == null) return;
+                    if (match(item))
+                    {
+                        keyList.Add(item.Key);
+                    }
+                }
+            }
+            foreach (var key in keyList)
+            {
+                RemoveKey(key);
+            }
         }
         public T this[TKey key]
         {
             get
             {
-                //if (dic.ContainsKey(key)&&dic[key]!=null)
-                //{
-                //    return dic[key];
-                //}
-                //else
-                {
-                    var value = Get(key);
-                   // dic.Add(key, value);
-                    return value;
-                }
+                return Get(key);
             }
             set
             {
-                this.RemoveKey(key);
-                //if (dic.ContainsKey(key))
-                //{
-                //    dic[key] = value;
-                //}
-                this.Set(key, value);
+                Set(key, value);
             }
         }
         public new void Remove(T obj)
         {
-            base.Remove(obj);
-           // dic.Remove(obj.Key);
+            if (obj != null)
+            {
+                base.Remove(obj);
+                dic.Remove(obj.Key);
+            }
         }
         public void RemoveKey(TKey key)
         {
@@ -163,25 +224,30 @@ namespace QTool
             //dic.Clear();
         }
 
-        public void OnBeforeSerialize()
-        {
-            list = new List<T>(this);
-        }
+        //public void OnBeforeSerialize()
+        //{
+        //    list = new List<T>(this);
+        //}
 
-        public void OnAfterDeserialize()
-        {
-            Clear();
-            for (int i = 0; i < list.Count; i++)
-            {
-                Add(list[i]);
-            }
-        }
+        //public void OnAfterDeserialize()
+        //{
+        //    Clear();
+        //    for (int i = 0; i < list.Count; i++)
+        //    {
+        //        Add(list[i]);
+        //    }
+        //}
     }
-    public class QAutoList<KeyType, T> : QList<KeyType,T> where T :IKey<KeyType>, new()
+    public class QAutoList<TKey, T> : QList<TKey,T> where T :IKey<TKey>, new()
     {
-        public override T Get(KeyType key)
+    
+        public override T Get(TKey key)
         {
-            return this.GetAndCreate<T, KeyType>(key, OnCreate);
+            if (!dic.ContainsKey(key))
+            {
+                dic[key] = this.GetAndCreate<T, TKey>(key,OnCreate);
+            }
+            return dic[key];
         }
         public virtual void OnCreate(T obj)
         {
