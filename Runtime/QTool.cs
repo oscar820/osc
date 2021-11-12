@@ -136,9 +136,9 @@ namespace QTool
             dic.Clear();
             base.Sort();
         }
-        public new void Contains(T value)
+        public new bool Contains(T value)
         {
-            base.Contains(value);
+            return base.Contains(value);
         }
         public bool ContainsKey(TKey key)
         {
