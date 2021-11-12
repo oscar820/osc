@@ -9,19 +9,16 @@ namespace QTool
   
     public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceBehaviour<T> where ResourceLabel : PrefabAssetList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
     {
-        public  new static T Instance
+        public new static T Instance
         {
             get
             {
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<T>();
-                    if (_instance == null)
+                    if (_instance == null && Application.isPlaying)
                     {
-                        if (_instance == null)
-                        {
-                             GetNewInstance();
-                        }
+                        GetNewInstance();
                     }
                 }
                 return _instance;
@@ -42,7 +39,7 @@ namespace QTool
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<T>();
-                    if (_instance == null)
+                    if (_instance == null&&Application.isPlaying)
                     {
                         var obj = new GameObject(typeof(T).Name);
                         _instance = obj.AddComponent<T>();
