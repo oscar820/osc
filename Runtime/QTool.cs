@@ -142,6 +142,11 @@ namespace QTool
         }
         public bool ContainsKey(TKey key)
         {
+            if (key == null)
+            {
+                Debug.LogError("key 为 null");
+                return false;
+            }
             if (dic.ContainsKey(key))
             {
                 return true;
@@ -153,6 +158,11 @@ namespace QTool
         }
         public virtual T Get(TKey key)
         {
+            if (key == null)
+            {
+                Debug.LogError("key 为 null");
+                return default;
+            }
             if (!dic.ContainsKey(key))
             {
                 dic[key] = this.Get<T, TKey>(key);
@@ -161,6 +171,10 @@ namespace QTool
         }
         public virtual void Set(TKey key,T value)
         {
+            if (key == null)
+            {
+                Debug.LogError("key 为 null");
+            }
             if (dic.ContainsKey(key))
             {
                 dic[key] = value;
@@ -220,10 +234,20 @@ namespace QTool
         }
         public new void Clear()
         {
+            dic.Clear();
             base.Clear();
             //dic.Clear();
         }
-
+        public new void Reverse(int index, int count)
+        {
+            dic.Clear();
+            base.Reverse(index, count);
+        }
+        public new void Reverse()
+        {
+            dic.Clear();
+            base.Reverse();
+        }
         //public void OnBeforeSerialize()
         //{
         //    list = new List<T>(this);
