@@ -96,7 +96,7 @@ namespace QTool
         {
             this.defaultValue = defaultValue;
         }
-        public void Set(TKey key, T value)
+        public void Add(TKey key, T value)
         {
             this[key] = value;
         }
