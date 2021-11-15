@@ -335,7 +335,7 @@ namespace QTool
             Debug.LogError("【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds + (getLength == null ? "" : " 长度" + getLength().ComputeScale()));
         }
 
-        public static async Task DelayGameTime(float second, bool ignoreTimeScale = false)
+        public static async Task<bool> DelayGameTime(float second, bool ignoreTimeScale = false)
         {
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
 
@@ -343,6 +343,7 @@ namespace QTool
             {
                 await Task.Yield();
             }
+            return Application.isPlaying;
         }
         public static async Task Wait(Func<bool> flagFunc)
         {
