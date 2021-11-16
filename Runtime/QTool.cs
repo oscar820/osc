@@ -345,13 +345,14 @@ namespace QTool
             }
             return Application.isPlaying;
         }
-        public static async Task Wait(Func<bool> flagFunc)
+        public static async Task<bool> Wait(Func<bool> flagFunc)
         {
-            if (flagFunc == null) return;
+            if (flagFunc == null) return Application.isPlaying;
             while (!flagFunc.Invoke() && Application.isPlaying)
             {
                 await Task.Yield();
             }
+            return Application.isPlaying;
         }
     }
     public static class ArrayExtend
