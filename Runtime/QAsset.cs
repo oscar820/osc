@@ -28,6 +28,11 @@ namespace QTool.Asset
             if (entry == null)
             {
                 entry = AssetSetting.CreateOrMoveEntry(guid, group);
+                if (entry == null)
+                {
+                    Debug.LogError("生成资源【" + key + "】出错：" + assetPath);
+                    return;
+                }
             }
             else if (entry.parentGroup != group)
             {
