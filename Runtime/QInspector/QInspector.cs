@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 namespace QTool.Inspector
 {
+
     /// <summary>
     /// 数值更改时调用changeCallBack函数
     /// </summary>
@@ -180,32 +181,32 @@ namespace QTool.Inspector
         }
 
     }
-    /// <summary>
-    /// 显示按钮 调用函数CallFunc 无参数
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
-    public class HorizontalGroupAttribute : GroupAttribute
-    {
+    ///// <summary>
+    ///// 显示按钮 调用函数CallFunc 无参数
+    ///// </summary>
+    //[AttributeUsage(AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
+    //public class HorizontalGroupAttribute : GroupAttribute
+    //{
 
-        public HorizontalGroupAttribute(string name, string showControl = "") : base(name, showControl)
-        {
+    //    public HorizontalGroupAttribute(string name, string showControl = "") : base(name, showControl)
+    //    {
 
-        }
-    }
+    //    }
+    //}
 
-    /// <summary>
-    /// 显示按钮 调用函数CallFunc 无参数
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field| AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class GroupAttribute : ViewContorlAttribute
-    {
-        public string name;
-        public GroupAttribute(string name, string showControl = "")
-        {
-            this.name = name;
-            this.control = showControl;
-        }
-    }
+    ///// <summary>
+    ///// 显示按钮 调用函数CallFunc 无参数
+    ///// </summary>
+    //[AttributeUsage(AttributeTargets.Field| AttributeTargets.Method, AllowMultiple = true)]
+    //public abstract class GroupAttribute : ViewContorlAttribute
+    //{
+    //    public string name;
+    //    public GroupAttribute(string name, string showControl = "")
+    //    {
+    //        this.name = name;
+    //        this.control = showControl;
+    //    }
+    //}
 
     public abstract class QHeightAttribute : ViewNameAttribute
     {
@@ -215,5 +216,5 @@ namespace QTool.Inspector
             this.height = height;
         }
     }
- 
+
 }

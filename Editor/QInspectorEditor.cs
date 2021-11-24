@@ -10,19 +10,8 @@ using QTool.QFixed;
 namespace QTool.Inspector
 {
 
-    [CustomPropertyDrawer(typeof(Fixed))]
-    public class FixedDrawer : PropertyDrawer
-    {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            var longValue = property.FindPropertyRelative("rawValue");
-            longValue.longValue = new Fixed(EditorGUILayout.FloatField(label, Fixed.Get(longValue.longValue).ToFloat())).RawValue;
-        }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return 0;
-        }
-    }
+
+   
     #region 自定义显示效果
     public class PropertyDrawBase<T> : PropertyDrawer where T : PropertyAttribute
     {
@@ -532,10 +521,44 @@ namespace QTool.Inspector
             }
         }
     }
+
+    //[CustomPropertyDrawer(typeof(Fixed))]
+    //public class FixedDrawer : PropertyDrawer
+    //{
+    //    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    //    {
+    //        var longValue = property.FindPropertyRelative("rawValue");
+    //        longValue.longValue = new Fixed(EditorGUILayout.FloatField(label, Fixed.Get(longValue.longValue).ToFloat())).RawValue;
+    //    }
+    //    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    //    {
+    //        return 0;
+    //    }
+    //}
+
     [CustomEditor(typeof(UnityEngine.Object), true, isFallback = true)]
     [CanEditMultipleObjects]
     public class QInspectorEditor : Editor
     {
+
+
+        public override void OnInspectorGUI()
+        {
+            //GroupList.Clear();
+            EditorGUI.BeginChangeCheck();
+            DrawAllProperties(serializedObject);
+
+            DrawButton();
+        //    DrawGroup();
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(target);
+                serializedObject.ApplyModifiedProperties();
+                ChangeCallBack?.Invoke();
+            }
+
+        }
+
         Vector2 previewDir;
         Quaternion previewRotation
         {
@@ -593,46 +616,31 @@ namespace QTool.Inspector
         }
 
         public Dictionary<string, ReorderableList> listArray = new Dictionary<string, ReorderableList>();
-        public override void OnInspectorGUI()
-        {
-            GroupList.Clear();
-            EditorGUI.BeginChangeCheck();
-            DrawAllProperties(serializedObject);
 
-            DrawButton();
-            DrawGroup();
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(target);
-                serializedObject.ApplyModifiedProperties();
-                ChangeCallBack?.Invoke();
-            }
-
-        }
-        public void DrawGroup()
-        {
-            foreach (var kv in GroupList)
-            {
-                if (kv.Value.group is HorizontalGroupAttribute)
-                {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        if (kv.Value.group.Active(target))
-                        {
-                            kv.Value.func?.Invoke();
-                        }
-                    }
-                }
-            }
-        }
+        //public void DrawGroup()
+        //{
+        //    foreach (var kv in GroupList)
+        //    {
+        //        if (kv.Value.group is HorizontalGroupAttribute)
+        //        {
+        //            using (new EditorGUILayout.HorizontalScope())
+        //            {
+        //                if (kv.Value.group.Active(target))
+        //                {
+        //                    kv.Value.func?.Invoke();
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
 
+        public int pickId = -1;
         public void DrawButton()
         {
             foreach (var kv in typeInfo.buttonFunc)
             {
-                CheckGroup(kv.Value.MethodInfo.GetCustomAttribute<GroupAttribute>(), () =>
-                {
+                
                     var att = kv.Key;
                     if (att.Active(target))
                     {
@@ -667,7 +675,6 @@ namespace QTool.Inspector
                         }
 
                     }
-                });
 
             }
         }
@@ -827,39 +834,38 @@ namespace QTool.Inspector
         public void DrawArrayProperty(SerializedProperty property)
         {
             if (DrawToggleList(property)) return;
-            ChangeCallBack +=property.DrawLayout();
+            ChangeCallBack += property.DrawLayout();
         }
         #endregion
         Action ChangeCallBack;
-        public int pickId = -1;
-        public void CheckGroup(GroupAttribute group, Action func)
-        {
-            if (group == null)
-            {
-                func();
-            }
-            else
-            {
-                if (GroupList[group.name] == null)
-                {
-                    GroupList[group.name] = new GroupInfo()
-                    {
-                        group = group
-                    };
-                }
-                GroupList[group.name].func += func;
-            }
-        }
-        public class GroupInfo
-        {
-            public GroupAttribute group;
-            public Action func;
-        }
-        public QDictionary<string, GroupInfo> GroupList = new QDictionary<string, GroupInfo>();
+        //public void CheckGroup(GroupAttribute group, Action func)
+        //{
+        //    if (group == null)
+        //    {
+        //        func();
+        //    }
+        //    else
+        //    {
+        //        if (GroupList[group.name] == null)
+        //        {
+        //            GroupList[group.name] = new GroupInfo()
+        //            {
+        //                group = group
+        //            };
+        //        }
+        //        GroupList[group.name].func += func;
+        //    }
+        //}
+        //public class GroupInfo
+        //{
+        //    public GroupAttribute group;
+        //    public Action func;
+        //}
+       // public QDictionary<string, GroupInfo> GroupList = new QDictionary<string, GroupInfo>();
         public void DrawProperty(SerializedProperty property)
         {
-            CheckGroup(property.GetAttribute<GroupAttribute>(), () =>
-            {
+            //CheckGroup(property.GetAttribute<GroupAttribute>(), () =>
+            //{
                 if (property.name.Equals("m_Script"))
                 {
                     GUI.enabled = false;
@@ -875,11 +881,11 @@ namespace QTool.Inspector
                     else
                     {
                         if (DrawToolbar(property)) return;
-                        ChangeCallBack +=property.DrawLayout();
+                        ChangeCallBack += property.DrawLayout();
                     }
 
                 }
-            });
+          //  });
         }
     }
 }
