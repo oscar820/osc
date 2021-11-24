@@ -51,6 +51,7 @@ namespace QTool.Asset
              //   entry.labels.Clear();
                 entry.SetLabel(groupName, true, true);
             }
+            EditorUtility.SetDirty(group);
         }
        
 
