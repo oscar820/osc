@@ -396,6 +396,7 @@ namespace QTool.Binary
             catch (Exception e)
             {
                 Debug.LogError("反序列化[" + type + "]出错" + e);
+                return null;
             }
         }
         public static object DeserializeType(byte[] bytes, Type type, object target = null)
