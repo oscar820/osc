@@ -51,7 +51,8 @@ namespace QTool.Asset
              //   entry.labels.Clear();
                 entry.SetLabel(groupName, true, true);
             }
-            group.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true,true);
+            EditorUtility.SetDirty(AssetSetting);
+            EditorUtility.SetDirty(group);
         }
        
 
