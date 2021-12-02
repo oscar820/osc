@@ -200,6 +200,7 @@ namespace QTool.Asset
         {
           
             if (_loadOver) return;
+            var startTime = DateTime.Now;
             ResourceLoadAll();
 
 #if Addressables
@@ -220,6 +221,7 @@ namespace QTool.Asset
                 _loading = false;
             }
 #endif
+            Debug.LogError("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms");
         }
 
 
