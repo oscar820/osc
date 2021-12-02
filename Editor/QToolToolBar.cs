@@ -44,7 +44,7 @@ namespace QTool
             };
            
         }
-        [MenuItem("QTool/清空缓存/清空ResourcesList缓存")]
+        [MenuItem("QTool/清空缓存/清空AssetList缓存")]
         public static void ClearResourcesList()
         {
             foreach (var type in typeof(AssetList<,>).GetAllTypes())

@@ -203,7 +203,6 @@ namespace QTool.Asset
             ResourceLoadAll();
 
 #if Addressables
-            
            if (_loading)
             {
                 await Task.Run(async () =>
@@ -230,6 +229,7 @@ namespace QTool.Asset
 
         static async Task<TObj> AddressableGetAsync(string key)
         {
+            LoadAllAsync();
             if (objDic.ContainsKey(key))
             {
                 return objDic[key];
@@ -277,6 +277,7 @@ namespace QTool.Asset
                 await loaderTask;
                 return;
             }
+#if !UNITY_EDITOR
             if (Application.isPlaying)
             {
                 var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
@@ -302,10 +303,8 @@ namespace QTool.Asset
                 }
              
             }
-            else
-            {
-#if UNITY_EDITOR
-                var list = AddressableTool.GetLabelList(Label);
+#else
+            var list = AddressableTool.GetLabelList(Label);
                 foreach (var entry in list)
                 {
 
@@ -323,7 +322,6 @@ namespace QTool.Asset
                 }
                 _loadOver = true;
 #endif
-            }
         }
 
 
