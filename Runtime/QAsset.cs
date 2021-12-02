@@ -279,14 +279,14 @@ namespace QTool.Asset
                 await loaderTask;
                 return;
             }
-#if !UNITY_EDITOR
+
             if (Application.isPlaying)
             {
                 var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
                 loaderTask = loader.Task;
                 var obj = await loader.Task;
-                loaderTask=null;
-                if(loader.Status== UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                loaderTask = null;
+                if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
 
                     foreach (var result in loader.Result)
@@ -294,7 +294,7 @@ namespace QTool.Asset
                         Set(result);
                     }
                     ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
-                    _loadOver = true; 
+                    _loadOver = true;
                 }
                 else
                 {
@@ -303,10 +303,12 @@ namespace QTool.Asset
                         Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
                     }
                 }
-             
+
             }
-#else
-            var list = AddressableTool.GetLabelList(Label);
+            else
+            {
+#if UNITY_EDITOR
+                var list = AddressableTool.GetLabelList(Label);
                 foreach (var entry in list)
                 {
 
@@ -314,9 +316,9 @@ namespace QTool.Asset
                     {
                         Set(entry.TargetAsset as TObj, entry.address);
                     }
-                    else if(typeof(TObj)==typeof(Sprite))
+                    else if (typeof(TObj) == typeof(Sprite))
                     {
-                        if(entry.TargetAsset is Texture2D)
+                        if (entry.TargetAsset is Texture2D)
                         {
                             Set(AssetDatabase.LoadAssetAtPath<Sprite>(entry.AssetPath) as TObj, entry.address);
                         }
@@ -324,6 +326,7 @@ namespace QTool.Asset
                 }
                 _loadOver = true;
 #endif
+            }
         }
 
 
