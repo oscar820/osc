@@ -221,7 +221,7 @@ namespace QTool.Asset
                 _loading = false;
             }
 #endif
-            Debug.LogError("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms");
+            Debug.Log("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms");
         }
 
 
