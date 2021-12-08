@@ -408,9 +408,9 @@ namespace QTool.Asset
         }
         public static async void Push(string key,GameObject obj)
         {
-            if (key.Contains("(")&&key.Contains(")"))
+            if (key.Contains(" "))
             {
-                key = key.Substring(0, key.IndexOf("("));
+                key = key.Substring(0, key.IndexOf(" "));
             }
             (await GetPool(key))?.Push(obj);
         }
