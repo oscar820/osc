@@ -122,12 +122,18 @@ namespace QTool.Inspector
     /// 当在scene视窗鼠标事件调用 传入3个参数 (Vector3 点击位置,Collider 点击碰撞物体,bool 是否按下shift键)
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class SceneMouseEventAttribute : Attribute
+    public class SceneInputEventAttribute : Attribute
     {
         public EventType eventType = EventType.MouseDown;
-        public SceneMouseEventAttribute(EventType eventType)
+        public KeyCode keyCode = KeyCode.None;
+        public SceneInputEventAttribute(EventType eventType)
         {
             this.eventType = eventType;
+        }
+        public SceneInputEventAttribute(EventType eventType, KeyCode keyCode)
+        {
+            this.eventType = eventType;
+            this.keyCode = keyCode;
         }
     }
     [AttributeUsage(AttributeTargets.Method)]

@@ -504,7 +504,7 @@ namespace QTool.Inspector
     public class QInspectorType : QTypeInfo<QInspectorType>
     {
         public QDictionary<EidtorInitInvokeAttribute, QFunctionInfo> initFunc = new QDictionary<EidtorInitInvokeAttribute, QFunctionInfo>();
-        public QDictionary<SceneMouseEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneMouseEventAttribute, QFunctionInfo>();
+        public QDictionary<SceneInputEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneInputEventAttribute, QFunctionInfo>();
         public QDictionary<ViewButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<ViewButtonAttribute, QFunctionInfo>();
         protected override void Init(Type type)
         {
@@ -513,7 +513,7 @@ namespace QTool.Inspector
             base.Init(type);
             foreach (var funcInfo in Functions)
             {
-                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<SceneMouseEventAttribute>())
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<SceneInputEventAttribute>())
                 {
                     mouseEventFunc[att] = funcInfo;
                 }
@@ -560,7 +560,7 @@ namespace QTool.Inspector
             if (typeInfo.mouseEventFunc.Count <= 0) return;
             HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
             Event input = Event.current;
-            if (input.isMouse && !input.alt)
+            if (!input.alt)
             {
 
                 if (input.button == 0)
@@ -580,8 +580,22 @@ namespace QTool.Inspector
                     {
                         if (input.type == kv.Key.eventType)
                         {
-                            kv.Value.Invoke(target, point, hit, input.shift);
-                            input.Use();
+                            if(input.isMouse)
+                            {
+                                if((bool) kv.Value.Invoke(target, point, hit, input.shift))
+                                {
+                                    input.Use();
+                                }
+                                
+                            }
+                            else if(input.keyCode == kv.Key.keyCode)
+                            {
+                                if ((bool)kv.Value.Invoke(target))
+                                {
+                                    input.Use();
+                                }
+                            }
+                           
                         }
                     }
                 }
