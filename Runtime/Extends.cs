@@ -29,7 +29,7 @@ namespace QTool
             Renderer[] meshs = com.GetComponentsInChildren<Renderer>();
             foreach (var mesh in meshs)
             {
-                if (mesh)
+                if (mesh is MeshRenderer ||mesh is SpriteRenderer ||mesh is SkinnedMeshRenderer)
                 {
                     if (bounds.extents == Vector3.zero)
                     {
