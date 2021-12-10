@@ -264,7 +264,7 @@ namespace QTool
 
             if (CanUsePool.Count > 0)
             {
-                    var obj = CanUsePool.Pop();
+                    var obj = CanUsePool.Dequeue();
                     return CheckGet(obj);
             }
             else
@@ -299,12 +299,12 @@ namespace QTool
                 return Get();
             }
         }
-        public void Push(T obj)
+        public async void Push(T obj)
         {
-            
-                if (CanUsePool.Contains(obj)) return;
-                CanUsePool.Push(CheckPush(obj));
-          
+            if (CanUsePool.Contains(obj)) return;
+            var resultObj = CheckPush(obj);
+            await Tool.DelayGameTime(0.5f, true);
+            CanUsePool.Enqueue(resultObj);
         }
         public int CanUseCount
         {
