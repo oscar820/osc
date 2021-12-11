@@ -299,11 +299,10 @@ namespace QTool
                 return Get();
             }
         }
-        public async void Push(T obj)
+        public void Push(T obj)
         {
             if (CanUsePool.Contains(obj)) return;
             var resultObj = CheckPush(obj);
-            await Tool.DelayGameTime(0.5f, true);
             CanUsePool.Enqueue(resultObj);
         }
         public int CanUseCount
