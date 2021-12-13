@@ -436,7 +436,7 @@ namespace QTool.Asset
             }
             if (parent != null)
             {
-                obj.transform.SetParent(parent);
+                obj.transform.SetParent(parent,true);
             }
             if (obj.transform is RectTransform)
             {
