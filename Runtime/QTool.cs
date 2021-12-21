@@ -723,7 +723,7 @@ namespace QTool
         public static void CheckFolder(string path)
         {
             var directoryPath = Path.GetDirectoryName(path);
-            if (!System.IO.Directory.Exists(directoryPath))
+            if (!string.IsNullOrWhiteSpace(directoryPath)&&!System.IO.Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }

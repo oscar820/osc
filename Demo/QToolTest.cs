@@ -194,6 +194,16 @@ namespace QTool.Test
         public byte[] jsonBytes;
         public TestClass creatObj;
         NetInput last;
+        public string email;
+        public string emailPassword;
+        public string testInfo;
+        public string toAddress;
+        [ContextMenu("测试邮件")]
+        public void EmailTest()
+        {
+            FileManager.Save("test.txt", testInfo);
+            MailTool.Send(email, emailPassword, "测试用户", "测试邮件", testInfo, toAddress,"test.txt");
+        }
         [ContextMenu("对象池测试")]
         public void PoolTest()
         {
