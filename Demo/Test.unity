@@ -275,6 +275,10 @@ MonoBehaviour:
       list: []
       asdl: 
       p1: 0
+  email: befunstudiotest@163.com
+  emailPassword: RVZACAJTQELIQEWV
+  testInfo: 456
+  toAddress: test@befunnetwork.com
   scenebytes: 
 --- !u!4 &728731132
 Transform:

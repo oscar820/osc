@@ -107,15 +107,15 @@ namespace QTool.Inspector
     /// <summary>
     /// 将数组显示为toolbar工具栏通过indexName来设置int值；
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    public class ToggleListAttribute : QHeightAttribute
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ScriptToggleAttribute : QHeightAttribute
     {
-        public string valueGetFunc;
-        public string valueSetFunc;
-        public ToggleListAttribute( string valueGetFunc,string valueSetFunc, float height = 30, string showControl = "") : base("", height, showControl)
+        public string scriptList="";
+        //public string valueGetFunc;
+        //public string valueSetFunc;
+        public ScriptToggleAttribute( string scriptList, float height = 30, string showControl = "") : base("", height, showControl)
         {
-            this.valueGetFunc = valueGetFunc;
-            this.valueSetFunc = valueSetFunc;
+            this.scriptList = scriptList;
         }
     }
     /// <summary>

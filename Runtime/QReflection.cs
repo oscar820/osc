@@ -263,8 +263,26 @@ namespace QTool.Reflection
                         typeDic.Add(typeString, type);
                         return type;
                     }
+                    
+                }
+                for (int i = 0; i < assemblyArrayLength; ++i)
+                {
+                    foreach (var eType in assemblyArray[i].GetTypes())
+                    {
+                        if (eType.Name.Equals(typeString))
+                        {
+                            type = eType;
+                            if (type != null)
+                            {
+                                typeDic.Add(typeString, type);
+                                return type;
+                            }
+                        }
+                    }
                 }
             }
+            typeDic.Add(typeString, null);
+            Debug.LogError("类型[" + typeString + "]未解析成功");
             return null;
 
         }

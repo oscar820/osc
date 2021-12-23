@@ -506,11 +506,13 @@ namespace QTool.Inspector
         public QDictionary<EidtorInitInvokeAttribute, QFunctionInfo> initFunc = new QDictionary<EidtorInitInvokeAttribute, QFunctionInfo>();
         public QDictionary<SceneInputEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneInputEventAttribute, QFunctionInfo>();
         public QDictionary<ViewButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<ViewButtonAttribute, QFunctionInfo>();
+        public ScriptToggleAttribute scriptToggle = null;
         protected override void Init(Type type)
         {
             MemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             FunctionFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             base.Init(type);
+            scriptToggle = type.GetCustomAttribute<ScriptToggleAttribute>();
             foreach (var funcInfo in Functions)
             {
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<SceneInputEventAttribute>())
@@ -615,6 +617,7 @@ namespace QTool.Inspector
 
             DrawButton();
             DrawGroup();
+            DrawScriptToggleList();
             if (EditorGUI.EndChangeCheck())
             {
                 EditorUtility.SetDirty(target);
@@ -781,25 +784,55 @@ namespace QTool.Inspector
         #endregion
 
         #region 将数组数据显示成可选项
-        public bool DrawToggleList(SerializedProperty property)
+        GameObject gameObject => (target as MonoBehaviour)?.gameObject;
+        public bool HasCompoent(string name)
         {
-            var att = property.GetAttribute<ToggleListAttribute>();
+            try
+            {
+
+                return gameObject?.GetComponent(QReflection.ParseType( name));
+            }
+            catch (System.Exception e)
+            {
+
+                Debug.LogError("判断脚本[" + name + "]出错：" + e);
+                return false;
+            }
+        }
+        public void SetCompoent(string name, bool value)
+        {
+            if (HasCompoent(name) != value)
+            {
+                if (value)
+                {
+                    gameObject?.AddComponent(QReflection.ParseType(name));
+                    //  UnityEngineInternal.APIUpdaterRuntimeServices.AddComponent(gameObject, "Assets\Scripts\Scenes\FightScene\Tile\TileObject.cs (296,17)", nameDic[name]);
+                }
+                else
+                {
+
+                    DestroyImmediate(gameObject.GetComponent(QReflection.ParseType(name)));
+                }
+            }
+        }
+        public bool DrawScriptToggleList()
+        {
+            var att = typeInfo.scriptToggle;
             if (att != null)
             {
                 if (!att.Active(target))
                 {
                     return true;
                 }
-                var getFunc = target.GetType().GetMethod(att.valueGetFunc);
-                var setFunc = target.GetType().GetMethod(att.valueSetFunc);
+                var listFunc = target.GetMember(att.scriptList);
 
-                var info = target.GetMember(property.name);
+             //   var info = target.GetMember(property.name);
 
                 var GuiList = new List<GUIContent>();
-                var list = (info.Get(target) as IList);
 
-                if (getFunc != null && setFunc != null)
+                if (listFunc != null)
                 {
+                    var list = (listFunc.Get(target) as IList);
                     GUILayout.BeginHorizontal();
                     for (int i = 0; i < list.Count; i++)
                     {
@@ -820,15 +853,15 @@ namespace QTool.Inspector
                         {
                             GuiList.Add(new GUIContent("空"));
                         }
-                        var value = (bool)getFunc.Invoke(target, new object[] { list[i] });
+                        var value = HasCompoent(list[i]?.ToString());
                         var style = EditorStyles.miniButton;
-                        setFunc.Invoke(target, new object[] { list[i], value.DrawToogleButton(GuiList[i], style) });
+                        SetCompoent(list[i]?.ToString(), value.DrawToogleButton(GuiList[i], style));
                     }
                     GUILayout.EndHorizontal();
                 }
                 else
                 {
-                    GUILayout.Box("无法获取函数【" + att.valueGetFunc + "】【" + att.valueSetFunc + "】");
+                    GUILayout.Box("无法获取列表【" + att.scriptList + "】");
                 }
                 return true;
 
@@ -840,7 +873,7 @@ namespace QTool.Inspector
         #region 对数组数据进行显示
         public void DrawArrayProperty(SerializedProperty property)
         {
-            if (DrawToggleList(property)) return;
+           // if (DrawToggleList(property)) return;
             ChangeCallBack +=property.DrawLayout();
         }
         #endregion

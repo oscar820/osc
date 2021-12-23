@@ -129,11 +129,13 @@ namespace QTool.Test
     {
         public string a;
     }
+    [ScriptToggle("scriptList")]
     public class QToolTest : MonoBehaviour
     {
         public Fixed fiexd1;
         public Fixed2 fixed2;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
+        public static List<string> scriptList=> new List<string> { "QId" };
         //[ViewToggle("开关")]
         public bool toggle;
         // Start is called before the first frame update
