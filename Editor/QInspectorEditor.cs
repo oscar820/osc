@@ -507,6 +507,7 @@ namespace QTool.Inspector
         public QDictionary<SceneInputEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneInputEventAttribute, QFunctionInfo>();
         public QDictionary<ViewButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<ViewButtonAttribute, QFunctionInfo>();
         public ScriptToggleAttribute scriptToggle = null;
+        public QDictionary<EditorModeAttribute, QFunctionInfo> editorMode = new QDictionary<EditorModeAttribute, QFunctionInfo>();
         protected override void Init(Type type)
         {
             MemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
@@ -531,6 +532,12 @@ namespace QTool.Inspector
                 {
                     initFunc[att] = funcInfo;
                 }
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EditorModeAttribute>())
+                {
+                    editorMode[att] = funcInfo;
+                }
+             
+                
             }
         }
     }
@@ -554,6 +561,21 @@ namespace QTool.Inspector
             foreach (var kv in typeInfo.initFunc)
             {
                 kv.Value.Invoke(target);
+            }
+            EditorApplication.playModeStateChanged += EditorModeChanged;
+        }
+        private void OnDestroy()
+        {
+            EditorApplication.playModeStateChanged -= EditorModeChanged;
+        }
+        void EditorModeChanged(PlayModeStateChange state)
+        {
+            foreach (var kv in typeInfo.editorMode)
+            {
+                if ((byte)kv.Key.state == (byte)state)
+                {
+                    kv.Value.Invoke(target);
+                }
             }
         }
         RaycastHit hit;

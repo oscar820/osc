@@ -153,8 +153,38 @@ namespace QTool.Inspector
         {
         }
 
+    } 
+    public enum EditorModeState
+    {
+        //
+        // 摘要:
+        //     Occurs during the next update of the Editor application if it is in edit mode
+        //     and was previously in play mode.
+        EnteredEditMode = 0,
+        //
+        // 摘要:
+        //     Occurs when exiting edit mode, before the Editor is in play mode.
+        ExitingEditMode = 1,
+        //
+        // 摘要:
+        //     Occurs during the next update of the Editor application if it is in play mode
+        //     and was previously in edit mode.
+        EnteredPlayMode = 2,
+        //
+        // 摘要:
+        //     Occurs when exiting play mode, before the Editor is in edit mode.
+        ExitingPlayMode = 3
     }
+    [AttributeUsage(AttributeTargets.Method)]
+    public class EditorModeAttribute : Attribute
+    {
+        public EditorModeState state;
+        public EditorModeAttribute(EditorModeState state)
+        {
+            this.state = state;
+        }
 
+    }
     [AttributeUsage(AttributeTargets.Method)]
     public class ViewButtonAttribute : QHeightAttribute
     {
