@@ -324,6 +324,7 @@ namespace QTool.Asset
                         }
                     }
                 }
+                ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
                 _loadOver = true;
 #endif
             }
