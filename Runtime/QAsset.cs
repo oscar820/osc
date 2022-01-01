@@ -274,7 +274,7 @@ namespace QTool.Asset
         static Task loaderTask;
         static async Task AddressableLoadAll()
         {
-            if (  loaderTask != null)
+            if (loaderTask != null)
             {
                 await loaderTask;
                 return;
@@ -308,24 +308,33 @@ namespace QTool.Asset
             else
             {
 #if UNITY_EDITOR
-                var list = AddressableTool.GetLabelList(Label);
-                foreach (var entry in list)
+                try
                 {
 
-                    if (entry.TargetAsset is TObj)
+
+                    var list = AddressableTool.GetLabelList(Label);
+                    foreach (var entry in list)
                     {
-                        Set(entry.TargetAsset as TObj, entry.address);
-                    }
-                    else if (typeof(TObj) == typeof(Sprite))
-                    {
-                        if (entry.TargetAsset is Texture2D)
+
+                        if (entry.TargetAsset is TObj)
                         {
-                            Set(AssetDatabase.LoadAssetAtPath<Sprite>(entry.AssetPath) as TObj, entry.address);
+                            Set(entry.TargetAsset as TObj, entry.address);
+                        }
+                        else if (typeof(TObj) == typeof(Sprite))
+                        {
+                            if (entry.TargetAsset is Texture2D)
+                            {
+                                Set(AssetDatabase.LoadAssetAtPath<Sprite>(entry.AssetPath) as TObj, entry.address);
+                            }
                         }
                     }
+                    ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                    _loadOver = true;
                 }
-                ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
-                _loadOver = true;
+                catch (Exception e)
+                {
+                    Debug.LogError("[" + Label + "]加载出错"+e);
+                }
 #endif
             }
         }
