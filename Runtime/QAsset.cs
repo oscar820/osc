@@ -75,6 +75,7 @@ namespace QTool.Asset
                 labelDic[label].Clear();
                 foreach (var group in AssetSetting.groups)
                 {
+                    if (group == null) continue;
                     foreach (var item in group.entries)
                     {
                         if (item.labels.Contains(label))
