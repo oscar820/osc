@@ -6,23 +6,10 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using QTool.Reflection;
-using QTool.QFixed;
 namespace QTool.Inspector
 {
 
-    [CustomPropertyDrawer(typeof(Fixed))]
-    public class FixedDrawer : PropertyDrawer
-    {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            var longValue = property.FindPropertyRelative("rawValue");
-            longValue.longValue = new Fixed(EditorGUILayout.FloatField(label, Fixed.Get(longValue.longValue).ToFloat())).RawValue;
-        }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return 0;
-        }
-    }
+  
     #region 自定义显示效果
     public class PropertyDrawBase<T> : PropertyDrawer where T : PropertyAttribute
     {

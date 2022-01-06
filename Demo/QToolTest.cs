@@ -9,8 +9,9 @@ using System.Reflection;
 using QTool.Inspector;
 using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Reflection;
-using QTool.QFixed;
 using System.Threading.Tasks;
+using FixMath.NET;
+using BEPUutilities;
 
 namespace QTool.Test
 {
@@ -132,8 +133,8 @@ namespace QTool.Test
     [ScriptToggle("scriptList")]
     public class QToolTest : MonoBehaviour
     {
-        public Fixed fiexd1;
-        public Fixed2 fixed2;
+        public Fix64 fiexd1;
+        public FixVector2 fixed2;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         public static List<string> scriptList=> new List<string> { "QId" };
         //[ViewToggle("开关")]
@@ -246,12 +247,12 @@ namespace QTool.Test
             }
             Debug.LogError(str);
         }
-        public void SinTest(string startStr,Func<double, double> sinFunc,Func<double,double> asinFunc)
+        public void SinTest(string startStr,Func<float, float> sinFunc,Func<float, float> asinFunc)
         {
             var str = startStr;
             for (double i = -180; i <= 180; i++)
             {
-                var value = sinFunc(2 * Math.PI * i / 360);
+                var value = sinFunc((float)(2 * Math.PI * i / 360));
                // asinFunc(value).ToString("f4");
                 str +=asinFunc(value).ToString("f4")+":"+  value.ToString("f4") + " , ";
             }
@@ -277,12 +278,12 @@ namespace QTool.Test
                 //GetTable("SinTable:", Math.Sin);
                 //GetTable("CosTable:", Math.Cos);
                 //GetTable("TanTable:", Math.Tan);
-                SinTest("Sin:", Math.Sin, Math.Asin);
-                SinTest("Cos:", Math.Cos, Math.Acos);
-                SinTest("Tan:", Math.Tan, Math.Atan);
-                SinTest("FixedSin:", (a) => MathFixed.Sin(a).ToFloat(), (a) => MathFixed.Asin(a).ToFloat());
-                SinTest("FixedCos:", (a) => MathFixed.Cos(a).ToFloat(), (a) => MathFixed.Acos(a).ToFloat());
-                SinTest("FixedTan:", (a) => MathFixed.Tan(a).ToFloat(), (a) => MathFixed.Atan(a).ToFloat());
+                //SinTest("Sin:", Math.Sin, Math.Asin);
+                //SinTest("Cos:", Math.Cos, Math.Acos);
+                //SinTest("Tan:", Math.Tan, Math.Atan);
+                //SinTest("FixedSin:", (a) => Fix64.Sin(a).ToFloat(), (a) => Fix64.Asin(a).ToFloat());
+                //SinTest("FixedCos:", (a) => Fix64.Cos(a).ToFloat(), (a) => Fix64.Acos(a).ToFloat());
+                //SinTest("FixedTan:", (a) => Fix64.Tan(a).ToFloat(), (a) => Fix64.Atan(a).ToFloat());
            // });
         }
         [ContextMenu("写入Test")]
