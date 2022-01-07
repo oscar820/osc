@@ -10,8 +10,6 @@ using QTool.Inspector;
 using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Reflection;
 using System.Threading.Tasks;
-using FixMath.NET;
-using BEPUutilities;
 
 namespace QTool.Test
 {
@@ -133,8 +131,6 @@ namespace QTool.Test
     [ScriptToggle("scriptList")]
     public class QToolTest : MonoBehaviour
     {
-        public Fix64 fiexd1;
-        public FixVector2 fixed2;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         public static List<string> scriptList=> new List<string> { "QId" };
         //[ViewToggle("开关")]
