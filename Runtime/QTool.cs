@@ -147,7 +147,7 @@ namespace QTool
                 Debug.LogError("key 为 null");
                 return false;
             }
-            if (dic.ContainsKey(key))
+            if (dic.ContainsKey(key)&&dic[key]!=null)
             {
                 return true;
             }
@@ -165,7 +165,15 @@ namespace QTool
             }
             if (!dic.ContainsKey(key))
             {
-                dic[key] = this.Get<T, TKey>(key);
+                var value= this.Get<T, TKey>(key);
+                if (value != null)
+                {
+                    dic[key] = value;
+                }
+                else
+                {
+                    return default;
+                }
             }
             return dic[key];
         }
