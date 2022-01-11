@@ -279,43 +279,59 @@ namespace QTool
         }
         public event System.Action<T> creatCallback;
     }
-    public class WaitTime
+    public abstract class WaitTimeBase<T>
     {
-        public float Time { get; protected set; }
-        public float CurTime { get; protected set; }
+        public T Time { get; protected set; }
+        public T CurTime { get; protected set; }
 
-        public void Clear()
-        {
-            CurTime = 0;
-        }
+
+        public abstract void Clear();
         public void Over()
         {
             CurTime = Time;
         }
-        public void Reset(float time,bool startOver=false)
+        public void Reset(T time, bool startOver = false)
         {
             this.Time = time;
-            CurTime = 0;
+            Clear();
             if (startOver) Over();
         }
-        public WaitTime(float time, bool startOver = false)
+      
+        protected abstract void AddTime(T addValue);
+        protected abstract bool IsOver(out T timeOffset);
+        public bool Check(T deltaTime, bool autoClear = true)
         {
-            Reset(time, startOver);
-        }
-
-        public bool Check(float deltaTime, bool autoClear = true)
-        {
-            CurTime += deltaTime;
-            var subTime = CurTime - Time;
-            if (subTime >= 0)
+            AddTime(deltaTime);
+            if (IsOver( out var timeOffset))
             {
-                if (autoClear) { CurTime = subTime; }
+                if (autoClear) { CurTime = timeOffset; }
                 return true;
             }
             else
             {
                 return false;
             }
+        }
+    }
+    public class WaitTime : WaitTimeBase<float>
+    {
+        public WaitTime(float time, bool startOver = false)
+        {
+            Reset(time, startOver);
+        }
+        public override void Clear()
+        {
+            CurTime = 0;
+        }
+        protected override void AddTime(float addValue)
+        {
+            CurTime += addValue;
+        }
+
+        protected override bool IsOver(out float timeOffset)
+        {
+            timeOffset= CurTime - Time;
+            return timeOffset > 0;
         }
     }
     public static partial class Tool
