@@ -359,6 +359,27 @@ namespace QTool
             Debug.LogError("【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds + (getLength == null ? "" : " 长度" + getLength().ComputeScale()));
         }
 
+
+        public static bool PercentRandom(float percent)
+        {
+            var value = UnityEngine.Random.Range(0, 100);
+            return value <= percent;
+        }
+        public static T RandomGet<T>(this IList<T> list)
+        {
+            return list[UnityEngine.Random.Range(0, list.Count)];
+        }
+      
+        public static IList<T> Random<T>(this IList<T> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                var cur = list[i];
+                list.Remove(cur);
+                list.Insert(UnityEngine.Random.Range(0, i), cur);
+            }
+            return list;
+        }
         public static async Task<bool> DelayGameTime(float second, bool ignoreTimeScale = false)
         {
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
