@@ -113,7 +113,11 @@ namespace QTool.Asset
 #endif
 
 #endif
-    public abstract class AssetList<TLabel,TObj> where TObj:UnityEngine.Object where TLabel:AssetList<TLabel,TObj>
+    public abstract class AssetList<TObj> : AssetList<TObj, TObj> where TObj: UnityEngine.Object  { 
+        
+    }
+
+    public abstract class AssetList<TLabel,TObj> where TObj:UnityEngine.Object 
     {
         public static QDictionary<string, TObj> objDic = new QDictionary<string, TObj>();
         public static string Label
