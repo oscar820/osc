@@ -32,17 +32,21 @@ namespace QTool
     public class InstanceReference
     {
         public string id;
-        [SerializeField]
-        private GameObject _obj;
+        public GameObject _obj;
         public GameObject Obj
         {
             get
             {
                 if (_obj == null)
                 {
-                    if (QId.InstanceIdList.ContainsKey(id) )
+                    if (string.IsNullOrWhiteSpace(id)) return null;
+                    if (QId.InstanceIdList.ContainsKey(id)&& QId.InstanceIdList[id]!=null)
                     {
                         _obj = QId.InstanceIdList[id].gameObject;
+                    }
+                    else
+                    {
+                        Debug.LogWarning("不存在物体 Id：[" + id + "]");
                     }
                  
                 }

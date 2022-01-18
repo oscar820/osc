@@ -12,8 +12,37 @@ namespace QTool.Inspector
 
     #region 自定义显示效果
     [CustomPropertyDrawer(typeof(InstanceReference))]
-    public class Fix64Drawer : PropertyDrawer
+    public class InstanceReferenceDrawer : PropertyDrawer
     {
+        public static InstanceReference Draw(string lable, InstanceReference ir, params GUILayoutOption[] options)
+        {
+            using ( new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(lable + "  [" + ir.id + "]", GUILayout.Width(100));
+                var newObj= EditorGUILayout.ObjectField(ir.Obj, typeof(GameObject), true) as GameObject;
+                if (newObj != ir._obj)
+                {
+                    ir._obj = newObj;
+                    if (ir._obj != null)
+                    {
+                        var id = ir._obj.GetComponent<QId>();
+                        if (id == null)
+                        {
+                            id = ir._obj.AddComponent<QId>();
+                            EditorUtility.SetDirty(ir._obj);
+                        }
+                        ir.id = id.InstanceId;
+                    }
+                    else
+                    {
+                        ir.id = "";
+                    }
+                }
+            }
+            return ir;
+           
+
+        }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var value = property.FindPropertyRelative("id");
@@ -28,22 +57,25 @@ namespace QTool.Inspector
             right.xMin = left.xMin+left.width;
             right.width = position.width * 0.7f;
             EditorGUI.LabelField(left, label.text + "  ["+ value.stringValue+"]");
-            objValue.objectReferenceValue = EditorGUI.ObjectField(right, objValue.objectReferenceValue, typeof(GameObject), true) as GameObject;
-            if (objValue.objectReferenceValue != null)
+            var newObj= EditorGUI.ObjectField(right, objValue.objectReferenceValue, typeof(GameObject), true) as GameObject;
+            if(newObj != objValue.objectReferenceValue)
             {
-                var id = (objValue.objectReferenceValue as GameObject).GetComponent<QId>();
-                if (id == null)
+                objValue.objectReferenceValue = newObj;
+                if (objValue.objectReferenceValue != null)
                 {
-                    id = (objValue.objectReferenceValue as GameObject).AddComponent<QId>();
-                    EditorUtility.SetDirty((objValue.objectReferenceValue as GameObject));
+                    var id = (objValue.objectReferenceValue as GameObject).GetComponent<QId>();
+                    if (id == null)
+                    {
+                        id = (objValue.objectReferenceValue as GameObject).AddComponent<QId>();
+                        EditorUtility.SetDirty((objValue.objectReferenceValue as GameObject));
+                    }
+                    value.stringValue = id.InstanceId;
                 }
-                value.stringValue = id.InstanceId;
+                else
+                {
+                    value.stringValue = "";
+                }
             }
-            else
-            {
-                value.stringValue = "";
-            }
-          
           
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
