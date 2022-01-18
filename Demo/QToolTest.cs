@@ -131,6 +131,7 @@ namespace QTool.Test
     [ScriptToggle("scriptList")]
     public class QToolTest : MonoBehaviour
     {
+        public InstanceReference instanceTest;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         public static List<string> scriptList=> new List<string> { "QId" };
         //[ViewToggle("开关")]

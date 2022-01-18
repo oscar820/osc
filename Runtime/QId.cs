@@ -28,6 +28,29 @@ namespace QTool
             return obj.GetComponent<QId>();
         }
     }
+    [System.Serializable]
+    public class InstanceReference
+    {
+        public string id;
+        [SerializeField]
+        private GameObject _obj;
+        public GameObject Obj
+        {
+            get
+            {
+                if (_obj == null)
+                {
+                    if (QId.InstanceIdList.ContainsKey(id) )
+                    {
+                        _obj = QId.InstanceIdList[id].gameObject;
+                    }
+                 
+                }
+                return _obj;
+            }
+        }
+    }
+    [ExecuteInEditMode]
     [DisallowMultipleComponent]
     public class QId : MonoBehaviour,IKey<string>,IQSerialize
     {
@@ -169,10 +192,17 @@ namespace QTool
         [ReadOnly]
         [ViewName("预制体Id", "HasPrefabId")]
         public string PrefabId;
-        [ReadOnly]
+        [ReadOnly("IsPlaying")]
         [ViewName("实例Id", "IsPrefabInstance")]
         public string InstanceId;
 
+        bool IsPlaying
+        {
+            get
+            {
+                return Application.isPlaying;
+            }
+        }
         public List<IQSerialize> qSerializes = new List<IQSerialize>();
         protected virtual void Awake()
         {
@@ -185,7 +215,6 @@ namespace QTool
             qSerializes.AddRange( GetComponents<IQSerialize>());
             qSerializes.Remove(this);
         }
-
         public void Write(QBinaryWriter writer)
         {
             var byteLength = (byte)qSerializes.Count;

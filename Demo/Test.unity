@@ -140,7 +140,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3821306717443387718, guid: 63430fcfc81908141b561723e89d54be, type: 3}
       propertyPath: InstanceId
-      value: 6c60562bd0384b3d9a8fdb7d00d7e73b
+      value: 616b8e36c28f4506bd190fdcb6113c17
       objectReference: {fileID: 0}
     - target: {fileID: 3821306717443387718, guid: 63430fcfc81908141b561723e89d54be, type: 3}
       propertyPath: isPrefabInstance
@@ -202,6 +202,7 @@ GameObject:
   m_Component:
   - component: {fileID: 728731132}
   - component: {fileID: 728731131}
+  - component: {fileID: 728731133}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -221,13 +222,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95d366b0a182c444894ed30a0337ed81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fiexd1:
-    rawValue: 660700000000
-  fixed2:
-    x:
-      rawValue: 1558000000000
-    y:
-      rawValue: 100000000000
+  instanceTest:
+    id: ef1b72d85ae9445a91798403554d7153
+    obj: {fileID: 1636650317}
   toggle: 0
   index: 0
   b: 
@@ -294,6 +291,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &728731133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728731130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a62fe154ceeb184fb003a657ac0cf29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PrefabId: 
+  InstanceId: 449489872ddc4c00b9b3a812f255478f
 --- !u!1 &994477549
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,7 +493,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7211509801118715592, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: InstanceId
-      value: 2485d35715d645b98469a52f648d94af
+      value: ef1b72d85ae9445a91798403554d7153
       objectReference: {fileID: 0}
     - target: {fileID: 7211509801118715592, guid: 9dc697a5edf67234facb1d30b6d40eb9, type: 3}
       propertyPath: isPrefabInstance

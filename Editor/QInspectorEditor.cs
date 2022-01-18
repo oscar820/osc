@@ -9,8 +9,48 @@ using QTool.Reflection;
 namespace QTool.Inspector
 {
 
-  
+
     #region 自定义显示效果
+    [CustomPropertyDrawer(typeof(InstanceReference))]
+    public class Fix64Drawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var value = property.FindPropertyRelative("id");
+            var objValue = property.FindPropertyRelative("_obj");
+            if (QId.InstanceIdList.ContainsKey(value.stringValue) && objValue.objectReferenceValue==null)
+            {
+                objValue.objectReferenceValue = QId.InstanceIdList[value.stringValue].gameObject;
+            }
+            var left = position;
+            left.width = position.width * 0.3f;
+            var right = position;
+            right.xMin = left.xMin+left.width;
+            right.width = position.width * 0.7f;
+            EditorGUI.LabelField(left, label.text + "  ["+ value.stringValue+"]");
+            objValue.objectReferenceValue = EditorGUI.ObjectField(right, objValue.objectReferenceValue, typeof(GameObject), true) as GameObject;
+            if (objValue.objectReferenceValue != null)
+            {
+                var id = (objValue.objectReferenceValue as GameObject).GetComponent<QId>();
+                if (id == null)
+                {
+                    id = (objValue.objectReferenceValue as GameObject).AddComponent<QId>();
+                    EditorUtility.SetDirty((objValue.objectReferenceValue as GameObject));
+                }
+                value.stringValue = id.InstanceId;
+            }
+            else
+            {
+                value.stringValue = "";
+            }
+          
+          
+        }
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+    }
     public class PropertyDrawBase<T> : PropertyDrawer where T : PropertyAttribute
     {
         public T att
