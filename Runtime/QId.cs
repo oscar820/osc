@@ -196,7 +196,7 @@ namespace QTool
         [ReadOnly]
         [ViewName("预制体Id", "HasPrefabId")]
         public string PrefabId;
-        [ReadOnly("IsPlaying")]
+        [ReadOnly]
         [ViewName("实例Id", "IsPrefabInstance")]
         public string InstanceId;
 
