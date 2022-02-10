@@ -91,18 +91,17 @@ namespace QTool
             if (IsPrefabAssets)
             {
                 SetPrefabId(UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(gameObject)));
-              //  SetInstanceId("");
+                SetInstanceId("");
             }
             else if (IsPrefabInstance)
             {
-                
-                if (!string.IsNullOrWhiteSpace(InstanceId)&&InstanceIdList[InstanceId] == null)
-                {
-                    InstanceIdList[InstanceId] = this;
-                }
-                else 
+                if (string.IsNullOrWhiteSpace(InstanceId))
                 {
                     SetInstanceId(GetNewId());
+                }
+                else if(InstanceIdList[InstanceId] == null)
+                {
+                    InstanceIdList[InstanceId] = this;
                 }
                 var prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
                 if (prefab == null)
