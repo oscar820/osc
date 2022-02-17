@@ -95,6 +95,7 @@ namespace QTool
             }
             else if (IsPrefabInstance)
             {
+
                 if (string.IsNullOrWhiteSpace(InstanceId))
                 {
                     SetInstanceId(GetNewId());
@@ -102,6 +103,10 @@ namespace QTool
                 else if(InstanceIdList[InstanceId] == null)
                 {
                     InstanceIdList[InstanceId] = this;
+                }
+                else if(InstanceIdList[InstanceId]!=this)
+                {
+                    SetInstanceId(GetNewId());
                 }
                 var prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
                 if (prefab == null)
@@ -150,7 +155,6 @@ namespace QTool
 #endif
             }
         }
-
         public static QDictionary<string, QId> InstanceIdList = new QDictionary<string, QId>();
         public static byte[] SaveAllInstance()
         {
@@ -199,6 +203,7 @@ namespace QTool
         [ViewName("实例Id", "IsPrefabInstance")]
         public string InstanceId;
 
+        public float test;
         bool IsPlaying
         {
             get
@@ -209,6 +214,14 @@ namespace QTool
         public List<IQSerialize> qSerializes = new List<IQSerialize>();
         protected virtual void Awake()
         {
+          
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                InitId();
+            }
+            else
+
+#endif
             if (string.IsNullOrWhiteSpace(InstanceId))
             {
                 InstanceId = GetNewId();
