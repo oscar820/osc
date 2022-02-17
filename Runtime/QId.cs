@@ -91,7 +91,7 @@ namespace QTool
             if (IsPrefabAssets)
             {
                 SetPrefabId(UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(gameObject)));
-                SetInstanceId("");
+                //SetInstanceId("");
             }
             else if (IsPrefabInstance)
             {
@@ -200,10 +200,8 @@ namespace QTool
         [ViewName("预制体Id", "HasPrefabId")]
         public string PrefabId;
         [ReadOnly]
-        [ViewName("实例Id", "IsPrefabInstance")]
+        [ViewName("实例Id")]
         public string InstanceId;
-
-        public float test;
         bool IsPlaying
         {
             get
@@ -219,7 +217,6 @@ namespace QTool
             if (!Application.isPlaying) {
                 InitId();
             }
-            else
 
 #endif
             if (string.IsNullOrWhiteSpace(InstanceId))
