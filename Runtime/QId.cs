@@ -80,34 +80,36 @@ namespace QTool
             if (id != InstanceId)
             {
                 InstanceId = id;
-                //this.SetDirty();
                 InstanceIdList[id] = this;
+            }
+        }
+        private void FreshInstanceId()
+        {
+            if (string.IsNullOrWhiteSpace(InstanceId))
+            {
+                SetInstanceId(GetNewId());
+            }
+            else if (InstanceIdList[InstanceId] == null)
+            {
+                InstanceIdList[InstanceId] = this;
+            }
+            else if (InstanceIdList[InstanceId] != this)
+            {
+                SetInstanceId(GetNewId());
             }
         }
         [ContextMenu("更新ID")]
         private void InitId()
         {
             if (Application.IsPlaying(gameObject)) return;
+            FreshInstanceId();
             if (IsPrefabAssets)
             {
                 SetPrefabId(UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(gameObject)));
-                //SetInstanceId("");
+           
             }
             else if (IsPrefabInstance)
             {
-
-                if (string.IsNullOrWhiteSpace(InstanceId))
-                {
-                    SetInstanceId(GetNewId());
-                }
-                else if(InstanceIdList[InstanceId] == null)
-                {
-                    InstanceIdList[InstanceId] = this;
-                }
-                else if(InstanceIdList[InstanceId]!=this)
-                {
-                    SetInstanceId(GetNewId());
-                }
                 var prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
                 if (prefab == null)
                 {

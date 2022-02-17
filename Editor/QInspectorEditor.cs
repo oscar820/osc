@@ -76,6 +76,10 @@ namespace QTool.Inspector
                         EditorUtility.SetDirty((objValue.objectReferenceValue as GameObject));
                     }
                     value.stringValue = id.InstanceId;
+                    if (!(objValue.objectReferenceValue as GameObject).activeSelf)
+                    {
+                        QIdManager.Instance.qIdInitList.AddCheckExist(id);
+                    }
                 }
                 else
                 {

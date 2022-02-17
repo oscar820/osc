@@ -12,7 +12,11 @@ namespace QTool
             {
                 if (_instanceObj == null)
                 {
-                    _instanceObj = new GameObject(nameof(QToolManager));
+                    _instanceObj = GameObject.Find(nameof(QToolManager));
+                    if (_instanceObj == null)
+                    {
+                        _instanceObj = new GameObject(nameof(QToolManager));
+                    }
                 }
                 return _instanceObj;
             }
@@ -45,6 +49,7 @@ namespace QTool
             {
                 GameObject.DontDestroyOnLoad(gameObject);
             }
+            qIdInitList.RemoveAll((obj) => obj == null);
             foreach (var id in qIdInitList)
             {
                 QId.InstanceIdList[id.InstanceId] = id;
