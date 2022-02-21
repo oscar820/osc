@@ -1039,6 +1039,21 @@ namespace QTool
             var len = b - a;
             return a + len * t;
         }
+        public static Fix64 Range(Fix64 value, Fix64 min, Fix64 max)
+        {
+            if (value < min)
+            {
+                return min;
+            }
+            else if(value>max)
+            {
+                return max;
+            }
+            else
+            {
+                return value;
+            }
+        }
         /// <summary>
         /// This is the constructor from raw value; it can only be used interally.
         /// </summary>

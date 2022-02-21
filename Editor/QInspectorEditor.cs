@@ -17,9 +17,14 @@ namespace QTool.Inspector
     {
         public static void DrawGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            var range= property.GetAttribute<RangeAttribute>();
             var longValue = property.FindPropertyRelative("RawValue");
             var v = (float)Fix64.Get(longValue.longValue);
             v = EditorGUI.FloatField(position, property.ViewName(), v);
+            if (range != null)
+            {
+                v = Mathf.Clamp(v, range.min, range.max);
+            }
             longValue.longValue = ((Fix64)v).RawValue;
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
