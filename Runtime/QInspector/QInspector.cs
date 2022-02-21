@@ -51,10 +51,11 @@ namespace QTool.Inspector
 
         public ViewNameAttribute()
         {
-            //  order = 1;
+            order = 10;
         }
         public ViewNameAttribute(string name,string showControl=""):base(showControl)
         {
+            order = 10;
             this.name = name;
         }
     }

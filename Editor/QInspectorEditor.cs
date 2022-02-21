@@ -10,7 +10,27 @@ namespace QTool.Inspector
 {
 
 
+
     #region 自定义显示效果
+    [CustomPropertyDrawer(typeof(Fix64))]
+    public class Fix64Drawer : PropertyDrawer
+    {
+        public static void DrawGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var longValue = property.FindPropertyRelative("RawValue");
+            var v = (float)Fix64.Get(longValue.longValue);
+            v = EditorGUI.FloatField(position, property.ViewName(), v);
+            longValue.longValue = ((Fix64)v).RawValue;
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            DrawGUI(position, property, label);
+        }
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+    }
     [CustomPropertyDrawer(typeof(InstanceReference))]
     public class InstanceReferenceDrawer : PropertyDrawer
     {
@@ -32,10 +52,6 @@ namespace QTool.Inspector
                             EditorUtility.SetDirty(ir._obj);
                         }
                         ir.id = id.InstanceId;
-                        if (!ir.Obj.activeSelf)
-                        {
-                            QIdManager.Instance.qIdInitList.AddCheckExist(id);
-                        }
                     }
                     else
                     {
@@ -62,8 +78,7 @@ namespace QTool.Inspector
             right.width = position.width * 0.7f;
             EditorGUI.LabelField(left, label.text + "  ["+ value.stringValue+"]");
             var newObj= EditorGUI.ObjectField(right, objValue.objectReferenceValue, typeof(GameObject), true) as GameObject;
-
-            if (newObj != objValue.objectReferenceValue)
+            if(newObj != objValue.objectReferenceValue)
             {
                 objValue.objectReferenceValue = newObj;
                 if (objValue.objectReferenceValue != null)
@@ -72,14 +87,9 @@ namespace QTool.Inspector
                     if (id == null)
                     {
                         id = (objValue.objectReferenceValue as GameObject).AddComponent<QId>();
-                        Debug.LogError(id);
                         EditorUtility.SetDirty((objValue.objectReferenceValue as GameObject));
                     }
                     value.stringValue = id.InstanceId;
-                    if (!(objValue.objectReferenceValue as GameObject).activeSelf)
-                    {
-                        QIdManager.Instance.qIdInitList.AddCheckExist(id);
-                    }
                 }
                 else
                 {
@@ -175,13 +185,25 @@ namespace QTool.Inspector
         {
             if (property.IsShow())
             {
-                property.Draw(position, att.name);
+                if (property.type == nameof(Fix64))
+                {
+                    Fix64Drawer.DrawGUI(position, property, label);
+                }
+                else
+                {
+                    property.Draw(position, att.name);
+                }
             }
+           
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
+        {   
+            
             if (property.IsShow())
             {
+                if (property.type == nameof(Fix64)) {
+                    return EditorGUI.GetPropertyHeight(property, GUIContent.none,false);
+                }
                 return property.GetHeight();
             }
             else
