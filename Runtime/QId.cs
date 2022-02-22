@@ -26,7 +26,7 @@ namespace QTool
             }
             return obj.GetComponent<QId>();
         }
-        public static byte[] SaveAllInstance(QDictionary<string, QId> InstanceIdList)
+        public static byte[] SaveAllInstance(this QDictionary<string, QId> InstanceIdList)
         {
             using (QBinaryWriter writer = new QBinaryWriter())
             {
@@ -42,7 +42,7 @@ namespace QTool
                 return writer.ToArray();
             }
         }
-        public static void LoadAllInstance(this byte[] bytes, QDictionary<string, QId> InstanceIdList)
+        public static void LoadAllInstance(this QDictionary<string, QId> InstanceIdList, byte[] bytes)
         {
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {

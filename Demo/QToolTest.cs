@@ -259,13 +259,12 @@ namespace QTool.Test
         [ContextMenu("保存场景")]
         public void SaveAll()
         {
-          
-            scenebytes = QId.SaveAllInstance();
+            scenebytes=QId.InstanceIdList.SaveAllInstance();
         }
         [ContextMenu("读取场景")]
         public void LoadAll()
         {
-            QId.LoadAllInstance(scenebytes);
+            QId.InstanceIdList.LoadAllInstance(scenebytes);
         }
         [ContextMenu("输出三角函数值")]
         public void SinTabFunc()
