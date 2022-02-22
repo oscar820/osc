@@ -39,16 +39,25 @@ namespace QTool
                 return _instance;
             }
         }
+        protected virtual void Awake()
+        {
+            if (_instance == null)
+            {
+                _instance = this as T;
+                if (Application.isPlaying)
+                {
+                    GameObject.DontDestroyOnLoad(gameObject);
+                }
+            }
+        }
     }
+
     public class QIdManager : QToolManagerBase<QIdManager>
     {
         public List<QId> qIdInitList = new List<QId>();
-        public void Awake()
+        protected override void Awake()
         {
-            if (Application.isPlaying)
-            {
-                GameObject.DontDestroyOnLoad(gameObject);
-            }
+            base.Awake();
             qIdInitList.RemoveAll((obj) => obj == null);
             foreach (var id in qIdInitList)
             {

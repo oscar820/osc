@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using QTool.Binary;
-using QTool.Binary;
 using QTool.Inspector;
 namespace QTool
 {
@@ -26,6 +25,41 @@ namespace QTool
                 return null;
             }
             return obj.GetComponent<QId>();
+        }
+        public static byte[] SaveAllInstance(QDictionary<string, QId> InstanceIdList)
+        {
+            using (QBinaryWriter writer = new QBinaryWriter())
+            {
+                var shortCount = (short)InstanceIdList.Count;
+
+                writer.Write(shortCount);
+                for (int i = 0; i < shortCount; i++)
+                {
+                    var kv = InstanceIdList[i];
+                    writer.Write(kv.Key);
+                    writer.WriteObject(kv.Value);
+                }
+                return writer.ToArray();
+            }
+        }
+        public static void LoadAllInstance(this byte[] bytes, QDictionary<string, QId> InstanceIdList)
+        {
+            using (QBinaryReader reader = new QBinaryReader(bytes))
+            {
+                var shortCount = reader.ReadInt16();
+                for (int i = 0; i < shortCount; i++)
+                {
+                    var key = reader.ReadString();
+                    if (InstanceIdList.ContainsKey(key))
+                    {
+                        reader.ReadObject(InstanceIdList[key]);
+                    }
+                    else
+                    {
+                        Debug.LogError("不存在【" + key + "】");
+                    }
+                }
+            }
         }
     }
     [System.Serializable]
@@ -158,41 +192,7 @@ namespace QTool
             }
         }
         public static QDictionary<string, QId> InstanceIdList = new QDictionary<string, QId>();
-        public static byte[] SaveAllInstance()
-        {
-            using (QBinaryWriter writer=new QBinaryWriter())
-            {
-                var shortCount = (short)InstanceIdList.Count;
-             
-                writer.Write(shortCount);
-                for (int i = 0; i < shortCount; i++)
-                {
-                     var kv = InstanceIdList[i];
-                     writer.Write(kv.Key);
-                    writer.WriteObject(kv.Value);
-                }
-                return writer.ToArray();
-            }
-        }
-        public static void LoadAllInstance(byte[] bytes)
-        {
-           using (QBinaryReader reader=new QBinaryReader(bytes))
-            {
-                var shortCount = reader.ReadInt16();
-                for (int i = 0; i < shortCount; i++)
-                {
-                    var key = reader.ReadString();
-                    if (InstanceIdList.ContainsKey(key))
-                    {
-                        reader.ReadObject(InstanceIdList[key]);
-                    }
-                    else
-                    {
-                        Debug.LogError("不存在【" + key + "】");
-                    }
-                }
-            }
-        }
+    
         public static string GetNewId(string key = "")
         {
             return string.IsNullOrWhiteSpace(key) ? System.Guid.NewGuid().ToString("N") : System.Guid.Parse(key).ToString("N");
@@ -230,7 +230,7 @@ namespace QTool
             qSerializes.AddRange( GetComponents<IQSerialize>());
             qSerializes.Remove(this);
         }
-        public void Write(QBinaryWriter writer)
+        public virtual void Write(QBinaryWriter writer)
         {
             var byteLength = (byte)qSerializes.Count;
             writer.Write(byteLength);
@@ -245,7 +245,7 @@ namespace QTool
             return name;
         }
 
-        public void Read(QBinaryReader reader)
+        public virtual void Read(QBinaryReader reader)
         {
             var byteLength = reader.ReadByte();
             if (qSerializes.Count == byteLength)
