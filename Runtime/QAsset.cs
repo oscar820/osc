@@ -287,7 +287,17 @@ namespace QTool.Asset
 
             if (Application.isPlaying)
             {
-                var loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
+                UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<IList<TObj>> loader = default;
+                try
+                {
+                    loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Addressables不存在Lable["+Label+"]:"+e);
+                    _loadOver = true;
+                    return;
+                }
                 loaderTask = loader.Task;
                 var obj = await loader.Task;
                 loaderTask = null;

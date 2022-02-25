@@ -4,9 +4,13 @@ using UnityEngine;
 using System;
 using QTool.Binary;
 using QTool.Inspector;
+using QTool.Asset;
 namespace QTool
 {
-   
+    public class QIdPrefab : PrefabAssetList<QIdPrefab>
+    {
+
+    }
     public static class QIdExtends
     {
         public static QId GetQId(this MonoBehaviour mono)
@@ -30,33 +34,103 @@ namespace QTool
         {
             using (QBinaryWriter writer = new QBinaryWriter())
             {
-                var shortCount = (short)InstanceIdList.Count;
+                var saveList = new List<QId>();
+                foreach (var item in InstanceIdList)
+                {
+                    if (item.Value.IsScenePrefabInstance)
+                    {
+                        saveList.Add(item.Value);
+                    }
+                }
+                var shortCount = (short)saveList.Count;
 
                 writer.Write(shortCount);
                 for (int i = 0; i < shortCount; i++)
                 {
-                    var kv = InstanceIdList[i];
-                    writer.Write(kv.Key);
-                    writer.WriteObject(kv.Value);
+                    var qId = saveList[i];
+
+                    Debug.Log("保存 " + qId);
+                    writer.Write(qId.InstanceId);
+                    writer.Write(qId.PrefabId);
+                    writer.WriteObject(qId);
                 }
                 return writer.ToArray();
             }
         }
         public static void LoadAllInstance(this QDictionary<string, QId> InstanceIdList, byte[] bytes)
         {
+            LoadAllInstance(InstanceIdList,bytes,(prefab)=> {
+                if (prefab != null)
+                {
+                    var obj = GameObject.Instantiate(prefab, null);
+                    return obj.GetComponent<QId>();
+                }
+                else
+                {
+                    return null;
+                }
+              
+            },(qid)=> { 
+                GameObject.Destroy(qid.gameObject);
+            });
+        }
+        public static void LoadAllInstance(this QDictionary<string, QId> InstanceIdList, byte[] bytes,System.Func<GameObject,QId> createFunc,System.Action< QId> destoryFunc )
+        {
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {
+                var destoryList = new List<QId>();
+                foreach (var item in InstanceIdList)
+                {
+                    if (item.Value.IsScenePrefabInstance)
+                    {
+                        destoryList.Add(item.Value);
+                    }
+                }
                 var shortCount = reader.ReadInt16();
                 for (int i = 0; i < shortCount; i++)
                 {
                     var key = reader.ReadString();
-                    if (InstanceIdList.ContainsKey(key))
+                    var prefabId= reader.ReadString();
+             
+                    if (InstanceIdList.ContainsKey(key)&&InstanceIdList[key]!=null)
                     {
-                        reader.ReadObject(InstanceIdList[key]);
+                        var qid = InstanceIdList[key];
+                        reader.ReadObject(qid);
+                        destoryList.Remove(qid);
+                        Debug.Log("读取 " + qid);
+                    }
+                    else if(createFunc!=null)
+                    {
+                        var prefab = QIdPrefab.Get(prefabId);
+                        if (prefab != null)
+                        {
+                            var id = createFunc.Invoke(prefab);
+                            if (id == null)
+                            {
+                                Debug.LogError("创建【" + prefab + "】失败 读取存档中断");
+                                return;
+                            }
+                            id.InstanceId = key;
+                            reader.ReadObject(id);
+                        }
+                        else
+                        {
+                            Debug.LogError("不存在【" + prefabId + "】预制体 读取存档中断");
+                            return;
+                        }
+                      
                     }
                     else
                     {
-                        Debug.LogError("不存在【" + key + "】");
+                        Debug.LogError("不存在【" + key + "】读取存档中断");
+                        return;
+                    }
+                }
+                if (destoryFunc != null)
+                {
+                    foreach (var item in destoryList)
+                    {
+                        destoryFunc.Invoke(item);
                     }
                 }
             }
@@ -117,21 +191,7 @@ namespace QTool
                 InstanceIdList[id] = this;
             }
         }
-        private void FreshInstanceId()
-        {
-            if (string.IsNullOrWhiteSpace(InstanceId))
-            {
-                SetInstanceId(GetNewId());
-            }
-            else if (InstanceIdList[InstanceId] == null)
-            {
-                InstanceIdList[InstanceId] = this;
-            }
-            else if (InstanceIdList[InstanceId] != this)
-            {
-                SetInstanceId(GetNewId());
-            }
-        }
+    
         [ContextMenu("更新ID")]
         private void InitId()
         {
@@ -211,7 +271,39 @@ namespace QTool
                 return Application.isPlaying;
             }
         }
+        public bool IsScenePrefabInstance
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (this == null)
+                {
+                    return false;
+                }
+                if (UnityEditor.EditorUtility.IsPersistent(gameObject))
+                {
+                    return false;
+                }
+#endif
+                return !string.IsNullOrWhiteSpace(PrefabId);
+            }
+        }
         public List<IQSerialize> qSerializes = new List<IQSerialize>();
+        private void FreshInstanceId()
+        {
+            if (string.IsNullOrWhiteSpace(InstanceId))
+            {
+                SetInstanceId(GetNewId());
+            }
+            else if (InstanceIdList[InstanceId] == null)
+            {
+                InstanceIdList[InstanceId] = this;
+            }
+            else if (InstanceIdList[InstanceId] != this)
+            {
+                SetInstanceId(GetNewId());
+            }
+        }
         protected virtual void Awake()
         {
           
@@ -219,16 +311,20 @@ namespace QTool
             if (!Application.isPlaying) {
                 InitId();
             }
-
 #endif
-            if (string.IsNullOrWhiteSpace(InstanceId))
-            {
-                InstanceId = GetNewId();
-            }
-            InstanceIdList[InstanceId] = this;
+            FreshInstanceId();
             qSerializes.Clear();
             qSerializes.AddRange( GetComponents<IQSerialize>());
             qSerializes.Remove(this);
+        }
+        protected virtual void OnDestory()
+        {
+            if (InstanceIdList.ContainsKey(InstanceId)){
+                if (InstanceIdList[InstanceId] == this)
+                {
+                    InstanceIdList.Remove(InstanceId);
+                }
+            }
         }
         public virtual void Write(QBinaryWriter writer)
         {
@@ -240,9 +336,10 @@ namespace QTool
             }
           
         }
+       
         public override string ToString()
         {
-            return name;
+            return name + "(" + InstanceId + " prefab:" + PrefabId + ")["+ qSerializes .Count+ "]";
         }
 
         public virtual void Read(QBinaryReader reader)
@@ -258,7 +355,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("读取序列化数据失败脚本数不匹配"+qSerializes.Count);
+                Debug.LogError("读取序列化数据失败脚本数不匹配"+qSerializes.Count+":"+byteLength);
             }
            
         }
