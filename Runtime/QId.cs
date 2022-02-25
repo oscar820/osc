@@ -232,14 +232,7 @@ namespace QTool
 
             }
         }
-        private bool HasPrefabId
-        {
-            get
-            {
-                return IsPrefabInstance || IsPrefabAssets;
-
-            }
-        }
+       
         private bool IsPrefabAssets
         {
             get
@@ -256,6 +249,14 @@ namespace QTool
         public static string GetNewId(string key = "")
         {
             return string.IsNullOrWhiteSpace(key) ? System.Guid.NewGuid().ToString("N") : System.Guid.Parse(key).ToString("N");
+        }
+        private bool HasPrefabId
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(PrefabId);
+
+            }
         }
         public string Key { get => InstanceId; set { } }
         [ReadOnly]
