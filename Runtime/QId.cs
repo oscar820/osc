@@ -49,12 +49,13 @@ namespace QTool
                 {
                     var qId = saveList[i];
 
-                    Debug.Log("保存 " + qId);
                     writer.Write(qId.InstanceId);
                     writer.Write(qId.PrefabId);
                     writer.WriteObject(qId);
                 }
-                return writer.ToArray();
+                var bytes = writer.ToArray();
+                Debug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ComputeScale());
+                return bytes;
             }
         }
         public static void LoadAllInstance(this QDictionary<string, QId> InstanceIdList, byte[] bytes)
@@ -97,7 +98,6 @@ namespace QTool
                         var qid = InstanceIdList[key];
                         reader.ReadObject(qid);
                         destoryList.Remove(qid);
-                        Debug.Log("读取 " + qid);
                     }
                     else if(createFunc!=null)
                     {
@@ -133,6 +133,7 @@ namespace QTool
                         destoryFunc.Invoke(item);
                     }
                 }
+                Debug.Log("读取数据完成数目：" + shortCount);
             }
         }
     }
