@@ -184,14 +184,7 @@ namespace QTool
                 //this.SetDirty();
             }
         }
-        private void SetInstanceId(string id)
-        {
-            if (id != InstanceId)
-            {
-                InstanceId = id;
-                InstanceIdList[id] = this;
-            }
-        }
+   
     
         [ContextMenu("更新ID")]
         private void InitId()
@@ -304,6 +297,14 @@ namespace QTool
             else if (InstanceIdList[InstanceId] != this)
             {
                 SetInstanceId(GetNewId());
+            }
+        }
+        private void SetInstanceId(string id)
+        {
+            if (id != InstanceId)
+            {
+                InstanceId = id;
+                InstanceIdList[id] = this;
             }
         }
         protected virtual void Awake()
