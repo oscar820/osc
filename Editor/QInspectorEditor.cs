@@ -12,30 +12,7 @@ namespace QTool.Inspector
 
 
     #region 自定义显示效果
-    [CustomPropertyDrawer(typeof(Fix64))]
-    public class Fix64Drawer : PropertyDrawer
-    {
-        public static void DrawGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            var range= property.GetAttribute<RangeAttribute>();
-            var longValue = property.FindPropertyRelative("RawValue");
-            var v = (float)Fix64.Get(longValue.longValue);
-            v = EditorGUI.FloatField(position, property.ViewName(), v);
-            if (range != null)
-            {
-                v = Mathf.Clamp(v, range.min, range.max);
-            }
-            longValue.longValue = ((Fix64)v).RawValue;
-        }
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            DrawGUI(position, property, label);
-        }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return base.GetPropertyHeight(property, label);
-        }
-    }
+
     [CustomPropertyDrawer(typeof(InstanceReference))]
     public class InstanceReferenceDrawer : PropertyDrawer
     {
@@ -183,40 +160,57 @@ namespace QTool.Inspector
             GUILayout.Space(10);
         }
     }
-    [CustomPropertyDrawer(typeof(ViewNameAttribute))]
-    public class ViewNameAttributeDrawer : PropertyDrawBase<ViewNameAttribute>
-    {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            if (property.IsShow())
-            {
-                if (property.type == nameof(Fix64))
-                {
-                    Fix64Drawer.DrawGUI(position, property, label);
-                }
-                else
-                {
-                    property.Draw(position, att.name);
-                }
-            }
+    //[CustomPropertyDrawer(typeof(ViewNameAttribute))]
+    //public class ViewNameAttributeDrawer : PropertyDrawBase<ViewNameAttribute>
+    //{
+    //    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    //    {
+    //        if (property.IsShow())
+    //        {
+    //            switch (property.type)
+    //            {
+    //                case nameof(Fix64):
+    //                    {
+    //                        Fix64Drawer.DrawGUI(position, property, label);
+    //                    }
+    //                    break;
+    //                case nameof(System.Single):
+    //                    {
+                            
+    //                    }
+    //                default:
+    //                    break;
+    //            }
+    //            if (property.type == nameof(Fix64))
+    //            {
+                   
+    //            }else if (property.type == nameof(System.Single) || property.type == nameof(System.Int32))
+    //            {
+
+    //            }
+    //            else
+    //            {
+    //                property.Draw(position, att.name);
+    //            }
+    //        }
            
-        }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {   
+    //    }
+    //    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    //    {   
             
-            if (property.IsShow())
-            {
-                if (property.type == nameof(Fix64)) {
-                    return EditorGUI.GetPropertyHeight(property, GUIContent.none,false);
-                }
-                return property.GetHeight();
-            }
-            else
-            {
-                return 0;
-            }
-        }
-    }
+    //        if (property.IsShow())
+    //        {
+    //            if (property.type == nameof(Fix64)) {
+    //                return EditorGUI.GetPropertyHeight(property, GUIContent.none,false);
+    //            }
+    //            return property.GetHeight();
+    //        }
+    //        else
+    //        {
+    //            return 0;
+    //        }
+    //    }
+    //}
     [CustomPropertyDrawer(typeof(ViewToggleAttribute))]
     public class ViewToggleAttributeDrawer : PropertyDrawBase<ViewToggleAttribute>
     {
@@ -239,7 +233,7 @@ namespace QTool.Inspector
             }
             else
             {
-                property.Draw(position, att.name);
+                property.Draw(position);
             }
 
         }
@@ -474,13 +468,14 @@ namespace QTool.Inspector
             {
                 var last = GUI.enabled;
                 GUI.enabled = false;
-                EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
+                property.Draw();
+             //  EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
                 GUI.enabled = last;
             }
             else
             {
-
-                EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
+                property.Draw();
+               // EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
             }
             if (changeCall != null)
             {
@@ -505,11 +500,65 @@ namespace QTool.Inspector
             EditorGUI.LabelField(rect, guiContent, style);
             return returnValue;
         }
-        public static bool Draw(this SerializedProperty property, Rect rect, string viewName)
+      
+        public static void DrawFix64(SerializedProperty property,Func<float,float> floatDraw)
         {
-            return EditorGUI.PropertyField(rect, property, new GUIContent(viewName), property.isExpanded);
+            var longValue = property.FindPropertyRelative("RawValue");
+            var v = (float)Fix64.Get(longValue.longValue);
+            v = floatDraw(v);
+            longValue.longValue = ((Fix64)v).RawValue;
         }
+        public static bool Draw(this SerializedProperty property, Rect rect)
+        {
+            switch (property.type)
+            {
+                case nameof(Fix64):
+                    {
+                        DrawFix64(property, ( value) => {
 
+                            var range = property.GetAttribute<RangeAttribute>();
+                            if (range == null)
+                            {
+                                return EditorGUI.FloatField(rect, property.ViewName(), value);
+                            }
+                            else
+                            {
+                                return EditorGUI.Slider(rect, property.ViewName(), value, range.min, range.max);
+                            }
+                            
+                            });
+                    }
+                    return true;
+                default:
+                    return EditorGUI.PropertyField(rect, property, new GUIContent(property.ViewName()), property.isExpanded);
+            }
+        }
+        public static bool Draw(this SerializedProperty property)
+        {
+            switch (property.type)
+            {
+                case nameof(Fix64):
+                    {
+                        DrawFix64(property, (value) => {
+                            var range = property.GetAttribute<RangeAttribute>();
+                            if (range == null)
+                            {
+                                return EditorGUILayout.FloatField(property.ViewName(), value);
+                            }
+                            else
+                            {
+                                return EditorGUILayout.Slider(property.ViewName(), value, range.min, range.max);
+                            }
+                        });
+                        return true;
+                    }
+                default:
+                    {
+                        return EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), property.isExpanded);
+                    }
+            }
+         
+        } 
         public static float GetHeight(this SerializedProperty property)
         {
             return EditorGUI.GetPropertyHeight(property, GUIContent.none, property.isExpanded);
@@ -1028,7 +1077,7 @@ namespace QTool.Inspector
                 if (property.name.Equals("m_Script"))
                 {
                     GUI.enabled = false;
-                    EditorGUILayout.PropertyField(property, true);
+                    property.Draw();
                     GUI.enabled = true;
                 }
                 else
