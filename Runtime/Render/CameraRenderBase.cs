@@ -2,12 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 namespace QTool
 {
     public abstract class OnPostRenderBase : MonoBehaviour
     {
-#if URP
         private void OnEnable()
         {
             RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
@@ -20,7 +18,7 @@ namespace QTool
         {
             OnPostRender();
         }
-#endif
+
         protected abstract void OnPostRender();
     }
 
