@@ -185,7 +185,6 @@ namespace QTool.Asset
         }
         public static async Task<TObj> GetAsync(string key)
         {
-            await Task.Yield();
             if (objDic.ContainsKey(key))
             {
                 return objDic[key];
@@ -208,10 +207,9 @@ namespace QTool.Asset
         {
           
             if (_loadOver) return;
-            await Task.Yield();
             var startTime = DateTime.Now;
             ResourceLoadAll();
-
+            await Task.Yield();
 #if Addressables
            if (_loading)
             {
