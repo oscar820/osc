@@ -34,6 +34,14 @@ namespace QTool.Test
         {
             return a.x != b.x || a.y != b.y;
         }
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
         public V2(Vector2 vector2)
         {
             x = vector2.x;

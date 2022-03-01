@@ -167,7 +167,7 @@ namespace QTool.Asset
         {
             if (!_loadOver)
             {
-                LoadAllAsync();
+                _ = LoadAllAsync();
             }
             if (objDic.ContainsKey(key))
             {
@@ -185,6 +185,7 @@ namespace QTool.Asset
         }
         public static async Task<TObj> GetAsync(string key)
         {
+            await Task.Yield();
             if (objDic.ContainsKey(key))
             {
                 return objDic[key];
@@ -200,11 +201,14 @@ namespace QTool.Asset
         }
 
         static bool _loadOver = false;
+#if Addressables
         static bool _loading = false;
+#endif
         public static async Task LoadAllAsync()
         {
           
             if (_loadOver) return;
+            await Task.Yield();
             var startTime = DateTime.Now;
             ResourceLoadAll();
 
@@ -232,7 +236,7 @@ namespace QTool.Asset
 
 
 #if Addressables
-        #region Addressable加载
+#region Addressable加载
 
         static async Task<TObj> AddressableGetAsync(string key)
         {
@@ -355,13 +359,13 @@ namespace QTool.Asset
         }
 
 
-        #endregion
+#endregion
 #endif
-        #region Resource加载
+#region Resource加载
 
         static TObj ResourceGet(string key)
         {
-            LoadAllAsync();
+            _ = LoadAllAsync();
             if (objDic.ContainsKey(key)) {
                 return objDic[key];
             }
@@ -399,7 +403,7 @@ namespace QTool.Asset
             }
             _loadOver = true;
         }
-        #endregion
+#endregion
     }
     public abstract class PrefabAssetList<TLabel>: AssetList<TLabel,GameObject> where TLabel:PrefabAssetList<TLabel>
     {
