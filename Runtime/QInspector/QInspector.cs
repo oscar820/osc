@@ -44,7 +44,7 @@ namespace QTool.Inspector
     /// <summary>
     /// 更改显示的名字
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field|AttributeTargets.Class|AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Field|AttributeTargets.Class|AttributeTargets.Method|AttributeTargets.Parameter)]
     public class ViewNameAttribute : ViewContorlAttribute
     {
         public string name;
