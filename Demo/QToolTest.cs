@@ -73,7 +73,7 @@ namespace QTool.Test
 
     //[QType()]
     [System.Serializable]
-    public class TestClass//:IQSerialize
+    public class TTestClass//:IQSerialize
     {
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
 
@@ -84,7 +84,7 @@ namespace QTool.Test
         public TestClass2 child;
         public void Read(QBinaryReader read)
         {
-            list = read.ReadObject(list);
+            list = read.ReadObject(list); 
             p2 = read.ReadSingle();
             // list = read.ReadObject<List<float>>();
             asdl = read.ReadString();
@@ -96,11 +96,11 @@ namespace QTool.Test
             write.Write(p2);
             write.Write(asdl);
         }
-        public TestClass()
+        public TTestClass()
         {
 
         }
-        public TestClass(int a)
+        public TTestClass(int a)
         {
 
         }
@@ -191,18 +191,18 @@ namespace QTool.Test
         [ContextMenu("Name")]
         public void FullName()
         {
-            UnityEngine.Debug.LogError(typeof(TestClass).Name);
+            UnityEngine.Debug.LogError(typeof(TTestClass).Name);
         }
 
         public byte[] testBytes;
 
       //   [HorizontalGroup("t1", "toggle")]
-        public TestClass test1;
+        public TTestClass test1;
      //   [HorizontalGroup("t1", "toggle")]
-        public TestClass test2;
+        public TTestClass test2;
         public byte[] xmlBytes;
         public byte[] jsonBytes;
-        public TestClass creatObj;
+        public TTestClass creatObj;
         NetInput last;
         public string email;
         public string emailPassword;
@@ -241,7 +241,7 @@ namespace QTool.Test
                     Activator.CreateInstance(QReflection.ParseType("TestClass"));
                 }
             });
-            creatObj = (TestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
+            creatObj = (TTestClass)Activator.CreateInstance(QReflection.ParseType("TestClass"));
             UnityEngine.Debug.LogError(creatObj);
         }
         public void GetTable(string startStr, Func<double, double> sinFunc)
@@ -345,7 +345,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    test2 = FileManager.XmlDeserialize<TestClass>(xmlBytes.GetString());
+                    test2 = FileManager.XmlDeserialize<TTestClass>(xmlBytes.GetString());
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
                 //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
             }
@@ -363,7 +363,7 @@ namespace QTool.Test
             {
                 for (int i = 0; i < 10000; i++)
                 {
-                    test2 = QSerialize.Deserialize<TestClass>(testBytes);
+                    test2 = QSerialize.Deserialize<TTestClass>(testBytes);
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
                 //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
             }
