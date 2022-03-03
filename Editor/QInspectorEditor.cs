@@ -233,7 +233,7 @@ namespace QTool.Inspector
             }
             else
             {
-                property.Draw(position);
+                property.Draw("",position);
             }
 
         }
@@ -511,62 +511,8 @@ namespace QTool.Inspector
             v = floatDraw(v);
             longValue.longValue = ((Fix64)v).RawValue;
         }
-        public static bool Draw(this SerializedProperty property, Rect rect, string parentKey = "")
-        {
-            switch (property.type)
-            {
-                case nameof(Fix64):
-                    {
-                        DrawFix64(property, ( value) => {
-
-                            var range = property.GetAttribute<RangeAttribute>();
-                            if (range == null)
-                            {
-                                return EditorGUI.FloatField(rect, property.ViewName(parentKey), value);
-                            }
-                            else
-                            {
-                                return EditorGUI.Slider(rect, property.ViewName(parentKey), value, range.min, range.max);
-                            }
-                            
-                            });
-                    }
-                    return true;
-                default:
-                    {
-                        if (property.hasVisibleChildren && !property.isArray)
-                        {
-                            var cur = property.Copy();
-                            var tRect = rect;
-                            tRect.height = property.GetHeight(false);
-                            var expanded = EditorGUI.PropertyField(tRect, cur, new GUIContent(cur.ViewName(parentKey)), false);
-                            var childRect = rect;
-                           // childRect.yMin = tRect.yMax;
-                            parentKey = property.type;
-                            if (expanded)
-                            {
-                                var end = cur.GetEndProperty();
-                                cur.NextVisible(true);
-                                do
-                                {
-                                    if (SerializedProperty.EqualContents(cur, end)) return expanded;
-                                    childRect.yMin = tRect.yMax;
-                                    tRect.yMin = childRect.yMin;
-                                    tRect.height = property.GetHeight(true);
-                                    cur.Draw(tRect, parentKey);
-                                } while (cur.NextVisible(false));
-                            }
-                            return expanded;
-                        }
-                        else
-                        {
-                            return EditorGUI.PropertyField(rect, property, new GUIContent(property.ViewName(parentKey)), property.isExpanded);
-                        }
-                    }
-                    
-            }
-        }
-        public static bool Draw(this SerializedProperty property,string parentKey="")
+      
+        public static bool Draw(this SerializedProperty property,string parentKey="", Rect? rect=null)
         {
             var cur= property.Copy();
             switch (cur.type)
@@ -577,11 +523,25 @@ namespace QTool.Inspector
                             var range = cur.GetAttribute<RangeAttribute>();
                             if (range == null)
                             {
-                                return EditorGUILayout.FloatField(cur.ViewName(parentKey), value);
+                                if (rect == null)
+                                {
+                                    return EditorGUILayout.FloatField(cur.ViewName(parentKey), value);
+                                }
+                                else
+                                {
+                                    return EditorGUI.FloatField(rect.Value, cur.ViewName(parentKey), value);
+                                }
                             }
                             else
                             {
-                                return EditorGUILayout.Slider(cur.ViewName(parentKey), value, range.min, range.max);
+                                if (rect == null)
+                                {
+                                    return EditorGUILayout.Slider(cur.ViewName(parentKey), value, range.min, range.max);
+                                }
+                                else
+                                {
+                                    return EditorGUI.Slider(rect.Value,cur.ViewName(parentKey), value, range.min, range.max);
+                                }
                             }
                         });
                         return true;
@@ -590,31 +550,54 @@ namespace QTool.Inspector
                     {
                         if (cur.hasVisibleChildren&&!cur.isArray)
                         {
-                            var expanded = EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)), false);
+                            if (rect != null)
+                            {
+                                rect = new Rect(rect.Value.position, new Vector2(rect.Value.width, cur.GetHeight(false)));
+                            }
+                            var expanded = rect == null ? EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)), false)
+                                : EditorGUI.PropertyField(rect.Value,cur, new GUIContent(cur.ViewName(parentKey)), false);
                             parentKey = property.type;
                             if (expanded)
                             {
-                                using (var h = new EditorGUILayout.HorizontalScope())
+                                using (rect==null?new EditorGUILayout.HorizontalScope():null)
                                 {
-                                    EditorGUILayout.Space(10,false);
-                                    using (var layout = new EditorGUILayout.VerticalScope())
+                                    if (rect == null)
+                                    {
+                                        EditorGUILayout.Space(20, false);
+                                    }
+                                    else
+                                    {
+                                        rect = new Rect(rect.Value.x + 20, rect.Value.y,rect.Value.width-10, rect.Value.height);
+                                    }
+                                    using (rect == null ? new EditorGUILayout.VerticalScope() : null)
                                     {
                                         var end = cur.GetEndProperty();
                                         cur.NextVisible(true);
                                         do
                                         {
                                             if (SerializedProperty.EqualContents(cur, end)) return expanded;
-                                   
-                                            cur.Draw(parentKey); 
+                                            if (rect != null)
+                                            {
+                                                rect = new Rect(new Vector2(rect.Value.x,rect.Value.yMax+2), new Vector2(rect.Value.width, cur.GetHeight(false)));
+                                            }
+                                            cur.Draw(parentKey, rect);
                                         } while (cur.NextVisible(false));
                                     }
+                                   
                                 }
                             }
                             return expanded;
                         }
                         else
                         {
-                            return EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)), cur.isExpanded);
+                            if (rect == null)
+                            {
+                                return EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)), cur.isExpanded);
+                            }
+                            else
+                            {
+                                return EditorGUI.PropertyField(rect.Value,cur, new GUIContent(cur.ViewName(parentKey)), cur.isExpanded);
+                            }
                         }
                     }
             }
