@@ -2,19 +2,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-namespace QTool.Inspector
+namespace QTool
 {
     /// <summary>
-    /// 数值更改时调用changeCallBack函数
+    /// 更改显示的名字
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    public class ChangeCallAttribute : PropertyAttribute
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Parameter)]
+    public class ViewNameAttribute : ViewContorlAttribute
     {
-        public bool change;
-        public string changeCallBack;
-        public ChangeCallAttribute(string changeCallBack)
+        public string name;
+
+        public ViewNameAttribute()
         {
-            this.changeCallBack = changeCallBack;
+            order = 10;
+        }
+        public ViewNameAttribute(string name, string showControl = "") : base(showControl)
+        {
+            order = 10;
+            this.name = name;
+        }
+    }
+    public class ViewContorlAttribute : PropertyAttribute
+    {
+        public string control = "";
+        public ViewContorlAttribute()
+        {
+        }
+        public ViewContorlAttribute(string control = "")
+        {
+            this.control = control;
         }
     }
     /// <summary>
@@ -23,7 +39,7 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Field)]
     public class ReadOnlyAttribute : ViewContorlAttribute
     {
-        public ReadOnlyAttribute(string control=""):base(control)
+        public ReadOnlyAttribute(string control = "") : base(control)
         {
         }
     }
@@ -41,36 +57,25 @@ namespace QTool.Inspector
         }
     }
 
+}
+namespace QTool.Inspector
+{
     /// <summary>
-    /// 更改显示的名字
+    /// 数值更改时调用changeCallBack函数
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field|AttributeTargets.Class|AttributeTargets.Method|AttributeTargets.Parameter)]
-    public class ViewNameAttribute : ViewContorlAttribute
+    [AttributeUsage(AttributeTargets.Field)]
+    public class ChangeCallAttribute : PropertyAttribute
     {
-        public string name;
-
-        public ViewNameAttribute()
+        public bool change;
+        public string changeCallBack;
+        public ChangeCallAttribute(string changeCallBack)
         {
-            order = 10;
-        }
-        public ViewNameAttribute(string name,string showControl=""):base(showControl)
-        {
-            order = 10;
-            this.name = name;
+            this.changeCallBack = changeCallBack;
         }
     }
-    public class ViewContorlAttribute : PropertyAttribute
-    {
-        public string control = "";
-        public ViewContorlAttribute()
-        {
-        }
-        public ViewContorlAttribute(string control = "")
-        {
-            this.control = control;
-        }
-    }
+  
 
+   
 
     /// <summary>
     /// 将字符传显示为枚举下拉款通过GetKeyListFunc获取所有可选择的字符串

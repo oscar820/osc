@@ -429,6 +429,7 @@ namespace QTool.Inspector
                 return property.displayName;
             }
         }
+      
         public static T Call<T>(this SerializedProperty property, string funcName) where T : class
         {
             return Call(property, funcName) as T;
@@ -504,7 +505,7 @@ namespace QTool.Inspector
       
         public static void DrawFix64(SerializedProperty property,Func<float,float> floatDraw)
         {
-            var longValue = property.FindPropertyRelative("RawValue");
+            var longValue = property.FindPropertyRelative(nameof(Fix64.RawValue));
             var v = (float)Fix64.Get(longValue.longValue);
             v = floatDraw(v);
             longValue.longValue = ((Fix64)v).RawValue;
