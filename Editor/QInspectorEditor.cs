@@ -386,10 +386,8 @@ namespace QTool.Inspector
 
         public static object[] GetAttributes<T>(this SerializedProperty prop,string parentKey)
         {
-            var type = string.IsNullOrWhiteSpace(parentKey)? prop.serializedObject.GetType() : QReflection.ParseType(parentKey);
-
+            var type = string.IsNullOrWhiteSpace(parentKey)? prop.serializedObject.targetObject.GetType() : QReflection.ParseType(parentKey);
             var field = GetChildObject(type, prop.name);
-
             if (field != null)
             { 
                 return field.GetCustomAttributes(typeof(T), true);
