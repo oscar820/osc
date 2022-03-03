@@ -78,6 +78,7 @@ namespace QTool.Test
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
 
         public List<float> list;
+        [ViewName("名字测试1")]
         public string asdl;
         public float p2;
         public TestClass2 child;
@@ -110,6 +111,7 @@ namespace QTool.Test
     public class TestClass2//:IQSerialize
     {
         public List<float> list;
+        [ViewName("名字测试2")]
         public string asdl;
         public float p1;
 

@@ -374,9 +374,9 @@ namespace QTool.Inspector
             rect.width = width;
             return rect;
         }
-        public static bool HasAttribute<T>(this SerializedProperty prop)
+        public static bool HasAttribute<T>(this SerializedProperty prop,string parentKey)
         {
-            object[] attributes = GetAttributes<T>(prop);
+            object[] attributes = GetAttributes<T>(prop,parentKey);
             if (attributes != null)
             {
                 return attributes.Length > 0;
@@ -384,28 +384,53 @@ namespace QTool.Inspector
             return false;
         }
 
-        public static object[] GetAttributes<T>(this SerializedProperty prop)
+        public static object[] GetAttributes<T>(this SerializedProperty prop, string parentKey)
         {
             object obj = prop.serializedObject.targetObject;
             if (obj == null)
                 return new object[0];
-
-            Type objType = obj.GetType();
-            const BindingFlags bindingFlags = System.Reflection.BindingFlags.GetField
-                                              | System.Reflection.BindingFlags.GetProperty
-                                              | System.Reflection.BindingFlags.Instance
-                                              | System.Reflection.BindingFlags.NonPublic
-                                              | System.Reflection.BindingFlags.Public;
-            FieldInfo field = objType.GetField(prop.name, bindingFlags);
+            var type = obj.GetType();
+            var keys = parentKey.Split('.');
+            FieldInfo field = null;
+            if (!string.IsNullOrWhiteSpace(parentKey))
+            {
+                foreach (var key in keys)
+                {
+                    field = GetChildObject(type, key);
+                    if (field == null)
+                    {
+                        break;
+                    }
+                    type = field.FieldType;
+                }
+            }
+            if (field != null)
+            {
+                field = GetChildObject(field.FieldType, prop.name);
+            }
+            else
+            {
+                field = GetChildObject(type, prop.name);
+            }
             if (field != null)
             {
                 return field.GetCustomAttributes(typeof(T), true);
             }
             return new object[0];
         }
-        public static T GetAttribute<T>(this SerializedProperty prop) where T : Attribute
+        public static FieldInfo GetChildObject(Type type,string key)
         {
-            object[] attributes = GetAttributes<T>(prop);
+            if (string.IsNullOrWhiteSpace(key)) return null;
+            const BindingFlags bindingFlags = System.Reflection.BindingFlags.GetField
+                                              | System.Reflection.BindingFlags.GetProperty
+                                              | System.Reflection.BindingFlags.Instance
+                                              | System.Reflection.BindingFlags.NonPublic
+                                              | System.Reflection.BindingFlags.Public;
+            return type.GetField(key, bindingFlags);
+        }
+        public static T GetAttribute<T>(this SerializedProperty prop,string parentKey="") where T : Attribute
+        {
+            object[] attributes = GetAttributes<T>(prop, parentKey);
             if (attributes.Length > 0)
             {
                 return attributes[0] as T;
@@ -416,9 +441,9 @@ namespace QTool.Inspector
             }
         }
 
-        public static string ViewName(this SerializedProperty property)
+        public static string ViewName(this SerializedProperty property,string parentName="")
         {
-            var att = property.GetAttribute<ViewNameAttribute>();
+            var att = property.GetAttribute<ViewNameAttribute>(parentName);
             if (att != null && att.name != "")
             {
                 return att.name;
@@ -508,7 +533,7 @@ namespace QTool.Inspector
             v = floatDraw(v);
             longValue.longValue = ((Fix64)v).RawValue;
         }
-        public static bool Draw(this SerializedProperty property, Rect rect)
+        public static bool Draw(this SerializedProperty property, Rect rect, string parentName = "")
         {
             switch (property.type)
             {
@@ -519,42 +544,70 @@ namespace QTool.Inspector
                             var range = property.GetAttribute<RangeAttribute>();
                             if (range == null)
                             {
-                                return EditorGUI.FloatField(rect, property.ViewName(), value);
+                                return EditorGUI.FloatField(rect, property.ViewName(parentName), value);
                             }
                             else
                             {
-                                return EditorGUI.Slider(rect, property.ViewName(), value, range.min, range.max);
+                                return EditorGUI.Slider(rect, property.ViewName(parentName), value, range.min, range.max);
                             }
                             
                             });
                     }
                     return true;
                 default:
-                    return EditorGUI.PropertyField(rect, property, new GUIContent(property.ViewName()), property.isExpanded);
+                    return EditorGUI.PropertyField(rect, property, new GUIContent(property.ViewName(parentName)), property.isExpanded);
             }
         }
-        public static bool Draw(this SerializedProperty property)
+        public static bool Draw(this SerializedProperty property,string parentName="")
         {
-            switch (property.type)
+            var cur= property.Copy();
+            switch (cur.type)
             {
                 case nameof(Fix64):
                     {
-                        DrawFix64(property, (value) => {
-                            var range = property.GetAttribute<RangeAttribute>();
+                        DrawFix64(cur, (value) => {
+                            var range = cur.GetAttribute<RangeAttribute>();
                             if (range == null)
                             {
-                                return EditorGUILayout.FloatField(property.ViewName(), value);
+                                return EditorGUILayout.FloatField(cur.ViewName(parentName), value);
                             }
                             else
                             {
-                                return EditorGUILayout.Slider(property.ViewName(), value, range.min, range.max);
+                                return EditorGUILayout.Slider(cur.ViewName(parentName), value, range.min, range.max);
                             }
                         });
                         return true;
                     }
                 default:
                     {
-                        return EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), property.isExpanded);
+                        if (cur.hasVisibleChildren&&!cur.isArray)
+                        {
+                            var expanded = EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(property.name)), false);
+                            parentName = string.IsNullOrWhiteSpace(parentName) ? property.name : parentName + "." + property.name;
+                            if (expanded)
+                            {
+                                using (var h = new EditorGUILayout.HorizontalScope())
+                                {
+                                    EditorGUILayout.Space(10,false);
+                                    using (var layout = new EditorGUILayout.VerticalScope())
+                                    {
+                                        var end = cur.GetEndProperty();
+                                        cur.NextVisible(true);
+                                        do
+                                        {
+                                            if (SerializedProperty.EqualContents(cur, end)) return expanded;
+
+                                            cur.Draw(parentName);
+                                        } while (cur.NextVisible(false));
+                                    }
+                                }
+                            }
+                            return expanded;
+                        }
+                        else
+                        {
+                            return EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentName)), cur.isExpanded);
+                        }
                     }
             }
          
@@ -868,7 +921,6 @@ namespace QTool.Inspector
                     DrawProperty(propertyIter.Copy());
                 } while (propertyIter.NextVisible(false));
             }
-
         }
 
         QDictionary<int, int> tempIndex = new QDictionary<int, int>(-1);
