@@ -109,11 +109,15 @@ namespace QTool
                     throw new Exception("已存在重名不同类型对象池" + poolDic[key]);
                 }
                     
-            }else
+            }else if(Application.isPlaying)
             {
                 var pool = new ObjectPool<T>(key,newFunc);
                 poolDic[key]= pool;
                 return pool;
+            }
+            else
+            {
+                return null;
             }
         }
         public static void Push(GameObject gameObject)
