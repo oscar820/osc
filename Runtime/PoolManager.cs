@@ -306,7 +306,12 @@ namespace QTool
                 var gameObj = GetGameObj(obj);
                 if (gameObj != null)
                 {
-                    Debug.LogError("物体[" + obj + "]对象池[" + Key + "]无法回收强制删除");
+                    GameObject.Destroy(gameObj);
+                    Debug.LogError("物体[" + obj + "]对象池[" + Key + "]中并不存在 无法回收强制删除");
+                }
+                else
+                {
+                    Debug.LogError("对象[" + obj + "]对象池[" + Key + "]中不存在 无法回收");
                 }
                 return;
             }
