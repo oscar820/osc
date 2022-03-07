@@ -408,7 +408,7 @@ namespace QTool.Asset
         static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
         static async Task<ObjectPool<GameObject>> GetPool(string key)
         {
-            var poolkey = key + "_ObjPool";
+            var poolkey = key + "_AssetList";
             if (!PoolDic.ContainsKey(poolkey))
             {
                 var prefab =await GetAsync(key) as GameObject;

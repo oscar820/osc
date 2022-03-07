@@ -153,15 +153,7 @@ namespace QTool
         }
         public static void Push(T obj)
         {
-            if (_pool == null)
-            {
-                _pool?.Push(obj);
-            }
-            else
-            {
-                Debug.LogError("物体[" + obj + "]对象池不存在强制删除");
-            }
- 
+            Pool.Push(obj);
         }
         public void Recover()
         {
@@ -229,7 +221,8 @@ namespace QTool
             }
             else
             {
-                var parent = new GameObject(name).transform;
+                var poolName = name + "_QPool";
+                var parent = new GameObject(poolName).transform;
                 parentList.Add(name, parent);
                 return parent;
             }
