@@ -153,7 +153,15 @@ namespace QTool
         }
         public static void Push(T obj)
         {
-            _pool?.Push(obj);
+            if (_pool == null)
+            {
+                _pool?.Push(obj);
+            }
+            else
+            {
+                Debug.LogError("物体[" + obj + "]对象池不存在强制删除");
+            }
+ 
         }
         public void Recover()
         {
@@ -198,16 +206,7 @@ namespace QTool
                         UsingPool.Remove(obj);
                     obj = Get();
                 }
-                GameObject gameObj = null;
-                if (isGameObject)
-                {
-                    gameObj = (obj as GameObject);
-                   
-                }
-                else if (isMonobehaviour)
-                {
-                    gameObj = (obj as MonoBehaviour).gameObject;
-                }
+                var gameObj = GetGameObj(obj);
                 if (gameObj != null)
                 {
                     gameObj.SetActive(true);
@@ -237,15 +236,7 @@ namespace QTool
         }
         T CheckPush(T obj)
         {
-            GameObject gameObj=null;
-            if (isGameObject)
-            {
-                gameObj=(obj as GameObject);
-            }
-            else if (isMonobehaviour)
-            {
-                gameObj=(obj as MonoBehaviour).gameObject;
-            }
+            var gameObj = GetGameObj(obj);
             if (gameObj != null)
             {
                 gameObj.SetActive(false);
@@ -302,9 +293,30 @@ namespace QTool
                 return Get();
             }
         }
+        GameObject GetGameObj(T obj)
+        {
+            if (isGameObject)
+            {
+                return obj as GameObject;
+            }
+            else if (isMonobehaviour)
+            {
+                return (obj as MonoBehaviour)?.gameObject;
+            }
+            return null;
+        }
         public void Push(T obj)
         {
-            if (CanUsePool.Contains(obj)) return;
+            if (obj==null||CanUsePool.Contains(obj)) return;
+            if (!UsingPool.Contains(obj))
+            {
+                var gameObj = GetGameObj(obj);
+                if (gameObj != null)
+                {
+                    Debug.LogError("物体[" + obj + "]对象池[" + Key + "]无法回收强制删除");
+                }
+                return;
+            }
             var resultObj = CheckPush(obj);
             CanUsePool.Enqueue(resultObj);
         }
