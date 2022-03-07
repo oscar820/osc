@@ -132,11 +132,16 @@ namespace QTool
     }
     public abstract class PoolObject<T>:IPoolObject where T : PoolObject<T>,new()
     {
+        internal static ObjectPool<T> _pool;
         public static ObjectPool<T> Pool
         {
             get
             {
-                return PoolManager.GetPool(typeof(T).FullName, () => new T());
+                if (_pool == null)
+                {
+                   _pool= PoolManager.GetPool(typeof(T).FullName, () => new T());
+                }
+                return _pool;
             }
         }
         public static T Get()
@@ -148,17 +153,11 @@ namespace QTool
         }
         public static void Push(T obj)
         {
-            lock (Pool)
-            {
-                Pool.Push(obj);
-            }
+            _pool?.Push(obj);
         }
         public void Recover()
         {
-            lock (Pool)
-            {
-                Pool.Push(this as T);
-            }
+            Push(this as T);
         }
         public abstract void OnPoolRecover();
         public abstract void OnPoolReset();
