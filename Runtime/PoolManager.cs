@@ -109,15 +109,11 @@ namespace QTool
                     throw new Exception("已存在重名不同类型对象池" + poolDic[key]);
                 }
                     
-            }else if(Application.isPlaying)
+            }else
             {
                 var pool = new ObjectPool<T>(key,newFunc);
                 poolDic[key]= pool;
                 return pool;
-            }
-            else
-            {
-                return null;
             }
         }
         public static void Push(GameObject gameObject)
@@ -215,6 +211,7 @@ namespace QTool
         private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
         private static Transform GetPoolParent(string name)
         {
+            if (!Application.isPlaying) return null;
             if (parentList.ContainsKey(name))
             {
                 return parentList[name];
