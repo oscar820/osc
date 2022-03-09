@@ -414,7 +414,7 @@ namespace QTool.Asset
                 var prefab =await GetAsync(key) as GameObject;
                 if (prefab == null)
                 {
-                    new Exception(Label + "找不到预制体资源" + key);
+                    Debug.LogError(Label + "找不到预制体资源" + key);
                     PoolDic.Add(poolkey, null);
                 }
                 else
@@ -456,6 +456,11 @@ namespace QTool.Asset
         public static async Task<GameObject> GetInstance(string key, Transform parent = null)
         {
             var pool = await GetPool(key);
+            if (pool == null)
+            {
+                Debug.LogError("无法实例化预制体[" + key + "]");
+                return null;
+            }
             var obj = pool.Get();
             if (obj == null)
             {
