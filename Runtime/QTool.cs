@@ -402,6 +402,36 @@ namespace QTool
     }
     public static class ArrayExtend
     {
+        public static bool TryParse(this string str,Type type,out object obj)
+        {
+            switch (type.Name)
+            {
+                case nameof(String):
+                    obj = str;
+                    return true;
+                case nameof(Int16):
+                case nameof(Int32):
+                case nameof(Int64):
+                    if(int.TryParse(str,out var intValue)){
+                        obj = intValue;
+                        return true;
+                    }
+                    break;
+                case nameof(Single):
+                case nameof(Double):
+                    if (float.TryParse(str, out var floatValue))
+                    {
+                        obj = floatValue;
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            Debug.LogError("[" + str + "]无法解析成类型[" + type.Name + "]");
+            obj = null;
+            return false;
+        }
         public static string ComputeScale(this string array)
         {
             return array.Length.ComputeScale();

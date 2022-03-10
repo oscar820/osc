@@ -591,11 +591,11 @@ namespace QTool.Inspector
                         {
                             if (rect == null)
                             {
-                                return EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)), cur.isExpanded);
+                                return EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)));
                             }
                             else
                             {
-                                return EditorGUI.PropertyField(rect.Value,cur, new GUIContent(cur.ViewName(parentKey)), cur.isExpanded);
+                                return EditorGUI.PropertyField(rect.Value,cur, new GUIContent(cur.ViewName(parentKey)));
                             }
                         }
                     }

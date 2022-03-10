@@ -157,7 +157,7 @@ namespace QTool.Test
             //var reader = new BinaryReader().Reset(writer.ToArray());
             // Debug.LogError(reader.ReadVector3()+":"+ reader.ReadVector3());
         }
-    
+        public List<string> tansList;
         // Update is called once per frame
         void Update()
         {
@@ -370,6 +370,12 @@ namespace QTool.Test
 
             });
             // Debug.LogError((bl[0] as IntValue).value);
+        }
+        public string commandStr;
+        [ViewName("命令测试")]
+        public void CommandTest()
+        {
+            QTool.Command.QCommand.Invoke(commandStr);
         }
         //[ContextMenu("test3")]
         //public void Test3Func()

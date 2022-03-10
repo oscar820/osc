@@ -193,16 +193,16 @@ namespace QTool.Reflection
     #endregion
     public static class QReflection
     {
-        public static string ViewName(this MethodInfo info)
+        public static string ViewName(this MemberInfo type)
         {
-            var att = info.GetCustomAttribute<ViewNameAttribute>();
+            var att = type.GetCustomAttribute<ViewNameAttribute>();
             if (att != null && att.name != "")
             {
                 return att.name;
             }
             else
             {
-                return info.Name;
+                return type.Name;
             }
         }
         public static string ViewName(this ParameterInfo info)
