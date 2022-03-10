@@ -410,7 +410,14 @@ namespace QTool
         {
             return array.Count.ComputeScale();
         }
-
+        public static int RemoveNull<T>(this List<T> array)
+        {
+            return array.RemoveAll(obj => obj == null);
+        }
+        public static int RemoveSpace(this List<string> array)
+        {
+            return array.RemoveAll(obj => string.IsNullOrWhiteSpace(obj));
+        }
         public static string ComputeScale(this int byteLength)
         {
             return ComputeScale((long)byteLength);
