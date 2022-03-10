@@ -13,9 +13,9 @@ namespace QTool.Command
         {
             FreshCommands(typeof(BaseCommands));
         }
-        public static void Invoke(string commandStr)
+        public static bool Invoke(string commandStr)
         {
-            if (string.IsNullOrWhiteSpace(commandStr)) return;
+            if (string.IsNullOrWhiteSpace(commandStr)) return false;
             List<string> commands =new List<string>( commandStr.Split(' '));
             commands.RemoveSpace();
             if (commands.Count > 0)
@@ -26,9 +26,11 @@ namespace QTool.Command
                     if(!NameDictionary[name].Invoke(commands))
                     {
                         Debug.LogError("通过[" + commandStr + "]调用命令[" + commandStr + "]出错");
+                        return false;
                     }
                 }
             }
+            return true;
         }
         public class QCommandInfo
         {
