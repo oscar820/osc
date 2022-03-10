@@ -372,7 +372,7 @@ namespace QTool.Test
             // Debug.LogError((bl[0] as IntValue).value);
         }
         public string commandStr;
-        [ViewName("命令测试")]
+        [ViewButton("命令测试")]
         public void CommandTest()
         {
             QTool.Command.QCommand.Invoke(commandStr);

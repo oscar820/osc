@@ -406,6 +406,7 @@ namespace QTool
         {
             switch (type.Name)
             {
+                case nameof(System.Object):
                 case nameof(String):
                     obj = str;
                     return true;

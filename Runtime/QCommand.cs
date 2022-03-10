@@ -23,7 +23,10 @@ namespace QTool.Command
                 var name = commands.Dequeue();
                 if (NameDictionary.ContainsKey(name))
                 {
-                    NameDictionary[name].Invoke(commands);
+                    if(!NameDictionary[name].Invoke(commands))
+                    {
+                        Debug.LogError("通过[" + commandStr + "]调用命令[" + commandStr + "]出错");
+                    }
                 }
             }
         }
