@@ -128,6 +128,16 @@ namespace QTool.Command
             {
                 Debug.Log(obj);
             }
+            [ViewName("错误")]
+            public static void LogError(object obj)
+            {
+                Debug.LogError(obj);
+            }
+            [ViewName("时间日志")]
+            public static void Time()
+            {
+                Debug.Log(DateTime.Now);
+            }
         }
 
     }
