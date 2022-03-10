@@ -163,7 +163,7 @@ namespace QTool
             }
         }
     }
-    [ExecuteInEditMode]
+
     [DisallowMultipleComponent]
     public class QId : MonoBehaviour,IKey<string>,IQSerialize
     {
@@ -307,6 +307,7 @@ namespace QTool
                 InstanceIdList[id] = this;
             }
         }
+        [ExecuteInEditMode]
         protected virtual void Awake()
         {
           
