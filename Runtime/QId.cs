@@ -30,41 +30,35 @@ namespace QTool
             }
             return obj.GetComponent<QId>();
         }
-        public static byte[] SaveAllInstance(this QDictionary<string, QId> InstanceIdList)
+        public static byte[] SaveAllInstance<IDType>(this QList<string, IDType> InstanceIdList) where IDType : QId
         {
             using (QBinaryWriter writer = new QBinaryWriter())
             {
-                var saveList = new List<QId>();
-                foreach (var item in InstanceIdList)
-                {
-                    if (item.Value.IsScenePrefabInstance)
-                    {
-                        saveList.Add(item.Value);
-                    }
-                }
-                var shortCount = (short)saveList.Count;
+              
+                var shortCount = (short)InstanceIdList.Count;
 
                 writer.Write(shortCount);
-                for (int i = 0; i < shortCount; i++)
+                foreach (var qId in InstanceIdList)
                 {
-                    var qId = saveList[i];
-
                     writer.Write(qId.InstanceId);
                     writer.Write(qId.PrefabId);
+                }
+                foreach (var qId in InstanceIdList)
+                {
                     writer.WriteObject(qId);
                 }
                 var bytes = writer.ToArray();
-                Debug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ComputeScale());
+                Debug.Log("保存数据 数目：" + InstanceIdList.Count+" 大小："+ bytes.Length.ComputeScale());
                 return bytes;
             }
         }
-        public static void LoadAllInstance(this QDictionary<string, QId> InstanceIdList, byte[] bytes)
+        public static void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes) where IDType:QId
         {
             LoadAllInstance(InstanceIdList,bytes,(prefab)=> {
                 if (prefab != null)
                 {
                     var obj = GameObject.Instantiate(prefab, null);
-                    return obj.GetComponent<QId>();
+                    return obj.GetComponent<IDType>();
                 }
                 else
                 {
@@ -75,18 +69,11 @@ namespace QTool
                 GameObject.Destroy(qid.gameObject);
             });
         }
-        public static void LoadAllInstance(this QDictionary<string, QId> InstanceIdList, byte[] bytes,System.Func<GameObject,QId> createFunc,System.Action< QId> destoryFunc )
+        public static void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes,System.Func<GameObject, IDType> createFunc,System.Action<IDType> destoryFunc ) where IDType : QId
         {
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {
-                var destoryList = new List<QId>();
-                foreach (var item in InstanceIdList)
-                {
-                    if (item.Value.IsScenePrefabInstance)
-                    {
-                        destoryList.Add(item.Value);
-                    }
-                }
+                var loadList = new List<IDType>();
                 var shortCount = reader.ReadInt16();
                 for (int i = 0; i < shortCount; i++)
                 {
@@ -96,8 +83,7 @@ namespace QTool
                     if (InstanceIdList.ContainsKey(key)&&InstanceIdList[key]!=null)
                     {
                         var qid = InstanceIdList[key];
-                        reader.ReadObject(qid);
-                        destoryList.Remove(qid);
+                        loadList.Add(qid);
                     }
                     else if(createFunc!=null)
                     {
@@ -111,11 +97,11 @@ namespace QTool
                                 return;
                             }
                             id.InstanceId = key;
-                            reader.ReadObject(id);
+                            loadList.Add(id);
                         }
                         else
                         {
-                            Debug.LogError("不存在【" + prefabId + "】预制体 读取存档中断");
+                            Debug.LogError("不存在【" + prefabId + "】["+"]预制体 读取存档中断");
                             return;
                         }
                       
@@ -128,10 +114,17 @@ namespace QTool
                 }
                 if (destoryFunc != null)
                 {
-                    foreach (var item in destoryList)
+                    foreach (var item in InstanceIdList)
                     {
-                        destoryFunc.Invoke(item);
+                        if (!loadList.Contains(item))
+                        {
+                            destoryFunc.Invoke(item);
+                        }
                     }
+                }
+                foreach (var item in loadList)
+                {
+                    reader.ReadObject(item);
                 }
                 Debug.Log("读取数据完成数目：" + shortCount);
             }
@@ -238,7 +231,7 @@ namespace QTool
 #endif
             }
         }
-        public static QDictionary<string, QId> InstanceIdList = new QDictionary<string, QId>();
+        public static QAutoList<string, QId> InstanceIdList = new QAutoList<string, QId>();
     
         public static string GetNewId(string key = "")
         {
@@ -338,7 +331,6 @@ namespace QTool
             {
                 writer.WriteObject(qSerializes[i]);
             }
-          
         }
        
         public override string ToString()
