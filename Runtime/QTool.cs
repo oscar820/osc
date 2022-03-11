@@ -437,6 +437,7 @@ namespace QTool
             obj = null;
             return false;
         }
+
         public static string ComputeScale(this string array)
         {
             return array.Length.ComputeScale();
@@ -482,6 +483,14 @@ namespace QTool
                 i++;
             }
             return str;
+        }
+        public static List<T> Replace<T>(this List<T> array,int indexA,int indexB)
+        {
+            if (indexA == indexB) return array;
+            var temp= array[indexA];
+            array[indexA] = array[indexB];
+            array[indexB] = temp;
+            return array;
         }
         public static bool ContainsKey<T, KeyType>(this ICollection<T> array, KeyType key) where T :  IKey<KeyType>
         {

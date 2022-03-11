@@ -38,8 +38,11 @@ namespace QTool
                 var shortCount = (short)InstanceIdList.Count;
 
                 writer.Write(shortCount);
+
                 foreach (var qId in InstanceIdList)
                 {
+
+                  
                     writer.Write(qId.InstanceId);
                     writer.Write(qId.PrefabId);
                 }
@@ -47,6 +50,7 @@ namespace QTool
                 {
                     writer.WriteObject(qId);
                 }
+
                 var bytes = writer.ToArray();
                 Debug.Log("保存数据 数目：" + InstanceIdList.Count+" 大小："+ bytes.Length.ComputeScale());
                 return bytes;
@@ -73,17 +77,19 @@ namespace QTool
         {
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {
+         
                 var loadList = new List<IDType>();
                 var shortCount = reader.ReadInt16();
                 for (int i = 0; i < shortCount; i++)
                 {
                     var key = reader.ReadString();
                     var prefabId= reader.ReadString();
-             
+               
                     if (InstanceIdList.ContainsKey(key)&&InstanceIdList[key]!=null)
                     {
                         var qid = InstanceIdList[key];
                         loadList.Add(qid);
+                        loadList.Replace(i, InstanceIdList.IndexOf(qid));
                     }
                     else if(createFunc!=null)
                     {
@@ -98,13 +104,14 @@ namespace QTool
                             }
                             id.InstanceId = key;
                             loadList.Add(id);
+                            InstanceIdList[key] = id;
+                            loadList.Replace(i, InstanceIdList.IndexOf(id));
                         }
                         else
                         {
-                            Debug.LogError("不存在【" + prefabId + "】["+"]预制体 读取存档中断");
+                            Debug.LogError("不存在【" + prefabId + "】["+key+"]预制体 读取存档中断");
                             return;
                         }
-                      
                     }
                     else
                     {

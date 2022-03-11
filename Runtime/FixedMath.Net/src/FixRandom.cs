@@ -33,6 +33,10 @@ namespace QTool
             return new FixRandom(Next());
         }
         public int Seed {  set; get; }
+        public FixRandom()
+        {
+            this.Seed = new System.Random().Next();
+        }
         public FixRandom(int seed)
         {
             this.Seed = seed;
