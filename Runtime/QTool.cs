@@ -298,6 +298,10 @@ namespace QTool
         {
             CurTime = Time;
         }
+        public void SetCurTime(T curTime)
+        {
+            CurTime = curTime;
+        }
         public void Reset(T time, bool startOver = false)
         {
             this.Time = time;

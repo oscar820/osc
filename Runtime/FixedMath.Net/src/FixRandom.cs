@@ -2,38 +2,51 @@
 
 namespace QTool
 {
-	public class FixRandom
+    public class FixRandom
     {
-        private Random random;
-        public FixRandom(int seed)
+     
+        
+        public Fix64 One()
         {
-            random = new Random(seed);
-        }
-        public FixRandom CreateRandom()
-        {
-            return new FixRandom(random.Next());
+            return Next() / (Fix64)M;
         }
         public int Range(int maxValue)
         {
-            return random.Next(maxValue);
+            return (int)(One() * maxValue);
         }
         public int Range(int minValue, int maxValue)
         {
-            return random.Next(minValue,maxValue);
-        }
-        public Fix64 One()
-        {
-            return (Fix64)random.Next(Fix) / Fix;
+            var range = maxValue - minValue;
+            return (int)(Range(range) + minValue);
         }
         public Fix64 Range(Fix64 maxValue)
         {
-            return One() * maxValue ;
+            return One() * maxValue;
         }
-        const int Fix = int.MaxValue;
         public Fix64 Range(Fix64 minValue, Fix64 maxValue)
         {
-            var range= maxValue - minValue;
-            return Range(range)+minValue;
+            var range = maxValue - minValue;
+            return Range(range) + minValue;
+        }
+        public FixRandom CreateRandom()
+        {
+            return new FixRandom(Next());
+        }
+        public int Seed {  set; get; }
+        public FixRandom(int seed)
+        {
+            this.Seed = seed;
+        }
+        const long M =int.MaxValue;
+        const long A =48271;
+        const long B =0;
+        private int Next()
+        {
+            Seed=(int)( (A*Seed+B)% M);
+            return Seed;
         }
     }
+
+
+
 }
