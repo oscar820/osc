@@ -5,10 +5,13 @@ namespace QTool
 	public class FixRandom
     {
         private Random random;
-
         public FixRandom(int seed)
         {
             random = new Random(seed);
+        }
+        public FixRandom CreateRandom()
+        {
+            return new FixRandom(random.Next());
         }
         public int Range(int maxValue)
         {
