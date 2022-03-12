@@ -108,11 +108,8 @@ namespace QTool
     }
     public class QList<TKey,T>:List<T> where T : IKey<TKey>
     {
-        //[SerializeField]
-        //public List<T> list = new List<T>();
         [NonSerialized]
         [XmlIgnore]
-        //[JsonIgnore]
         protected Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
         public new void Add(T value)
         {
