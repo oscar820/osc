@@ -10,21 +10,13 @@ namespace QTool.Binary
   
     public class QBinaryReader:BinaryReader
     {
-      //  public static Func<QBinaryReader, Type,object, object> customReadType;
         public T ReadObject<T>(T obj = default)
         {
             return (T)ReadObjectType(typeof(T), obj);
         }
-        public object ReadObjectType(Type type ,object obj = default)
+        public object ReadObjectType(Type type, object obj = default)
         {
-            //if (customReadType == null|| !checkCustom )
-            //{
-                return this.DeserializeType(type, obj);
-            //}
-            //else
-            //{
-            //    return customReadType(this, type, obj);
-            //}
+            return this.DeserializeType(type, obj);
         }
         public QBinaryReader(byte[] bytes):base(new MemoryStream(bytes))
         {
@@ -32,7 +24,6 @@ namespace QTool.Binary
         public MemoryStream memory => BaseStream as MemoryStream;
         public byte[] ReadByteLengthBytes()
         {
-
             var count = base.ReadByte();
             return base.ReadBytes(count);
         }
@@ -53,7 +44,6 @@ namespace QTool.Binary
     }
     public class QBinaryWriter : BinaryWriter
     {
-       // public static Action<QBinaryWriter,object, Type> customWriteType;
         public QBinaryWriter() : base(new MemoryStream())
         {
         }
@@ -64,14 +54,7 @@ namespace QTool.Binary
 
         public void WriteObjectType(object obj,Type type)
         {
-            //if ( customWriteType == null||!checkCustom)
-            //{
             this.SerializeType(obj, type);
-            //}
-            //else
-            //{
-            //    customWriteType(this,obj, type);
-            //}
         }
         public byte[] ToArray()
         {

@@ -52,7 +52,7 @@ namespace QTool
                 }
 
                 var bytes = writer.ToArray();
-                Debug.Log("保存数据 数目：" + InstanceIdList.Count+" 大小："+ bytes.Length.ComputeScale());
+                Debug.Log("保存数据 数目：" + InstanceIdList.Count+" 大小："+ bytes.Length.ToSizeString());
                 return bytes;
             }
         }

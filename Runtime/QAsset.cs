@@ -419,7 +419,7 @@ namespace QTool.Asset
                 }
                 else
                 {
-                    var pool = PoolManager.GetPool(poolkey, prefab);
+                    var pool = QPoolManager.GetPool(poolkey, prefab);
                     PoolDic.Add(poolkey, pool);
                 }
             }

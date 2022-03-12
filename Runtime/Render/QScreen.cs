@@ -11,7 +11,7 @@ namespace QTool
     {
         public static async Task<Texture> Capture()
         {
-            return await QToolDelay.Instance.Capture();
+            return await QCapture.Instance.Capture();
         }
         public static void SetResolution(int width, int height, bool fullScreen)
         {

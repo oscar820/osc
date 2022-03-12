@@ -4,13 +4,8 @@ using UnityEngine;
 using System.Threading.Tasks;
 namespace QTool
 {
-    public class QToolDelay : InstanceBehaviourAutoCreate<QToolDelay>
+    public class QCapture : QManagerBase<QCapture>
     {
-        protected override void Awake()
-        {
-            base.Awake();
-            DontDestroyOnLoad(gameObject);
-        }
         RenderTexture renderTexture;
         IEnumerator CaptureIEnumerator()
         {
@@ -29,11 +24,7 @@ namespace QTool
         {
             captureOver = false;
             StartCoroutine(CaptureIEnumerator());
-
-            while (!captureOver)
-            {
-                await Task.Delay(10);
-            }
+            await Tool.Wait(() => captureOver);
             return renderTexture;
         }
     }

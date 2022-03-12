@@ -68,7 +68,7 @@ namespace QTool
             }
         }
     }
-    public static class PoolManager
+    public static class QPoolManager
     {
       
         
@@ -135,7 +135,7 @@ namespace QTool
             {
                 if (_pool == null)
                 {
-                   _pool= PoolManager.GetPool(typeof(T).FullName, () => new T());
+                   _pool= QPoolManager.GetPool(typeof(T).FullName, () => new T());
                 }
                 return _pool;
             }

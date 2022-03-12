@@ -3,27 +3,42 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
 {
-    public static class QToolManager
+    internal class QToolManager:InstanceBehaviour<QToolManager>
     {
-        private static GameObject _instanceObj;
-        public static GameObject InstanceObj
+        public static GameObject InstanceObj => Instance.gameObject;
+        public new static QToolManager Instance
         {
             get
             {
-                if (_instanceObj == null)
+                if (_instance == null)
                 {
-                    _instanceObj = GameObject.Find(nameof(QToolManager));
-                    if (_instanceObj == null)
+                    _instance = GameObject.FindObjectOfType<QToolManager>();
+                    if (_instance == null)
                     {
-                        _instanceObj = new GameObject(nameof(QToolManager));
+                        var obj= GameObject.Find(nameof(QToolManager));
+                        if (obj == null)
+                        {
+                            obj = new GameObject(nameof(QToolManager));
+                        }
+                      
+                        _instance = obj.AddComponent<QToolManager>();
+                        _instance.SetDirty();
                     }
                 }
-                return _instanceObj;
+                return _instance;
+            }
+        }
+        protected override void Awake()
+        {
+            base.Awake();
+            if (Application.isPlaying)
+            {
+                GameObject.DontDestroyOnLoad(gameObject);
             }
         }
     }
     [ExecuteInEditMode]
-    public abstract class QToolManagerBase<T>:MonoBehaviour where T : QToolManagerBase<T>
+    public abstract class QManagerBase<T>:MonoBehaviour where T : QManagerBase<T>
     {
         private static T _instance;
         public static T Instance {
@@ -32,9 +47,7 @@ namespace QTool
                 if (_instance == null)
                 {
                     _instance= QToolManager.InstanceObj.AddComponent<T>();
-#if UNITY_EDITOR
-                    UnityEditor.EditorUtility.SetDirty(_instance);
-#endif
+                    _instance.SetDirty();
                 }
                 return _instance;
             }
@@ -44,15 +57,11 @@ namespace QTool
             if (_instance == null)
             {
                 _instance = this as T;
-                if (Application.isPlaying)
-                {
-                    GameObject.DontDestroyOnLoad(gameObject);
-                }
             }
         }
     }
 
-    public class QIdManager : QToolManagerBase<QIdManager>
+    public class QIdManager : QManagerBase<QIdManager>
     {
         public List<QId> qIdInitList = new List<QId>();
         protected override void Awake()
