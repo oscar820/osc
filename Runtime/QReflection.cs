@@ -266,6 +266,17 @@ namespace QTool.Reflection
             });
             return typeList;
         }
+        public static T CreateInstance<T>(this Type type, params object[] param)
+        {
+            try
+            {
+                return (T)(Activator.CreateInstance(type, param));
+            }
+            catch (Exception e)
+            {
+                throw new Exception("通过" + type + "(" + param.ToOneString(",") + ")创建对象" + type + "出错", e);
+            }
+        }
         static Dictionary<string, Type> typeDic = new Dictionary<string, Type>();
         public static Type ParseType(string typeString)
         {

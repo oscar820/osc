@@ -238,7 +238,7 @@ namespace QTool
 #endif
             }
         }
-        public static QAutoList<string, QId> InstanceIdList = new QAutoList<string, QId>();
+        public static QList<string, QId> InstanceIdList = new QList<string, QId>();
     
         public static string GetNewId(string key = "")
         {
