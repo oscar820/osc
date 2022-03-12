@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace QTool.UI
 {
-    public class QGameObjList : MonoBehaviour
+    public class QObjectList : MonoBehaviour
     {
         public GameObject prefab;
 
