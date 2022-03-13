@@ -824,6 +824,7 @@ namespace QTool.Inspector
             if (serializedObject == null||serializedObject.targetObject==null)
             {
                 base.OnInspectorGUI();
+                return;
             }
             GroupList.Clear();
             EditorGUI.BeginChangeCheck();
