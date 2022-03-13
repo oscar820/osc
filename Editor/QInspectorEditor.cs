@@ -821,6 +821,10 @@ namespace QTool.Inspector
         public Dictionary<string, ReorderableList> listArray = new Dictionary<string, ReorderableList>();
         public override void OnInspectorGUI()
         {
+            if (serializedObject == null)
+            {
+                base.OnInspectorGUI();
+            }
             GroupList.Clear();
             EditorGUI.BeginChangeCheck();
             DrawAllProperties(serializedObject);
