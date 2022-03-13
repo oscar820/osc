@@ -58,6 +58,10 @@ namespace QTool
     public class SpriteEvent : UnityEvent<Sprite>
     {
     }
+    [System.Serializable]
+    public class Vector3Event : UnityEvent<Vector3>
+    {
+    }
 
     [System.Serializable]
     public class FloatEventTrigger : EventTriggerBase<FloatEvent>
