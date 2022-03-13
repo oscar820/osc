@@ -386,7 +386,7 @@ namespace QTool.Inspector
 
         public static object[] GetAttributes<T>(this SerializedProperty prop,string parentKey)
         {
-            var type = string.IsNullOrWhiteSpace(parentKey)? prop.serializedObject.targetObject.GetType() : QReflection.ParseType(parentKey);
+            var type = string.IsNullOrWhiteSpace(parentKey)? prop.serializedObject.targetObject?.GetType() : QReflection.ParseType(parentKey);
             var field = GetChildObject(type, prop.name);
             if (field != null)
             { 
@@ -821,7 +821,7 @@ namespace QTool.Inspector
         public Dictionary<string, ReorderableList> listArray = new Dictionary<string, ReorderableList>();
         public override void OnInspectorGUI()
         {
-            if (serializedObject == null)
+            if (serializedObject == null||serializedObject.targetObject==null)
             {
                 base.OnInspectorGUI();
             }
