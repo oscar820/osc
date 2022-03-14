@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 using System;
 using System.IO;
 using QTool.Asset;
-using QTool.Data;
 using QTool.Reflection;
 using System.Reflection;
 
@@ -16,33 +15,16 @@ namespace QTool
     public static class QToolToolBar
     {
      
-        //[MenuItem("QTool/Tool/显示日志")]
-        //public static void SwitchLog()
-        //{
-        //    QToolDebug.ShowLog = !QToolDebug.ShowLog;
-        //    UnityEngine.Debug.Log(QToolDebug.ShowLog ? "显示"+QToolDebug.Key : "隐藏"+ QToolDebug.Key);
-        //}
         [MenuItem("QTool/清空缓存/清空全部缓存")]
         public static void ClearMemery()
         {
             ClearPlayerPrefs();
-            ClearQData();
             ClearResourcesList();
         }
         [MenuItem("QTool/清空缓存/清空PlayerPrefs")]
         public static void ClearPlayerPrefs()
         {
             PlayerPrefs.DeleteAll();
-        }
-        [MenuItem("QTool/清空缓存/清空QData缓存")]
-        public static void ClearQData()
-        {
-            foreach (var type in typeof(QData<>).GetAllTypes())
-            {
-                type.InvokeStaticFunction("Clear");
-                Debug.LogError("清空" + type.Name);
-            };
-           
         }
         [MenuItem("QTool/清空缓存/清空AssetList缓存")]
         public static void ClearResourcesList()
