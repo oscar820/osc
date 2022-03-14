@@ -110,8 +110,27 @@ namespace QTool
             return flag;
         }
     }
-   
-    
+    public class AverageList
+    {
+        List<float> delayList = new List<float>();
+        public float Value
+        {
+            get; private set;
+        }
+        float delaySum = 0;
+        public void Push(float delay)
+        {
+            delayList.Enqueue(delay);
+            delaySum +=delay;
+            if (delayList.Count > 200)
+            {
+                delaySum -= delayList[0];
+                delayList.RemoveAt(0);
+            }
+            Value = delaySum/delayList.Count;
+        }
+    }
+
 
 
 
