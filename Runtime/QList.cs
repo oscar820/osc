@@ -89,9 +89,10 @@ namespace QTool
     }
     public class QList<TKey, T> : QList<T> where T : IKey<TKey>
     {
+        
         [NonSerialized]
         [XmlIgnore]
-        protected Dictionary<TKey, T> dic = new Dictionary<TKey, T>();
+        protected Dictionary<TKey, T> dicBuffer = new Dictionary<TKey, T>();
         public new void Add(T value)
         {
             if (value != null)
@@ -101,17 +102,17 @@ namespace QTool
         }
         public new void Sort(Comparison<T> comparison)
         {
-            dic.Clear();
+            dicBuffer.Clear();
             base.Sort(comparison);
         }
         public new void Sort(int index, int count, IComparer<T> comparer)
         {
-            dic.Clear();
+            dicBuffer.Clear();
             base.Sort(index, count, comparer);
         }
         public new void Sort()
         {
-            dic.Clear();
+            dicBuffer.Clear();
             base.Sort();
         }
         public new bool Contains(T value)
@@ -125,7 +126,7 @@ namespace QTool
                 Debug.LogError("key Ϊ null");
                 return false;
             }
-            if (dic.ContainsKey(key) && dic[key] != null)
+            if (dicBuffer.ContainsKey(key) && dicBuffer[key] != null)
             {
                 return true;
             }
@@ -141,19 +142,19 @@ namespace QTool
                 Debug.LogError("key Ϊ null");
                 return default;
             }
-            if (!dic.ContainsKey(key))
+            if (!dicBuffer.ContainsKey(key))
             {
                 var value = this.Get<T, TKey>(key);
                 if (value != null)
                 {
-                    dic[key] = value;
+                    dicBuffer[key] = value;
                 }
                 else
                 {
                     return default;
                 }
             }
-            return dic[key];
+            return dicBuffer[key];
         }
         public virtual void Set(TKey key, T value)
         {
@@ -161,13 +162,13 @@ namespace QTool
             {
                 Debug.LogError("key Ϊ null");
             }
-            if (dic.ContainsKey(key))
+            if (dicBuffer.ContainsKey(key))
             {
-                dic[key] = value;
+                dicBuffer[key] = value;
             }
             else
             {
-                dic.Add(key, value);
+                dicBuffer.Add(key, value);
             }
             this.Set<T, TKey>(key, value);
         }
@@ -211,7 +212,7 @@ namespace QTool
             if (obj != null)
             {
                 base.Remove(obj);
-                dic.Remove(obj.Key);
+                dicBuffer.Remove(obj.Key);
             }
         }
         public void RemoveKey(TKey key)
@@ -220,18 +221,17 @@ namespace QTool
         }
         public new void Clear()
         {
-            dic.Clear();
+            dicBuffer.Clear();
             base.Clear();
-            //dic.Clear();
         }
         public new void Reverse(int index, int count)
         {
-            dic.Clear();
+            dicBuffer.Clear();
             base.Reverse(index, count);
         }
         public new void Reverse()
         {
-            dic.Clear();
+            dicBuffer.Clear();
             base.Reverse();
         }
     }
@@ -240,11 +240,11 @@ namespace QTool
 
         public override T Get(TKey key)
         {
-            if (!dic.ContainsKey(key))
+            if (!dicBuffer.ContainsKey(key))
             {
-                dic[key] = this.GetAndCreate<T, TKey>(key, OnCreate);
+                dicBuffer[key] = this.GetAndCreate<T, TKey>(key, OnCreate);
             }
-            return dic[key];
+            return dicBuffer[key];
         }
         public virtual void OnCreate(T obj)
         {
@@ -299,25 +299,24 @@ namespace QTool
                 return dblSByte.ToString("f1") + "" + Suffix[i];
             }
         }
-        static StringBuilder strBuilder = new StringBuilder();
         public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n")
         {
             if (array == null)
             {
                 return "";
             }
-            strBuilder.Clear();
+            var str = "";
             int i = 0;
             foreach (var item in array)
             {
-                strBuilder.Append(item);
+                str+=item;
                 if (i < array.Count - 1)
                 {
-                    strBuilder.Append(splitChar);
+                    str+=splitChar; 
                 }
                 i++;
             }
-            return strBuilder.ToString();
+            return str;
         }
         public static List<T> Replace<T>(this List<T> array, int indexA, int indexB)
         {

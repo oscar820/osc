@@ -16,6 +16,7 @@ namespace QTool
                 if (!QDataList.QToolSetting.ContainsKey(Key)&&Application.isEditor)
                 {
                     QDataList.QToolSetting[Key].SetValue(true);
+                    Debug.LogError("new " + Key );
                 }
                 return QDataList.QToolSetting[Key].GetValue<bool>();
             }
@@ -27,28 +28,14 @@ namespace QTool
                 return typeof(T).Name;
             }
         }
-        public static void Log(object log)
-        {
-            if (ShowLog)
-            {
-                Debug.Log(Key + ":" + log);
-            }
-        }
-        public static void Log(Func<object> log)
+        public static void Log(Func<string> log)
         {
             if (ShowLog)
             {
                 Debug.Log(Key + ":" + log?.Invoke());
             }
         }
-        public static void LogWarning(object log)
-        {
-            if (ShowLog)
-            {
-                Debug.LogWarning(Key + ":" + log);
-            }
-        }
-        public static void LogWarning(Func<object> log)
+        public static void LogWarning(Func<string> log)
         {
             if (ShowLog)
             {

@@ -87,7 +87,7 @@ namespace QTool
                 var buildInfo = BuildPipeline.BuildPlayer(buildOption);
                 if (buildInfo.summary.result == BuildResult.Succeeded)
                 {
-                    QToolDebug.Log("打包成功" + BasePath+WindowsLocalPath);
+                    QToolDebug.Log(()=>"打包成功" + BasePath+WindowsLocalPath);
                     System.Diagnostics.Process.Start(BasePath + WindowsLocalPath);
                 }
                 else

@@ -83,19 +83,24 @@ namespace QTool{
             var lineStrs = dataStr.Split('\n');
             foreach (var lineStr in lineStrs)
             {
-                Add(new QDataLine(lineStr,this));
+                Add(new QDataLine(lineStr, this));
             }
         }
         public override string ToString()
         {
-            return this.ToOneString();
+            return this.ToOneString("\n");
         }
 
     }
 
     public class QDataLine:QList<string>,IKey<string>
     {
-        public string Key { get => base[0]; set => base[0] = value; }
+        public string Key { get => base[0]; set
+            {
+
+                base[0] = value;
+            }
+        }
         public T GetValue<T>()
         {
             Value.TryParse<T>(out var obj);
@@ -121,6 +126,7 @@ namespace QTool{
             set
             {
                 base[1] = value;
+                Debug.LogError(base[0]+"."+ base[1] + "=>" + value);
             }
         }
         public string this[string title]
@@ -163,16 +169,9 @@ namespace QTool{
             }
             OwnerData = ownerData;
         }
-        static StringBuilder builder = new StringBuilder();
         public override string ToString()
         {
-            builder.Clear();
-            foreach (var value in this)
-            {
-                builder.Append(value);
-                builder.Append('\t');
-            }
-            return builder.ToString().TrimEnd('\t');
+            return this.ToOneString("\t");
         }
     }
 }

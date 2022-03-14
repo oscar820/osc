@@ -156,7 +156,7 @@ namespace QTool
                     while (!sw.EndOfStream)
                     {
 
-                        data += sw.ReadLine();
+                        data += sw.ReadLine() + '\n';
                     }
                 }
             }

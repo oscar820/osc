@@ -104,6 +104,13 @@ namespace QTool
                         return true;
                     }
                     break;
+                case nameof(Boolean):
+                    if(bool.TryParse(str,out var boolValue))
+                    {
+                        obj = boolValue;
+                        return true;
+                    }
+                    break;
                 default:
                     break;
             }
