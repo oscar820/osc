@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QTool
 {
-  
+   
     
     public static partial class Tool
     {
@@ -65,6 +65,20 @@ namespace QTool
             }
             return Application.isPlaying;
         }
+        public static bool TryParse<T>(this string str,out T t)
+        {
+            if(TryParse(str, typeof(T), out var obj))
+            {
+                t = (T)obj;
+                return true;
+            }
+            else
+            {
+                t = default;
+                return false;
+            }
+            
+        }
         public static bool TryParse(this string str, Type type, out object obj)
         {
             switch (type.Name)
@@ -93,7 +107,6 @@ namespace QTool
                 default:
                     break;
             }
-            Debug.LogError("[" + str + "]无法解析成类型[" + type.Name + "]");
             obj = null;
             return false;
         }

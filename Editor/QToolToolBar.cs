@@ -16,12 +16,12 @@ namespace QTool
     public static class QToolToolBar
     {
      
-        [MenuItem("QTool/Tool/显示日志")]
-        public static void SwitchLog()
-        {
-            ToolDebug.ShowLog = !ToolDebug.ShowLog;
-            UnityEngine.Debug.Log(ToolDebug.ShowLog ? "显示"+ToolDebug.Key : "隐藏"+ ToolDebug.Key);
-        }
+        //[MenuItem("QTool/Tool/显示日志")]
+        //public static void SwitchLog()
+        //{
+        //    QToolDebug.ShowLog = !QToolDebug.ShowLog;
+        //    UnityEngine.Debug.Log(QToolDebug.ShowLog ? "显示"+QToolDebug.Key : "隐藏"+ QToolDebug.Key);
+        //}
         [MenuItem("QTool/清空缓存/清空全部缓存")]
         public static void ClearMemery()
         {
@@ -87,7 +87,7 @@ namespace QTool
                 var buildInfo = BuildPipeline.BuildPlayer(buildOption);
                 if (buildInfo.summary.result == BuildResult.Succeeded)
                 {
-                    ToolDebug.Log("打包成功" + BasePath+WindowsLocalPath);
+                    QToolDebug.Log("打包成功" + BasePath+WindowsLocalPath);
                     System.Diagnostics.Process.Start(BasePath + WindowsLocalPath);
                 }
                 else

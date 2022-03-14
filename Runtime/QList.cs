@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Xml.Serialization;
 using UnityEngine;
 namespace QTool
@@ -61,7 +62,32 @@ namespace QTool
             base.OnCreate(obj);
         }
     }
-    public class QList<TKey, T> : List<T> where T : IKey<TKey>
+    public class QList<T> : List<T>
+    {
+        public new T this[int index]
+        {
+            get
+            {
+                if (index < Count)
+                {
+                    return base[index];
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            set
+            {
+                for (int i = Count; i <= index; i++)
+                {
+                    Add(default);
+                }
+                base[index] = value;
+            }
+        }
+    }
+    public class QList<TKey, T> : QList<T> where T : IKey<TKey>
     {
         [NonSerialized]
         [XmlIgnore]
@@ -273,20 +299,25 @@ namespace QTool
                 return dblSByte.ToString("f1") + "" + Suffix[i];
             }
         }
+        static StringBuilder strBuilder = new StringBuilder();
         public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n")
         {
-            var str = "";
             if (array == null)
             {
-                return str;
+                return "";
             }
+            strBuilder.Clear();
             int i = 0;
             foreach (var item in array)
             {
-                str += item + (i != array.Count - 1 ? splitChar : "");
+                strBuilder.Append(item);
+                if (i < array.Count - 1)
+                {
+                    strBuilder.Append(splitChar);
+                }
                 i++;
             }
-            return str;
+            return strBuilder.ToString();
         }
         public static List<T> Replace<T>(this List<T> array, int indexA, int indexB)
         {

@@ -66,7 +66,7 @@ namespace QTool.Data
         {
             _loadOverFile.Clear();
             list.Clear();
-            ToolDebug.Log("清空" + TableName);
+            QToolDebug.Log("清空" + TableName);
         }
         public static void Set(T newData)
         {
@@ -180,7 +180,7 @@ namespace QTool.Data
             var xmlStr = FileManager.XmlSerialize(saveList);
             var path = GetPlayerDataPath(key);
             FileManager.Save(path, xmlStr);
-            ToolDebug.Log(TableName + "保存数据：" + Count + " 大小：" + (xmlStr.Length * 8).ToSizeString());
+            QToolDebug.Log(TableName + "保存数据：" + Count + " 大小：" + (xmlStr.Length * 8).ToSizeString());
         }
         static void LoadPath(string path,string key)
         {
@@ -198,7 +198,7 @@ namespace QTool.Data
                     {
                         Set(key, item);
                     }
-                    ToolDebug.Log(TableName + "加载数据：" + loadList.Count + " 大小：" + (data.Length * 8).ToSizeString());
+                    QToolDebug.Log(TableName + "加载数据：" + loadList.Count + " 大小：" + (data.Length * 8).ToSizeString());
                     _loadOverFile.Add(GetName(key));
                 }
             }
@@ -267,7 +267,7 @@ namespace QTool.Data
             {
                 var newList = FileManager.XmlDeserialize<QList<string, T>>(asset.text);
                 Set(key, newList);
-                ToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
+                QToolDebug.Log(TableName + "加载数据：" + newList.ToOneString());
             }
             else
             {

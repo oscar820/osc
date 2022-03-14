@@ -377,6 +377,18 @@ namespace QTool.Test
         {
             QTool.Command.QCommand.Invoke(commandStr);
         }
+        [TextArea(5,10)]
+        public string QDataStr;
+        [ViewButton("QData测试")]
+        public void QDataTest()
+        {
+            var data = new QDataList(QDataStr);
+            data[2]["3"] = "2 3";
+            data[3][4] = "3 4";
+            data["newLine"][4] = "n 4";
+            data["setting"].Value = "off";
+            Debug.LogError(data);
+        }
         //[ContextMenu("test3")]
         //public void Test3Func()
         //{

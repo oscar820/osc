@@ -3,74 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
 {
-    public class ToolDebug : DebugBase<ToolDebug>
-    {
 
-    }
-    public class DebugBase<T> where T:DebugBase<T>
-    {
-        static bool Init = false;
-        static bool _show=false;
-        public static bool ShowLog
-        {
-            get
-            {
-                if (!Init)
-                {
-                    Init = true;
-                    _show = PlayerPrefs.GetInt(Key+ "日志", 0) == 1;
-                }
-                return _show;
-            }
-            set
-            {
-                if (!Init)
-                {
-                    Init = true;
-                }
-                _show = value;
-                PlayerPrefs.SetInt(Key + "日志", value ? 1 : 0);
-            }
-        }
-        public static string Key
-        {
-            get
-            {
-                return "【" + typeof(T).Name + "】";
-            }
-        }
-        public static void Log(object log)
-        {
-            if (ShowLog)
-            {
-                Debug.Log(Key+":"+log);
-            }
-        }
-        public static void Log(Func<object> log)
-        {
-            if (ShowLog)
-            {
-                Debug.Log(Key + ":" + log?.Invoke());
-            }
-        }
-        public static void LogWarning(object log)
-        {
-            if (ShowLog)
-            {
-                Debug.LogWarning(Key + ":" + log);
-            }
-        }
-        public static void LogWarning(Func<object> log)
-        {
-            if (ShowLog)
-            {
-                Debug.LogWarning(Key + ":" + log?.Invoke());
-            }
-        }
-    }
     public static class QPoolManager
     {
-      
         
         static QDictionary<string, PoolBase> poolDic = new QDictionary<string, PoolBase>();
 
@@ -258,7 +193,7 @@ namespace QTool
                     throw new Exception("对象池创建函数为空  " + this);
                 }
                 var obj = newFunc();
-                ToolDebug.Log(() =>
+                QToolDebug.Log(() =>
                 {
                     var info = "【" + Key + "】对象池当前池大小：" + AllCount + '\n';
                     foreach (var item in UsingPool)

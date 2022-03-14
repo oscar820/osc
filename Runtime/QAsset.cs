@@ -134,7 +134,7 @@ namespace QTool.Asset
             loaderTask = null;
 #endif
             objDic.Clear();
-            ToolDebug.Log("清空ResourceList<" + Label+">");
+            QToolDebug.Log("清空ResourceList<" + Label+">");
         }
        
         public static bool ContainsKey(string key)
@@ -150,7 +150,7 @@ namespace QTool.Asset
                 setKey = obj.name;
             }
             objDic[setKey] = obj;
-            ToolDebug.Log("资源缓存[" + setKey + "]:" + obj);
+            QToolDebug.Log("资源缓存[" + setKey + "]:" + obj);
             if (checkQid)
             {
                 if (obj is GameObject)
