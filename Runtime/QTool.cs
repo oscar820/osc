@@ -110,24 +110,64 @@ namespace QTool
             return flag;
         }
     }
-    public class AverageList
+    public class SecondsAverageList
     {
-        List<float> delayList = new List<float>();
         public float Value
         {
             get; private set;
         }
-        float delaySum = 0;
-        public void Push(float delay)
+        QDictionary<float, float> list = new QDictionary<float, float>();
+        public float AllSum { private set; get; }
+        float _lastSumTime=-1;
+        float _secondeSum = 0;
+        public float EndTime
         {
-            delayList.Enqueue(delay);
-            delaySum +=delay;
-            if (delayList.Count > 200)
+            get
             {
-                delaySum -= delayList[0];
-                delayList.RemoveAt(0);
+                if (list.Count == 0) return 0;
+                return list.StackPeek().Value;
             }
-            Value = delaySum/delayList.Count;
+        }
+        public float SecondeSum
+        {
+            get
+            {
+                var endTime = EndTime;
+                if (endTime == 0) return 0;
+                if (endTime == _lastSumTime)
+                {
+                    return _secondeSum;
+                }
+                _lastSumTime = endTime;
+                _secondeSum = 0f;
+                foreach (var kv in list)
+                {
+                    _secondeSum += kv.Value;
+                }
+                return _secondeSum ;
+            }
+        }
+        int maxCount = -1;
+        public void Push(float value)
+        {
+            AllSum += value;
+            list.RemoveAll((kv) => (Time.time - kv.Key) > 1);
+            list[Time.time]= value;
+            Value = SecondeSum/list.Count;
+        }
+        public void Clear()
+        {
+            list.Clear();
+            _lastSumTime = -1;
+            _secondeSum = 0;
+        }
+        public override string ToString()
+        {
+            return "总记[" + AllSum + "]平均[" + Value + "/s]";
+        }
+        public  string ToString(Func<float,string> toString)
+        {
+            return "总记[" + toString(AllSum) + "]平均[" + toString(Value) + "/s]";
         }
     }
 

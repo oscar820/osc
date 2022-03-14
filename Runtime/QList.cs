@@ -226,7 +226,7 @@ namespace QTool
         }
         public event System.Action<T> creatCallback;
     }
-    public static class ArrayExtend
+    public static class ArrayTool
     {
      
 
@@ -246,6 +246,11 @@ namespace QTool
         {
             return array.RemoveAll(obj => string.IsNullOrWhiteSpace(obj));
         }
+        public static string ToSizeString(this float byteLength)
+        {
+            return ToSizeString((long)byteLength);
+        }
+
         public static string ToSizeString(this int byteLength)
         {
             return ToSizeString((long)byteLength);
@@ -259,7 +264,14 @@ namespace QTool
             if (longLength > 1024)
                 for (i = 0; (longLength / 1024) > 0; i++, longLength /= 1024)
                     dblSByte = longLength / 1024.0;
-            return String.Format("{0:0.##}{1}", dblSByte, Suffix[i]);
+            if (i == 0)
+            {
+                return dblSByte.ToString("f0") + "" + Suffix[i];
+            }
+            else
+            {
+                return dblSByte.ToString("f1") + "" + Suffix[i];
+            }
         }
         public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n")
         {
