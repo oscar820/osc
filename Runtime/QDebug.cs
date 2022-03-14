@@ -15,8 +15,7 @@ namespace QTool
             {
                 if (!QDataList.QToolSetting.ContainsKey(Key)&&Application.isEditor)
                 {
-                    QDataList.QToolSetting[Key].SetValue(true);
-                    Debug.LogError("new " + Key );
+                    QDataList.QToolSetting[Key].SetValue(false);
                 }
                 return QDataList.QToolSetting[Key].GetValue<bool>();
             }
