@@ -48,6 +48,7 @@ namespace QTool
             if (list != null)
             {
                 PreviewList = list;
+                Debug.LogError("加载【" + TypeName + "】数目" + list.Count);
             }
         }
         public static QList<string, PreviewT> PreviewList = new QList<string, PreviewT>();
