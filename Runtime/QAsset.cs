@@ -296,7 +296,7 @@ namespace QTool.Asset
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Addressables不存在Lable["+Label+"]:"+e);
+                    QToolDebug.Log(() => "Addressables不存在Lable[" +Label+"]:"+e);
                     _loadOver = true;
                     return;
                 }
@@ -310,14 +310,14 @@ namespace QTool.Asset
                     {
                         Set(result);
                     }
-                    ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                    QToolDebug.Log(()=>"[" + Label + "]加载完成总数" + objDic.Count);
                     _loadOver = true;
                 }
                 else
                 {
                     if (loader.OperationException != null)
                     {
-                        Debug.LogError("加载资源表[" + Label + "]出错" + loader.OperationException);
+                        QToolDebug.Log(() => "加载资源表[" + Label + "]出错" + loader.OperationException);
                     }
                 }
 
@@ -345,7 +345,7 @@ namespace QTool.Asset
                             }
                         }
                     }
-                    ToolDebug.Log("[" + Label + "]加载完成总数" + objDic.Count);
+                    QToolDebug.Log(() => "[" + Label + "]加载完成总数" + objDic.Count);
                     _loadOver = true;
                 }
                 catch (Exception e)
