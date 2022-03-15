@@ -18,7 +18,10 @@ namespace QTool
     }
     public abstract class QSaveData<T> : QSaveData<T, PreviewData> where T : QSaveData<T>, new()
     {
-
+        protected override PreviewData GetPreview()
+        {
+            return new PreviewData() { Key = Key };
+        }
     }
     public abstract class QSaveData<T, PreviewT> : IKey<string> where T : QSaveData<T, PreviewT>, new() where PreviewT : PreviewData
     {
