@@ -4,6 +4,34 @@ using UnityEngine;
 using UnityEngine.Events;
 namespace QTool
 {
+    public class QEventManager
+    {
+        /// <summary>
+        /// 当任意事件触发时调用
+        /// </summary>
+        public static event System.Action<string> OnEventTigger;
+        /// <summary>
+        /// 事件列表 对应事件触发时调用对应Action 使用方法： EventList["事件名"]+=Action;
+        /// </summary>
+        public static QDictionary<string, System.Action> EventList = new QDictionary<string, System.Action>();
+        /// <summary>
+        /// 触发事件
+        /// </summary>
+        /// <param name="eventKey">事件名</param>
+        public static void Trigger(string eventKey)
+        {
+            eventKey = eventKey.Trim();
+            if (string.IsNullOrWhiteSpace(eventKey))
+            {
+                return;
+            }
+            OnEventTigger?.Invoke(eventKey);
+            if (EventList.ContainsKey(eventKey))
+            {
+                EventList[eventKey]?.Invoke();
+            }
+        }
+    }
     [System.Serializable]
     public class QEventTrigger : MonoBehaviour
     {
