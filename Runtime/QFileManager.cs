@@ -129,14 +129,6 @@ namespace QTool
                 return (T)xz.Deserialize(sr);
             }
         }
-        //public static string JsonSerialize<T>(T t, params Type[] extraTypes)
-        //{
-        //    return JsonConvert.SerializeObject(t);
-        //}
-        //public static T JsonDeserialize<T>(string s, params Type[] extraTypes)
-        //{
-        //    return JsonConvert.DeserializeObject<T>(s);
-        //}
         public static bool ExistsFile(string path)
         {
             return File.Exists(path);
@@ -153,11 +145,7 @@ namespace QTool
             {
                 using (var sw = new System.IO.StreamReader(file))
                 {
-                    while (!sw.EndOfStream)
-                    {
-
-                        data += sw.ReadLine() + '\n';
-                    }
+                    data = sw.ReadToEnd();
                 }
             }
             return data;
@@ -171,6 +159,7 @@ namespace QTool
             }
             return File.ReadAllBytes(path);
         }
+     
         public static void Save(string path, byte[] bytes)
         {
             CheckFolder(path);
@@ -203,6 +192,14 @@ namespace QTool
             {
                 Directory.CreateDirectory(directoryPath);
             }
+        }
+        public static void SaveXml<T>(string path, T data)
+        {
+            Save(path, XmlSerialize(data));
+        }
+        public static T LoadXml<T>(string path)
+        {
+            return XmlDeserialize<T>(Load(path));
         }
         public static string Save(string path, string data)
         {

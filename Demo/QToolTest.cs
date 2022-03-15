@@ -382,7 +382,7 @@ namespace QTool.Test
         [ViewButton("QData测试")]
         public void QDataTest()
         {
-            var data = new QDataList(QDataStr);
+            var data = new QDataTable(QDataStr);
             data[2]["3"] = "2 3";
             data[3][4] = "3 4";
             data["newLine"][4] = "n 4";

@@ -11,7 +11,7 @@ namespace QTool
    
     public class QTranslate : MonoBehaviour
     {
-        public static QDataList LanguageData => QDataList.GetData(Application.streamingAssetsPath+ "/LanguageData.qdata"); 
+        public static QDataTable LanguageData => QDataTable.GetData(Application.streamingAssetsPath+ "/LanguageData.qdata"); 
         #region 基础数据
 
         [HideInInspector]
@@ -104,15 +104,20 @@ namespace QTool
             }
             return value;
         }
+        public static QDictionary<string, System.Func<string>> KeyReplace = new QDictionary<string, System.Func<string>>();
         static string TranslateKey(string value)
         {
             if (LanguageData.ContainsKey(value))
             {
                 var translate = LanguageData[value][globalLanguage];
-                if (!string.IsNullOrEmpty( translate ))
+                if (!string.IsNullOrEmpty(translate))
                 {
                     return translate;
                 }
+            }
+            else if(KeyReplace.ContainsKey(value))
+            {
+                return KeyReplace[value]?.Invoke();
             }
             return value;
         }

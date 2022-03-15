@@ -6,10 +6,10 @@ using System.Text;
 
 namespace QTool{
     
-    public class QDataList: QAutoList<string, QDataLine>
+    public class QDataTable: QAutoList<string, QDataLine>
     {
-        public static QDataList QToolSetting => GetData(nameof(QToolSetting)+".qdata");
-        static QDataList()
+        public static QDataTable QToolSetting => GetData(nameof(QToolSetting)+".qdata");
+        static QDataTable()
         {
             Application.focusChanged += (focus) =>
             {
@@ -19,17 +19,17 @@ namespace QTool{
                 }
             };
         }
-        public static QDataList GetData(string path)
+        public static QDataTable GetData(string path)
         {
             if (!dataList.ContainsKey(path))
             {
-                dataList[path] = new QDataList(FileManager.Load(path));
+                dataList[path] = new QDataTable(FileManager.Load(path));
                 dataList[path].LoadPath = path;
             }
             return dataList[path];
         }
 
-        static QDictionary<string, QDataList> dataList = new QDictionary<string, QDataList>();
+        static QDictionary<string, QDataTable> dataList = new QDictionary<string, QDataTable>();
         public override void OnCreate(QDataLine obj)
         {
             obj.OwnerData = this;
@@ -78,7 +78,7 @@ namespace QTool{
             }
         }
        
-        public QDataList(string dataStr)
+        public QDataTable(string dataStr)
         {
             var lineStrs = dataStr.Split('\n');
             foreach (var lineStr in lineStrs)
@@ -158,8 +158,8 @@ namespace QTool{
         public QDataLine()
         {
         }
-        public QDataList OwnerData { get; internal set; }
-        public QDataLine(string lineStr,QDataList ownerData)
+        public QDataTable OwnerData { get; internal set; }
+        public QDataLine(string lineStr,QDataTable ownerData)
         {
             var valueS = lineStr.Split('\t');
             for (int i = 0; i < valueS.Length; i++)
