@@ -7,7 +7,7 @@ using UnityEngine;
 using QTool.Binary;
 using System.Threading.Tasks;
 using QTool.Asset;
-namespace QTool.Data
+namespace QTool
 {
     public class PreviewData : IKey<string>
     {
