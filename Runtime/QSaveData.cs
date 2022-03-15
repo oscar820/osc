@@ -33,7 +33,14 @@ namespace QTool
             return "[" + Key + "]";
         }
         protected abstract PreviewT GetPreview();
-
+        public void Save()
+        {
+            Save(Key,this as T);
+        }
+        public void Delete()
+        {
+            Delete(Key);
+        }
         #endregion
         #region 数据表相关
         static QSaveData(){
