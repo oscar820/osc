@@ -50,7 +50,7 @@ namespace QTool
         }
         public static void UnRegister<T>(string eventKey, System.Action<T> action)
         {
-            QEventManager<T>.EventList[eventKey] += action;
+            QEventManager<T>.EventList[eventKey] -= action;
         }
     }
     public class QEventManager<T>
