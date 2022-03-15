@@ -60,7 +60,7 @@ namespace QTool
       
 
         public static string RootPath => ((Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) ?
-            Application.persistentDataPath : Application.streamingAssetsPath) + "\\QSaveData\\" + nameof(T) + "\\";
+            Application.persistentDataPath : Application.streamingAssetsPath) + "\\QSaveData\\" + typeof(T).Name + "\\";
       
         public static string PreviewPath => RootPath + typeof(PreviewT).Name;
        
