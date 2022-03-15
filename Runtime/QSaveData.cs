@@ -67,18 +67,19 @@ namespace QTool
        
         public static T Load(string key)
         {
-            return FileManager.LoadXml<T>(PreviewPath + key);
+            return FileManager.LoadXml<T>(RootPath + key);
         }
 
         public static void Delete(string key )
         {
-            System.IO.File.Delete(PreviewPath + key);
+            System.IO.File.Delete(RootPath + key);
             PreviewList.Remove(key);
             FileManager.SaveXml(PreviewPath, PreviewList);
         }
         public static void Save(string key ,T data)
         {
-            FileManager.SaveXml(PreviewPath + key, data);
+            data.Key = key;
+            FileManager.SaveXml(RootPath + key, data);
             PreviewList[key] =data.GetPreview();
             PreviewList[key].saveTime = DateTime.Now;
             FileManager.SaveXml(PreviewPath, PreviewList);
@@ -88,7 +89,7 @@ namespace QTool
         {
             foreach (var preview in PreviewList)
             {
-                System.IO.File.Delete(PreviewPath + preview.Key);
+                System.IO.File.Delete(RootPath + preview.Key);
             }
             PreviewList.Clear();
             FileManager.SaveXml(PreviewPath, PreviewList);
