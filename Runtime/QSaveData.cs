@@ -44,7 +44,11 @@ namespace QTool
         #endregion
         #region 数据表相关
         static QSaveData(){
-            PreviewList=FileManager.LoadXml<QList<string,PreviewT>>(PreviewPath);
+            var list=FileManager.LoadXml<QList<string,PreviewT>>(PreviewPath);
+            if (list != null)
+            {
+                PreviewList = list;
+            }
         }
         public static QList<string, PreviewT> PreviewList = new QList<string, PreviewT>();
         public static string TypeName => typeof(T).Name;
@@ -62,15 +66,7 @@ namespace QTool
        
         public static T Load(string key)
         {
-            var data = FileManager.Load(PreviewPath+key);
-            if (!string.IsNullOrEmpty(data))
-            {
-                return FileManager.XmlDeserialize<T>(data);
-            }
-            else
-            {
-                return default;
-            }
+            return FileManager.LoadXml<T>(PreviewPath + key);
         }
 
         public static void Delete(string key )

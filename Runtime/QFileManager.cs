@@ -125,8 +125,16 @@ namespace QTool
         {
             using (StringReader sr = new StringReader(s))
             {
-                XmlSerializer xz = GetSerializer(typeof(T), extraTypes);
-                return (T)xz.Deserialize(sr);
+                try
+                {
+                    XmlSerializer xz = GetSerializer(typeof(T), extraTypes);
+                    return (T)xz.Deserialize(sr);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("XmlÐòÁÐ»¯³ö´í£º\n" + e);
+                    return default;
+                }
             }
         }
         public static bool ExistsFile(string path)
