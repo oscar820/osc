@@ -65,56 +65,177 @@ namespace QTool
             }
             return Application.isPlaying;
         }
-        public static bool TryParse<T>(this string str,out T t)
+     
+        public static string ToQData<T>(this T obj)
         {
-            if(TryParse(str, typeof(T), out var obj))
+            var type = typeof(T);
+            var typeCode = Type.GetTypeCode(type);
+            switch (typeCode)
             {
-                t = (T)obj;
+                case TypeCode.Object:
+                    {
+                        Debug.LogError("不支持类型[" + type + "]");
+                        return "";
+                    }
+                default:
+                    return obj?.ToString();
+            }
+        }
+        public static bool TryParseQData<T>(this string qdataStr, out T tObj)
+        {
+            if(TryParseQData(qdataStr,typeof(T),out var obj))
+            {
+                tObj = (T)obj;
                 return true;
             }
-            else
-            {
-                t = default;
-                return false;
-            }
-            
+            tObj = default;
+            return false;
         }
-        public static bool TryParse(this string str, Type type, out object obj)
+        public static bool TryParseQData(this string qdataStr,Type type, out object obj)
         {
-            switch (type.Name)
+            var typeCode = Type.GetTypeCode(type);
+            switch (typeCode)
             {
-                case nameof(System.Object):
-                case nameof(String):
-                    obj = str;
+                case TypeCode.Boolean:
+                    {
+                        if (byte.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Byte:
+                    {
+                        if (byte.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Char:
+                    {
+                        if (char.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.DateTime:
+                    {
+                        if (DateTime.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.DBNull:
+                    break;
+                case TypeCode.Decimal:
+                    {
+                        if (decimal.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Double:
+                    {
+                        if (double.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Empty:
+                    break;
+                case TypeCode.Int16:
+                    {
+                        if (short.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Int32:
+                    {
+                        if (int.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Int64:
+                    {
+                        if (long.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case TypeCode.SByte:
+                    {
+                        if (sbyte.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.Single:
+                    {
+                        if (float.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
+                    }
+                    break;
+                case TypeCode.String:
+                    obj = qdataStr;
                     return true;
-                case nameof(Int16):
-                case nameof(Int32):
-                case nameof(Int64):
-                    if (int.TryParse(str, out var intValue))
+                case TypeCode.UInt16:
                     {
-                        obj = intValue;
-                        return true;
+                        if (ushort.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
                     }
                     break;
-                case nameof(Single):
-                case nameof(Double):
-                    if (float.TryParse(str, out var floatValue))
+                case TypeCode.UInt32:
                     {
-                        obj = floatValue;
-                        return true;
+                        if (uint.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
                     }
                     break;
-                case nameof(Boolean):
-                    if(bool.TryParse(str,out var boolValue))
+                case TypeCode.UInt64:
                     {
-                        obj = boolValue;
-                        return true;
+                        if (ulong.TryParse(qdataStr, out var value))
+                        {
+                            obj = value;
+                            return true;
+                        }
                     }
                     break;
+                    
                 default:
+                    Debug.LogError("不支持类型[" + typeCode + "]");
                     break;
             }
-            obj = null;
+            obj = default;
             return false;
         }
 

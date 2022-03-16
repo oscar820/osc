@@ -57,7 +57,7 @@ namespace QTool.Command
                     var pInfo = paramInfos[i];
                     if (i < commands.Count)
                     {
-                        if(commands[i].TryParse(pInfo.ParameterType,out var obj))
+                        if(commands[i].TryParseQData(pInfo.ParameterType,out var obj))
                         {
                             paramObjs[i] = obj;
                         }

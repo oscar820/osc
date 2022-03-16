@@ -13,11 +13,11 @@ namespace QTool
         {
             get
             {
-                if (!QDataTable.QToolSetting.ContainsKey(Key)&&Application.isEditor)
+                if (!QDataList.QToolSetting.ContainsKey(Key)&&Application.isEditor)
                 {
-                    QDataTable.QToolSetting[Key].SetValue(false);
+                    QDataList.QToolSetting[Key].SetValue(false);
                 }
-                return QDataTable.QToolSetting[Key].GetValue<bool>();
+                return QDataList.QToolSetting[Key].GetValue<bool>();
             }
         }
         public static string Key

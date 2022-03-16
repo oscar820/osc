@@ -6,11 +6,11 @@ using System.Text;
 
 namespace QTool{
     
-    public class QDataTable: QAutoList<string, QDataLine>
+    public class QDataList: QAutoList<string, QDataLine>
     {
-        public static QDataTable QToolSetting => GetData(nameof(QToolSetting)+".qdata");
-        public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataTable)+'\\';
-        static QDataTable()
+        public static QDataList QToolSetting => GetData(nameof(QToolSetting)+".qdata");
+        public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
+        static QDataList()
         {
             Application.focusChanged += (focus) =>
             {
@@ -20,17 +20,17 @@ namespace QTool{
                 }
             };
         }
-        public static QDataTable GetData(string path)
+        public static QDataList GetData(string path)
         {
             if (!dataList.ContainsKey(path))
             {
-                dataList[path] = new QDataTable(FileManager.Load(path));
+                dataList[path] = new QDataList(FileManager.Load(path));
                 dataList[path].LoadPath = path;
             }
             return dataList[path];
         }
 
-        static QDictionary<string, QDataTable> dataList = new QDictionary<string, QDataTable>();
+        static QDictionary<string, QDataList> dataList = new QDictionary<string, QDataList>();
         public override void OnCreate(QDataLine obj)
         {
             obj.OwnerData = this;
@@ -79,7 +79,7 @@ namespace QTool{
             }
         }
        
-        public QDataTable(string dataStr)
+        public QDataList(string dataStr)
         {
             var lineStrs = dataStr.Split('\n');
             foreach (var lineStr in lineStrs)
@@ -104,7 +104,7 @@ namespace QTool{
         }
         public T GetValue<T>()
         {
-            Value.TryParse<T>(out var obj);
+            Value.TryParseQData<T>(out var obj);
             return obj;
         }
         public void SetValue<T>(T value)
@@ -159,8 +159,8 @@ namespace QTool{
         public QDataLine()
         {
         }
-        public QDataTable OwnerData { get; internal set; }
-        public QDataLine(string lineStr,QDataTable ownerData)
+        public QDataList OwnerData { get; internal set; }
+        public QDataLine(string lineStr,QDataList ownerData)
         {
             var valueS = lineStr.Split('\t');
             for (int i = 0; i < valueS.Length; i++)
