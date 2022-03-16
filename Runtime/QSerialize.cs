@@ -141,7 +141,9 @@ namespace QTool.Binary
                 {
                     case TypeCode.Object:
                         {
-                            writer.Write(object.Equals(value, null));
+                            var isNull = object.Equals(value, null);
+                            writer.Write(isNull);
+                            if (isNull) { return writer; }
                             QSerializeType typeInfo = QSerializeType.Get(type);
                             switch (typeInfo.state)
                             {
