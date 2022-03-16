@@ -53,7 +53,7 @@ namespace QTool
         }
         public static async void GetNewInstance()
         {
-            _instance=(await PrefabAssetList<ResourceLabel>.GetInstance(typeof(T).Name)).GetComponent<T>();
+            _instance=(await PrefabAssetList<ResourceLabel>.GetInstance(typeof(T).Name))?.GetComponent<T>();
         }
     }
 }
