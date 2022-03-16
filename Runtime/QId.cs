@@ -128,7 +128,7 @@ namespace QTool
                 {
                     foreach (var item in InstanceIdList)
                     {
-                        if (!loadList.Contains(item))
+                        if (!loadList.Contains(item)&&item.IsSceneInstance)
                         {
                             destoryFunc.Invoke(item);
                         }
