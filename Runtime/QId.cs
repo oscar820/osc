@@ -34,25 +34,30 @@ namespace QTool
         {
             using (QBinaryWriter writer = new QBinaryWriter())
             {
-              
-                var shortCount = (short)InstanceIdList.Count;
+                var saveList = new List<QId>();
+                foreach (var item in InstanceIdList)
+                {
+                    if (item.IsSceneInstance)
+                    {
+                        saveList.Add(item);
+                    }
+                }
+                writer.Write((short)saveList.Count);
 
-                writer.Write(shortCount);
-
-                foreach (var qId in InstanceIdList)
+                foreach (var qId in saveList)
                 {
 
                   
                     writer.Write(qId.InstanceId);
                     writer.Write(qId.PrefabId);
                 }
-                foreach (var qId in InstanceIdList)
+                foreach (var qId in saveList)
                 {
                     writer.WriteObject(qId);
                 }
 
                 var bytes = writer.ToArray();
-                Debug.Log("保存数据 数目：" + InstanceIdList.Count+" 大小："+ bytes.Length.ToSizeString());
+                Debug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ToSizeString());
                 return bytes;
             }
         }
@@ -266,7 +271,7 @@ namespace QTool
                 return Application.isPlaying;
             }
         }
-        public bool IsScenePrefabInstance
+        public bool IsSceneInstance
         {
             get
             {
@@ -280,7 +285,7 @@ namespace QTool
                     return false;
                 }
 #endif
-                return !string.IsNullOrWhiteSpace(PrefabId);
+                return true;
             }
         }
         public List<IQSerialize> qSerializes = new List<IQSerialize>();
