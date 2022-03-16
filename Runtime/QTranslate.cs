@@ -11,7 +11,7 @@ namespace QTool
    
     public class QTranslate : MonoBehaviour
     {
-        public static QDataTable LanguageData => QDataTable.GetData(Application.streamingAssetsPath+ "\\LanguageData.qdata"); 
+        public static QDataTable LanguageData => QDataTable.GetData(QDataTable.StreamingPathRoot+ "LanguageData.qdata"); 
         #region 基础数据
 
         [HideInInspector]

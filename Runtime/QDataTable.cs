@@ -9,6 +9,7 @@ namespace QTool{
     public class QDataTable: QAutoList<string, QDataLine>
     {
         public static QDataTable QToolSetting => GetData(nameof(QToolSetting)+".qdata");
+        public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataTable)+'\\';
         static QDataTable()
         {
             Application.focusChanged += (focus) =>
