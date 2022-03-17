@@ -208,6 +208,7 @@ namespace QTool
             }
             return true;
         }
+        public static QDictionary<Type, Func<string,object>> QDataParseFunc = new QDictionary<Type, Func<string,object>>();
         public static object ParseQData(this string qdataStr,Type type, bool hasName)
         {
             var typeCode = Type.GetTypeCode(type);
@@ -236,6 +237,10 @@ namespace QTool
                                                 var str = strs[i];
                                                 if (typeInfo.IsIQData && obj is IQData qData)
                                                 {
+                                                    if (QDataParseFunc.ContainsKey(type))
+                                                    {
+                                                        return QDataParseFunc[type]?.Invoke(str);
+                                                    }
                                                     qData.TryParseQData(str);
                                                 }
                                                 else
