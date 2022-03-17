@@ -104,8 +104,7 @@ namespace QTool{
         }
         public T GetValue<T>()
         {
-            Value.TryParseQData<T>(out var obj);
-            return obj;
+            return Value.ParseQData<T>();
         }
         public void SetValue<T>(T value)
         {

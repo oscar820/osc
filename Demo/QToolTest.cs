@@ -10,6 +10,7 @@ using QTool.Inspector;
 using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Reflection;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace QTool.Test
 {
@@ -78,9 +79,13 @@ namespace QTool.Test
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
 
         public List<float> list;
+        public List<List<float>> list2Test = new List<List<float>> { new List<float>() { 1, 2, 3 } };
         [ViewName("名字测试1")]
         public string asdl;
         public float p2;
+        public byte[] array = new byte[] { 123 };
+        [XmlIgnore]
+        public byte[,,] arrayTest = new byte[1,2,2] { { { 1, 2 }, { 3, 4 } } };
         public TestClass2 child;
         public void Read(QBinaryReader read)
         {
@@ -343,25 +348,16 @@ namespace QTool.Test
 
             Tool.RunTimeCheck("Xml读取", () =>
             {
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     test2 = FileManager.XmlDeserialize<TTestClass>(xmlBytes.GetString());
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
                 //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
             }
             });
-            Tool.RunTimeCheck("Json读取", () =>
-            {
-                for (int i = 0; i < 10000; i++)
-                {
-                 //   test2 = JsonConvert.DeserializeObject<TestClass>(jsonBytes.GetString());
-                //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
-                //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
-            }
-            });
             Tool.RunTimeCheck("QSerialize读取", () =>
             {
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     test2 = QSerialize.Deserialize<TTestClass>(testBytes);
                 //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
@@ -388,6 +384,9 @@ namespace QTool.Test
             data["newLine"][4] = "n 4";
             data["setting"].Value = "off";
             Debug.LogError(data);
+            Debug.LogError(test1.ToQData());
+            var tobj = test1.ToQData().ParseQData<TTestClass>();
+            Debug.LogError(tobj.ToQData());
         }
         //[ContextMenu("test3")]
         //public void Test3Func()

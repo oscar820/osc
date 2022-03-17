@@ -393,6 +393,15 @@ namespace QTool
             }
             return array[0];
         }
+        public static object[] ToObjects<T>(this IList<T> array)
+        {
+            var objs = new object[array.Count];
+            for (int i = 0; i < array.Count; i++)
+            {
+                objs[i] = array[i];
+            }
+            return objs;
+        }
         public static void Enqueue<T>(this IList<T> array, T obj)
         {
             array.Add(obj);

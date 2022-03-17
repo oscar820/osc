@@ -94,7 +94,7 @@ namespace QTool
                     {
                         var qid = InstanceIdList[key];
                         loadList.Add(qid);
-                        loadList.Replace(i, InstanceIdList.IndexOf(qid));
+                        loadList.Replace(i, loadList.IndexOf(qid));
                     }
                     else if(createFunc!=null)
                     {
@@ -110,7 +110,7 @@ namespace QTool
                             id.InstanceId = key;
                             loadList.Add(id);
                             InstanceIdList[key] = id;
-                            loadList.Replace(i, InstanceIdList.IndexOf(id));
+                            loadList.Replace(i, loadList.IndexOf(id));
                         }
                         else
                         {
@@ -337,6 +337,7 @@ namespace QTool
         }
         public virtual void Write(QBinaryWriter writer)
         {
+            writer.WriteObject(transform.position);
             var byteLength = (byte)qSerializes.Count;
             writer.Write(byteLength);
             for (int i = 0; i < byteLength; i++)
@@ -352,6 +353,7 @@ namespace QTool
 
         public virtual void Read(QBinaryReader reader)
         {
+            transform.position = reader.ReadObject(transform.position);
             var byteLength = reader.ReadByte();
             if (qSerializes.Count == byteLength)
             {
