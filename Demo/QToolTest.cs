@@ -205,8 +205,6 @@ namespace QTool.Test
         public TTestClass test1;
      //   [HorizontalGroup("t1", "toggle")]
         public TTestClass test2;
-        public byte[] xmlBytes;
-        public byte[] jsonBytes;
         public TTestClass creatObj;
         NetInput last;
         public string email;
@@ -297,75 +295,65 @@ namespace QTool.Test
                 //SinTest("FixedTan:", (a) => Fix64.Tan(a).ToFloat(), (a) => Fix64.Atan(a).ToFloat());
            // });
         }
-        [ContextMenu("写入Test")]
+        [ContextMenu("序列化测试")]
         public void TestFunc()
         {
-
-            // list = new List<IValueBase>();
-            //  list.Add(new IntValue { value = 4654 });
-
             Tool.RunTimeCheck("Xml写入", () =>
             {
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < 4000; i++)
                 {
-                    xmlBytes = FileManager.XmlSerialize(test1).GetBytes();
-                   // if (i == 0) FileManager.Save(Application.dataPath + "/Test/xmlTest.xml", FileManager.Serialize(test1));
-                //info = QSerialize.Serialize(al);
-                //bl = QSerialize.Deserialize <List<IValueBase>>(info);
-            }
-            }, () => xmlBytes.Length);
-            //Tool.RunTimeCheck("Json写入", () =>
-            //{
-            //    for (int i = 0; i < 10000; i++)
-            //    {
-            //       jsonBytes = FileManager.JsonSerialize(test1).GetBytes();
-            //    //info = QSerialize.Serialize(al);
-            //    //bl = QSerialize.Deserialize <List<IValueBase>>(info);
-            //}
-            //}, () => jsonBytes.Length);
-            Tool.RunTimeCheck("QSerialize写入", () =>
-            {
-                for (int i = 0; i < 10000; i++)
-                {
-                    testBytes = QSerialize.Serialize(test1);
-                //info = QSerialize.Serialize(al);
-                //bl = QSerialize.Deserialize <List<IValueBase>>(info);
+                    testBytes = FileManager.XmlSerialize(test1).GetBytes();
             }
             }, () => testBytes.Length);
-            //   Debug.LogError((QSerialize.Deserialize<T1>(QSerialize.Serialize(new T1 { a = "1124436" })) as T1).a);
-            // Debug.LogError((bl[0] as IntValue).value);
-            //  Debug.LogError(al["a"].netInput.NetVector2 .x+ ":" +bl[0].netInput.NetVector2.x);
-
-        }
-        [ContextMenu("读取Test")]
-        public void Test2Func()
-        {
-            //al = new List<IValueBase>();
-            //al.Add(new IntValue { value = 153 });
-            //al.Add(null);
-            //   list = new List<IValueBase>();
-            //  list.Add(new IntValue { value = 431 });
-
             Tool.RunTimeCheck("Xml读取", () =>
             {
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < 4000; i++)
                 {
-                    test2 = FileManager.XmlDeserialize<TTestClass>(xmlBytes.GetString());
-                //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
-                //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
-            }
+                    test2 = FileManager.XmlDeserialize<TTestClass>(testBytes.GetString());
+                }
             });
+            Tool.RunTimeCheck("QSerialize写入", () =>
+            {
+                for (int i = 0; i < 4000; i++)
+                {
+                    testBytes = QSerialize.Serialize(test1);
+            }
+            }, () => testBytes.Length);
             Tool.RunTimeCheck("QSerialize读取", () =>
             {
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < 4000; i++)
                 {
                     test2 = QSerialize.Deserialize<TTestClass>(testBytes);
-                //info = Encoding.UTF8.GetBytes(FileManager.Serialize(al, typeof(IntValue)));
-                //bl = FileManager.Deserialize<List<IValueBase>>(Encoding.UTF8.GetString(info), typeof(IntValue));
-            }
-
+                }
             });
-            // Debug.LogError((bl[0] as IntValue).value);
+            Tool.RunTimeCheck("QData写入", () =>
+            {
+                for (int i = 0; i < 4000; i++)
+                {
+                    testBytes = test1.ToQData().GetBytes();
+                }
+            }, () => testBytes.Length);
+            Tool.RunTimeCheck("QData读取", () =>
+            {
+                for (int i = 0; i < 4000; i++)
+                {
+                    test2 = testBytes.GetString().ParseQData<TTestClass>();
+                }
+            });
+            Tool.RunTimeCheck("QData写入无Name", () =>
+            {
+                for (int i = 0; i < 4000; i++)
+                {
+                    testBytes = test1.ToQData(false).GetBytes();
+                }
+            }, () => testBytes.Length);
+            Tool.RunTimeCheck("QData读取Name", () =>
+            {
+                for (int i = 0; i < 4000; i++)
+                {
+                    test2 = testBytes.GetString().ParseQData<TTestClass>(false);
+                }
+            });
         }
         public string commandStr;
         [ViewButton("命令测试")]
@@ -387,21 +375,10 @@ namespace QTool.Test
             Debug.LogError(test1.ToQData());
             var tobj = test1.ToQData().ParseQData<TTestClass>();
             Debug.LogError(tobj.ToQData());
+
+            Debug.LogError(test1.ToQData(false));
+            tobj = test1.ToQData(false).ParseQData<TTestClass>(false);
+            Debug.LogError(tobj.ToQData(false));
         }
-        //[ContextMenu("test3")]
-        //public void Test3Func()
-        //{
-        //    al = new KeyList<string, IValueBase>();
-        //    al.Add(new IValueBase { Key = "a" });
-        //    al["a"].netInput.NetVector2 = new V2(Vector2.one * 123);
-        //    TimeCheck("Json序列化", () =>
-        //    {
-        //        for (int i = 0; i < 1000; i++)
-        //        {
-        //            info = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(al));
-        //            bl = JsonConvert.DeserializeObject<KeyList<string, IValueBase>>(Encoding.UTF8.GetString(info));
-        //        }
-        //    });
-        //}
     }
 }

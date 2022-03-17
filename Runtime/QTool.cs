@@ -92,12 +92,12 @@ namespace QTool
             }
             end?.Invoke();
         }
-        public static string ToQData<T>(this T obj)
+        public static string ToQData<T>(this T obj,bool hasName=true)
         {
             var type = typeof(T);
-            return ToQData(obj, type);
+            return ToQData(obj, type,hasName);
         }
-        public static string ToQData(this object obj,Type type)
+        public static string ToQData(this object obj,Type type, bool hasName = true)
         {
             var typeCode = Type.GetTypeCode(type);
             switch (typeCode)
@@ -123,8 +123,11 @@ namespace QTool
                                             {
                                                 var memberInfo = typeInfo.Members[i];
                                                 var member = memberInfo.Get(obj);
-                                                writer.Write(memberInfo.Name + "=");
-                                                writer.Write(ToQData(member, memberInfo.Type));
+                                                if (hasName)
+                                                {
+                                                    writer.Write(memberInfo.Name + "=");
+                                                }
+                                                writer.Write(ToQData(member, memberInfo.Type,hasName));
                                                 if (i < typeInfo.Members.Count - 1)
                                                 {
                                                     writer.Write(';');
@@ -140,7 +143,7 @@ namespace QTool
                                         writer.Write('[');
                                         for (int i = 0; i < list.Count; i++)
                                         {
-                                            writer.Write(ToQData(list[i], typeInfo.ElementType));
+                                            writer.Write(ToQData(list[i], typeInfo.ElementType,hasName));
                                             if (i < list.Count - 1)
                                             {
                                                 writer.Write(',');
@@ -154,7 +157,7 @@ namespace QTool
                                         var array = obj as Array;
                                         array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
                                         {
-                                            writer.Write(ToQData(array.GetValue(indexArray), typeInfo.ElementType) );
+                                            writer.Write(ToQData(array.GetValue(indexArray), typeInfo.ElementType,hasName) );
                                         },()=>writer.Write('['),()=>writer.Write(']'),()=>writer.Write(','));
                                         return writer.ToString();
                                     }
@@ -198,14 +201,14 @@ namespace QTool
                     }
                     else
                     {
-                        strList.AddRange(strs);
+                        strList.Add(str);
                     }
                 }
                 i++;
             }
             return true;
         }
-        public static object ParseQData(this string qdataStr,Type type)
+        public static object ParseQData(this string qdataStr,Type type, bool hasName)
         {
             var typeCode = Type.GetTypeCode(type);
             if (type.IsEnum)
@@ -228,24 +231,31 @@ namespace QTool
                                         var obj =  Activator.CreateInstance(type);
                                         if (reader.ReadSplit('{', '}', ';', out var strs))
                                         {
-                                            foreach (var str in strs)
+                                            for (int i = 0; i < strs.Length; i++)
                                             {
+                                                var str = strs[i];
                                                 if (typeInfo.IsIQData && obj is IQData qData)
                                                 {
                                                     qData.TryParseQData(str);
                                                 }
                                                 else
                                                 {
-                                                    using (var childReader = new StringReader(str))
+                                                    if (hasName)
                                                     {
-                                                        if (childReader.ReadSplit('=', out var name, out var memberStr))
+                                                        using (var childReader = new StringReader(str))
                                                         {
-                                                            var memeberInfo = typeInfo.Members[name];
-                                                            memeberInfo.Set.Invoke(obj, ParseQData(memberStr, memeberInfo.Type));
-
+                                                            if (childReader.ReadSplit('=', out var name, out var memberStr))
+                                                            {
+                                                                var memeberInfo = typeInfo.Members[name];
+                                                                memeberInfo.Set.Invoke(obj, ParseQData(memberStr, memeberInfo.Type, hasName));
+                                                            }
                                                         }
                                                     }
-
+                                                    else
+                                                    {
+                                                        typeInfo.Members[i].Set.Invoke(obj, ParseQData(str, typeInfo.Members[i].Type, hasName));
+                                                    }
+                                                    
                                                 }
                                             }
                                             return obj;
@@ -260,7 +270,7 @@ namespace QTool
                                         {
                                             foreach (var memberStr in strs)
                                             {
-                                                list.Add(ParseQData(memberStr, typeInfo.ElementType));
+                                                list.Add(ParseQData(memberStr, typeInfo.ElementType,hasName));
                                             }
                                             return list;
                                         };
@@ -279,7 +289,7 @@ namespace QTool
                                             var array = (Array)Activator.CreateInstance(type, intArray.ToObjects()) ;
                                             array.ForeachArray(0, intArray.ToArray(), (indexArray) =>
                                             {
-                                                array.SetValue(ParseQData(strArray.Dequeue(), typeInfo.ElementType), indexArray);
+                                                array.SetValue(ParseQData(strArray.Dequeue(), typeInfo.ElementType,hasName), indexArray);
                                             });
                                             return array;
                                         }
@@ -331,11 +341,11 @@ namespace QTool
             }
 
         }
-        public static bool TryParseQData(this string qdataStr,Type type,out object obj)
+        public static bool TryParseQData(this string qdataStr,Type type,out object obj,bool hasName=true)
         {
             try
             {
-                obj = ParseQData(qdataStr,type);
+                obj = ParseQData(qdataStr,type,hasName);
                 return true;
             }
             catch (Exception)
@@ -344,11 +354,11 @@ namespace QTool
                 return false;
             }
         }
-        public static bool TryParseQData<T>(this string qdataStr,out T obj)
+        public static bool TryParseQData<T>(this string qdataStr,out T obj, bool hasName=true)
         {
             try
             {
-                obj = ParseQData<T>(qdataStr);
+                obj = ParseQData<T>(qdataStr,hasName);
                 return true;
             }
             catch (Exception)
@@ -358,9 +368,9 @@ namespace QTool
             }
         }
        
-        public static T ParseQData<T>(this string qdataStr)
+        public static T ParseQData<T>(this string qdataStr,bool hasName=true)
         {
-            return (T)ParseQData(qdataStr, typeof(T));
+            return (T)ParseQData(qdataStr, typeof(T),hasName);
         }
         public static bool NextIs(this StringReader reader, char value)
         {
