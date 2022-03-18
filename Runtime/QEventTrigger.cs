@@ -132,6 +132,10 @@ namespace QTool
     {
     }
     [System.Serializable]
+    public class ColorEvent : UnityEvent<Color>
+    {
+    }
+    [System.Serializable]
     public class Vector3Event : UnityEvent<Vector3>
     {
     }

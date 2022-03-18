@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-namespace QTool.UI
+namespace QTool
 {
     public class QObjectList : MonoBehaviour
     {

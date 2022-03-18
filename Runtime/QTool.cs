@@ -221,6 +221,7 @@ namespace QTool
                 case TypeCode.Object:
                     {
                         if (string.IsNullOrEmpty(qdataStr)) return true;
+                        if (type.Name == nameof(System.Object)) return qdataStr;
                         using (var reader=new StringReader(qdataStr))
                         {
                             var typeInfo = QSerializeType.Get(type);
