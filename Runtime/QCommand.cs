@@ -114,7 +114,6 @@ namespace QTool.Command
                 {
                     var info = new QCommandInfo(methodInfo);
                     KeyDictionary[typeKey + '/' + methodInfo.Name] = info;
-                    Debug.LogError(typeKey + '/' + methodInfo.Name + "   :  " + info.fullName);
                     NameDictionary[methodInfo.ViewName()] = info;
 
                 }
