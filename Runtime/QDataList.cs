@@ -126,7 +126,6 @@ namespace QTool{
             set
             {
                 base[1] = value;
-                Debug.LogError(base[0]+"."+ base[1] + "=>" + value);
             }
         }
         public string this[string title]

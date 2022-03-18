@@ -32,15 +32,19 @@ namespace QTool.Command
             }
             return true;
         }
-        public class QCommandInfo
+        public class QCommandInfo : IKey<string>
         {
+            public string Key {  set; get; }
             public string name;
+            public string fullName;
             public MethodInfo method;
             public ParameterInfo[] paramInfos;
             public List<string> paramNames;
             public QCommandInfo( MethodInfo method)
             {
+                Key = method.DeclaringType.Name + "/" + method.Name;
                 name = method.ViewName();
+                fullName = method.DeclaringType.ViewName() + '/' + name;
                 this.method = method;
                 paramInfos = method.GetParameters();
                 paramNames = new List<string>();
@@ -83,41 +87,35 @@ namespace QTool.Command
                 return method.ViewName() + " " + paramInfos.ToOneString(" ");
             }
         }
-        public static QDictionary<string, QCommandInfo> KeyDictionary = new QDictionary<string, QCommandInfo>();
+        public static QList<string, QCommandInfo> KeyDictionary = new QList<string, QCommandInfo>();
         public static QDictionary<string, QCommandInfo> NameDictionary = new QDictionary<string, QCommandInfo>();
         public static List<Type> TypeList = new List<Type>();
         public static void FreshCommands(params Type[] types)
         {
             foreach (var t in TypeList)
             {
-                FreshCommands(t);
+                FreshTypeCommands(t);
             }
             foreach (var t in types)
             {
                 if (!TypeList.Contains(t))
                 {
-                    FreshCommands(t);
+                    FreshTypeCommands(t);
                 }
             }
-            NameDictionary.Sort((a, b) => {
-                return string.Compare(a.Key, b.Key);
-            });
         }
-        static void FreshCommands(Type type)
+        static void FreshTypeCommands(Type type)
         {
             type.ForeachFunction((methodInfo) =>
             {
+                var typeKey = type.Name; 
                 var typeName = type.ViewName();
                 if (methodInfo.DeclaringType != typeof(object))
                 {
                     var info = new QCommandInfo(methodInfo);
-                    foreach (var viewName in methodInfo.GetCustomAttributes<ViewNameAttribute>())
-                    {
-                        NameDictionary[viewName.name] = info;
-                        KeyDictionary[typeName + '/' + viewName.name] = info;
-                    }
-                    NameDictionary[methodInfo.Name] = info;
-                    KeyDictionary[typeName + '/' + methodInfo.Name] = info;
+                    KeyDictionary[typeKey + '/' + methodInfo.Name] = info;
+                    NameDictionary[methodInfo.ViewName()] = info;
+
                 }
             }, BindingFlags.Public | BindingFlags.Static);
             TypeList.AddCheckExist(type);
