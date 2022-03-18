@@ -50,7 +50,7 @@ namespace QTool.Command
                 paramNames = new List<string>();
                 foreach (var paramInfo in paramInfos)
                 {
-                    paramNames.Add(paramInfo.ViewName());
+                    paramNames.Add(paramInfo.Name);
                 }
             }
             public bool Invoke(IList<string> commands)
@@ -114,6 +114,7 @@ namespace QTool.Command
                 {
                     var info = new QCommandInfo(methodInfo);
                     KeyDictionary[typeKey + '/' + methodInfo.Name] = info;
+                    Debug.LogError(typeKey + '/' + methodInfo.Name + "   :  " + info.fullName);
                     NameDictionary[methodInfo.ViewName()] = info;
 
                 }
@@ -128,6 +129,7 @@ namespace QTool.Command
             {
                 Debug.Log(obj);
             }
+           
             [ViewName("´íÎó")]
             public static void LogError(object obj)
             {
