@@ -482,25 +482,17 @@ namespace QTool
         public float AllSum { private set; get; }
         float _lastSumTime=-1;
         float _secondeSum = 0;
-        public float EndTime
-        {
-            get
-            {
-                if (list.Count == 0) return 0;
-                return list.StackPeek().Value;
-            }
-        }
+        public float EndTime { private set; get; }
         public float SecondeSum
         {
             get
             {
-                var endTime = EndTime;
-                if (endTime == 0) return 0;
-                if (endTime == _lastSumTime)
+                if (EndTime == 0) return 0;
+                if (EndTime == _lastSumTime)
                 {
                     return _secondeSum;
                 }
-                _lastSumTime = endTime;
+                _lastSumTime = EndTime;
                 _secondeSum = 0f;
                 foreach (var kv in list)
                 {
@@ -515,6 +507,7 @@ namespace QTool
             AllSum += value;
             list.RemoveAll((kv) => (Time.time - kv.Key) > 1);
             list[Time.time]= value;
+            EndTime = Time.time;
             Value = SecondeSum/list.Count;
         }
         public void Clear()
