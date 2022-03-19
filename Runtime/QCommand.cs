@@ -25,9 +25,13 @@ namespace QTool.Command
                 {
                     if(!NameDictionary[name].Invoke(commands))
                     {
-                        Debug.LogError("通过[" + commandStr + "]调用命令[" + commandStr + "]出错");
+                        Debug.LogError("通过[" + commandStr + "]调用命令[" + name + "]出错");
                         return false;
                     }
+                }
+                else
+                {
+                    return false;
                 }
             }
             return true;
