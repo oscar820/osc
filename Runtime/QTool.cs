@@ -387,6 +387,13 @@ namespace QTool
             }
             return false;
         }
+        public static void NextIgnore(this StringReader reader, char value)
+        {
+            if (reader.Peek() == value)
+            {
+                reader.Read();
+            }
+        }
         public static bool IsEnd(this StringReader reader)
         {
             return reader.Peek() < 0;
@@ -409,13 +416,7 @@ namespace QTool
         public static bool ReadSplit(this StringReader reader,char start,char end,char split,out string[] strs)
         {
             splitStrList.Clear();
-            if (!reader.NextIs(start))
-            {
-                Debug.LogError("缺少[" + start + "]:["+reader.ReadToEnd()+"]");
-                strs = new string[0];
-                return false;
-            }
-       
+            reader.NextIgnore(start);
             {
                 var writer = new StringWriter();
                 int child = 0;
