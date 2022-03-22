@@ -25,7 +25,6 @@ namespace QTool.Command
                 {
                     if(!NameDictionary[name].Invoke(commands))
                     {
-                        Debug.LogError("通过[" + commandStr + "]调用命令[" + name + "]出错");
                         return false;
                     }
                 }
@@ -43,7 +42,8 @@ namespace QTool.Command
             public string fullName;
             public MethodInfo method;
             public ParameterInfo[] paramInfos;
-            public List<string> paramNames;
+            public List<string> paramNames = new List<string>();
+            public List<string> paramViewNames = new List<string>();
             public QCommandInfo( MethodInfo method)
             {
                 Key = method.DeclaringType.Name + "/" + method.Name;
@@ -51,10 +51,10 @@ namespace QTool.Command
                 fullName = method.DeclaringType.ViewName() + '/' + name;
                 this.method = method;
                 paramInfos = method.GetParameters();
-                paramNames = new List<string>();
                 foreach (var paramInfo in paramInfos)
                 {
                     paramNames.Add(paramInfo.Name);
+                    paramViewNames.Add(paramInfo.ViewName());
                 }
             }
             public bool Invoke(IList<string> commands)
@@ -71,6 +71,8 @@ namespace QTool.Command
                         }
                         else
                         {
+
+                            Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 :\n" +"参数["+ pInfo + "]解析出错");
                             return false;
                         }
                     }
@@ -80,15 +82,17 @@ namespace QTool.Command
                     }
                     else
                     {
+                        Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 :\n" + "缺少参数[" + pInfo + "]");
                         return false;
                     }
                 }
                 method.Invoke(null, paramObjs);
+
                 return true; ;
             }
             public override string ToString()
             {
-                return method.ViewName() + " " + paramInfos.ToOneString(" ");
+                return method.ViewName() + " " + paramViewNames.ToOneString(" ");
             }
         }
         public static QList<string, QCommandInfo> KeyDictionary = new QList<string, QCommandInfo>();
