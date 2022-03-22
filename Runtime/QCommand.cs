@@ -65,14 +65,14 @@ namespace QTool.Command
                     var pInfo = paramInfos[i];
                     if (i < commands.Count)
                     {
-                        if(commands[i].TryParseQData(pInfo.ParameterType,out var obj))
+                        try
                         {
-                            paramObjs[i] = obj;
+                            paramObjs[i] = commands[i].ParseQData(pInfo.ParameterType, false);
                         }
-                        else
+                        catch (Exception e)
                         {
 
-                            Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 :\n" +"参数["+ pInfo + "]解析出错");
+                            Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 " + "参数[" + pInfo + "]解析出错 :\n" + e);
                             return false;
                         }
                     }
@@ -82,7 +82,7 @@ namespace QTool.Command
                     }
                     else
                     {
-                        Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 :\n" + "缺少参数[" + pInfo + "]");
+                        Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 " + "缺少参数[" + pInfo + "]");
                         return false;
                     }
                 }
