@@ -254,8 +254,17 @@ namespace QTool
     }
     public static class ArrayTool
     {
-     
+        public static string SplitEndString(this string str,string splitStart)
+        {
+            if (str.Contains(splitStart)){
 
+                return str.Substring(str.LastIndexOf(splitStart)+1);
+            }
+            else
+            {
+                return str;
+            }
+        }
         public static string ToSizeString(this string array)
         {
             return array.Length.ToSizeString();

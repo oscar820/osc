@@ -118,7 +118,7 @@ namespace QTool.Command
                 {
                     var info = new QCommandInfo(methodInfo);
                     KeyDictionary[typeKey + '/' + methodInfo.Name] = info;
-                    NameDictionary[methodInfo.ViewName()] = info;
+                    NameDictionary[methodInfo.ViewName().SplitEndString("/")] = info;
 
                 }
             }, BindingFlags.Public | BindingFlags.Static);

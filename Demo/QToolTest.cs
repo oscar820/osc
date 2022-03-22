@@ -154,6 +154,11 @@ namespace QTool.Test
         // Start is called before the first frame update
         void Start()
         {
+            for (int i = 0; i < 3; i++)
+            {
+
+                Debug.LogError("start "+i);
+            }
             //qDcitionaryTest["123"] = "123";
             //qDcitionaryTest["456"] = "456";
             //var a= qDcitionaryTest["789"];
@@ -166,7 +171,7 @@ namespace QTool.Test
         // Update is called once per frame
         void Update()
         {
-
+            Debug.Log("1");
         }
         [ReadOnly]
         [ViewName(name ="索引"  )]
