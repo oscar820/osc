@@ -561,7 +561,13 @@ namespace QTool
             base.Init(type);
             if (Code == TypeCode.Object)
             {
-
+                IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
+                IsIQData = typeof(IQData).IsAssignableFrom(type);
+                if (IsIQSerialize || IsIQData)
+                {
+                    objType = QObjectType.Object;
+                    return;
+                }
                 if (IsArray)
                 {
                     objType = QObjectType.Array;
@@ -572,8 +578,6 @@ namespace QTool
                 }
                 else
                 {
-                    IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
-                    IsIQData = typeof(IQData).IsAssignableFrom(type);
                     if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
                         Debug.LogError("不支持序列化【" + type + "】Nullable类型");
