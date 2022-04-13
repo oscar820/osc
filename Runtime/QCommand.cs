@@ -35,10 +35,24 @@ namespace QTool.Command
             }
             return true;
         }
-      
         public static QList<string, QCommandInfo> KeyDictionary = new QList<string, QCommandInfo>();
         public static QDictionary<string, QCommandInfo> NameDictionary = new QDictionary<string, QCommandInfo>();
         public static List<Type> TypeList = new List<Type>();
+        public static QCommandInfo GetCommand(string key)
+        {
+            if (KeyDictionary.ContainsKey(key))
+            {
+                return KeyDictionary[key];
+            }
+            else if(NameDictionary.ContainsKey(key))
+            {
+                return NameDictionary[key];
+            }
+            else
+            {
+                return KeyDictionary.Get(key, (info) => info.method.Name);
+            }
+        }
         public static void FreshCommands(params Type[] types)
         {
             foreach (var t in TypeList)
@@ -113,9 +127,9 @@ namespace QTool.Command
                 paramViewNames.Add(paramInfo.ViewName());
             }
         }
-        public void Invoke(params object[] Params)
+        public object Invoke(params object[] Params)
         {
-            method.Invoke(null, Params);
+            return method.Invoke(null, Params);
         }
         public bool Invoke(IList<string> commands)
         {

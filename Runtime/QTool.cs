@@ -95,6 +95,10 @@ namespace QTool
         public static string ToQData<T>(this T obj,bool hasName=true)
         {
             var type = typeof(T);
+            if (type == typeof(object))
+            {
+                throw new Exception("不能以 object 类型序列化["+obj+"]");
+            }
             return ToQData(obj, type,hasName);
         }
         public static string ToQData(this object obj,Type type, bool hasName = true)

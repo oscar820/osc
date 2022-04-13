@@ -17,20 +17,26 @@ namespace QTool.StateMachine
                 return stateList[startKey];
             }
         }
-        public QState this[string key]
+        private QState this[string key]
         {
             get
             {
+                if (string.IsNullOrWhiteSpace(key)) return null;
                 return stateList[key];
             }
         }
-        public void Add(QState state)
+        public QState Add(string commandKey)
+        {
+            return Add(new QState(commandKey));
+        }
+        public QState Add(QState state)
         {
             if (stateList.Count == 0)
             {
                 startKey = state.Key;
             }
             stateList.Add(state);
+            return state;
         }
         public IEnumerator Run(string startKey=null)
         {
@@ -48,13 +54,9 @@ namespace QTool.StateMachine
         Output,
         Input,
     }
-    public static class PortKey
-    {
-        public const string Next = "#next";
-    }
+   
     public class QStatePort : IKey<string>
     {
-       
         public string Key { get; set; }
         public PortType portType= PortType.Connect;
         public string connectState;
@@ -65,15 +67,22 @@ namespace QTool.StateMachine
         {
             return value.ParseQData(valueType);
         }
-        public void SetValue(object value)
+        public void SetValue(object obj)
         {
-            value= value.ToQData();
+            value= obj.ToQData(valueType);
         }
     }
     public class QState:IKey<string>
     {
+        public static class PortKey
+        {
+            public const string Next = "#next";
+        }
+
         public string Key { get;  set; } = QId.GetNewId();
+        public string name;
         public string commandKey;
+        bool hasDelay = false;
         public QStatePort this[string key]
         {
             get
@@ -82,11 +91,24 @@ namespace QTool.StateMachine
             }
         }
         QCommandInfo command;
-
-        public void Init()
+        private QState()
         {
-            command= QCommand.KeyDictionary[Key];
-            NextPort.portType = PortType.Connect;
+        }
+        public QState(string commandKey)
+        {
+            name = commandKey;
+            Init(commandKey);
+        }
+        void Init(string commandKey)
+        {
+            this.commandKey = commandKey;
+            command= QCommand.GetCommand(commandKey);
+            if (command == null)
+            {
+                Debug.LogError("≤ª¥Ê‘⁄√¸¡Ó°æ" + commandKey + "°ø");
+            }
+            hasDelay = command.method.ReturnType == typeof(IEnumerator);
+            Ports[PortKey.Next].portType = PortType.Connect;
             commandParams = new object[command.paramInfos.Length];
             foreach (var paramInfo in command.paramInfos)
             {
@@ -103,25 +125,37 @@ namespace QTool.StateMachine
         {
             get
             {
-                return Ports[PortKey.Next];
+                return Ports[runtimeNext];
             }
         }
         public void Connect(QState targetState)
         {
-            NextPort.connectState = targetState.Key;
+            Ports[PortKey.Next].connectState = targetState.Key;
         }
         public QAutoList<string, QStatePort> Ports { get; private set; } = new QAutoList<string, QStatePort>();
-
+        string runtimeNext;
         object[] commandParams;
+        public void SetNextPort(string portKey)
+        {
+            runtimeNext = portKey;
+        }
         public IEnumerator Update()
         {
+            runtimeNext = PortKey.Next;
             for (int i = 0; i < command.paramInfos.Length; i++)
             {
                 var info = command.paramInfos[i];
                 commandParams[i] = this[info.Name].GetValue();
             }
-            command.Invoke(commandParams);
-            yield break;
+            var returnValue= command.Invoke(commandParams);
+            if (hasDelay)
+            {
+                yield return returnValue;
+            }
+            else
+            {
+                yield return null;
+            }
         }
     }
 }

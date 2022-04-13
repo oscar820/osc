@@ -123,7 +123,7 @@ namespace QTool
         {
             if (key == null)
             {
-                Debug.LogError("key Ϊ null");
+                Debug.LogError("key is null");
                 return false;
             }
             if (dicBuffer.ContainsKey(key) && dicBuffer[key] != null)
@@ -139,7 +139,7 @@ namespace QTool
         {
             if (key == null)
             {
-                Debug.LogError("key Ϊ null");
+                Debug.LogError("key is null");
                 return default;
             }
             if (!dicBuffer.ContainsKey(key))
@@ -160,7 +160,7 @@ namespace QTool
         {
             if (key == null)
             {
-                Debug.LogError("key Ϊ null");
+                Debug.LogError("key is null");
             }
             if (dicBuffer.ContainsKey(key))
             {
