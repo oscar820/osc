@@ -35,66 +35,7 @@ namespace QTool.Command
             }
             return true;
         }
-        public class QCommandInfo : IKey<string>
-        {
-            public string Key {  set; get; }
-            public string name;
-            public string fullName;
-            public MethodInfo method;
-            public ParameterInfo[] paramInfos;
-            public List<string> paramNames = new List<string>();
-            public List<string> paramViewNames = new List<string>();
-            public QCommandInfo( MethodInfo method)
-            {
-                Key = method.DeclaringType.Name + "/" + method.Name;
-                name = method.ViewName();
-                fullName = method.DeclaringType.ViewName() + '/' + name;
-                this.method = method;
-                paramInfos = method.GetParameters();
-                foreach (var paramInfo in paramInfos)
-                {
-                    paramNames.Add(paramInfo.Name);
-                    paramViewNames.Add(paramInfo.ViewName());
-                }
-            }
-            public bool Invoke(IList<string> commands)
-            {
-                var paramObjs = new object[paramInfos.Length];
-                for (int i = 0; i <paramInfos.Length; i++)
-                {
-                    var pInfo = paramInfos[i];
-                    if (i < commands.Count)
-                    {
-                        try
-                        {
-                            paramObjs[i] = commands[i].ParseQData(pInfo.ParameterType, false);
-                        }
-                        catch (Exception e)
-                        {
-
-                            Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 " + "参数[" + pInfo + "]解析出错 :\n" + e);
-                            return false;
-                        }
-                    }
-                    else if (pInfo.HasDefaultValue)
-                    {
-                        paramObjs[i] = pInfo.DefaultValue;
-                    }
-                    else
-                    {
-                        Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 " + "缺少参数[" + pInfo + "]");
-                        return false;
-                    }
-                }
-                method.Invoke(null, paramObjs);
-
-                return true; ;
-            }
-            public override string ToString()
-            {
-                return method.ViewName() + " " + paramViewNames.ToOneString(" ");
-            }
-        }
+      
         public static QList<string, QCommandInfo> KeyDictionary = new QList<string, QCommandInfo>();
         public static QDictionary<string, QCommandInfo> NameDictionary = new QDictionary<string, QCommandInfo>();
         public static List<Type> TypeList = new List<Type>();
@@ -149,5 +90,69 @@ namespace QTool.Command
             }
         }
 
+    }
+    public class QCommandInfo : IKey<string>
+    {
+        public string Key { set; get; }
+        public string name;
+        public string fullName;
+        public MethodInfo method;
+        public ParameterInfo[] paramInfos;
+        public List<string> paramNames = new List<string>();
+        public List<string> paramViewNames = new List<string>();
+        public QCommandInfo(MethodInfo method)
+        {
+            Key = method.DeclaringType.Name + "/" + method.Name;
+            name = method.ViewName();
+            fullName = method.DeclaringType.ViewName() + '/' + name;
+            this.method = method;
+            paramInfos = method.GetParameters();
+            foreach (var paramInfo in paramInfos)
+            {
+                paramNames.Add(paramInfo.Name);
+                paramViewNames.Add(paramInfo.ViewName());
+            }
+        }
+        public void Invoke(params object[] Params)
+        {
+            method.Invoke(null, Params);
+        }
+        public bool Invoke(IList<string> commands)
+        {
+            var paramObjs = new object[paramInfos.Length];
+            for (int i = 0; i < paramInfos.Length; i++)
+            {
+                var pInfo = paramInfos[i];
+                if (i < commands.Count)
+                {
+                    try
+                    {
+                        paramObjs[i] = commands[i].ParseQData(pInfo.ParameterType, false);
+                    }
+                    catch (Exception e)
+                    {
+
+                        Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 " + "参数[" + pInfo + "]解析出错 :\n" + e);
+                        return false;
+                    }
+                }
+                else if (pInfo.HasDefaultValue)
+                {
+                    paramObjs[i] = pInfo.DefaultValue;
+                }
+                else
+                {
+                    Debug.LogError("通过[" + commands.ToOneString(" ") + "]调用命令[" + this + "]出错 " + "缺少参数[" + pInfo + "]");
+                    return false;
+                }
+            }
+            method.Invoke(null, paramObjs);
+
+            return true; ;
+        }
+        public override string ToString()
+        {
+            return method.ViewName() + " " + paramViewNames.ToOneString(" ");
+        }
     }
 }

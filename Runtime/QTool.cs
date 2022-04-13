@@ -208,7 +208,7 @@ namespace QTool
             }
             return true;
         }
-        public static object ParseQData(this string qdataStr,Type type, bool hasName)
+        public static object ParseQData(this string qdataStr,Type type, bool hasName=true)
         {
             var typeCode = Type.GetTypeCode(type);
             if (type.IsEnum)
