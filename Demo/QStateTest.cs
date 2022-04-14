@@ -18,8 +18,7 @@ public class QStateTest : MonoBehaviour
         var qsm = new QStateMachine();
         var a= qsm.Add(nameof(QStateTestFunc.DebugValue));
         var wait = qsm.Add(nameof(QStateTestFunc.Wait));
-        var b = qsm.Add(nameof(QStateTestFunc.DebugValue));
-        b["value"].SetValue("laskdjla");
+        a["value"].SetValue("QState≤‚ ‘");
         wait["time"].SetValue(3);
         a.Connect(wait);
         wait.Connect(a);

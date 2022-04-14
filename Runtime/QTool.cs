@@ -478,11 +478,13 @@ namespace QTool
         {
             get; private set;
         }
-        QDictionary<float, float> list = new QDictionary<float, float>();
+        QDictionary<double, float> list = new QDictionary<double, float>();
         public float AllSum { private set; get; }
-        float _lastSumTime=-1;
+        
+        double _lastSumTime=-1;
         float _secondeSum = 0;
-        public float EndTime { private set; get; }
+        public double StartTime { private set; get; } = -1;
+        public double EndTime { private set; get; }
         public float SecondeSum
         {
             get
@@ -502,17 +504,29 @@ namespace QTool
             }
         }
         int maxCount = -1;
+        static double CurTime
+        {
+            get
+            {
+                return (DateTime.Now - new DateTime()).TotalSeconds;
+            }
+        }
         public void Push(float value)
         {
+            if (StartTime<0)
+            {
+                StartTime = CurTime;
+            }
             AllSum += value;
-            list.RemoveAll((kv) => (Time.time - kv.Key) > 1);
-            list[Time.time]= value;
-            EndTime = Time.time;
+            list.RemoveAll((kv) => (CurTime - kv.Key) > 1);
+            list[CurTime] = value;
+            EndTime = CurTime;
             Value = SecondeSum/list.Count;
         }
         public void Clear()
         {
             list.Clear();
+            StartTime = -1;
             _lastSumTime = -1;
             _secondeSum = 0;
         }
