@@ -52,19 +52,14 @@ namespace QTool
         public static async Task<bool> DelayGameTime(float second, bool ignoreTimeScale = false)
         {
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
-
-            while (startTime + second > (ignoreTimeScale ? Time.unscaledTime : Time.time) && Application.isPlaying)
-            {
-                await Task.Yield();
-            }
-            return Application.isPlaying;
+            return await Tool.Wait(() => startTime + second > (ignoreTimeScale ? Time.unscaledTime : Time.time));
         }
         public static async Task<bool> Wait(Func<bool> flagFunc)
         {
             if (flagFunc == null) return Application.isPlaying;
             while (!flagFunc.Invoke() && Application.isPlaying)
             {
-                await Task.Yield();
+                await Task.Delay(100);
             }
             return Application.isPlaying;
         }
