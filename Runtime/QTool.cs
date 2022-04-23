@@ -172,23 +172,24 @@ namespace QTool
                     return obj?.ToString();
             }
         }
-        static bool ArrayParse(string[] strs,List<int> indexArray,List<string> strList,bool addLength=true)
+        static bool ArrayParse(string[] strs,List<int> indexArray,List<string> strList,int rank,bool addLength=true)
         {
             if (addLength)
             {
                 indexArray.Add(strs.Length);
             }
+          
             int i = 0;
             foreach (var str in strs)
             {
                 using (var childReader = new StringReader(str))
                 {
-                    if (childReader.Peek() == '[')
+                    if (rank>1&& childReader.Peek() == '[')
                     {
                       
                         if (childReader.ReadSplit('[', ']', ',', out var childStrs))
                         {
-                            if (!ArrayParse(childStrs,indexArray,strList,i==0))
+                            if (!ArrayParse(childStrs,indexArray,strList,rank,i==0))
                             {
                                 return false;
                             }
@@ -205,6 +206,7 @@ namespace QTool
                 }
                 i++;
             }
+           
             return true;
         }
         public static object ParseQData(this string qdataStr,Type type, bool hasName=true)
@@ -281,15 +283,26 @@ namespace QTool
                                     }
                                 case QObjectType.Array:
                                     {
+                                     
                                         List<int> intArray = new List<int>();
                                         List<string> strArray = new List<string>();
-                                        if( reader.ReadSplit('[', ']', ',', out var strs))
+                                        if (reader.ReadSplit('[', ']', ',', out var strs))
                                         {
-                                            ArrayParse(strs, intArray, strArray);
-                                            var array = (Array)Activator.CreateInstance(type, intArray.ToObjects()) ;
+
+                                            ArrayParse(strs, intArray, strArray,type.GetArrayRank());
+                                            var array = (Array)Activator.CreateInstance(type, intArray.ToObjects());
                                             array.ForeachArray(0, intArray.ToArray(), (indexArray) =>
                                             {
-                                                array.SetValue(ParseQData(strArray.Dequeue(), typeInfo.ElementType,hasName), indexArray);
+                                                try
+                                                {
+
+                                                    array.SetValue(ParseQData(strArray.Dequeue(), typeInfo.ElementType, hasName), indexArray);
+                                                }
+                                                catch (Exception)
+                                                {
+                                                    Debug.LogError("类型出错：" + typeInfo.Type + ":" + typeInfo.ElementType);
+                                                    throw;
+                                                }
                                             });
                                             return array;
                                         }
@@ -304,7 +317,16 @@ namespace QTool
                 case TypeCode.Boolean:
                     return bool.Parse(qdataStr);
                 case TypeCode.Byte:
-                    return byte.Parse(qdataStr);
+                    try
+                    {
+
+                        return byte.Parse(qdataStr);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("转换出错" + type + " {" + qdataStr + "}");
+                        throw;
+                    }
                 case TypeCode.Char:
                     return char.Parse(qdataStr);
                 case TypeCode.DateTime:

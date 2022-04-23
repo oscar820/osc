@@ -384,6 +384,8 @@ namespace QTool.Test
             Debug.LogError(test1.ToQData(false));
             tobj = test1.ToQData(false).ParseQData<TTestClass>(false);
             Debug.LogError(tobj.ToQData(false));
+
+            Debug.LogError((new int[][] {new int[] { 1, 2 },new int[] { 3, 4 } }).ToQData().ParseQData<int[][]>().ToQData());
         }
     }
 }

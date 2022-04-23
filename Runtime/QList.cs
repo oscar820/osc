@@ -354,6 +354,11 @@ namespace QTool
             }
             return false;
         }
+        public static T Get<T>(this IList<T> array,int index) 
+        {
+            if (index < 0 || index >= array.Count) return default;
+            return array[index];
+        }
         public static T Get<T, KeyType>(this ICollection<T> array, KeyType key) where T : IKey<KeyType>
         {
             return array.Get(key, (item) => item.Key);
