@@ -8,6 +8,8 @@ public class QMusicTest : MonoBehaviour
 {
     public AudioSource audio;
     public LineRenderer[] lines;
+    public GameObject cubePrefab;
+    ObjectPool<GameObject> CubePool;
     [Range(1, 20)]
     public int Scale = 4;
 
@@ -15,7 +17,7 @@ public class QMusicTest : MonoBehaviour
     [ViewButton("test")]
     void Start()
     {
-
+        CubePool = new ObjectPool<GameObject>("QMusicPool", () => Instantiate(cubePrefab)); ;
         QMusicManager.ParseMusic(audio.clip);
         audio.Play();
         lines[0].gameObject.InvokeEvent("œ‘ æ√˚", "QMusic");

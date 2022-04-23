@@ -220,7 +220,7 @@ namespace QTool
             {
                 case TypeCode.Object:
                     {
-                        if (string.IsNullOrEmpty(qdataStr)) return true;
+                        if (string.IsNullOrEmpty(qdataStr)) return null;
                         if (type.Name == nameof(System.Object)) return qdataStr;
                         using (var reader=new StringReader(qdataStr))
                         {
@@ -293,16 +293,19 @@ namespace QTool
                                             var array = (Array)Activator.CreateInstance(type, intArray.ToObjects());
                                             array.ForeachArray(0, intArray.ToArray(), (indexArray) =>
                                             {
+
+                                                var obj = ParseQData(strArray.Dequeue(), typeInfo.ElementType, hasName);
                                                 try
                                                 {
 
-                                                    array.SetValue(ParseQData(strArray.Dequeue(), typeInfo.ElementType, hasName), indexArray);
+                                                    array.SetValue(obj, indexArray);
                                                 }
                                                 catch (Exception)
                                                 {
-                                                    Debug.LogError("类型出错：" + typeInfo.Type + ":" + typeInfo.ElementType);
+                                                    Debug.LogError("设置类型出错：【" + obj + "】【" + typeInfo.ElementType + "】");
                                                     throw;
                                                 }
+                                             
                                             });
                                             return array;
                                         }
@@ -317,16 +320,7 @@ namespace QTool
                 case TypeCode.Boolean:
                     return bool.Parse(qdataStr);
                 case TypeCode.Byte:
-                    try
-                    {
-
-                        return byte.Parse(qdataStr);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("转换出错" + type + " {" + qdataStr + "}");
-                        throw;
-                    }
+                    return byte.Parse(qdataStr);
                 case TypeCode.Char:
                     return char.Parse(qdataStr);
                 case TypeCode.DateTime:

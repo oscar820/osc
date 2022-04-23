@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using System;
 namespace QTool
 {
     public class QMusicManager : QManagerBase<QMusicManager>
@@ -16,15 +17,23 @@ namespace QTool
         const float intervel = 0.1f;
         public static void ParseMusic(AudioClip clip)
         {
-            if (PlayerPrefs.HasKey(clip.name))
+            var key = "QMusicData_" + clip.name;
+            if (PlayerPrefs.HasKey(key))
             {
-                AllData = FileManager.XmlDeserialize<float[][]>(PlayerPrefs.GetString(clip.name));
+                try
+                {
+                    AllData = PlayerPrefs.GetString(key).ParseQData<float[][]>();
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("读取出错：" + e);
+                }
                 if (AllData != null)
                 {
                     Debug.LogError("读取【" + clip.name + "】");
                     return;
                 }
-                PlayerPrefs.DeleteKey(clip.name);
+                PlayerPrefs.DeleteKey(key);
                 ParseMusic(clip);
             }
             else
@@ -44,8 +53,10 @@ namespace QTool
                 curTime = previewAudio.time;
                 yield return null;
             }
-            PlayerPrefs.SetString(clip.name, FileManager.XmlSerialize(AllData));
-            Debug.LogError("保存 【" + clip.name + "】");
+            var key = "QMusicData_" + clip.name;
+            PlayerPrefs.SetString(key, AllData.ToQData());
+            Debug.LogError(key);
+
         }
         static float[][] AllData;
         public static float[] GetParseData(float time)
