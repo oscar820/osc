@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
 {
-    class QToolManager:InstanceBehaviour<QToolManager>
+    public class QToolManager:InstanceBehaviour<QToolManager>
     {
         public static GameObject InstanceObj => Instance.gameObject;
         public new static QToolManager Instance
