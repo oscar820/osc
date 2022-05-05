@@ -8,13 +8,13 @@ namespace QTool.StateMachine
 
     public class QStateMachine
     {
-        QList<string,QState> stateList = new QList<string,QState>();
-         string startKey; 
+        public QList<string,QState> StateList { private set; get; } = new QList<string,QState>();
+        string startKey; 
         public QState StartState
         {
             get
             {
-                return stateList[startKey];
+                return StateList[startKey];
             }
         }
         private QState this[string key]
@@ -22,20 +22,28 @@ namespace QTool.StateMachine
             get
             {
                 if (string.IsNullOrWhiteSpace(key)) return null;
-                return stateList[key];
+                return StateList[key];
             }
         }
-        public QState Add(string commandKey)
+        public void Remove(QState state)
         {
-            return Add(new QState(commandKey));
+            StateList.Remove(state);
+        }
+        public QState Add(string commandKey,string name=null)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                name = commandKey;
+            }
+            return Add(new QState(commandKey,name));
         }
         public QState Add(QState state)
         {
-            if (stateList.Count == 0)
+            if (StateList.Count == 0)
             {
                 startKey = state.Key;
             }
-            stateList.Add(state);
+            StateList.Add(state);
             return state;
         }
         public IEnumerator Run(string startKey=null)
@@ -78,7 +86,8 @@ namespace QTool.StateMachine
         {
             public const string Next = "#next";
         }
-
+        public Rect windowRect;
+        public Vector2 scrollPos;
         public string Key { get;  set; } = QId.GetNewId();
         public string name;
         public string commandKey;
@@ -94,13 +103,13 @@ namespace QTool.StateMachine
         private QState()
         {
         }
-        public QState(string commandKey)
+        public QState(string commandKey,string name)
         {
-            name = commandKey;
-            Init(commandKey);
+            Init(commandKey,name);
         }
-        void Init(string commandKey)
+        void Init(string commandKey,string name)
         {
+            this.name = name;
             this.commandKey = commandKey;
             command= QCommand.GetCommand(commandKey);
             if (command == null)
