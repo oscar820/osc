@@ -616,7 +616,7 @@ namespace QTool.Inspector
             var memeberInfo = QInspectorType.Get(target.GetType()).Members[key];
             return memeberInfo;
         }
-        public static bool Active(this ViewContorlAttribute att, object target)
+        public static bool Active(this ViewNameAttribute att, object target)
         {
             if (string.IsNullOrWhiteSpace(att.control))
             {

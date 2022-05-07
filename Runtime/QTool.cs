@@ -264,7 +264,14 @@ namespace QTool
                                                             if (childReader.ReadSplit('=', out var name, out var memberStr))
                                                             {
                                                                 var memeberInfo = typeInfo.Members[name];
-                                                                memeberInfo.Set(obj, ParseQData(memberStr, memeberInfo.Type, hasName));
+                                                                if (memeberInfo != null)
+                                                                {
+                                                                    memeberInfo.Set(obj, ParseQData(memberStr, memeberInfo.Type, hasName));
+                                                                }
+                                                                else
+                                                                {
+                                                                    Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name);
+                                                                }
                                                             }
                                                         }
                                                     }

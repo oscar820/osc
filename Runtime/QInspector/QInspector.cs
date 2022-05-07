@@ -4,42 +4,34 @@ using UnityEngine;
 using System;
 namespace QTool
 {
+
+
     /// <summary>
     /// 更改显示的名字
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Parameter)]
-    public class ViewNameAttribute : ViewContorlAttribute
+    public class ViewNameAttribute : PropertyAttribute
     {
         public string name;
-
+        public string control = "";
         public ViewNameAttribute()
         {
             order = 10;
         }
-        public ViewNameAttribute(string name, string showControl = "") : base(showControl)
+        public ViewNameAttribute(string name, string showControl = "") 
         {
             order = 10;
             this.name = name;
-        }
-    }
-    public class ViewContorlAttribute : PropertyAttribute
-    {
-        public string control = "";
-        public ViewContorlAttribute()
-        {
-        }
-        public ViewContorlAttribute(string control = "")
-        {
-            this.control = control;
+            this.control = showControl;
         }
     }
     /// <summary>
     /// 使数据在inspector视窗不可更改
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ReadOnlyAttribute : ViewContorlAttribute
+    public class ReadOnlyAttribute : ViewNameAttribute
     {
-        public ReadOnlyAttribute(string control = "") : base(control)
+        public ReadOnlyAttribute() 
         {
         }
     }
@@ -239,9 +231,8 @@ namespace QTool.Inspector
     /// 显示按钮 调用函数CallFunc 无参数
     /// </summary>
     [AttributeUsage(AttributeTargets.Field| AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class GroupAttribute : ViewContorlAttribute
+    public abstract class GroupAttribute : ViewNameAttribute
     {
-        public string name;
         public GroupAttribute(string name, string showControl = "")
         {
             this.name = name;

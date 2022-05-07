@@ -18,8 +18,8 @@ public class QFlowTest : MonoBehaviour
         var graph = new QFlowGraph();
         var a= graph.Add(nameof(QStateTestFunc.DebugValue));
         var wait = graph.Add(nameof(QStateTestFunc.Wait));
-        a["value"].SetValue("QState≤‚ ‘");
-        wait["time"].SetValue(3);
+        a["value"].Value="QState≤‚ ‘";
+        wait["time"].Value=3;
         a.Connect(wait);
         wait.Connect(a);
         StartCoroutine(graph.Run());

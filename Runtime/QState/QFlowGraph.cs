@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using QTool.Command;
+using System.Threading.Tasks;
+using QTool.Reflection;
+
 namespace QTool.Flow
 {
 
@@ -45,7 +48,43 @@ namespace QTool.Flow
             }
             return Add(new FlowNode(commandKey,name));
         }
-        public void AddRange(params FlowNode[] nodes)
+        public void Parse(IList<FlowNode> nodes,Vector2 startPos)
+        {
+            var lastKeys = new List<string>();
+            var keys = new List<string>();
+            var offsetPos = Vector2.one * float.MaxValue;
+            foreach (var node in nodes)
+            {
+                offsetPos = new Vector2(Mathf.Min(offsetPos.x, node.rect.x), Mathf.Min(offsetPos.y, node.rect.y));
+                lastKeys.Add(node.Key);
+                node.Key = QId.GetNewId();
+                keys.Add(node.Key);
+            }
+
+            foreach (var node in nodes)
+            {
+                node.rect.position = node.rect.position - offsetPos + startPos;
+                foreach (var port in node.Ports)
+                {
+                    var lastConnect = port.ConnectList.ToArray();
+                    port.ConnectList.Clear();
+                    foreach (var connect in lastConnect)
+                    {
+                        var keyIndex = lastKeys.IndexOf(connect.node);
+                        if (keyIndex >= 0)
+                        {
+                            port.ConnectList.Add(new PortId
+                            {
+                                node = keys[keyIndex],
+                                port = connect.port,
+                            });
+                        }
+                    }
+                }
+            }
+            AddRange(nodes);
+        }
+        public void AddRange(IList<FlowNode> nodes)
         {
             foreach (var node in nodes)
             {
@@ -102,22 +141,32 @@ namespace QTool.Flow
             return Key + "[" + valueType + "]";
         }
         public string Key { get; set; }
-        public PortType portType = PortType.Input;
-        public string value;
+        public string name;
+        public bool isOutput = false;
+        public string stringValue;
         public QList<PortId> ConnectList = new QList<PortId>();
         public bool onlyoneConnect = false;
+        [QIgnore]
+        public int paramIndex=-1;
         [QIgnore]
         public Type valueType;
         [QIgnore]
         public Rect rect;
         [QIgnore]
-        public FlowNode Node { get; private set; }
+        public FlowNode Node { get; internal set; }
+        public bool HasConnect
+        {
+            get
+            {
+                return ConnectList.Count > 0;
+            }
+        }
         [QIgnore]
         public FlowPort ConnectPort
         {
             get
             {
-                if (ConnectList.Count > 0)
+                if (HasConnect)
                 {
                     var connect = ConnectList.QueuePeek();
                     return Node.Graph[connect];
@@ -128,6 +177,50 @@ namespace QTool.Flow
                 }
             }
         }
+        object _value;
+        [QIgnore]
+        public object Value
+        {
+            get
+            {
+                if(isOutput)
+                {
+                    return _value;
+                }
+                else
+                {
+                    if (HasConnect)
+                    {
+                        return ConnectPort.Value;
+                    }
+                    else
+                    {
+                        return stringValue.ParseQData(valueType);
+                    }
+                }
+                
+            }
+            set
+            {
+                if (isOutput)
+                {
+                    _value = value;
+                }
+                else
+                {
+                    if (HasConnect)
+                    {
+                        _value = value;
+                    }
+                    else
+                    {
+                        stringValue = value.ToQData(valueType);
+                    }
+                }
+               
+            }
+        }
+     
         public void Init(FlowNode state)
         {
             this.Node = state;
@@ -182,7 +275,7 @@ namespace QTool.Flow
         }
         public bool CanConnect(FlowPort port)
         {
-            if (portType == port.portType) return false;
+            if (isOutput == port.isOutput) return false;
             return CanConnect(port.valueType);
         }
         public void Connect(FlowPort port)
@@ -219,30 +312,38 @@ namespace QTool.Flow
                 DisConnect(Node.Graph[connect]);
             }
         }
-        public object GetValue()
-        {
-            return value.ParseQData(valueType);
-        }
-        public void SetValue(object obj)
-        {
-            value= obj.ToQData(valueType);
-        }
+      
     }
     public static class QFlowKey
     {
         public const string FromPort = "#From";
         public const string NextPort = "#Next";
+        public const string ResultPort = "#Result";
     }
+    
     public class FlowNode:IKey<string>
     {
+        [System.Flags]
+        public enum ReturnType
+        {
+            Void,
+            ReturnValue,
+            CoroutineDelay,
+            TaskDelayVoid,
+            TaskDelayValue
+        }
 
         [QIgnore]
         public QFlowGraph Graph { private set; get; }
-        public Rect rect;
+        [QIgnore]
+        public ReturnType returnType { private set; get; }= ReturnType.Void;
+        [QIgnore]
+        public List<FlowPort> OutParamPorts = new List<FlowPort>();
         public string Key { get;  set; } = QId.GetNewId();
         public string name;
-        public string commandKey;
-        bool hasDelay = false;
+        public string commandKey; 
+        public Rect rect;
+        
         public FlowPort this[string key]
         {
             get
@@ -260,7 +361,7 @@ namespace QTool.Flow
             this.name = name;
             this.commandKey = commandKey;
         }
-        public FlowPort AddPort(string key,Type type,PortType portType)
+        public FlowPort AddPort(string key,string name,Type type,bool isOutput=false)
         {
             if (!Ports.ContainsKey(key))
             {
@@ -268,9 +369,11 @@ namespace QTool.Flow
             }
             var port = Ports[key];
             port.Key = key;
+            port.name = name;
             port.valueType = type;
-            port.portType = portType;
-            port.onlyoneConnect = portType == (type == null ? PortType.Output : PortType.Input);
+            port.isOutput = isOutput;
+            port.onlyoneConnect =  (type == null)== isOutput ;
+            port.Init(this);
             return port;
         }
         public void Init(QFlowGraph graph)
@@ -280,23 +383,53 @@ namespace QTool.Flow
             if (command == null)
             {
                 Debug.LogError("≤ª¥Ê‘⁄√¸¡Ó°æ" + commandKey + "°ø");
+                return;
             }
-            hasDelay = command.method.ReturnType == typeof(IEnumerator);
-            AddPort(QFlowKey.FromPort, null, PortType.Input);
-            AddPort(QFlowKey.NextPort, null, PortType.Output);
-            commandParams = new object[command.paramInfos.Length];
-            foreach (var paramInfo in command.paramInfos)
+            if (command.method.ReturnType == typeof(void))
             {
-                var port = AddPort(paramInfo.Name, paramInfo.ParameterType, paramInfo.IsOut?PortType.Output: PortType.Input);
-                if (paramInfo.HasDefaultValue)
+                returnType = ReturnType.Void;
+            }
+            else if (command.method.ReturnType == typeof(IEnumerator))
+            {
+                returnType = ReturnType.CoroutineDelay;
+            }
+            else if (typeof(Task).IsAssignableFrom(command.method.ReturnType)) 
+            {
+                if (typeof(Task) == command.method.ReturnType)
                 {
-                    port.SetValue( paramInfo.DefaultValue);
+                    returnType = ReturnType.TaskDelayVoid;
+                }
+                else
+                {
+                    returnType = ReturnType.TaskDelayValue;
+                    TaskReturnValueGet= command.method.ReturnType.GetProperty("Result").GetValue;
+                    AddPort(QFlowKey.ResultPort,"result", null, true);
                 }
             }
-            foreach (var port in Ports)
+            else
             {
-                port.Init(this);
+                AddPort(QFlowKey.ResultPort,"result", null, true);
+                returnType = ReturnType.ReturnValue;
+            } 
+            AddPort(QFlowKey.FromPort,"", null);
+            AddPort(QFlowKey.NextPort,"", null,true);
+            commandParams = new object[command.paramInfos.Length];
+            OutParamPorts.Clear();
+            for (int i = 0; i < command.paramInfos.Length; i++)
+            {
+                var paramInfo = command.paramInfos[i];
+                var port = AddPort(paramInfo.Name, paramInfo.ViewName(), paramInfo.ParameterType, paramInfo.IsOut);
+                port.paramIndex = i;
+                if (paramInfo.HasDefaultValue)
+                {
+                    port.Value = paramInfo.DefaultValue;
+                }
+                if (paramInfo.IsOut)
+                {
+                    OutParamPorts.Add(port);
+                }
             }
+            Ports.RemoveAll((port) => port.Node == null);
         }
         public FlowPort RuntimeNext
         {
@@ -320,6 +453,7 @@ namespace QTool.Flow
         public QList<string, FlowPort> Ports { get; private set; } = new QList<string, FlowPort>();
         string runtimeNext;
         object[] commandParams;
+        static Func<object,object> TaskReturnValueGet;
         public void SetNextPort(string portKey)
         {
             runtimeNext = portKey;
@@ -330,17 +464,37 @@ namespace QTool.Flow
             for (int i = 0; i < command.paramInfos.Length; i++)
             {
                 var info = command.paramInfos[i];
-                commandParams[i] = this[info.Name].GetValue();
+                commandParams[i] = this[info.Name].Value;
             }
-            var returnValue= command.Invoke(commandParams);
-            if (hasDelay)
+            var returnObj= command.Invoke(commandParams);
+            switch (returnType)
             {
-                yield return returnValue;
+                case ReturnType.ReturnValue:
+                    Ports[QFlowKey.ResultPort].Value= returnObj;
+                    break;
+                case ReturnType.CoroutineDelay:
+                    yield return returnObj;
+                    break;
+                case ReturnType.TaskDelayVoid:
+                case ReturnType.TaskDelayValue:
+                    var task= returnObj as Task;
+                    while (!task.IsCompleted)
+                    {
+                        yield return null;
+                    }
+                    if (returnType== ReturnType.TaskDelayValue)
+                    {
+                        Ports[QFlowKey.ResultPort].Value= TaskReturnValueGet(returnObj);
+                    }
+                    break;
+                default:
+                    break;
             }
-            else
+            foreach (var port in OutParamPorts)
             {
-                yield return null;
+                port.Value = commandParams[port.paramIndex];
             }
         }
+
     }
 }

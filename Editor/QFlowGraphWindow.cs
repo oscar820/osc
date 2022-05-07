@@ -87,17 +87,24 @@ namespace QTool.Flow
                         state.rect.position -= viewOffset;
                     });
                 }
-                menu.AddSeparator("1");
-                menu.AddItem(new GUIContent("复制"), false, Copy);
-                menu.AddItem(new GUIContent("粘贴"), false, Parse);
+                if(!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
+                {
+                    menu.AddSeparator("");
+                    menu.AddItem(new GUIContent("粘贴"), false, Parse);
+                }
             }
             else
             {
+                menu.AddItem(new GUIContent("复制"), false, Copy);
+                if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
+                {
+                    menu.AddItem(new GUIContent("粘贴"), false, Parse);
+                }
                 menu.AddItem(new GUIContent("删除"), false, DeleteSelectNodes);
-                menu.AddItem(new GUIContent("清空连接"), false, DeleteSelectNodes);
-               
+                menu.AddItem(new GUIContent("清空连接"), false, ClearAllConnect);
                 if (Application.isPlaying)
                 {
+                    menu.AddSeparator("");
                     menu.AddItem(new GUIContent("运行节点"), false, () =>
                     {
                         QToolManager.Instance.StartCoroutine(GraphAsset.Graph.Run(curNode.Key));
@@ -112,19 +119,7 @@ namespace QTool.Flow
             {
                 SelectNodes.Add(curNode);
             }
-            foreach (var node in SelectNodes)
-            {
-                foreach (var port in node.Ports)
-                {
-                    port.ConnectList.RemoveAll((id) =>
-                    {
-                        var node = SelectNodes.Get(id.node);
-                        if (node == null) return true;
-                        if (node[id.port] == null) return true;
-                        return false;
-                    });
-                }
-            }
+      
             GUIUtility.systemCopyBuffer = SelectNodes.ToQData();
         }
         void Parse()
@@ -132,7 +127,7 @@ namespace QTool.Flow
             try
             {
                 var nodeList = GUIUtility.systemCopyBuffer.ParseQData<List<FlowNode>>();
-                GraphAsset.Graph.AddRange(nodeList.ToArray());
+                GraphAsset.Graph.Parse(nodeList, mousePos-viewOffset) ;
             }
             catch (Exception e)
             {
@@ -189,6 +184,7 @@ namespace QTool.Flow
         Vector2 mousePos;
         FlowNode curNode;
         FlowPort curPort;
+        FlowPort nearPort;
         private void OnGUI()
         {
             mousePos = Event.current.mousePosition;
@@ -246,11 +242,15 @@ namespace QTool.Flow
                 case EventType.MouseDown:
                     {
                         UpdateCurrentData();
-                        if(ControlState== EditorState.None)
+                        if(ControlState== EditorState.None&&Event.current.button == 0)
                         {
                             if (curPort != null)
                             {
-                                if (curPort.portType == PortType.Input)
+                                if (curPort.isOutput)
+                                {
+                                    StartConnect(curPort);
+                                }
+                                else
                                 {
                                     var fromPort = curPort.ConnectPort;
                                     if (fromPort != null)
@@ -259,13 +259,9 @@ namespace QTool.Flow
                                         StartConnect(fromPort);
                                     }
                                 }
-                                else
-                                {
-                                    StartConnect(curPort);
-                                }
                                 Event.current.Use();
                             }
-                            else if (Event.current.button == 0)
+                            else 
                             {
                                 if (curNode == null)
                                 {
@@ -409,7 +405,7 @@ namespace QTool.Flow
             EditorGUILayout.EndHorizontal();
             if (Event.current.type== EventType.Repaint)
             {
-                state.rect.height = GUILayoutUtility.GetLastRect().height + 25;
+                state.rect.height = GUILayoutUtility.GetLastRect().height + 30;
             }
             GUI.DragWindow();
 
@@ -435,7 +431,7 @@ namespace QTool.Flow
             {
                 foreach (var port in state.Ports)
                 {
-                    if (port.portType == PortType.Output)
+                    if (port.isOutput )
                     {
                         var color = GetTypeColor(port.valueType);
 
@@ -467,58 +463,60 @@ namespace QTool.Flow
         void DrawPort(FlowPort port)
         {
             var typeColor = GetTypeColor(port.valueType);
-            if(port.portType == PortType.Input)
+            if(port.isOutput)
+            {
+
+
+                Rect lastRect = default;
+                if (port.Key == QFlowKey.NextPort)
+                {
+                    lastRect = new Rect(0, 5, windowRect.width - 50, 20);
+                }
+                else
+                {
+                    EditorGUILayout.LabelField(port.name, OutputPortStyle);
+                    lastRect = GUILayoutUtility.GetLastRect();
+                }
+                var center = new Vector2(lastRect.xMax, lastRect.y) + Vector2.one * dotSize / 2;
+                var dotRect = DrawDot(center, dotSize, Color.black);
+                DrawDot(center, dotSize * (port.ConnectPort == null ? 0.9f : 0.7f), typeColor);
+                if (Event.current.type == EventType.Repaint)
+                {
+                    port.rect = new Rect(dotRect.position + windowRect.position, dotRect.size);
+                }
+            }
+            else
             {
                 Rect lastRect = default;
                 if (port.Key == QFlowKey.FromPort)
                 {
-                    lastRect = new Rect(50, 5, windowRect.width,20);
+                    lastRect = new Rect(50, 5, windowRect.width, 20);
                 }
                 else
                 {
-                    if (port.ConnectList.Count== 0||typeof(UnityEngine.Object).IsAssignableFrom(port.valueType))
+                    if (port.ConnectList.Count == 0 || typeof(UnityEngine.Object).IsAssignableFrom(port.valueType))
                     {
-                        port.SetValue(port.GetValue().Draw(port.Key, port.valueType));
+                        port.Value= port.Value.Draw(port.name, port.valueType);
                     }
                     else
                     {
-                        EditorGUILayout.LabelField(port.Key);
+                        EditorGUILayout.LabelField(port.name);
                     }
                     lastRect = GUILayoutUtility.GetLastRect();
                 }
                 var center = lastRect.position + new Vector2(-dotSize, dotSize) / 2;
                 var canConnect = connectStartPort != null && connectStartPort.CanConnect(port);
-                var dotRect = DrawDot(center, dotSize*(canConnect?1:0.8f), typeColor);
+                var dotRect = DrawDot(center, dotSize * (canConnect ? 1 : 0.8f), typeColor);
                 if (Event.current.type == EventType.Repaint)
                 {
                     port.rect = new Rect(dotRect.position + windowRect.position, dotRect.size);
                 }
-                DrawDot(center, dotSize *(canConnect? 0.8f:0.7f), Color.black);
+                DrawDot(center, dotSize * (canConnect ? 0.8f : 0.7f), Color.black);
                 if (port.ConnectList.Count > 0)
                 {
                     DrawDot(center, dotSize * 0.6f, typeColor);
                 }
-               
-            }
-            else
-            {
-                Rect lastRect = default;
-                if (port.Key== QFlowKey.NextPort)
-                {
-                    lastRect = new Rect(0, 5, windowRect.width-50, 20);
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(port.Key, OutputPortStyle);
-                    lastRect = GUILayoutUtility.GetLastRect();
-                }
-                var center = new Vector2(lastRect.xMax, lastRect.y) + Vector2.one * dotSize / 2;
-                var dotRect= DrawDot(center, dotSize, Color.black);
-                DrawDot(center, dotSize*(port.ConnectPort==null? 0.9f:0.7f), typeColor);
-                if (Event.current.type == EventType.Repaint)
-                {
-                    port.rect = new Rect(dotRect.position + windowRect.position, dotRect.size);
-                }
+
                 
             }
            
