@@ -147,7 +147,7 @@ namespace QTool.Flow
         public QList<PortId> ConnectList = new QList<PortId>();
         public bool onlyoneConnect = false;
         [QIgnore]
-        public int paramIndex=-1;
+        public int paramIndex = -1;
         [QIgnore]
         public Type valueType;
         [QIgnore]
@@ -169,7 +169,7 @@ namespace QTool.Flow
                 if (HasConnect)
                 {
                     var connect = ConnectList.QueuePeek();
-                    return Node.Graph[connect];
+                    return Node?.Graph[connect];
                 }
                 else
                 {
@@ -183,7 +183,7 @@ namespace QTool.Flow
         {
             get
             {
-                if(isOutput)
+                if (isOutput)
                 {
                     return _value;
                 }
@@ -198,7 +198,7 @@ namespace QTool.Flow
                         return stringValue.ParseQData(valueType);
                     }
                 }
-                
+
             }
             set
             {
@@ -217,14 +217,22 @@ namespace QTool.Flow
                         stringValue = value.ToQData(valueType);
                     }
                 }
-               
+
             }
         }
-     
+
         public void Init(FlowNode state)
         {
             this.Node = state;
         }
+        public static QDictionary<Type, List<Type>> CanConnectList = new QDictionary<Type, List<Type>>()
+        {
+            new QKeyValue<Type, List<Type>>
+            {
+                 Key= typeof(int),
+                 Value=new List<Type>{typeof(float),typeof(double)}
+            }
+        };
         public bool CanConnect(Type type)
         {
             if (valueType == type)
@@ -244,12 +252,10 @@ namespace QTool.Flow
                 else if (type.IsAssignableFrom(valueType))
                 {
                     return true;
-                }
-                else if (valueType.Name.Equals(type.Name + "&"))
+                }else if(CanConnectList.ContainsKey(valueType))
                 {
-                    return true;
+                    return CanConnectList[valueType].Contains(type);
                 }
-
             }
             return false;
         }
@@ -418,7 +424,7 @@ namespace QTool.Flow
             for (int i = 0; i < command.paramInfos.Length; i++)
             {
                 var paramInfo = command.paramInfos[i];
-                var port = AddPort(paramInfo.Name, paramInfo.ViewName(), paramInfo.ParameterType, paramInfo.IsOut);
+                var port = AddPort(paramInfo.Name, paramInfo.ViewName(), paramInfo.ParameterType.GetTrueType(), paramInfo.IsOut);
                 port.paramIndex = i;
                 if (paramInfo.HasDefaultValue)
                 {

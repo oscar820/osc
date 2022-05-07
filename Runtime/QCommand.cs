@@ -44,7 +44,11 @@ namespace QTool.Command
             {
                 return KeyDictionary[key];
             }
-            else if(NameDictionary.ContainsKey(key))
+            if (key.Contains("/"))
+            {
+                key = key.SplitEndString("/");
+            }
+            if(NameDictionary.ContainsKey(key))
             {
                 return NameDictionary[key];
             }

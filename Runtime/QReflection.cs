@@ -205,6 +205,14 @@ namespace QTool.Reflection
                 return type.Name;
             }
         }
+        public static Type GetTrueType(this Type type)
+        {
+            if (type.Name.EndsWith("&"))
+            {
+                return type.GetElementType();
+            }
+            return type;
+        }
         public static string ViewName(this ParameterInfo info)
         {
             var att = info.GetCustomAttribute<ViewNameAttribute>();
