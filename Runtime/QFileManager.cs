@@ -230,6 +230,9 @@ namespace QTool
 
             return path;
         }
+
+ 
+
         public static string SelectOpenPath(string title = "打开文件", string extension = "obj", string directory = "Assets")
         {
             var dialog = new FileDialog
@@ -245,18 +248,23 @@ namespace QTool
             }
             return "";
         }
-        public static string SelectSavePath(string title = "保存文件", string extension = "obj", string directory = "Assets")
+        public static string SelectSavePath(string title = "保存文件", string directory= "Assets", string defaultName="newfile", string extension = "obj" )
         {
             var dialog = new FileDialog
             {
                 title = title,
                 initialDir = directory,
+                file=defaultName,
                 //  defExt = extension,
                 filter = "(." + extension + ")\0*." + extension + "\0",
             };
             if (FileDialog.GetSaveFileName(dialog))
             {
-                return dialog.file;
+                if (dialog.file.EndsWith("." + extension))
+                {
+                    return dialog.file + "." + extension;
+                }
+                return  dialog.file;
             }
             return "";
         }

@@ -76,6 +76,7 @@ namespace QTool.Test
     [System.Serializable]
     public class TTestClass//:IQSerialize
     {
+        public Rect rect;
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
 
         public List<float> list;
@@ -303,6 +304,7 @@ namespace QTool.Test
         [ContextMenu("序列化测试")]
         public void TestFunc()
         {
+           
             Tool.RunTimeCheck("Xml写入", () =>
             {
                 for (int i = 0; i < 4000; i++)

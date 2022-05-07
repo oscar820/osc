@@ -14,6 +14,17 @@ namespace QTool
     
     public static partial class Tool
     {
+        static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
+        public static Color ToColor(this string key, float s = 0.5f, float v =1f)
+        {
+            var colorKey = key + s + v;
+            if (!KeyColor.ContainsKey(colorKey))
+            {
+                var colorValue = Mathf.Abs(key[0].GetHashCode() %10000) + Mathf.Abs(key.GetHashCode() %100f);
+                KeyColor[colorKey] = Color.HSVToRGB(colorValue / 10100, s, v);
+            }
+            return KeyColor[colorKey];
+        }
         public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null)
         {
             var last = System.DateTime.Now;
@@ -96,6 +107,7 @@ namespace QTool
             }
             return ToQData(obj, type,hasName);
         }
+        
         public static string ToQData(this object obj,Type type, bool hasName = true)
         {
             var typeCode = Type.GetTypeCode(type);
@@ -211,6 +223,10 @@ namespace QTool
         }
         public static object ParseQData(this string qdataStr,Type type, bool hasName=true)
         {
+            if (string.IsNullOrEmpty(qdataStr))
+            {
+                return type.IsValueType ? Activator.CreateInstance(type) : null;
+            }
             var typeCode = Type.GetTypeCode(type);
             if (type.IsEnum)
             {
@@ -220,7 +236,6 @@ namespace QTool
             {
                 case TypeCode.Object:
                     {
-                        if (string.IsNullOrEmpty(qdataStr)) return null;
                         if (type.Name == nameof(System.Object)) return qdataStr;
                         using (var reader=new StringReader(qdataStr))
                         {
@@ -249,13 +264,13 @@ namespace QTool
                                                             if (childReader.ReadSplit('=', out var name, out var memberStr))
                                                             {
                                                                 var memeberInfo = typeInfo.Members[name];
-                                                                memeberInfo.Set.Invoke(obj, ParseQData(memberStr, memeberInfo.Type, hasName));
+                                                                memeberInfo.Set(obj, ParseQData(memberStr, memeberInfo.Type, hasName));
                                                             }
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        typeInfo.Members[i].Set.Invoke(obj, ParseQData(str, typeInfo.Members[i].Type, hasName));
+                                                        typeInfo.Members[i].Set.Invoke(obj, ParseQData(str, typeInfo.Members[i].Type, hasName)); 
                                                     }
                                                     
                                                 }
@@ -465,7 +480,11 @@ namespace QTool
                   
                    
                 }
-                splitStrList.Add(writer.ToString());
+                var str = writer.ToString();
+                if (!(splitStrList.Count == 0&&string.IsNullOrEmpty(str)))
+                {
+                    splitStrList.Add(str);
+                }
                 writer.Dispose();
                 strs = splitStrList.ToArray();
                 return true;
@@ -573,6 +592,18 @@ namespace QTool
     }
     public class QSerializeType : QTypeInfo<QSerializeType>
     {
+        public static QDictionary<Type, List<string>> TypeMembers = new QDictionary<Type, List<string>>()
+        {
+            new QKeyValue<Type, List<string>>
+            {
+                 Key=typeof(Rect),
+                 Value=new List<string>
+                 {
+                     "position",
+                     "size",
+                 }
+            }
+        };
         static bool IsQSValue(MemberInfo info)
         {
             if (info.GetCustomAttribute<QIgnoreAttribute>() != null)
@@ -585,7 +616,7 @@ namespace QTool
         public bool IsIQSerialize { private set; get; }
         public bool IsIQData { private set; get; }
         protected override void Init(Type type)
-        {
+        {  
             Functions = null;
             base.Init(type);
             if (Code == TypeCode.Object)
@@ -613,6 +644,10 @@ namespace QTool
                     }
                     Members.RemoveAll((info) =>
                     {
+                        if (TypeMembers.ContainsKey(type))
+                        {
+                            return !TypeMembers[type].Contains(info.Key);
+                        }
                         return !IsQSValue(info.MemeberInfo) || info.Key == "Item" || info.Set == null || info.Get == null;
                     });
                 }

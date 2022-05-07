@@ -107,110 +107,7 @@ namespace QTool.Inspector
         }
 
     }
-    public class QStylesWindows : EditorWindow
-    {
-
-        private Vector2 scrollVector2 = Vector2.zero;
-        private string search = "";
-
-        [MenuItem("Window/GUIStyle查看器")]
-        public static void InitWindow()
-        {
-            EditorWindow.GetWindow(typeof(QStylesWindows));
-        }
-
-        void OnGUI()
-        {
-
-            GUILayout.BeginHorizontal("HelpBox");
-            GUILayout.Space(30);
-            search = EditorGUILayout.TextField("", search, "SearchTextField", GUILayout.MaxWidth(position.x / 3));
-            GUILayout.Label("", "SearchCancelButtonEmpty");
-            GUILayout.EndHorizontal();
-            scrollVector2 = GUILayout.BeginScrollView(scrollVector2);
-            foreach (GUIStyle style in GUI.skin.customStyles)
-            {
-                if (style.name.ToLower().Contains(search.ToLower()))
-                {
-                    DrawStyleItem(style);
-                }
-            }
-            GUILayout.EndScrollView();
-        }
-
-        void DrawStyleItem(GUIStyle style)
-        {
-            GUILayout.BeginHorizontal("box");
-            GUILayout.Space(40);
-            EditorGUILayout.SelectableLabel(style.name);
-            GUILayout.Space(40);
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.SelectableLabel(style.name, style);
-            GUILayout.Space(40);
-            EditorGUILayout.SelectableLabel("", style, GUILayout.Height(40), GUILayout.Width(40));
-            GUILayout.Space(50);
-            if (GUILayout.Button("复制GUIStyle名字"))
-            {
-                TextEditor textEditor = new TextEditor();
-                textEditor.text = style.name;
-                textEditor.OnFocus();
-                textEditor.Copy();
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.Space(10);
-        }
-    }
-    //[CustomPropertyDrawer(typeof(ViewNameAttribute))]
-    //public class ViewNameAttributeDrawer : PropertyDrawBase<ViewNameAttribute>
-    //{
-    //    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-    //    {
-    //        if (property.IsShow())
-    //        {
-    //            switch (property.type)
-    //            {
-    //                case nameof(Fix64):
-    //                    {
-    //                        Fix64Drawer.DrawGUI(position, property, label);
-    //                    }
-    //                    break;
-    //                case nameof(System.Single):
-    //                    {
-                            
-    //                    }
-    //                default:
-    //                    break;
-    //            }
-    //            if (property.type == nameof(Fix64))
-    //            {
-                   
-    //            }else if (property.type == nameof(System.Single) || property.type == nameof(System.Int32))
-    //            {
-
-    //            }
-    //            else
-    //            {
-    //                property.Draw(position, att.name);
-    //            }
-    //        }
-           
-    //    }
-    //    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    //    {   
-            
-    //        if (property.IsShow())
-    //        {
-    //            if (property.type == nameof(Fix64)) {
-    //                return EditorGUI.GetPropertyHeight(property, GUIContent.none,false);
-    //            }
-    //            return property.GetHeight();
-    //        }
-    //        else
-    //        {
-    //            return 0;
-    //        }
-    //    }
-    //}
+   
     [CustomPropertyDrawer(typeof(ViewToggleAttribute))]
     public class ViewToggleAttributeDrawer : PropertyDrawBase<ViewToggleAttribute>
     {
@@ -502,9 +399,92 @@ namespace QTool.Inspector
             EditorGUI.LabelField(rect, guiContent, style);
             return returnValue;
         }
-      
-      
+
+        static QDictionary<string, bool> Foldout = new QDictionary<string, bool>();
         public static QDictionary<string, Action<SerializedProperty, Func<float, float>>> DrawFloatAction = new QDictionary<string, Action<SerializedProperty, Func<float, float>>>(); 
+        public static object Draw(this object obj,string name,Type type)
+        {
+            var typeInfo = QSerializeType.Get(type);
+            switch (typeInfo.Code)
+            {
+                case TypeCode.Boolean:
+                    return EditorGUILayout.Toggle(name,(bool)obj);
+                case TypeCode.Char:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                    return EditorGUILayout.IntField(name, (int)obj);
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                    return EditorGUILayout.LongField(name, (long)obj);
+                case TypeCode.Single:
+                    return EditorGUILayout.FloatField(name, (float)obj);
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                    return EditorGUILayout.DoubleField(name, (double)obj);
+                case TypeCode.String:
+                    return EditorGUILayout.TextField(name,obj?.ToString());
+                case TypeCode.Object:
+                    switch (typeInfo.objType)
+                    {
+                        case QObjectType.Object:
+                            if (type == typeof(object))
+                            {
+                                EditorGUILayout.LabelField(name);
+                                return obj;
+                            }
+                            else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
+                            {
+                                return EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true);
+                            }
+                            else
+                            {
+                                if (obj == null)
+                                {
+                                    obj = type.CreateInstance();
+                                }
+                                if (typeof(InstanceReference).IsAssignableFrom(type))
+                                {
+                                    return InstanceReferenceDrawer.Draw(name, (InstanceReference)obj);
+                                }
+                                EditorGUILayout.BeginVertical();
+                                Foldout[name] = EditorGUILayout.Foldout(Foldout[name], name);
+                                if (Foldout[name])
+                                {
+                                    EditorGUILayout.BeginHorizontal();
+                                    EditorGUILayout.Space(10);
+                                    EditorGUILayout.BeginVertical();
+                                    foreach (var member in typeInfo.Members)
+                                    {
+                                        member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+                                    }
+                                    EditorGUILayout.EndVertical();
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                                EditorGUILayout.EndVertical();
+                                return obj;
+                            }
+                        case QObjectType.List:
+                            break;
+                        case QObjectType.Array:
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case TypeCode.Empty:
+                case TypeCode.DateTime:
+                case TypeCode.DBNull:
+                default:;
+                    break;
+            }
+
+            EditorGUILayout.LabelField(name + " (不支持类型" + type + ")");
+            return obj;
+        }
         public static bool Draw(this SerializedProperty property,string parentKey="", Rect? rect=null)
         {
             var cur= property.Copy();

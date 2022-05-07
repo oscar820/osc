@@ -83,8 +83,8 @@ namespace QTool.Reflection
         public Type ElementType { get; private set; }
         public Type Type { get; private set; }
         public TypeCode Code { get; private set; }
-        public BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-        public BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        public BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public;
+        public BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public ;
         public bool IsArray {
             get
             {
@@ -266,11 +266,11 @@ namespace QTool.Reflection
             });
             return typeList;
         }
-        public static T CreateInstance<T>(this Type type, params object[] param)
+        public static object CreateInstance(this Type type, params object[] param)
         {
             try
             {
-                return (T)(Activator.CreateInstance(type, param));
+                return Activator.CreateInstance(type, param);
             }
             catch (Exception e)
             {
@@ -325,6 +325,10 @@ namespace QTool.Reflection
             FieldInfo[] fields = type.GetFields(bindingFlags);
             foreach (var item in fields)
             {
+                if (item.Name.EndsWith("k__BackingField"))
+                {
+                    continue;
+                }
                 fieldInfo?.Invoke(item);
             }
             var infos = type.GetProperties(bindingFlags);

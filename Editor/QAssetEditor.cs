@@ -13,7 +13,7 @@ namespace QTool.Asset {
     public static  class AddressableToolEditor
     {
 #if Addressable
-        [MenuItem("Assets/工具/批量生成Addressable资源", priority = 0)]
+        [MenuItem("Assets/QTool/批量生成Addressable资源", priority = 0)]
         public static void AutoAddressableResource()
         {
             if (Selection.activeObject is DefaultAsset)
@@ -40,7 +40,7 @@ namespace QTool.Asset {
 
             }
         }
-        [MenuItem("Assets/工具/添加Addressable资源", priority = 0)]
+        [MenuItem("Assets/QTool/添加Addressable资源", priority = 0)]
         public static void AddAddressableResource()
         {
             var index = 0;

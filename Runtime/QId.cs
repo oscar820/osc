@@ -142,10 +142,12 @@ namespace QTool
             }
         }
     }
+   
     [System.Serializable]
     public class InstanceReference
     {
         public string id;
+        [QIgnore]
         public GameObject _obj;
         public GameObject Obj
         {
