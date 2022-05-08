@@ -5,17 +5,18 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-namespace QTool.Flow
+namespace QTool.FlowGraph
 {
-    
+
     public class QFlowGraphWindow : EditorWindow
     {
         const float dotSize = 16;
         static Texture2D DotTex => _dotTex ??= Resources.Load<Texture2D>("NodeEditorDot");
         static Texture2D _dotTex;
-        static GUIStyle OutputPortStyle => _outputPortStyle ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+        static GUIStyle IutputPortStyle => _iutputPortStyle ??= new GUIStyle(EditorStyles.label);
+        static GUIStyle _iutputPortStyle;
+        static GUIStyle OutputPortStyle=> _outputPortStyle??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
         static GUIStyle _outputPortStyle;
-
         static Texture2D BackTex => _backTex ??= Resources.Load<Texture2D>("NodeEditorBackground");
         static Texture2D _backTex = null;
 
@@ -23,21 +24,21 @@ namespace QTool.Flow
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line)
         {
-           
-            var asset= EditorUtility.InstanceIDToObject(instanceID) as QFlowGraphAsset;
+
+            var asset = EditorUtility.InstanceIDToObject(instanceID) as QFlowGraphAsset;
             if (asset != null)
             {
                 var window = GetWindow<QFlowGraphWindow>();
                 window.minSize = new Vector2(500, 400);
-                window.titleContent = new GUIContent(asset.name+" - 流图");
+                window.titleContent = new GUIContent(asset.name + " - 流图");
                 window.GraphAsset = asset;
-                window.ViewRange=new Rect( Vector2.zero,window.position.size);
+                window.ViewRange = new Rect(Vector2.zero, window.position.size);
                 return true;
             }
-            
+
             return false;
         }
-        [MenuItem("Assets/Create/QTool/QFlowGraph",priority = 0)]
+        [MenuItem("Assets/Create/QTool/QFlowGraph", priority = 0)]
         public static void CreateNewFile()
         {
             FileManager.Save(EditorUtility.SaveFilePanel("保存QFG文件", Application.dataPath, nameof(QFlowGraphAsset), "qfg"), (new QFlowGraph()).ToQData());
@@ -53,21 +54,21 @@ namespace QTool.Flow
                 GraphAsset.Save();
             }
         }
-       
+
         private Rect ViewRange;
-        void CreateMenu(FlowPort fromPort)
+        void CreateMenu(QFlowPort fromPort)
         {
-            
+
             GenericMenu menu = new GenericMenu();
             foreach (var info in QTool.Command.QCommand.KeyDictionary)
             {
-                if (fromPort.CanConnect(info,out var portKey))
+                if (fromPort.CanConnect(info, out var portKey))
                 {
                     menu.AddItem(new GUIContent(info.fullName), false, () =>
                     {
                         var node = GraphAsset.Graph.Add(info.Key, info.name);
                         node.rect = new Rect(mousePos, new Vector2(300, 80));
-                        fromPort.Connect(node[portKey]);
+                        fromPort.Connect(node.Ports[portKey]);
                     });
                 }
             }
@@ -80,11 +81,11 @@ namespace QTool.Flow
             {
                 foreach (var kv in QTool.Command.QCommand.KeyDictionary)
                 {
-                    menu.AddItem(new GUIContent( kv.fullName), false, () =>
-                    {
-                        var state = GraphAsset.Graph.Add(kv.Key, kv.name);
-                        state.rect = new Rect(mousePos,new Vector2( 300, 80));
-                    });
+                    menu.AddItem(new GUIContent(kv.fullName), false, () =>
+                   {
+                       var state = GraphAsset.Graph.Add(kv.Key, kv.name);
+                       state.rect = new Rect(mousePos, new Vector2(300, 80));
+                   });
                 }
                 menu.AddSeparator("");
                 if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
@@ -100,7 +101,7 @@ namespace QTool.Flow
             {
                 if (curPort != null)
                 {
-                    menu.AddItem(new GUIContent("清空"+curPort.name+"端口连接"), false, curPort.ClearAllConnect);
+                    menu.AddItem(new GUIContent("清空" + curPort.name + "端口连接"), false, curPort.ClearAllConnect);
                 }
                 else
                 {
@@ -116,7 +117,7 @@ namespace QTool.Flow
                     {
                         menu.AddItem(new GUIContent("运行节点"), false, () =>
                         {
-                            QToolManager.Instance.StartCoroutine(GraphAsset.Graph.Run(curNode.Key));
+                            QToolManager.Instance.StartCoroutine(GraphAsset.Graph.RunCoroutine(curNode.Key));
                         });
                     }
                     else
@@ -124,7 +125,7 @@ namespace QTool.Flow
                         menu.AddDisabledItem(new GUIContent("运行节点"));
                     }
                 }
-             
+
             }
             menu.ShowAsContext();
         }
@@ -134,15 +135,15 @@ namespace QTool.Flow
             {
                 SelectNodes.Add(curNode);
             }
-      
+
             GUIUtility.systemCopyBuffer = SelectNodes.ToQData();
         }
         void Parse()
         {
             try
             {
-                var nodeList = GUIUtility.systemCopyBuffer.ParseQData<List<FlowNode>>();
-                GraphAsset.Graph.Parse(nodeList, mousePos) ;
+                var nodeList = GUIUtility.systemCopyBuffer.ParseQData<List<QFlowNode>>();
+                GraphAsset.Graph.Parse(nodeList, mousePos);
             }
             catch (Exception e)
             {
@@ -155,9 +156,9 @@ namespace QTool.Flow
         }
         void DeleteSelectNodes()
         {
-            ForeachSelectNodes((node) =>GraphAsset.Graph.Remove(node));
+            ForeachSelectNodes((node) => GraphAsset.Graph.Remove(node));
         }
-        void ForeachSelectNodes(System.Action<FlowNode> action)
+        void ForeachSelectNodes(System.Action<QFlowNode> action)
         {
             if (SelectNodes.Count > 0)
             {
@@ -189,7 +190,7 @@ namespace QTool.Flow
                             {
                                 nearPort = port;
                                 minDis = dis;
-                        }
+                            }
                         }
                     }
                 }
@@ -202,7 +203,7 @@ namespace QTool.Flow
             {
                 nearPort = null;
             }
-            
+
         }
         protected void UpdateCurrentData()
         {
@@ -211,7 +212,7 @@ namespace QTool.Flow
             {
                 if (state.rect.Contains(mousePos))
                 {
-                    curNode= state;
+                    curNode = state;
                     break;
                 }
             }
@@ -227,18 +228,18 @@ namespace QTool.Flow
                     }
                 }
             }
-         
+
         }
         Vector2 mousePos;
-        FlowNode curNode;
-        FlowPort curPort;
-        FlowPort nearPort;
+        QFlowNode curNode;
+        QFlowPort curPort;
+        QFlowPort nearPort;
         private void OnGUI()
         {
             ViewRange.size = position.size;
-            mousePos = Event.current.mousePosition+ViewRange.position;
+            mousePos = Event.current.mousePosition + ViewRange.position;
             DrawBackground();
-            if (GraphAsset == null)
+            if (GraphAsset == null||GraphAsset.Graph==null)
             {
                 if (GUILayout.Button("创建新的QFlowGraph"))
                 {
@@ -261,7 +262,7 @@ namespace QTool.Flow
                     node.rect.position -= ViewRange.position;
                     var lastColor = GUI.backgroundColor;
                     GUI.backgroundColor = node.commandKey.ToColor(SelectNodes.Contains(node) ? 0.8f : 0.4f);
-                    node.rect = GUI.Window(i, node.rect, DrawNode, node.name);
+                    node.rect = GUI.Window(i, node.rect, DrawNode, node.ViewName);
                     GUI.backgroundColor = lastColor;
                     node.rect.position += ViewRange.position;
                 }
@@ -296,7 +297,7 @@ namespace QTool.Flow
         EditorState ControlState = EditorState.None;
         Vector2 StartPos = Vector2.zero;
         Rect SelectBox = new Rect();
-        List<FlowNode> SelectNodes = new List<FlowNode>();
+        List<QFlowNode> SelectNodes = new List<QFlowNode>();
         void Controls()
         {
             switch (Event.current.type)
@@ -553,81 +554,66 @@ namespace QTool.Flow
             GUI.color = col;
             return rect;
         }
-        void DrawPort(FlowPort port)
+        void DrawPort(QFlowPort port)
         {
             var typeColor = GetTypeColor(port.valueType);
-            if(port.isOutput)
+
+            Rect lastRect = default;
+            if (port.Key == QFlowKey.NextPort|| port.Key == QFlowKey.FromPort)
             {
-                Rect lastRect = default;
-                if (port.Key == QFlowKey.NextPort)
-                {
-                    lastRect = new Rect(0, 5, windowRect.width - 50, 20);
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(port.name, OutputPortStyle);
-                    lastRect = GUILayoutUtility.GetLastRect();
-                }
-                var center = new Vector2(lastRect.xMax, lastRect.y) + Vector2.one * dotSize / 2;
-                var dotRect = DrawDot(center , dotSize, Color.black);
-                DrawDot(center, dotSize * (port.ConnectPort == null ? 0.9f : 0.7f), typeColor);
-                if (Event.current.type == EventType.Repaint)
-                {
-                    port.rect = new Rect(dotRect.position + windowRect.position, dotRect.size);
-                }
+                lastRect = new Rect(50, 5, windowRect.width - 100, 20);
             }
             else
             {
-                Rect lastRect = default;
-                if (port.Key == QFlowKey.FromPort)
+                if (!port.isOutput && port.ConnectList.Count == 0 && port.valueType != null)
                 {
-                    lastRect = new Rect(50, 5, windowRect.width, 20);
-                }
-                else
-                {
-                    if (port.ConnectList.Count == 0)
+                    if (typeof(UnityEngine.Object).IsAssignableFrom(port.valueType))
                     {
-                        if (typeof(UnityEngine.Object).IsAssignableFrom(port.valueType))
-                        {
-                            port.stringValue = QObjectReferenceDrawer.Draw(port.name ,port.stringValue,port.valueType);
-                        }
-                        else
-                        {
-                            port.Value = port.Value.Draw(port.name, port.valueType);
-                        }
+                        port.stringValue = QObjectReferenceDrawer.Draw(port.name, port.stringValue, port.valueType);
                     }
                     else
                     {
-                        EditorGUILayout.LabelField(port.name);
+                        port.Value = port.Value.Draw(port.name, port.valueType);
                     }
-                    lastRect = GUILayoutUtility.GetLastRect();
                 }
+                else
+                {
+                    EditorGUILayout.LabelField(port.name, port.isOutput? OutputPortStyle: IutputPortStyle);
+                }
+                lastRect = GUILayoutUtility.GetLastRect();
+            }
+            Rect dotRect = default;
+            if (port.isOutput)
+            {
+                var center = new Vector2(lastRect.xMax, lastRect.y) + Vector2.one * dotSize / 2;
+                dotRect = DrawDot(center, dotSize, Color.black);
+                DrawDot(center, dotSize * (port.ConnectPort == null ? 0.9f : 0.7f), typeColor);
+            }
+            else
+            {
                 var center = lastRect.position + new Vector2(-dotSize, dotSize) / 2;
                 var canConnect = connectStartPort != null && connectStartPort.CanConnect(port);
-                var dotRect = DrawDot(center, dotSize * (canConnect ? 1 : 0.8f), typeColor);
-                if (Event.current.type == EventType.Repaint)
-                {
-                    port.rect = new Rect(dotRect.position + windowRect.position, dotRect.size);
-                }
+                dotRect= DrawDot(center, dotSize * (canConnect ? 1 : 0.8f), typeColor);
                 DrawDot(center, dotSize * (canConnect ? 0.8f : 0.7f), Color.black);
                 if (port.ConnectList.Count > 0)
                 {
                     DrawDot(center, dotSize * 0.6f, typeColor);
                 }
-
-                
             }
-           
+            if (Event.current.type == EventType.Repaint)
+            {
+                port.rect = new Rect(dotRect.position + windowRect.position, dotRect.size);
+            }
         }
 
         #endregion
 
-        void StartConnect(FlowPort startPort)
+        void StartConnect(QFlowPort startPort)
         {
             ControlState = EditorState.ConnectPort;
             connectStartPort = startPort;
         }
-        void StopConnect(FlowPort endPort)
+        void StopConnect(QFlowPort endPort)
         {
             ControlState = EditorState.None;
             if (endPort != null)
@@ -640,7 +626,7 @@ namespace QTool.Flow
             }
             connectStartPort = null;
         }
-        FlowPort connectStartPort;
+        QFlowPort connectStartPort;
         QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
    
         public Color GetTypeColor(Type type,float s=0.4f,float v=0.9f)

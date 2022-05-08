@@ -113,6 +113,7 @@ namespace QTool.Command
         }
 
     }
+
     public class QCommandInfo : IKey<string>
     {
         public string Key { set; get; }

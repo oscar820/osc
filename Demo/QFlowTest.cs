@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using QTool;
 using QTool.Command;
-using QTool.Flow;
+using QTool.FlowGraph;
 using QTool.Reflection;
 using System.Threading.Tasks;
 using QTool.Test;
@@ -23,11 +23,11 @@ public class QFlowTest : MonoBehaviour
         var graph = new QFlowGraph();
         var a= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
         var wait = graph.Add(nameof(QFlowNodeTest.CoroutineWaitTest));
-        a["value"].Value="QState≤‚ ‘";
-        wait["time"].Value=3;
+        a["value"]="QState≤‚ ‘";
+        wait["time"]=3;
         a.Connect(wait);
         wait.Connect(a);
-        StartCoroutine(graph.Run());
+        StartCoroutine(graph.RunCoroutine());
      
     }
     // Update is called once per frame
@@ -84,5 +84,29 @@ public static class QFlowNodeTest
     public static void ListTest(List<string> list, List<Vector3> v3List)
     {
 
+    }
+    public static void BoolTest(QFlowNode This,bool boolValue,[QFlowPort,QNodeOutput]bool True, [QFlowPort] out object False)
+    {
+        False = true;
+        if (boolValue)
+        {
+            This.SetNetFlowPort(nameof(True));
+        }
+        else
+        {
+            This.SetNetFlowPort(nameof(False));
+        }
+    }
+    public static void GetTime_AutoUseTest([QNodeOutput(true)]out float time)
+    {
+        time = Time.time;
+    }
+    public static float AddTest1(float a,float b)
+    {
+        return a + b;
+    }
+    public static void AddTest2(QFlowNode This, float a,float b,[QNodeOutput(true)] float result)
+    {
+        This[nameof(result)] = a + b;
     }
 }

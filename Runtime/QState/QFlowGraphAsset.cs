@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-namespace QTool.Flow
+namespace QTool.FlowGraph
 {
   
     public class QFlowGraphAsset : ScriptableObject
@@ -30,7 +30,7 @@ namespace QTool.Flow
         }
         public void Save()
         {
-
+            if (Graph == null) return;
             try
             {
                 this.stringValue = Graph.ToQData();

@@ -433,6 +433,18 @@ namespace QTool.Inspector
         static GUIStyle BackStyle = new GUIStyle("helpBox");
         public static object Draw(this object obj,string name,Type type,Rect? rect=null)
         {
+            if (type == null)
+            {
+                if (rect == null)
+                {
+                    EditorGUILayout.LabelField(name);
+                }
+                else
+                {
+                    EditorGUI.LabelField(rect.Value, name);
+                }
+                return obj;
+            }
             var typeInfo = QSerializeType.Get(type);
             switch (typeInfo.Code)
             {

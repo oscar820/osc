@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor.AssetImporters;
 using UnityEngine;
-namespace QTool.Flow
+namespace QTool.FlowGraph
 {
     [ScriptedImporter(1, ".qfg")]
     public class QFGImporter : ScriptedImporter
