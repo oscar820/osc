@@ -39,10 +39,11 @@ namespace QTool.Flow
                 return this[portId.node]?[portId.port];
             }
         }
-        public void Remove(FlowNode state)
+        public void Remove(FlowNode node)
         {
-            state.ClearAllConnect();  
-            NodeList.Remove(state);
+            if (node == null) return;
+            node.ClearAllConnect();   
+            NodeList.Remove(node);
         }
         public FlowNode Add(string commandKey,string name=null)
         {
@@ -154,9 +155,8 @@ namespace QTool.Flow
         public int paramIndex = -1;
         [QIgnore]
         public Type valueType;
-        [QIgnore]
         public Rect rect;
-        [QIgnore]
+        [QIgnore] 
         public FlowNode Node { get; internal set; }
         public bool HasConnect
         {

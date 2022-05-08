@@ -188,7 +188,7 @@ namespace QTool
                         }
                     }
                 case TypeCode.String:
-                    return obj?.ToString();
+                    return "\""+ obj+"\"";
                 default:
                     return obj?.ToString();
             }
@@ -390,6 +390,10 @@ namespace QTool
                 case TypeCode.Single:
                     return float.Parse(qdataStr);
                 case TypeCode.String:
+                    if (qdataStr.StartsWith("\"")&& qdataStr.EndsWith("\""))
+                    {
+                        return qdataStr.Substring(1, qdataStr.Length - 2);
+                    }
                     return qdataStr;
                 case TypeCode.UInt16:
                     return ushort.Parse(qdataStr);

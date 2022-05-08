@@ -31,9 +31,10 @@ namespace QTool.Flow
                 window.minSize = new Vector2(500, 400);
                 window.titleContent = new GUIContent(asset.name+" - Á÷Í¼");
                 window.GraphAsset = asset;
-                window.viewOffset = Vector2.zero;
+                window.ViewRange=new Rect( Vector2.zero,window.position.size);
                 return true;
             }
+            
             return false;
         }
         [MenuItem("Assets/Create/QTool/QFlowGraph",priority = 0)]
@@ -53,7 +54,7 @@ namespace QTool.Flow
             }
         }
        
-        private Vector2 viewOffset;
+        private Rect ViewRange;
         void CreateMenu(FlowPort fromPort)
         {
             
@@ -64,10 +65,9 @@ namespace QTool.Flow
                 {
                     menu.AddItem(new GUIContent(info.fullName), false, () =>
                     {
-                        var state = GraphAsset.Graph.Add(info.Key, info.name);
-                        state.rect = new Rect(mousePos.x, mousePos.y, 300, 80);
-                        state.rect.position -= viewOffset;
-                        fromPort.Connect(state[portKey]);
+                        var node = GraphAsset.Graph.Add(info.Key, info.name);
+                        node.rect = new Rect(mousePos, new Vector2(300, 80));
+                        fromPort.Connect(node[portKey]);
                     });
                 }
             }
@@ -83,8 +83,7 @@ namespace QTool.Flow
                     menu.AddItem(new GUIContent( kv.fullName), false, () =>
                     {
                         var state = GraphAsset.Graph.Add(kv.Key, kv.name);
-                        state.rect = new Rect(mousePos.x, mousePos.y, 300, 80);
-                        state.rect.position -= viewOffset;
+                        state.rect = new Rect(mousePos,new Vector2( 300, 80));
                     });
                 }
                 menu.AddSeparator("");
@@ -143,7 +142,7 @@ namespace QTool.Flow
             try
             {
                 var nodeList = GUIUtility.systemCopyBuffer.ParseQData<List<FlowNode>>();
-                GraphAsset.Graph.Parse(nodeList, mousePos-viewOffset) ;
+                GraphAsset.Graph.Parse(nodeList, mousePos) ;
             }
             catch (Exception e)
             {
@@ -210,7 +209,7 @@ namespace QTool.Flow
             curNode = null;
             foreach (var state in GraphAsset.Graph.NodeList)
             {
-                if (state.rect.Contains(mousePos-viewOffset))
+                if (state.rect.Contains(mousePos))
                 {
                     curNode= state;
                     break;
@@ -236,7 +235,8 @@ namespace QTool.Flow
         FlowPort nearPort;
         private void OnGUI()
         {
-            mousePos = Event.current.mousePosition;
+            ViewRange.size = position.size;
+            mousePos = Event.current.mousePosition+ViewRange.position;
             DrawBackground();
             if (GraphAsset == null)
             {
@@ -256,12 +256,16 @@ namespace QTool.Flow
                     Debug.LogError(i + "/" + GraphAsset.Graph.NodeList.Count);
                     continue;
                 }
-                node.rect.position += viewOffset;
-                var lastColor = GUI.backgroundColor;
-                GUI.backgroundColor =node.commandKey.ToColor(SelectNodes.Contains(node)?0.8f:0.4f);
-                node.rect = GUI.Window(i, node.rect, DrawNode, node.name);
-                GUI.backgroundColor = lastColor;
-                node.rect.position -= viewOffset;
+                if (ViewRange.Overlaps(node.rect))
+                {
+                    node.rect.position -= ViewRange.position;
+                    var lastColor = GUI.backgroundColor;
+                    GUI.backgroundColor = node.commandKey.ToColor(SelectNodes.Contains(node) ? 0.8f : 0.4f);
+                    node.rect = GUI.Window(i, node.rect, DrawNode, node.name);
+                    GUI.backgroundColor = lastColor;
+                    node.rect.position += ViewRange.position;
+                }
+
             }
             EndWindows();
             DrawCurve();
@@ -270,7 +274,9 @@ namespace QTool.Flow
                 case EditorState.BoxSelect:
                     {
                         GUI.color = Color.black;
-                        GUI.Box(SelectBox, "");
+                        var box = SelectBox;
+                        box.position -= ViewRange.position;
+                        GUI.Box(box, "");
                     }
                     break;
                 default:
@@ -348,7 +354,7 @@ namespace QTool.Flow
                             case EditorState.MoveOffset:
                                 if (Event.current.delta.magnitude < 100)
                                 {
-                                    viewOffset += Event.current.delta;
+                                    ViewRange.position -= Event.current.delta;
                                     ControlState = EditorState.MoveOffset;
                                 }
                                 break;
@@ -373,7 +379,6 @@ namespace QTool.Flow
                                     foreach (var node in GraphAsset.Graph.NodeList)
                                     {
                                         var rect = node.rect;
-                                        rect.position += viewOffset;
                                         if (SelectBox.Overlaps(rect))
                                         {
                                             SelectNodes.Add(node);
@@ -450,8 +455,8 @@ namespace QTool.Flow
         {
             var xTex = position.width / BackTex.width;
             var yTex = position.height / BackTex.height;
-            var xStart = Fix(viewOffset.x,-BackTex.width, 0, BackTex.width);
-            var yStart = Fix(viewOffset.y,-BackTex.height, 0, BackTex.height);
+            var xStart = Fix(-ViewRange.x,-BackTex.width, 0, BackTex.width);
+            var yStart = Fix(-ViewRange.y,-BackTex.height, 0, BackTex.height);
             for (int x = 0; x <= xTex + 1; x++)
             {
                 for (int y = 0; y <= yTex + 1; y++)
@@ -466,7 +471,6 @@ namespace QTool.Flow
         {
             var node = GraphAsset.Graph.NodeList[id];
             windowRect = node.rect;
-            windowRect.position += viewOffset;
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.Space(dotSize);
             EditorGUILayout.BeginVertical();
@@ -492,14 +496,17 @@ namespace QTool.Flow
             GUI.DragWindow();
 
         }
-        static void DrawCurve(Vector3 start, Vector3 end,Color color)
+        void DrawCurve(Vector2 start, Vector2 end,Color color)
         {
+            if (!ViewRange.Contains(start) &&!ViewRange.Contains(end)) return;
+            start -= ViewRange.position;
+            end -= ViewRange.position;
             if (Vector3.Distance(start, end) < 0.1f)
             {
                 return;
             }
             float size = Mathf.Abs(start.x - end.x) / 2;
-            Handles.DrawBezier(start, end, start + Vector3.right * size, end + Vector3.left * size, color, null, 3f);
+            Handles.DrawBezier(start, end , start + Vector2.right * size, end + Vector2.left * size, color, null, 3f);
         }
         public void DrawCurve()
         {
@@ -507,15 +514,15 @@ namespace QTool.Flow
             { 
                 var color = GetTypeColor(connectStartPort.valueType);
                 DrawCurve(connectStartPort.rect.center, mousePos, color);
-                DrawDot(mousePos, dotSize*0.8f, color);
+                DrawDot(mousePos - ViewRange.position, dotSize*0.8f, color);
                 if (nearPort != null)
                 {
-                    DrawDot(nearPort.rect.center, dotSize * 0.4f, color);
+                    DrawDot(nearPort.rect.center - ViewRange.position, dotSize * 0.4f, color);
                 }
             }
-            foreach (var state in GraphAsset.Graph.NodeList)
+            foreach (var name in GraphAsset.Graph.NodeList)
             {
-                foreach (var port in state.Ports)
+                foreach (var port in name.Ports)
                 {
                     if (port.isOutput )
                     {
@@ -551,8 +558,6 @@ namespace QTool.Flow
             var typeColor = GetTypeColor(port.valueType);
             if(port.isOutput)
             {
-
-
                 Rect lastRect = default;
                 if (port.Key == QFlowKey.NextPort)
                 {
@@ -564,7 +569,7 @@ namespace QTool.Flow
                     lastRect = GUILayoutUtility.GetLastRect();
                 }
                 var center = new Vector2(lastRect.xMax, lastRect.y) + Vector2.one * dotSize / 2;
-                var dotRect = DrawDot(center, dotSize, Color.black);
+                var dotRect = DrawDot(center , dotSize, Color.black);
                 DrawDot(center, dotSize * (port.ConnectPort == null ? 0.9f : 0.7f), typeColor);
                 if (Event.current.type == EventType.Repaint)
                 {

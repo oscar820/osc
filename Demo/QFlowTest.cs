@@ -77,7 +77,11 @@ public static class QFlowNodeTest
         outInt = inInt;
         outFloat = inFloat;
     }
-    public static void ObjectTest(QObjectReference QObjectReference,Object _object,GameObject gameObject,Sprite sprite, List<string> list, Vector3 vector3)
+    public static void ObjectTest(QObjectReference QObjectReference,Object _object,GameObject gameObject,Sprite sprite, Vector3 vector3)
+    {
+
+    }
+    public static void ListTest(List<string> list, List<Vector3> v3List)
     {
 
     }

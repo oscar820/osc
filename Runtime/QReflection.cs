@@ -287,6 +287,10 @@ namespace QTool.Reflection
         {
             try
             {
+                if (type == typeof(string))
+                {
+                    return "";
+                }
                 return Activator.CreateInstance(type, param);
             }
             catch (Exception e)
