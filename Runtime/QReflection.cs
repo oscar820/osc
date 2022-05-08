@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace QTool.Reflection
@@ -196,7 +197,7 @@ namespace QTool.Reflection
         public static string ViewName(this MemberInfo type)
         {
             var att = type.GetCustomAttribute<ViewNameAttribute>();
-            if (att != null && att.name != "")
+            if (att != null && !string.IsNullOrWhiteSpace(att.name))
             {
                 return att.name;
             }
@@ -211,12 +212,20 @@ namespace QTool.Reflection
             {
                 return type.GetElementType();
             }
+            else if(typeof(Task).IsAssignableFrom(type))
+            { 
+                return type.GenericTypeArguments[0];
+            }
+            else if(typeof(Nullable).IsAssignableFrom(type))
+            {
+                return type.GenericTypeArguments[0];
+            }
             return type;
         }
         public static string ViewName(this ParameterInfo info)
         {
             var att = info.GetCustomAttribute<ViewNameAttribute>();
-            if (att != null && att.name != "")
+            if (att != null && !string.IsNullOrWhiteSpace(att.name))
             {
                 return att.name;
             }

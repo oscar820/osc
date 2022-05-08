@@ -40,6 +40,10 @@ namespace QTool.Command
         public static List<Type> TypeList = new List<Type>();
         public static QCommandInfo GetCommand(string key)
         {
+            if (key == null)
+            {
+                return null;
+            }
             if (KeyDictionary.ContainsKey(key))
             {
                 return KeyDictionary[key];

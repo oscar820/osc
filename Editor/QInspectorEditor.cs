@@ -13,72 +13,46 @@ namespace QTool.Inspector
 
     #region 自定义显示效果
 
-    [CustomPropertyDrawer(typeof(InstanceReference))]
-    public class InstanceReferenceDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(QObjectReference))]
+    public class QObjectReferenceDrawer : PropertyDrawer
     {
-        public static InstanceReference Draw(string lable, InstanceReference ir, params GUILayoutOption[] options)
+        public static string Draw(string lable, string id,Type type, params GUILayoutOption[] options)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                var name = lable + "【" + (id == null ? "" : id.Substring(0, Mathf.Min(4, id.Length))) + "~】";
+                var oldObj =QObjectReference.GetObject(id);
+                var newObj = oldObj;
+
+                newObj = EditorGUILayout.ObjectField(name, oldObj, type, true);
+                if (newObj != oldObj)
+                {
+                   id= QObjectReference.GetId(newObj);
+                }
+            }
+            return id;
+        }
+        public static QObjectReference Draw(string lable, QObjectReference ir, params GUILayoutOption[] options)
         {
             using ( new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField(lable + "  [" + ir.id + "]", GUILayout.Width(100));
-                var newObj= EditorGUILayout.ObjectField(ir.Obj, typeof(GameObject), true) as GameObject;
-                if (newObj != ir._obj)
+                var newId= Draw(lable, ir.id,typeof(UnityEngine.Object), options);
+                if (newId != ir.id)
                 {
-                    ir._obj = newObj;
-                    if (ir._obj != null)
-                    {
-                        var id = ir._obj.GetComponent<QId>();
-                        if (id == null)
-                        {
-                            id = ir._obj.AddComponent<QId>();
-                            EditorUtility.SetDirty(ir._obj);
-                        }
-                        ir.id = id.InstanceId;
-                    }
-                    else
-                    {
-                        ir.id = "";
-                    }
+                    ir.id = newId;
                 }
             }
             return ir;
-           
-
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var value = property.FindPropertyRelative("id");
-            var objValue = property.FindPropertyRelative("_obj");
-            if (QId.InstanceIdList.ContainsKey(value.stringValue) && objValue.objectReferenceValue==null)
-            {
-                objValue.objectReferenceValue = QId.InstanceIdList[value.stringValue].gameObject;
-            }
+            var id = property.FindPropertyRelative(nameof(QObjectReference.id));
             var left = position;
             left.width = position.width * 0.3f;
             var right = position;
             right.xMin = left.xMin+left.width;
             right.width = position.width * 0.7f;
-            EditorGUI.LabelField(left, label.text + "  ["+ value.stringValue+"]");
-            var newObj= EditorGUI.ObjectField(right, objValue.objectReferenceValue, typeof(GameObject), true) as GameObject;
-            if(newObj != objValue.objectReferenceValue)
-            {
-                objValue.objectReferenceValue = newObj;
-                if (objValue.objectReferenceValue != null)
-                {
-                    var id = (objValue.objectReferenceValue as GameObject).GetComponent<QId>();
-                    if (id == null)
-                    {
-                        id = (objValue.objectReferenceValue as GameObject).AddComponent<QId>();
-                        EditorUtility.SetDirty((objValue.objectReferenceValue as GameObject));
-                    }
-                    value.stringValue = id.InstanceId;
-                }
-                else
-                {
-                    value.stringValue = "";
-                }
-            }
-          
+            id.stringValue= Draw(label.text, id.stringValue,typeof(UnityEngine.Object));
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -317,7 +291,7 @@ namespace QTool.Inspector
         public static string ViewName(this SerializedProperty property,string parentName="")
         {
             var att = property.GetAttribute<ViewNameAttribute>(parentName);
-            if (att != null && att.name != "")
+            if (att != null && !string.IsNullOrWhiteSpace( att.name ))
             {
                 return att.name;
             }
@@ -416,6 +390,10 @@ namespace QTool.Inspector
                 case TypeCode.Int32:
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
+                    if (type.IsEnum)
+                    {
+                        return EditorGUILayout.EnumPopup(name, (Enum)obj);
+                    }
                     return EditorGUILayout.IntField(name, (int)obj);
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
@@ -446,9 +424,9 @@ namespace QTool.Inspector
                                 {
                                     obj = type.CreateInstance();
                                 }
-                                if (typeof(InstanceReference).IsAssignableFrom(type))
+                                if (typeof(QObjectReference).IsAssignableFrom(type))
                                 {
-                                    return InstanceReferenceDrawer.Draw(name, (InstanceReference)obj);
+                                    return QObjectReferenceDrawer.Draw(name, (QObjectReference)obj);
                                 }
                                 EditorGUILayout.BeginVertical();
                                 Foldout[name] = EditorGUILayout.Foldout(Foldout[name], name);

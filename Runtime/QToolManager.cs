@@ -46,13 +46,17 @@ namespace QTool
             {
                 if (_instance == null)
                 {
-                    _instance= QToolManager.InstanceObj.AddComponent<T>();
-                    _instance.SetDirty();
+                    _instance = QToolManager.InstanceObj.GetComponent<T>();
+                    if (_instance == null)
+                    {
+                        _instance = QToolManager.InstanceObj.AddComponent<T>();
+                        _instance.SetDirty();
+                    }
                 }
                 return _instance;
             }
         }
-        protected virtual void Awake()
+        protected virtual void Awake() 
         {
             if (_instance == null)
             {

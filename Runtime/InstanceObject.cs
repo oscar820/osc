@@ -14,6 +14,36 @@ namespace QTool
 
         }
     }
+    public abstract class InstanceScriptable<T> : ScriptableObject where T : InstanceScriptable<T>
+    {
+        protected static T _instance;
+        public static T Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                     _instance= Resources.Load<T>(typeof(T).Name);
+#if UNITY_EDITOR
+                    if (_instance==null&& !Application.isPlaying)
+                    {
+                        var obj = ScriptableObject.CreateInstance<T>();
+                        _instance = obj;
+                        UnityEditor.AssetDatabase.CreateAsset(obj, ("Assets/Resources/" + typeof(T).Name + ".asset").CheckFolder());
+                        UnityEditor.AssetDatabase.Refresh();
+                    }
+#endif 
+                }
+                return _instance; 
+            }
+        }
+        public virtual void Awake()
+        {
+            if (_instance != null) return;
+            _instance = this as T;
+            Debug.Log("³õÊ¼»¯µ¥Àý¡¾" + typeof(T).Name + "¡¿");
+        }
+    }
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>
     {
         public static T Instance

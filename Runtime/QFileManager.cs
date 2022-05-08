@@ -193,13 +193,14 @@ namespace QTool
             tex.LoadImage(bytes);
             return tex;
         }
-        public static void CheckFolder(string path)
+        public static string CheckFolder(this string path)
         {
             var directoryPath = Path.GetDirectoryName(path);
             if (!string.IsNullOrWhiteSpace(directoryPath) && !System.IO.Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
+            return path;
         }
         public static void SaveXml<T>(string path, T data)
         {

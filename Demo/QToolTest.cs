@@ -74,7 +74,7 @@ namespace QTool.Test
 
     //[QType()]
     [System.Serializable]
-    public class TTestClass//:IQSerialize
+    public class TTestClass//:IQSerialize 
     {
         public Rect rect;
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
@@ -87,7 +87,7 @@ namespace QTool.Test
         public byte[] array = new byte[] { 123 };
         [XmlIgnore]
         public byte[,,] arrayTest = new byte[1,2,2] { { { 1, 2 }, { 3, 4 } } };
-        public TestClass2 child;
+        public TestClass2 child; 
         public void Read(QBinaryReader read)
         {
             list = read.ReadObject(list); 
@@ -147,7 +147,7 @@ namespace QTool.Test
     [ScriptToggle("scriptList")]
     public class QToolTest : MonoBehaviour
     {
-        public InstanceReference instanceTest;
+        public QObjectReference instanceTest;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         public static List<string> scriptList=> new List<string> { "QId" };
         //[ViewToggle("开关")]

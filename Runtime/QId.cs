@@ -141,35 +141,7 @@ namespace QTool
                 Debug.Log("读取数据完成数目：" + shortCount);
             }
         }
-    }
-   
-    [System.Serializable]
-    public class InstanceReference
-    {
-        public string id;
-        [QIgnore]
-        public GameObject _obj;
-        public GameObject Obj
-        {
-            get
-            {
-                if (_obj == null)
-                {
-                    if (string.IsNullOrWhiteSpace(id)) return null;
-                    if (QId.InstanceIdList.ContainsKey(id)&& QId.InstanceIdList[id]!=null)
-                    {
-                        _obj = QId.InstanceIdList[id].gameObject;
-                    }
-                    else
-                    {
-                        Debug.LogWarning("不存在物体 Id：[" + id + "]");
-                    }
-                 
-                }
-                return _obj;
-            }
-        }
-    }
+    } 
 
     [DisallowMultipleComponent]
     public class QId : MonoBehaviour,IKey<string>,IQSerialize

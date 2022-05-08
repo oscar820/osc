@@ -11,6 +11,10 @@ namespace QTool.Flow
 
     public class QFlowGraph
     {
+        public override string ToString()
+        {
+            return this.ToQData();
+        }
         public QList<string,FlowNode> NodeList { private set; get; } = new QList<string,FlowNode>();
         string startKey; 
         public FlowNode StartNode
@@ -329,6 +333,10 @@ namespace QTool.Flow
     
     public class FlowNode:IKey<string>
     {
+        public override string ToString()
+        {
+            return this.ToQData();
+        }
         [System.Flags]
         public enum ReturnType
         {
@@ -357,7 +365,8 @@ namespace QTool.Flow
                 return Ports[key];
             }
         }
-        QCommandInfo command;
+        [QIgnore]
+        public QCommandInfo command { get; private set; }
         public FlowNode()
         {
 
@@ -385,40 +394,15 @@ namespace QTool.Flow
         public void Init(QFlowGraph graph)
         {
             this.Graph = graph;
-            command= QCommand.GetCommand(commandKey);
+            command = QCommand.GetCommand(commandKey);
             if (command == null)
             {
                 Debug.LogError("≤ª¥Ê‘⁄√¸¡Ó°æ" + commandKey + "°ø");
                 return;
             }
-            if (command.method.ReturnType == typeof(void))
-            {
-                returnType = ReturnType.Void;
-            }
-            else if (command.method.ReturnType == typeof(IEnumerator))
-            {
-                returnType = ReturnType.CoroutineDelay;
-            }
-            else if (typeof(Task).IsAssignableFrom(command.method.ReturnType)) 
-            {
-                if (typeof(Task) == command.method.ReturnType)
-                {
-                    returnType = ReturnType.TaskDelayVoid;
-                }
-                else
-                {
-                    returnType = ReturnType.TaskDelayValue;
-                    TaskReturnValueGet= command.method.ReturnType.GetProperty("Result").GetValue;
-                    AddPort(QFlowKey.ResultPort,"result", null, true);
-                }
-            }
-            else
-            {
-                AddPort(QFlowKey.ResultPort,"result", null, true);
-                returnType = ReturnType.ReturnValue;
-            } 
-            AddPort(QFlowKey.FromPort,"", null);
-            AddPort(QFlowKey.NextPort,"", null,true);
+
+            AddPort(QFlowKey.FromPort, "", null);
+            AddPort(QFlowKey.NextPort, "", null, true);
             commandParams = new object[command.paramInfos.Length];
             OutParamPorts.Clear();
             for (int i = 0; i < command.paramInfos.Length; i++)
@@ -434,6 +418,32 @@ namespace QTool.Flow
                 {
                     OutParamPorts.Add(port);
                 }
+            }
+            if (command.method.ReturnType == typeof(void))
+            {
+                returnType = ReturnType.Void;
+            }
+            else if (command.method.ReturnType == typeof(IEnumerator))
+            {
+                returnType = ReturnType.CoroutineDelay;
+            }
+            else if (typeof(Task).IsAssignableFrom(command.method.ReturnType))
+            {
+                if (typeof(Task) == command.method.ReturnType)
+                {
+                    returnType = ReturnType.TaskDelayVoid;
+                }
+                else
+                {
+                    returnType = ReturnType.TaskDelayValue;
+                    TaskReturnValueGet = command.method.ReturnType.GetProperty("Result").GetValue;
+                    AddPort(QFlowKey.ResultPort, "result", command.method.ReturnType.GetTrueType(), true);
+                }
+            }
+            else
+            {
+                AddPort(QFlowKey.ResultPort, "result", command.method.ReturnType.GetTrueType(), true);
+                returnType = ReturnType.ReturnValue;
             }
             Ports.RemoveAll((port) => port.Node == null);
         }

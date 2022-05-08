@@ -17,6 +17,7 @@ namespace QTool
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
         public static Color ToColor(this string key, float s = 0.5f, float v =1f)
         {
+            if (string.IsNullOrWhiteSpace(key)) return Color.white;
             var colorKey = key + s + v;
             if (!KeyColor.ContainsKey(colorKey))
             {
@@ -124,9 +125,13 @@ namespace QTool
                                 case QObjectType.Object:
                                     {
                                         writer.Write('{');
-                                        if (typeInfo.IsIQData && obj is IQData qData)
+                                        if(typeInfo.IsUnityObject)
                                         {
-                                            return qData.ToQData();
+                                            writer.Write( QObjectReference.GetId(obj as UnityEngine.Object));
+                                        }
+                                        else if (typeInfo.IsIQData)
+                                        {
+                                            writer.Write((obj as IQData).ToQData());
                                         }
                                         else
                                         {
@@ -146,6 +151,7 @@ namespace QTool
                                             }
                                         }
                                         writer.Write('}');
+
                                         return writer.ToString();
                                     }
                                 case QObjectType.List:
@@ -155,12 +161,15 @@ namespace QTool
                                         for (int i = 0; i < list.Count; i++)
                                         {
                                             writer.Write(ToQData(list[i], typeInfo.ElementType,hasName));
+
                                             if (i < list.Count - 1)
                                             {
                                                 writer.Write(',');
                                             }
                                         }
                                         writer.Write(']');
+
+
                                         return writer.ToString();
                                     }
                                 case QObjectType.Array:
@@ -223,6 +232,7 @@ namespace QTool
         }
         public static object ParseQData(this string qdataStr,Type type, bool hasName=true)
         {
+
             if (string.IsNullOrEmpty(qdataStr))
             {
                 return type.IsValueType ? Activator.CreateInstance(type) : null;
@@ -236,7 +246,7 @@ namespace QTool
             {
                 case TypeCode.Object:
                     {
-                        if (type.Name == nameof(System.Object)) return qdataStr;
+                        if (type == typeof(object)) return qdataStr;
                         using (var reader=new StringReader(qdataStr))
                         {
                             var typeInfo = QSerializeType.Get(type);
@@ -245,18 +255,29 @@ namespace QTool
                             {
                                 case QObjectType.Object:
                                     {
-                                        var obj =  Activator.CreateInstance(type);
+                                        if (string.IsNullOrEmpty(qdataStr)) return null;
+
                                         if (reader.ReadSplit('{', '}', ';', out var strs))
                                         {
+                                            object obj = null;
                                             for (int i = 0; i < strs.Length; i++)
                                             {
                                                 var str = strs[i];
-                                                if (typeInfo.IsIQData && obj is IQData qData)
+                                                if (typeInfo.IsUnityObject)
                                                 {
-                                                    obj= qData.ParseQData(str);
+                                                    obj = QObjectReference.GetObject(str);
+                                                  
+                                                }
+                                                else if (typeInfo.IsIQData)
+                                                {
+                                                    obj = (Activator.CreateInstance(type) as IQData).ParseQData(str);
                                                 }
                                                 else
                                                 {
+                                                    if (obj == null)
+                                                    {
+                                                        obj = Activator.CreateInstance(type);
+                                                    }
                                                     if (hasName)
                                                     {
                                                         using (var childReader = new StringReader(str))
@@ -296,12 +317,13 @@ namespace QTool
                                             {
                                                 list.Add(ParseQData(memberStr, typeInfo.ElementType,hasName));
                                             }
+
                                             return list;
                                         };
                                         Debug.LogError("读取List出错[" + type + "][" + qdataStr + "]");
-                                        return null;
 
 
+                                        return list;
                                     }
                                 case QObjectType.Array:
                                     {
@@ -329,8 +351,10 @@ namespace QTool
                                                 }
                                              
                                             });
+
                                             return array;
                                         }
+                                        Debug.LogError("读取数组出错");
                                         return null;
                                     }
                                 default:
@@ -445,10 +469,10 @@ namespace QTool
             }
         }
         static List<string> splitStrList = new List<string>();
-        public static bool ReadSplit(this StringReader reader,char start,char end,char split,out string[] strs)
+        public static bool ReadSplit(this StringReader reader, char start, char end, char split, out string[] strs)
         {
             splitStrList.Clear();
-            reader.NextIgnore(start);
+            if (reader.NextIs(start))
             {
                 var writer = new StringWriter();
                 int child = 0;
@@ -466,7 +490,7 @@ namespace QTool
                             break;
                         }
                     }
-                    if (child==0&& peek == split)
+                    if (child == 0 && peek == split)
                     {
 
                         splitStrList.Add(writer.ToString());
@@ -484,17 +508,22 @@ namespace QTool
                             child++;
                         }
                     }
-                  
-                   
+
+
                 }
                 var str = writer.ToString();
-                if (!(splitStrList.Count == 0&&string.IsNullOrEmpty(str)))
+                if (!(splitStrList.Count == 0 && string.IsNullOrEmpty(str)))
                 {
                     splitStrList.Add(str);
                 }
                 writer.Dispose();
                 strs = splitStrList.ToArray();
                 return true;
+            }
+            else
+            {
+                strs = null;
+                return false;
             }
         }
         /// <summary>
@@ -622,6 +651,7 @@ namespace QTool
         public QObjectType objType = QObjectType.Object;
         public bool IsIQSerialize { private set; get; }
         public bool IsIQData { private set; get; }
+        public bool IsUnityObject { private set; get; }
         protected override void Init(Type type)
         {  
             Functions = null;
@@ -630,6 +660,7 @@ namespace QTool
             {
                 IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
                 IsIQData = typeof(IQData).IsAssignableFrom(type);
+                IsUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(type);
                 if (IsIQSerialize || IsIQData)
                 {
                     objType = QObjectType.Object;
