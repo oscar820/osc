@@ -21,13 +21,13 @@ public class QFlowTest : MonoBehaviour
         var c = QCommand.GetCommand(nameof(QFlowNodeTest.OutTest));
         QCommand.FreshCommands(typeof(QFlowNodeTest));
         var graph = new QFlowGraph();
-        var a= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
-        var wait = graph.Add(nameof(QFlowNodeTest.CoroutineWaitTest));
-        a["value"]="QState测试";
-        wait["time"]=3;
-        a.Connect(wait);
-        wait.Connect(a);
-        StartCoroutine(graph.RunCoroutine(a.Key));
+        var logNode= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
+        logNode["value"] = "QState测试";
+        var waitNode = graph.Add(nameof(QFlowNodeTest.CoroutineWaitTest));
+        waitNode["time"]=3;
+        logNode.SetNextNode(waitNode);
+        waitNode.SetNextNode(logNode);
+        StartCoroutine(graph.RunCoroutine(logNode.Key));
      
     }
     // Update is called once per frame
@@ -109,8 +109,28 @@ public static class QFlowNodeTest
     {
         This[nameof(result)] = a + b;
     }
-    public static void TaskTest(QFlowNode This, [QFlowPort] string task1, [QFlowPort] string task2, [QFlowPort] string failureEvent, [QOutputPort,QFlowPort(showValue = true)] float success, [QOutputPort, QFlowPort(showValue = true)] float failure)
+    [ViewName("任务示例")]
+    public static IEnumerator TaskTest(QFlowNode This, QFlow task1, QFlow task2, QFlow failureEvent, [QOutputPort,QFlowPort(showValue = true)] QFlow success, [QOutputPort, QFlowPort(showValue = true)] string failure)
     {
-        Debug.LogError("运行端口" + This.StartPort);
+        List<string> taskList = new List<string> { nameof(task1), nameof(task2) };
+        This.TriggerPortList.Clear();
+        Debug.LogError("任务开始");
+        while (taskList.Count>0)
+        {
+            foreach (var portKey in This.TriggerPortList)
+            {
+                Debug.LogError("完成 " + portKey);
+                taskList.Remove(portKey);
+            }
+            This.TriggerPortList.Clear();
+
+            if (This.TriggerPortList.Contains(nameof(failureEvent)))
+            {
+                yield break;
+            }
+            yield return null;
+        }
+        Debug.LogError("任务结束");
+        This.SetNetFlowPort(taskList.Count==0?nameof(success):nameof(failureEvent));
     }
 }

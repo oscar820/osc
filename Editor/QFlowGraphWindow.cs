@@ -30,7 +30,7 @@ namespace QTool.FlowGraph
             {
                 var window = GetWindow<QFlowGraphWindow>();
                 window.minSize = new Vector2(500, 400);
-                window.titleContent = new GUIContent(asset.name + " - Á÷Í¼");
+                window.titleContent = new GUIContent(asset.name + " - "+nameof(QFlowGraph));
                 window.GraphAsset = asset;
                 window.ViewRange = new Rect(Vector2.zero, window.position.size);
                 return true;
@@ -631,7 +631,7 @@ namespace QTool.FlowGraph
    
         public Color GetTypeColor(Type type,float s=0.4f,float v=0.9f)
         {
-            if (type == null) return Color.HSVToRGB(0.6f, s, v);
+            if (type == QFlow.Type) return Color.HSVToRGB(0.6f, s, v);
             return type.Name.ToColor(s,v);
         }
     
