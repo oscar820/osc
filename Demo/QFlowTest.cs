@@ -27,7 +27,7 @@ public class QFlowTest : MonoBehaviour
         wait["time"]=3;
         a.Connect(wait);
         wait.Connect(a);
-        StartCoroutine(graph.RunCoroutine());
+        StartCoroutine(graph.RunCoroutine(a.Key));
      
     }
     // Update is called once per frame
@@ -85,7 +85,7 @@ public static class QFlowNodeTest
     {
 
     }
-    public static void BoolTest(QFlowNode This,bool boolValue,[QFlowPort,QNodeOutput]bool True, [QFlowPort] out object False)
+    public static void BoolTest(QFlowNode This,bool boolValue,[QFlowPort,QOutputPort]bool True, [QFlowPort] out object False)
     {
         False = true;
         if (boolValue)
@@ -97,7 +97,7 @@ public static class QFlowNodeTest
             This.SetNetFlowPort(nameof(False));
         }
     }
-    public static void GetTime_AutoUseTest([QNodeOutput(true)]out float time)
+    public static void GetTime_AutoUseTest([QOutputPort(autoRunNode = true)]out float time)
     {
         time = Time.time;
     }
@@ -105,8 +105,12 @@ public static class QFlowNodeTest
     {
         return a + b;
     }
-    public static void AddTest2(QFlowNode This, float a,float b,[QNodeOutput(true)] float result)
+    public static void AddTest2(QFlowNode This, float a,float b,[QOutputPort(autoRunNode = true)] float result)
     {
         This[nameof(result)] = a + b;
+    }
+    public static void TaskTest(QFlowNode This, [QFlowPort] string task1, [QFlowPort] string task2, [QFlowPort] string failureEvent, [QOutputPort,QFlowPort(showValue = true)] float success, [QOutputPort, QFlowPort(showValue = true)] float failure)
+    {
+        Debug.LogError("ÔËÐÐ¶Ë¿Ú" + This.StartPort);
     }
 }

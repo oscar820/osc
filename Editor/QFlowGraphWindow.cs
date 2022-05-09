@@ -513,7 +513,7 @@ namespace QTool.FlowGraph
         {
             if (connectStartPort!=null)
             { 
-                var color = GetTypeColor(connectStartPort.valueType);
+                var color = GetTypeColor(connectStartPort.ConnectType);
                 DrawCurve(connectStartPort.rect.center, mousePos, color);
                 DrawDot(mousePos - ViewRange.position, dotSize*0.8f, color);
                 if (nearPort != null)
@@ -527,7 +527,7 @@ namespace QTool.FlowGraph
                 {
                     if (port.isOutput )
                     {
-                        var color = GetTypeColor(port.valueType);
+                        var color = GetTypeColor(port.ConnectType);
 
                         foreach (var connect in port.ConnectList)
                         {
@@ -556,7 +556,7 @@ namespace QTool.FlowGraph
         }
         void DrawPort(QFlowPort port)
         {
-            var typeColor = GetTypeColor(port.valueType);
+            var typeColor = GetTypeColor(port.ConnectType);
 
             Rect lastRect = default;
             if (port.Key == QFlowKey.NextPort|| port.Key == QFlowKey.FromPort)
@@ -565,20 +565,20 @@ namespace QTool.FlowGraph
             }
             else
             {
-                if (!port.isOutput && port.ConnectList.Count == 0 && port.valueType != null)
+                if (port.ShowValue)
                 {
-                    if (typeof(UnityEngine.Object).IsAssignableFrom(port.valueType))
+                    if (typeof(UnityEngine.Object).IsAssignableFrom(port.ValueType))
                     {
-                        port.stringValue = QObjectReferenceDrawer.Draw(port.name, port.stringValue, port.valueType);
+                        port.stringValue = QObjectReferenceDrawer.Draw(port.name, port.stringValue, port.ValueType);
                     }
                     else
                     {
-                        port.Value = port.Value.Draw(port.name, port.valueType);
+                        port.Value = port.Value.Draw(port.name, port.ValueType);
                     }
                 }
                 else
                 {
-                    EditorGUILayout.LabelField(port.name, port.isOutput? OutputPortStyle: IutputPortStyle);
+                    EditorGUILayout.LabelField(port.name, port.isOutput ? OutputPortStyle : IutputPortStyle);
                 }
                 lastRect = GUILayoutUtility.GetLastRect();
             }
