@@ -4,8 +4,6 @@ using UnityEngine;
 using System;
 namespace QTool
 {
-
-
     /// <summary>
     /// 更改显示的名字
     /// </summary>

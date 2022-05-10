@@ -27,7 +27,7 @@ public class QFlowTest : MonoBehaviour
         waitNode["time"]=3;
         logNode.SetNextNode(waitNode);
         waitNode.SetNextNode(logNode);
-        StartCoroutine(graph.RunCoroutine(logNode.Key));
+        graph.Run(logNode.Key);
      
     }
     // Update is called once per frame
@@ -81,7 +81,7 @@ public static class QFlowNodeTest
     {
 
     }
-    public static void ListTest(List<string> list, List<Vector3> v3List)
+    public static void ListTest(List<string> list, List<Vector3> v3List, [QFlowPort]List<Vector3> v3FlowList)
     {
 
     }
@@ -109,28 +109,36 @@ public static class QFlowNodeTest
     {
         This[nameof(result)] = a + b;
     }
-    [ViewName("任务示例")]
-    public static IEnumerator TaskTest(QFlowNode This, QFlow task1, QFlow task2, QFlow failureEvent, [QOutputPort,QFlowPort(showValue = true)] QFlow success, [QOutputPort, QFlowPort(showValue = true)] string failure)
+    [ViewName("异步测试")]
+    public static void AsyncTest(QFlowNode This, [QOutputPort]QFlow One, [QOutputPort] QFlow Tow)
     {
-        List<string> taskList = new List<string> { nameof(task1), nameof(task2) };
+        This.SetNetFlowPort(nameof(One));
+        This.RunPort(nameof( Tow));
+    }
+    [ViewName("任务测试")]
+    public static IEnumerator TaskTest(QFlowNode This, QFlow task1, QFlow task2, QFlow task3, QFlow failureEvent, [QOutputPort,QFlowPort(showValue = true)] QFlow success, [QOutputPort, QFlowPort(showValue = true)] string failure)
+    {
+        List<string> taskList = new List<string> { nameof(task1), nameof(task2),nameof(task3) };
         This.TriggerPortList.Clear();
         Debug.LogError("任务开始");
         while (taskList.Count>0)
         {
             foreach (var portKey in This.TriggerPortList)
             {
-                Debug.LogError("完成 " + portKey);
-                taskList.Remove(portKey);
+                if (taskList.Contains(portKey))
+                {
+                    Debug.LogError("完成 " + portKey);
+                    taskList.Remove(portKey);
+                }
             }
-            This.TriggerPortList.Clear();
-
             if (This.TriggerPortList.Contains(nameof(failureEvent)))
             {
-                yield break;
+                break;
             }
+            This.TriggerPortList.Clear();
             yield return null;
         }
         Debug.LogError("任务结束");
-        This.SetNetFlowPort(taskList.Count==0?nameof(success):nameof(failureEvent));
+        This.SetNetFlowPort(taskList.Count==0?nameof(success):nameof(failure));
     }
 }

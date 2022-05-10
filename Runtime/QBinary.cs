@@ -2,6 +2,7 @@
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using QTool.Reflection;
 namespace QTool.Binary
 {
 
@@ -20,14 +21,7 @@ namespace QTool.Binary
       
 
 
-        static object CreateInstance(Type type, object targetObj, params object[] args)
-        {
-            if (targetObj != null)
-            {
-                return targetObj;
-            }
-            return Activator.CreateInstance(type, args);
-        }
+  
         public static QBinaryWriter SerializeType(this QBinaryWriter writer, object value, Type type)
         {
             try
@@ -175,7 +169,7 @@ namespace QTool.Binary
 
                             case QObjectType.List:
                                 {
-                                    var obj = CreateInstance(type, target);
+                                    var obj =QReflection.CreateInstance(type, target);
                                     var list = obj as IList;
                                     var count = reader.ReadInt32();
                                     for (int i = 0; i < count; i++)
@@ -199,7 +193,7 @@ namespace QTool.Binary
                                     {
                                         typeInfo.IndexArray[i] = reader.ReadInt32();
                                     }
-                                    var array = (Array)CreateInstance(type, target, typeInfo.IndexArray.ToObjects());
+                                    var array = (Array)QReflection.CreateInstance(type, target, typeInfo.IndexArray.ToObjects());
                                     array.ForeachArray( 0, typeInfo.IndexArray, (indexArray) =>
                                     {
                                         var obj = array.GetValue(indexArray); if (obj == null)
@@ -214,13 +208,13 @@ namespace QTool.Binary
                                 {
                                     if (typeInfo.IsIQSerialize)
                                     {
-                                        var serObj = CreateInstance(type, target) as IQSerialize;
+                                        var serObj = QReflection.CreateInstance(type, target) as IQSerialize;
                                         serObj.Read(reader);
                                         return serObj;
                                     }
                                     else
                                     {
-                                        var obj = CreateInstance(type, target);
+                                        var obj = QReflection.CreateInstance(type, target);
                                         var memberCount = reader.ReadByte();
                                         foreach (var memeberInfo in typeInfo.Members)
                                         {

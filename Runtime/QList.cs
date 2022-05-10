@@ -327,7 +327,7 @@ namespace QTool
             }
             return str;
         }
-        public static List<T> Replace<T>(this List<T> array, int indexA, int indexB)
+        public static IList<T> Replace<T>(this IList<T> array, int indexA, int indexB)
         {
             if (indexA == indexB) return array;
             var temp = array[indexA];

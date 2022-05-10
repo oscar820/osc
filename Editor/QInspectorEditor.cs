@@ -6,6 +6,8 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using QTool.Reflection;
+using System.Threading.Tasks;
+
 namespace QTool.Inspector
 {
 
@@ -426,12 +428,13 @@ namespace QTool.Inspector
                 GUILayout.Space(10);
             }
         }
-        static QDictionary<string, bool> FoldoutDic = new QDictionary<string, bool>();
+        public static QDictionary<string, bool> FoldoutDic = new QDictionary<string, bool>();
         public static QDictionary<string, Action<SerializedProperty, Func<float, float>>> DrawFloatAction = new QDictionary<string, Action<SerializedProperty, Func<float, float>>>();
 
         static Color BackColor = new Color(0, 0, 0, 0.6f);
         static GUIStyle BackStyle = new GUIStyle("helpBox");
-        public static object Draw(this object obj,string name,Type type,Rect? rect=null)
+
+        public static object Draw(this object obj,string name,Type type,Rect? rect=null,Action<int> DrawElementCall=null,Action<int,int> IndexChange=null)
         {
             if (type == null)
             {
@@ -581,8 +584,16 @@ namespace QTool.Inspector
                                     using (new EditorGUILayout.VerticalScope(BackStyle))
                                     {
                                         GUI.backgroundColor = color;
-                                        FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
-                                        if (FoldoutDic[name])
+                                        var canHideChild = DrawElementCall==null;
+                                        if (canHideChild)
+                                        {
+                                            FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
+                                        }
+                                        else
+                                        {
+                                            EditorGUILayout.LabelField(name);
+                                        }
+                                        if (!canHideChild || FoldoutDic[name])
                                         {
                                             using (new EditorGUILayout.HorizontalScope())
                                             {
@@ -591,17 +602,55 @@ namespace QTool.Inspector
                                                 {
                                                     for (int i = 0; i < list.Count; i++)
                                                     {
-                                                        list[i] = list[i].Draw(name + "[" + i + "]", typeInfo.ElementType);
+                                                        var key = name + "[" + i + "]";
+                                                        var element = list[i].Draw(key, typeInfo.ElementType);
+                                                        list[i] = element;
+                                                        DrawElementCall?.Invoke(i);
+                                                        var elementRect = GUILayoutUtility.GetLastRect();
+                                                        if (elementRect.Contains(Event.current.mousePosition))
+                                                        {
+                                                            var btnRect = elementRect;
+                                                            btnRect.size = Vector3.one * 18;
+                                                            btnRect.position += new Vector2(elementRect.width - 40, 2);
+                                                            if (GUI.Button(btnRect,"+"))
+                                                            {
+                                                                list.Insert(i+1,list[i]);
+                                                                IndexChange?.Invoke(-1, i+1);
+                                                            }
+                                                            btnRect.position += new Vector2(20, 0);
+                                                            if (GUI.Button(btnRect, "-"))
+                                                            {
+                                                                list.RemoveAt(i);
+                                                                IndexChange?.Invoke(i, -1);
+                                                            }
+                                                        }
+                                                     
+
+                                                        //if(Event.current.type== EventType.MouseDown)
+                                                        //{
+                                                        //    if (Event.current.button == 1&& )
+                                                        //    {
+                                                        //        GenericMenu menu = new GenericMenu();
+                                                        //        menu.AddItem(new GUIContent( "删除 "+ key),false, () => {  list.Remove(element); });
+                                                        //        menu.ShowAsContext();
+                                                        //        Event.current.Use();
+
+                                                        //    }
+                                                        //}
                                                     }
 
                                                 }
                                             }
-                                            if (GUILayout.Button("添加新元素"))
+                                            if (list.Count == 0)
                                             {
-                                                list.Add(typeInfo.ElementType.CreateInstance());
-                                                
-                                                Debug.Log("["+ typeInfo.ElementType.CreateInstance() + "]");
+                                                if (GUILayout.Button("添加新元素", GUILayout.Height(20)))
+                                                {
+                                                    list.Add(typeInfo.ElementType.CreateInstance());
+
+                                                    Debug.Log("[" + typeInfo.ElementType.CreateInstance() + "]");
+                                                }
                                             }
+                                           
                                         }
                                     }
                                     return list;

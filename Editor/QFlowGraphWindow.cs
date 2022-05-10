@@ -21,6 +21,7 @@ namespace QTool.FlowGraph
         static Texture2D _backTex = null;
 
         public QFlowGraphAsset GraphAsset = null;
+        public QFlowGraph Graph => GraphAsset?.Graph;
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line)
         {
@@ -56,19 +57,21 @@ namespace QTool.FlowGraph
         }
 
         private Rect ViewRange;
-        void CreateMenu(QFlowPort fromPort)
+        void CreateMenu(PortId fromPortId)
         {
 
+
             GenericMenu menu = new GenericMenu();
+            var fromPort = Graph[fromPortId];
             foreach (var info in QTool.Command.QCommand.KeyDictionary)
             {
                 if (fromPort.CanConnect(info, out var portKey))
                 {
                     menu.AddItem(new GUIContent(info.fullName), false, () =>
                     {
-                        var node = GraphAsset.Graph.Add(info.Key, info.name);
+                        var node = GraphAsset.Graph.Add(info.Key);
                         node.rect = new Rect(mousePos, new Vector2(300, 80));
-                        fromPort.Connect(node.Ports[portKey]);
+                        fromPort.Connect( node.Ports[portKey]);
                     });
                 }
             }
@@ -83,7 +86,7 @@ namespace QTool.FlowGraph
                 {
                     menu.AddItem(new GUIContent(kv.fullName), false, () =>
                    {
-                       var state = GraphAsset.Graph.Add(kv.Key, kv.name);
+                       var state = GraphAsset.Graph.Add(kv.Key);
                        state.rect = new Rect(mousePos, new Vector2(300, 80));
                    });
                 }
@@ -99,9 +102,10 @@ namespace QTool.FlowGraph
             }
             else
             {
-                if (curPort != null)
+                if (curPortId != null)
                 {
-                    menu.AddItem(new GUIContent("清空" + curPort.name + "端口连接"), false, curPort.ClearAllConnect);
+
+                    menu.AddItem(new GUIContent("清空" + curPortId + "端口连接"), false, ()=> GraphAsset.Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.listKey));
                 }
                 else
                 {
@@ -117,7 +121,7 @@ namespace QTool.FlowGraph
                     {
                         menu.AddItem(new GUIContent("运行节点"), false, () =>
                         {
-                            QToolManager.Instance.StartCoroutine(GraphAsset.Graph.RunCoroutine(curNode.Key));
+                            QToolManager.Instance.StartCoroutine(GraphAsset.Graph.RunIEnumerator(curNode.Key));
                         });
                     }
                     else
@@ -177,31 +181,36 @@ namespace QTool.FlowGraph
             UpdateCurrentData();
             if (curNode != null)
             {
-                if (curPort == null)
+                if (curPortId == null)
                 {
-                    nearPort = null;
+                    nearPortId = null;
                     var minDis = float.MaxValue;
                     foreach (var port in curNode.Ports)
                     {
-                        var dis = Vector2.Distance(port.rect.position, mousePos);
-                        if (connectStartPort.CanConnect(port))
+                        
+                        if (Graph[connectStartPort].CanConnect(port))
                         {
-                            if (dis < minDis)
+                            foreach (var c in port.ConnectInfolist)
                             {
-                                nearPort = port;
-                                minDis = dis;
+                                var dis = Vector2.Distance(c.rect.position, mousePos);
+                                if (dis < minDis)
+                                {
+                                    nearPortId = new PortId(port, c.Key);
+                                    minDis = dis;
+                                }
                             }
                         }
+
                     }
                 }
                 else
                 {
-                    nearPort = curPort;
+                    nearPortId = curPortId;
                 }
             }
             else
             {
-                nearPort = null;
+                nearPortId = null;
             }
 
         }
@@ -216,24 +225,28 @@ namespace QTool.FlowGraph
                     break;
                 }
             }
-            curPort = null;
+            curPortId = null;
             if (curNode != null)
             {
                 foreach (var port in curNode.Ports)
                 {
-                    if (port.rect.Contains(mousePos))
+                    foreach (var c in port.ConnectInfolist)
                     {
-                        curPort = port;
-                        break;
+                        if (c.rect.Contains(mousePos))
+                        {
+                            curPortId = new PortId(port, c.Key);
+                            break;
+                        }
                     }
+                   
                 }
             }
 
         }
         Vector2 mousePos;
         QFlowNode curNode;
-        QFlowPort curPort;
-        QFlowPort nearPort;
+        PortId? curPortId;
+        PortId? nearPortId;
         private void OnGUI()
         {
             ViewRange.size = position.size;
@@ -307,18 +320,19 @@ namespace QTool.FlowGraph
                         UpdateCurrentData();
                         if(ControlState== EditorState.None&&Event.current.button == 0)
                         {
-                            if (curPort != null)
+                            if (curPortId != null)
                             {
-                                if (curPort.isOutput)
+                                if (Graph[curPortId.Value].isOutput)
                                 {
-                                    StartConnect(curPort);
+                                    StartConnect(curPortId.Value);
                                 }
                                 else
                                 {
-                                    var fromPort = curPort.ConnectPort;
+                                    var curPort = Graph[curPortId];
+                                    var fromPort = Graph.GetConnectInfo(curPortId).ConnectPort();
                                     if (fromPort != null)
                                     {
-                                        fromPort.DisConnect(curPort);
+                                        Graph[fromPort].DisConnect(curPortId);
                                         StartConnect(fromPort);
                                     }
                                 }
@@ -389,7 +403,7 @@ namespace QTool.FlowGraph
                                 break;
                             case EditorState.ConnectPort:
                                 {
-                                    StopConnect(nearPort);
+                                    StopConnect(nearPortId);
                                     Event.current.Use();
                                 }
                                 break;
@@ -512,13 +526,14 @@ namespace QTool.FlowGraph
         public void DrawCurve()
         {
             if (connectStartPort!=null)
-            { 
-                var color = GetTypeColor(connectStartPort.ConnectType);
-                DrawCurve(connectStartPort.rect.center, mousePos, color);
+            {
+                var connectInfo = Graph.GetConnectInfo(connectStartPort);
+                var color = GetTypeColor(Graph[connectStartPort].ConnectType);
+                DrawCurve(connectInfo.rect.center, mousePos, color);
                 DrawDot(mousePos - ViewRange.position, dotSize*0.8f, color);
-                if (nearPort != null)
+                if (nearPortId != null)
                 {
-                    DrawDot(nearPort.rect.center - ViewRange.position, dotSize * 0.4f, color);
+                    DrawDot(Graph.GetConnectInfo(nearPortId).rect.center - ViewRange.position, dotSize * 0.4f, color);
                 }
             }
             foreach (var name in GraphAsset.Graph.NodeList)
@@ -528,15 +543,18 @@ namespace QTool.FlowGraph
                     if (port.isOutput )
                     {
                         var color = GetTypeColor(port.ConnectType);
-
-                        foreach (var connect in port.ConnectList)
+                        foreach (var c in port.ConnectInfolist)
                         {
-                            var next = GraphAsset.Graph[connect];
-                            if (next != null)
+                            foreach (var connect in c.ConnectList)
                             {
-                                DrawCurve(port.rect.center, next.rect.center, color);
+                                var next = Graph.GetConnectInfo(connect);
+                                if (next != null)
+                                {
+                                    DrawCurve(c.rect.center, next.rect.center, color);
+                                }
                             }
                         }
+                      
                     }
                 }
             }
@@ -554,10 +572,10 @@ namespace QTool.FlowGraph
             GUI.color = col;
             return rect;
         }
+       
         void DrawPort(QFlowPort port)
         {
-            var typeColor = GetTypeColor(port.ConnectType);
-
+            curDrawPort = port;
             Rect lastRect = default;
             if (port.Key == QFlowKey.NextPort|| port.Key == QFlowKey.FromPort)
             {
@@ -573,7 +591,15 @@ namespace QTool.FlowGraph
                     }
                     else
                     {
-                        port.Value = port.Value.Draw(port.name, port.ValueType);
+                        if(port.FlowPort == null)
+                        {
+                            port.Value = port.Value.Draw(port.name, port.ValueType);
+                        }
+                        else
+                        {
+                            port.Value = port.Value.Draw(port.name, port.ValueType, null,  DrawFlowListDot,port.IndexChange);
+                        }
+                            
                     }
                 }
                 else
@@ -582,18 +608,30 @@ namespace QTool.FlowGraph
                 }
                 lastRect = GUILayoutUtility.GetLastRect();
             }
+            if (port.isFlowList) return;
+            DrawPortDot(lastRect, port.ConnectInfo, port.isOutput, port.ConnectType);
+        }
+        QFlowPort curDrawPort;
+        void DrawFlowListDot(int i)
+        {
+            if (curDrawPort == null) return;
+            DrawPortDot(GUILayoutUtility.GetLastRect(), curDrawPort.ConnectInfolist.Get(i),curDrawPort.isOutput, QFlow.Type);
+        } 
+        public void DrawPortDot(Rect rect,ConnectInfo port,bool isOutput,Type connectType)
+        {
+            var typeColor = GetTypeColor(connectType);
             Rect dotRect = default;
-            if (port.isOutput)
+            if (isOutput)
             {
-                var center = new Vector2(lastRect.xMax, lastRect.y) + Vector2.one * dotSize / 2;
+                var center = new Vector2(rect.xMax, rect.y) + Vector2.one * dotSize / 2;
                 dotRect = DrawDot(center, dotSize, Color.black);
-                DrawDot(center, dotSize * (port.ConnectPort == null ? 0.9f : 0.7f), typeColor);
+                DrawDot(center, dotSize * (port.ConnectList.Count==0? 0.9f : 0.7f), typeColor);
             }
             else
             {
-                var center = lastRect.position + new Vector2(-dotSize, dotSize) / 2;
-                var canConnect = connectStartPort != null && connectStartPort.CanConnect(port);
-                dotRect= DrawDot(center, dotSize * (canConnect ? 1 : 0.8f), typeColor);
+                var center = rect.position + new Vector2(-dotSize, dotSize) / 2;
+                var canConnect = connectStartPort != null &&Graph[connectStartPort].CanConnect(connectType);
+                dotRect = DrawDot(center, dotSize * (canConnect ? 1 : 0.8f), typeColor);
                 DrawDot(center, dotSize * (canConnect ? 0.8f : 0.7f), Color.black);
                 if (port.ConnectList.Count > 0)
                 {
@@ -608,25 +646,26 @@ namespace QTool.FlowGraph
 
         #endregion
 
-        void StartConnect(QFlowPort startPort)
+        void StartConnect(PortId? startPort)
         {
+            if (startPort == null) return;
             ControlState = EditorState.ConnectPort;
             connectStartPort = startPort;
         }
-        void StopConnect(QFlowPort endPort)
+        void StopConnect(PortId? endPort)
         {
             ControlState = EditorState.None;
             if (endPort != null)
             {
-               connectStartPort.Connect(endPort);
+               Graph[ connectStartPort].Connect(endPort);
             }
             else
             {
-                CreateMenu(connectStartPort);
+                CreateMenu(connectStartPort.Value);
             }
             connectStartPort = null;
         }
-        QFlowPort connectStartPort;
+        PortId? connectStartPort;
         QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
    
         public Color GetTypeColor(Type type,float s=0.4f,float v=0.9f)

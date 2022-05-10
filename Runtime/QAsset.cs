@@ -412,15 +412,21 @@ namespace QTool.Asset
             if (!PoolDic.ContainsKey(poolkey))
             {
                 var prefab =await GetAsync(key) as GameObject;
-                if (prefab == null)
+                if (!PoolDic.ContainsKey(poolkey))
                 {
-                    Debug.LogError(Label + "找不到预制体资源" + key);
-                    PoolDic.Add(poolkey, null);
-                }
-                else
-                {
-                    var pool = QPoolManager.GetPool(poolkey, prefab);
-                    PoolDic.Add(poolkey, pool);
+                    if (prefab == null)
+                    {
+                        Debug.LogError(Label + "找不到预制体资源" + key);
+                        PoolDic.Add(poolkey, null);
+                    }
+                    else
+                    {
+                        var pool = QPoolManager.GetPool(poolkey, prefab);
+                        if (!PoolDic.ContainsKey(poolkey))
+                        {
+                            PoolDic.Add(poolkey, pool);
+                        }
+                    }
                 }
             }
             return PoolDic[poolkey];

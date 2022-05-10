@@ -289,8 +289,13 @@ namespace QTool.Reflection
             });
             return typeList;
         }
-        public static object CreateInstance(this Type type, params object[] param)
+    
+        public static object CreateInstance(this Type type, object targetObj=null, params object[] param)
         {
+            if (targetObj != null)
+            {
+                return targetObj;
+            }
             try
             {
                 if (type == typeof(string))

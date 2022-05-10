@@ -230,213 +230,211 @@ namespace QTool
            
             return true;
         }
-        public static object ParseQData(this string qdataStr,Type type, bool hasName=true)
+        public static object ParseQData(this string qdataStr,Type type, bool hasName=true,object target=null)
         {
 
             if (string.IsNullOrEmpty(qdataStr))
             {
-                return type.IsValueType ? Activator.CreateInstance(type) : null;
+                return type.IsValueType ? QReflection.CreateInstance(type,target) : null;
             }
             var typeCode = Type.GetTypeCode(type);
             if (type.IsEnum)
             {
                 return Enum.Parse(type, qdataStr);
             }
-            switch (typeCode)
+            try
             {
-                case TypeCode.Object:
-                    {
-                        if (type == typeof(object)) return qdataStr;
-                        using (var reader=new StringReader(qdataStr))
+                switch (typeCode)
+                {
+                    case TypeCode.Object:
                         {
-                            var typeInfo = QSerializeType.Get(type);
-                          
-                            switch (typeInfo.objType)
+                            if (type == typeof(object)) return qdataStr;
+                            using (var reader = new StringReader(qdataStr))
                             {
-                                case QObjectType.Object:
-                                    {
-                                        if (string.IsNullOrEmpty(qdataStr)) return null;
+                                var typeInfo = QSerializeType.Get(type);
 
-                                        if (reader.ReadSplit('{', '}', ';', out var strs))
+                                switch (typeInfo.objType)
+                                {
+                                    case QObjectType.Object:
                                         {
-                                            object obj = null;
-                                            for (int i = 0; i < strs.Length; i++)
+                                            if (string.IsNullOrEmpty(qdataStr)) return null;
+
+                                            if (reader.ReadSplit('{', '}', ';', out var strs))
                                             {
-                                                var str = strs[i];
-                                                if (typeInfo.IsUnityObject)
+                                                for (int i = 0; i < strs.Length; i++)
                                                 {
-                                                    obj = QObjectReference.GetObject(str);
-                                                  
-                                                }
-                                                else if (typeInfo.IsIQData)
-                                                {
-                                                    obj = (Activator.CreateInstance(type) as IQData).ParseQData(str);
-                                                }
-                                                else
-                                                {
-                                                    if (obj == null)
+                                                    var str = strs[i];
+                                                    if (typeInfo.IsUnityObject)
                                                     {
-                                                        obj = Activator.CreateInstance(type);
+                                                        target = QObjectReference.GetObject(str);
+
                                                     }
-                                                    if (hasName)
+                                                    else if (typeInfo.IsIQData)
                                                     {
-                                                        using (var childReader = new StringReader(str))
-                                                        {
-                                                            if (childReader.ReadSplit('=', out var name, out var memberStr))
-                                                            {
-                                                                var memeberInfo = typeInfo.Members[name];
-                                                                if (memeberInfo != null)
-                                                                {
-                                                                    memeberInfo.Set(obj, ParseQData(memberStr, memeberInfo.Type, hasName));
-                                                                }
-                                                                else
-                                                                {
-                                                                    Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name);
-                                                                }
-                                                            }
-                                                        }
+                                                        target = (QReflection.CreateInstance(type, target) as IQData).ParseQData(str);
                                                     }
                                                     else
                                                     {
-                                                        typeInfo.Members[i].Set.Invoke(obj, ParseQData(str, typeInfo.Members[i].Type, hasName)); 
+                                                        if (target == null)
+                                                        {
+                                                            target = QReflection.CreateInstance(type, target);
+                                                        }
+                                                        if (hasName)
+                                                        {
+                                                            using (var childReader = new StringReader(str))
+                                                            {
+                                                                if (childReader.ReadSplit('=', out var name, out var memberStr))
+                                                                {
+                                                                    var memeberInfo = typeInfo.Members[name];
+                                                                    if (memeberInfo != null)
+                                                                    {
+                                                                        var result = ParseQData(memberStr, memeberInfo.Type, hasName, memeberInfo.Get(target));
+                                                                        try
+                                                                        {
+                                                                            memeberInfo.Set(target, result);
+                                                                        }
+                                                                        catch (Exception e)
+                                                                        {
+                                                                            Debug.LogError("读取成员【" + type.Name + "." + memeberInfo.Name + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+                                                                            throw e;
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            typeInfo.Members[i].Set.Invoke(target, ParseQData(str, typeInfo.Members[i].Type, hasName, typeInfo.Members[i].Get(target)));
+                                                        }
+
                                                     }
-                                                    
                                                 }
-                                            }
-                                            return obj;
-                                        };
-                                        Debug.LogError("读取类型出错[" + type + "]:[" + qdataStr + "]");
-                                        return null;
-                                    }
-                                case QObjectType.List:
-                                    {
-                                        var list =  ( Activator.CreateInstance(type)) as IList;
-                                        if (reader.ReadSplit('[', ']', ',',out var strs))
+                                                return target;
+                                            };
+                                            Debug.LogError("读取类型出错[" + type + "]:[" + qdataStr + "]");
+                                            return null;
+                                        }
+                                    case QObjectType.List:
                                         {
-                                            foreach (var memberStr in strs)
+                                            var list = QReflection.CreateInstance(type, target) as IList;
+                                            if (reader.ReadSplit('[', ']', ',', out var strs))
                                             {
-                                                list.Add(ParseQData(memberStr, typeInfo.ElementType,hasName));
-                                            }
+                                                for (int i = 0; i < strs.Length; i++)
+                                                {
+                                                    if (i < list.Count)
+                                                    {
+                                                        list[i] = ParseQData(strs[i], typeInfo.ElementType, hasName, list[i]);
+                                                    }
+                                                    else
+                                                    {
+                                                        list.Add(ParseQData(strs[i], typeInfo.ElementType, hasName));
+                                                    }
+                                                }
+
+
+                                                return list;
+                                            };
+                                            Debug.LogError("读取List出错[" + type + "][" + qdataStr + "]");
+
 
                                             return list;
-                                        };
-                                        Debug.LogError("读取List出错[" + type + "][" + qdataStr + "]");
-
-
-                                        return list;
-                                    }
-                                case QObjectType.Array:
-                                    {
-                                     
-                                        List<int> intArray = new List<int>();
-                                        List<string> strArray = new List<string>();
-                                        if (reader.ReadSplit('[', ']', ',', out var strs))
+                                        }
+                                    case QObjectType.Array:
                                         {
 
-                                            ArrayParse(strs, intArray, strArray,type.GetArrayRank());
-                                            var array = (Array)Activator.CreateInstance(type, intArray.ToObjects());
-                                            array.ForeachArray(0, intArray.ToArray(), (indexArray) =>
+                                            List<int> intArray = new List<int>();
+                                            List<string> strArray = new List<string>();
+                                            if (reader.ReadSplit('[', ']', ',', out var strs))
                                             {
 
-                                                var obj = ParseQData(strArray.Dequeue(), typeInfo.ElementType, hasName);
-                                                try
+                                                ArrayParse(strs, intArray, strArray, type.GetArrayRank());
+                                                var array = (Array)QReflection.CreateInstance(type, target, intArray.ToObjects());
+                                                array.ForeachArray(0, intArray.ToArray(), (indexArray) =>
                                                 {
 
-                                                    array.SetValue(obj, indexArray);
-                                                }
-                                                catch (Exception)
-                                                {
-                                                    Debug.LogError("设置类型出错：【" + obj + "】【" + typeInfo.ElementType + "】");
-                                                    throw;
-                                                }
-                                             
-                                            });
+                                                    var obj = ParseQData(strArray.Dequeue(), typeInfo.ElementType, hasName, array.GetValue(indexArray));
+                                                    try
+                                                    {
 
-                                            return array;
+                                                        array.SetValue(obj, indexArray);
+                                                    }
+                                                    catch (Exception)
+                                                    {
+                                                        Debug.LogError("设置类型出错：【" + obj + "】【" + typeInfo.ElementType + "】");
+                                                        throw;
+                                                    }
+
+                                                });
+
+                                                return array;
+                                            }
+                                            Debug.LogError("读取数组出错");
+                                            return null;
                                         }
-                                        Debug.LogError("读取数组出错");
+                                    default:
+                                        Debug.LogError("不支持类型[" + type + "]");
                                         return null;
-                                    }
-                                default:
-                                    Debug.LogError("不支持类型[" + type + "]");
-                                    return null;
+                                }
                             }
                         }
-                    }
-                case TypeCode.Boolean:
-                    return bool.Parse(qdataStr);
-                case TypeCode.Byte:
-                    return byte.Parse(qdataStr);
-                case TypeCode.Char:
-                    return char.Parse(qdataStr);
-                case TypeCode.DateTime:
-                    return DateTime.Parse(qdataStr);
-                case TypeCode.DBNull:
-                    return null;
-                case TypeCode.Decimal:
-                    return decimal.Parse(qdataStr);
-                case TypeCode.Double:
-                    return double.Parse(qdataStr);
-                case TypeCode.Empty:
-                    return null;
-                case TypeCode.Int16:
-                    return short.Parse(qdataStr);
-                case TypeCode.Int32:
-                    return int.Parse(qdataStr);
-                case TypeCode.Int64:
-                    return long.Parse(qdataStr);
-                case TypeCode.SByte:
-                    return sbyte.Parse(qdataStr);
-                case TypeCode.Single:
-                    return float.Parse(qdataStr);
-                case TypeCode.String:
-                    if (qdataStr.StartsWith("\"")&& qdataStr.EndsWith("\""))
-                    {
-                        return qdataStr.Substring(1, qdataStr.Length - 2);
-                    }
-                    return qdataStr;
-                case TypeCode.UInt16:
-                    return ushort.Parse(qdataStr);
-                case TypeCode.UInt32:
-                    return uint.Parse(qdataStr);
-                case TypeCode.UInt64:
-                    return ulong.Parse(qdataStr);
-                default:
-                    Debug.LogError("不支持类型[" + typeCode + "]");
-                    return null;
+                    case TypeCode.Boolean:
+                        return bool.Parse(qdataStr);
+                    case TypeCode.Byte:
+                        return byte.Parse(qdataStr);
+                    case TypeCode.Char:
+                        return char.Parse(qdataStr);
+                    case TypeCode.DateTime:
+                        return DateTime.Parse(qdataStr);
+                    case TypeCode.DBNull:
+                        return null;
+                    case TypeCode.Decimal:
+                        return decimal.Parse(qdataStr);
+                    case TypeCode.Double:
+                        return double.Parse(qdataStr);
+                    case TypeCode.Empty:
+                        return null;
+                    case TypeCode.Int16:
+                        return short.Parse(qdataStr);
+                    case TypeCode.Int32:
+                        return int.Parse(qdataStr);
+                    case TypeCode.Int64:
+                        return long.Parse(qdataStr);
+                    case TypeCode.SByte:
+                        return sbyte.Parse(qdataStr);
+                    case TypeCode.Single:
+                        return float.Parse(qdataStr);
+                    case TypeCode.String:
+                        if (qdataStr.StartsWith("\"") && qdataStr.EndsWith("\""))
+                        {
+                            return qdataStr.Substring(1, qdataStr.Length - 2);
+                        }
+                        return qdataStr;
+                    case TypeCode.UInt16:
+                        return ushort.Parse(qdataStr);
+                    case TypeCode.UInt32:
+                        return uint.Parse(qdataStr);
+                    case TypeCode.UInt64:
+                        return ulong.Parse(qdataStr);
+                    default:
+                        Debug.LogError("不支持类型[" + typeCode + "]");
+                        return null;
+                }
             }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
+            }
+      
 
         }
-        public static bool TryParseQData(this string qdataStr,Type type,out object obj,bool hasName=true)
+        public static T ParseQData<T>(this string qdataStr,bool hasName=true,T target=default)
         {
-            try
-            {
-                obj = ParseQData(qdataStr,type,hasName);
-                return true;
-            }
-            catch (Exception)
-            {
-                obj = default;
-                return false;
-            }
-        }
-        public static bool TryParseQData<T>(this string qdataStr,out T obj, bool hasName=true)
-        {
-            try
-            {
-                obj = ParseQData<T>(qdataStr,hasName);
-                return true;
-            }
-            catch (Exception)
-            {
-                obj = default;
-                return false;
-            }
-        }
-       
-        public static T ParseQData<T>(this string qdataStr,bool hasName=true)
-        {
-            return (T)ParseQData(qdataStr, typeof(T),hasName);
+            return (T)ParseQData(qdataStr, typeof(T),hasName,target);
         }
         public static bool NextIs(this StringReader reader, char value)
         {
