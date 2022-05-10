@@ -18,7 +18,7 @@ namespace QTool.Inspector
     [CustomPropertyDrawer(typeof(QObjectReference))]
     public class QObjectReferenceDrawer : PropertyDrawer
     {
-        public static string Draw(string lable, string id,Type type, params GUILayoutOption[] options)
+        public static string Draw(string lable, string id,Type type,Rect? rect=null, params GUILayoutOption[] options)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -26,7 +26,14 @@ namespace QTool.Inspector
                 var oldObj =QObjectReference.GetObject(id);
                 var newObj = oldObj;
 
-                newObj = EditorGUILayout.ObjectField(name, oldObj, type, true);
+                if (rect == null)
+                {
+                    newObj = EditorGUILayout.ObjectField(name, oldObj, type, true);
+                }
+                else
+                {
+                    newObj = EditorGUI.ObjectField(rect.Value, name, oldObj, type, true);
+                }
                 if (newObj != oldObj)
                 {
                    id= QObjectReference.GetId(newObj);
@@ -38,7 +45,7 @@ namespace QTool.Inspector
         {
             using ( new EditorGUILayout.HorizontalScope())
             {
-                var newId= Draw(lable, ir.id,typeof(UnityEngine.Object), options);
+                var newId= Draw(lable, ir.id,typeof(UnityEngine.Object),null, options);
                 if (newId != ir.id)
                 {
                     ir.id = newId;
@@ -48,13 +55,8 @@ namespace QTool.Inspector
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var id = property.FindPropertyRelative(nameof(QObjectReference.id));
-            var left = position;
-            left.width = position.width * 0.3f;
-            var right = position;
-            right.xMin = left.xMin+left.width;
-            right.width = position.width * 0.7f;
-            id.stringValue= Draw(label.text, id.stringValue,typeof(UnityEngine.Object));
+       //     var id = property.FindPropertyRelative(nameof(QObjectReference.id));
+        //    id.stringValue= Draw(label.text, id.stringValue,typeof(UnityEngine.Object),position);
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
