@@ -190,14 +190,16 @@ namespace QTool.FlowGraph
                         
                         if (Graph[connectStartPort].CanConnect(port))
                         {
+                            var index = 0;
                             foreach (var c in port.ConnectInfolist)
                             {
                                 var dis = Vector2.Distance(c.rect.position, mousePos);
                                 if (dis < minDis)
                                 {
-                                    nearPortId = new PortId(port, c.Key);
+                                    nearPortId = new PortId(port, index);
                                     minDis = dis;
                                 }
+                                index++;
                             }
                         }
 
@@ -230,13 +232,15 @@ namespace QTool.FlowGraph
             {
                 foreach (var port in curNode.Ports)
                 {
+                    var index = 0;
                     foreach (var c in port.ConnectInfolist)
                     {
                         if (c.rect.Contains(mousePos))
                         {
-                            curPortId = new PortId(port, c.Key);
+                            curPortId = new PortId(port,index);
                             break;
                         }
+                        index++;
                     }
                    
                 }
@@ -615,7 +619,7 @@ namespace QTool.FlowGraph
         void DrawFlowListDot(int i)
         {
             if (curDrawPort == null) return;
-            DrawPortDot(GUILayoutUtility.GetLastRect(), curDrawPort.ConnectInfolist.Get(i),curDrawPort.isOutput, QFlow.Type);
+            DrawPortDot(GUILayoutUtility.GetLastRect(), curDrawPort[i],curDrawPort.isOutput, QFlow.Type);
         } 
         public void DrawPortDot(Rect rect,ConnectInfo port,bool isOutput,Type connectType)
         {
