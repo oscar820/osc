@@ -198,7 +198,7 @@ namespace QTool.Asset
 #endif
             }
         }
-
+        public bool LoadOver => _loadOver;
         static bool _loadOver = false;
 #if Addressables
         static bool _loading = false;
