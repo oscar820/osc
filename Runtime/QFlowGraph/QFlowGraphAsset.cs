@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 namespace QTool.FlowGraph
 {
@@ -34,8 +33,10 @@ namespace QTool.FlowGraph
             try
             {
                 this.stringValue = Graph.ToQData();
-                FileManager.Save(AssetDatabase.GetAssetPath(this), this.stringValue);
-                AssetDatabase.Refresh();
+#if UNITY_EDITOR
+                FileManager.Save(UnityEditor.AssetDatabase.GetAssetPath(this), this.stringValue);
+                UnityEditor.AssetDatabase.Refresh();
+#endif
             }
             catch (System.Exception e)
             {
