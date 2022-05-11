@@ -64,7 +64,6 @@ namespace QTool.Binary
                                     }
                                     else
                                     {
-                                        writer.Write((byte)typeInfo.Members.Count);
                                         foreach (var item in typeInfo.Members)
                                         {
                                             writer.SerializeType(item.Get(value), item.Type);
@@ -149,133 +148,114 @@ namespace QTool.Binary
         }
         public static object DeserializeType(this QBinaryReader reader, Type type, object target = null)
         {
-            try
+            TypeCode typeCode = Type.GetTypeCode(type);
+            switch (typeCode)
             {
+                case TypeCode.Object:
+                    QSerializeType typeInfo = null;
+                    if (reader.ReadBoolean())
+                    {
+                        return null;
+                    }
+                    typeInfo = QSerializeType.Get(type);
+                    switch (typeInfo.objType)
+                    {
 
-
-                TypeCode typeCode = Type.GetTypeCode(type);
-                switch (typeCode)
-                {
-
-                    case TypeCode.Object:
-                        QSerializeType typeInfo = null;
-                        if (reader.ReadBoolean())
-                        {
+                        case QObjectType.List:
+                            {
+                                var obj = QReflection.CreateInstance(type, target);
+                                var list = obj as IList;
+                                var count = reader.ReadInt32();
+                                for (int i = 0; i < list.Count; i++)
+                                {
+                                    list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
+                                }
+                                for (int i = list.Count; i < count; i++)
+                                {
+                                    list.Add(reader.DeserializeType(typeInfo.ElementType));
+                                }
+                                return list;
+                            }
+                        case QObjectType.Array:
+                            {
+                                var rank = reader.ReadByte();
+                                for (int i = 0; i < rank; i++)
+                                {
+                                    typeInfo.IndexArray[i] = reader.ReadInt32();
+                                }
+                                var array = (Array)QReflection.CreateInstance(type, target, typeInfo.IndexArray.ToObjects());
+                                array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
+                               {
+                                   array.SetValue(reader.DeserializeType(typeInfo.ElementType, array.GetValue(indexArray)), indexArray);
+                               });
+                                return array;
+                            }
+                        case QObjectType.Object:
+                            {
+                                if (typeInfo.IsIQSerialize)
+                                {
+                                    var serObj = QReflection.CreateInstance(type, target) as IQSerialize;
+                                    serObj.Read(reader);
+                                    return serObj;
+                                }
+                                else
+                                {
+                                    var obj = QReflection.CreateInstance(type, target);
+                                    foreach (var memeberInfo in typeInfo.Members)
+                                    {
+                                        memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type, target != null ? memeberInfo.Get?.Invoke(target) : null));
+                                    }
+                                    return obj;
+                                }
+                            }
+                        default:
+                            Debug.LogError("反序列化类型[" + type + "]出错");
                             return null;
-                        }
-                        typeInfo = QSerializeType.Get(type);
-                        switch (typeInfo.objType)
-                        {
+                    }
+                #region 基础类型
 
-                            case QObjectType.List:
-                                {
-                                    var obj =QReflection.CreateInstance(type, target);
-                                    var list = obj as IList;
-                                    var count = reader.ReadInt32();
-                                    for (int i = 0; i < count; i++)
-                                    {
-                                        if (list.Count > i)
-                                        {
-                                            list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
-                                        }
-                                        else
-                                        {
-                                            list.Add(reader.DeserializeType(typeInfo.ElementType));
-                                        }
+                case TypeCode.Boolean:
+                    return reader.ReadBoolean();
+                case TypeCode.Byte:
+                    return reader.ReadByte();
+                case TypeCode.Char:
+                    return reader.ReadChar();
+                case TypeCode.DateTime:
+                    return new DateTime(reader.ReadInt64());
+                case TypeCode.DBNull:
+                    return null;
+                case TypeCode.Decimal:
+                    return (decimal)reader.ReadDouble();
+                case TypeCode.Double:
+                    return reader.ReadDouble();
+                case TypeCode.Empty:
+                    return null;
+                case TypeCode.Int16:
+                    return reader.ReadInt16();
+                case TypeCode.Int32:
+                    return reader.ReadInt32();
+                case TypeCode.Int64:
+                    return reader.ReadInt64();
 
-                                    }
-                                    return list;
-                                }
-                            case QObjectType.Array:
-                                {
-                                    var rank = reader.ReadByte();
-                                    for (int i = 0; i < rank; i++)
-                                    {
-                                        typeInfo.IndexArray[i] = reader.ReadInt32();
-                                    }
-                                    var array = (Array)QReflection.CreateInstance(type, target, typeInfo.IndexArray.ToObjects());
-                                    array.ForeachArray( 0, typeInfo.IndexArray, (indexArray) =>
-                                    {
-                                        var obj = array.GetValue(indexArray); if (obj == null)
-                                        {
-                                            Debug.LogError(indexArray.ToOneString() + " 数据为空[" + target + "]");
-                                        }
-                                        array.SetValue(reader.DeserializeType(typeInfo.ElementType, array.GetValue(indexArray)), indexArray);
-                                    });
-                                    return array;
-                                }
-                            case QObjectType.Object:
-                                {
-                                    if (typeInfo.IsIQSerialize)
-                                    {
-                                        var serObj = QReflection.CreateInstance(type, target) as IQSerialize;
-                                        serObj.Read(reader);
-                                        return serObj;
-                                    }
-                                    else
-                                    {
-                                        var obj = QReflection.CreateInstance(type, target);
-                                        var memberCount = reader.ReadByte();
-                                        foreach (var memeberInfo in typeInfo.Members)
-                                        {
-                                            memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type, target != null ? memeberInfo.Get?.Invoke(target) : null));
-                                        }
-                                        return obj;
-                                    }
-                                }
-                            default:
-                                Debug.LogError("反序列化类型[" + type + "]出错");
-                                return null;
-                        }
-                    #region 基础类型
+                case TypeCode.SByte:
+                    return reader.ReadSByte();
+                case TypeCode.Single:
+                    return reader.ReadSingle();
+                case TypeCode.String:
+                    return reader.ReadString();
+                case TypeCode.UInt16:
+                    return reader.ReadUInt16();
+                case TypeCode.UInt32:
+                    return reader.ReadUInt32();
+                case TypeCode.UInt64:
+                    return reader.ReadUInt64();
+                default:
+                    Debug.LogError("不支持的类型【" + typeCode + "】");
+                    return null;
 
-                    case TypeCode.Boolean:
-                        return reader.ReadBoolean();
-                    case TypeCode.Byte:
-                        return reader.ReadByte();
-                    case TypeCode.Char:
-                        return reader.ReadChar();
-                    case TypeCode.DateTime:
-                        return new DateTime(reader.ReadInt64());
-                    case TypeCode.DBNull:
-                        return null;
-                    case TypeCode.Decimal:
-                        return (decimal)reader.ReadDouble();
-                    case TypeCode.Double:
-                        return reader.ReadDouble();
-                    case TypeCode.Empty:
-                        return null;
-                    case TypeCode.Int16:
-                        return reader.ReadInt16();
-                    case TypeCode.Int32:
-                        return reader.ReadInt32();
-                    case TypeCode.Int64:
-                        return reader.ReadInt64();
-
-                    case TypeCode.SByte:
-                        return reader.ReadSByte();
-                    case TypeCode.Single:
-                        return reader.ReadSingle();
-                    case TypeCode.String:
-                        return reader.ReadString();
-                    case TypeCode.UInt16:
-                        return reader.ReadUInt16();
-                    case TypeCode.UInt32:
-                        return reader.ReadUInt32();
-                    case TypeCode.UInt64:
-                        return reader.ReadUInt64();
-                    default:
-                        Debug.LogError("不支持的类型【" + typeCode + "】");
-                        return null;
-
-                        #endregion
-                }
+                    #endregion
             }
-            catch (Exception e)
-            {
-                Debug.LogError("反序列化[" + type + "]出错" + e);
-                return null;
-            }
+
         }
         public static object DeserializeType(byte[] bytes, Type type, object target = null)
         {
