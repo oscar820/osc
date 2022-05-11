@@ -27,7 +27,6 @@ namespace QTool.Binary
             try
             {
                 TypeCode typeCode = Type.GetTypeCode(type);
-
                 switch (typeCode)
                 {
                     case TypeCode.Object:
@@ -155,8 +154,9 @@ namespace QTool.Binary
                     QSerializeType typeInfo = null;
                     if (reader.ReadBoolean())
                     {
-                        return null;
+                        return target;
                     }
+                    var hasTarget = target != null;
                     typeInfo = QSerializeType.Get(type);
                     switch (typeInfo.objType)
                     {
@@ -166,14 +166,25 @@ namespace QTool.Binary
                                 var obj = QReflection.CreateInstance(type, target);
                                 var list = obj as IList;
                                 var count = reader.ReadInt32();
-                                for (int i = 0; i < list.Count; i++)
+                                if (hasTarget)
                                 {
-                                    list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
+                                    for (int i = 0; i < list.Count; i++)
+                                    {
+                                        list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
+                                    }
+                                    for (int i = list.Count; i < count; i++)
+                                    {
+                                        list.Add(reader.DeserializeType(typeInfo.ElementType));
+                                    }
                                 }
-                                for (int i = list.Count; i < count; i++)
+                                else
                                 {
-                                    list.Add(reader.DeserializeType(typeInfo.ElementType));
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        list.Add(reader.DeserializeType(typeInfo.ElementType));
+                                    }
                                 }
+                              
                                 return list;
                             }
                         case QObjectType.Array:
@@ -184,10 +195,21 @@ namespace QTool.Binary
                                     typeInfo.IndexArray[i] = reader.ReadInt32();
                                 }
                                 var array = (Array)QReflection.CreateInstance(type, target, typeInfo.IndexArray.ToObjects());
-                                array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
-                               {
-                                   array.SetValue(reader.DeserializeType(typeInfo.ElementType, array.GetValue(indexArray)), indexArray);
-                               });
+                                if (hasTarget)
+                                {
+                                    array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
+                                    {
+                                        array.SetValue(reader.DeserializeType(typeInfo.ElementType, array.GetValue(indexArray)), indexArray);
+                                    });
+                                }
+                                else
+                                {
+                                    array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
+                                    {
+                                        array.SetValue(reader.DeserializeType(typeInfo.ElementType), indexArray);
+                                    });
+                                }
+                            
                                 return array;
                             }
                         case QObjectType.Object:
@@ -201,10 +223,21 @@ namespace QTool.Binary
                                 else
                                 {
                                     var obj = QReflection.CreateInstance(type, target);
-                                    foreach (var memeberInfo in typeInfo.Members)
+                                    if (hasTarget)
                                     {
-                                        memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type, target != null ? memeberInfo.Get?.Invoke(target) : null));
+                                        foreach (var memeberInfo in typeInfo.Members)
+                                        {
+                                            memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type, memeberInfo.Get?.Invoke(target) ));
+                                        }
                                     }
+                                    else
+                                    {
+                                        foreach (var memeberInfo in typeInfo.Members)
+                                        {
+                                            memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type));
+                                        }
+                                    }
+                                  
                                     return obj;
                                 }
                             }

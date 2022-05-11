@@ -462,7 +462,7 @@ namespace QTool.FlowGraph
                 Debug.LogError("²»´æÔÚ¶Ë¿Ú " + port);
                 return;
             }
-            port[connect.Value.listKey].ConnectList.Remove(new PortId(this, listKey));
+            port[connect.Value.listKey]?.ConnectList.Remove(new PortId(this, listKey));
         }
      
         public void ClearAllConnect(int listKey = 0)
