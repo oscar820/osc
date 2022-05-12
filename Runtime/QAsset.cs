@@ -203,11 +203,12 @@ namespace QTool.Asset
 #if Addressables
         static bool _loading = false;
 #endif
+        static DateTime startTime;
         public static async Task LoadAllAsync()
         {
           
             if (_loadOver) return;
-            var startTime = DateTime.Now;
+            startTime = DateTime.Now;
             ResourceLoadAll();
             await Task.Yield();
 #if Addressables
@@ -222,6 +223,7 @@ namespace QTool.Asset
                 _loading = false;
             }
 #endif
+            _loadOver = true;
             Debug.Log("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms\n"+objDic.ToOneString());
         }
 
@@ -291,7 +293,6 @@ namespace QTool.Asset
                 catch (Exception e)
                 {
                     Debug.LogError( "Addressables不存在Lable[" +Label+"]:"+e);
-                    _loadOver = true;
                     return;
                 }
                 loaderTask = loader.Task;
@@ -311,8 +312,6 @@ namespace QTool.Asset
                     {
                         Set(result);
                     }
-                    Debug.Log("[" + Label + "]加载完成:\n" + objDic.ToOneString());
-                    _loadOver = true;
                 }
             }
             else
