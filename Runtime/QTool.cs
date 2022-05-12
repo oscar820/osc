@@ -135,20 +135,34 @@ namespace QTool
                                         }
                                         else
                                         {
-                                            for (int i = 0; i < typeInfo.Members.Count; i++)
+                                            if (hasName)
                                             {
-                                                var memberInfo = typeInfo.Members[i];
-                                                var member = memberInfo.Get(obj);
-                                                if (hasName)
+                                                for (int i = 0; i < typeInfo.Members.Count; i++)
                                                 {
+                                                    var memberInfo = typeInfo.Members[i];
+                                                    var member = memberInfo.Get(obj);
                                                     writer.Write(memberInfo.Name + "=");
-                                                }
-                                                writer.Write(ToQData(member, memberInfo.Type,hasName));
-                                                if (i < typeInfo.Members.Count - 1)
-                                                {
-                                                    writer.Write(';');
+                                                    writer.Write(ToQData(member, memberInfo.Type, hasName));
+                                                    if (i < typeInfo.Members.Count - 1)
+                                                    {
+                                                        writer.Write(';');
+                                                    }
                                                 }
                                             }
+                                            else
+                                            {
+                                                for (int i = 0; i < typeInfo.Members.Count; i++)
+                                                {
+                                                    var memberInfo = typeInfo.Members[i];
+                                                    var member = memberInfo.Get(obj);
+                                                    writer.Write(ToQData(member, memberInfo.Type, hasName));
+                                                    if (i < typeInfo.Members.Count - 1)
+                                                    {
+                                                        writer.Write(';');
+                                                    }
+                                                }
+                                            }
+                                         
                                         }
                                         writer.Write('}');
 
@@ -162,7 +176,6 @@ namespace QTool
                                         for (int i = 0; i < list.Count; i++)
                                         {
                                             writer.Write(ToQData(list[i], typeInfo.ElementType,hasName));
-
                                             if (i < list.Count - 1)
                                             {
                                                 writer.Write(',');

@@ -213,13 +213,7 @@ namespace QTool.Asset
 #if Addressables
            if (_loading)
             {
-                await Task.Run(async () =>
-                {
-                    while (_loading)
-                    {
-                        await Task.Delay(10);
-                    }
-                });
+                await QTool.Tool.Wait(() => !_loading);
             }
             else
             {
@@ -228,7 +222,7 @@ namespace QTool.Asset
                 _loading = false;
             }
 #endif
-            Debug.Log("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms");
+            Debug.Log("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms\n"+objDic.ToOneString());
         }
 
 
@@ -296,31 +290,30 @@ namespace QTool.Asset
                 }
                 catch (Exception e)
                 {
-                    QToolDebug.Log(() => "Addressables不存在Lable[" +Label+"]:"+e);
+                    Debug.LogError( "Addressables不存在Lable[" +Label+"]:"+e);
                     _loadOver = true;
                     return;
                 }
                 loaderTask = loader.Task;
                 var obj = await loader.Task;
                 loaderTask = null;
-                if (loader.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                if (loader.OperationException != null)
                 {
-
+                    Debug.LogError( "加载资源表[" + Label + "]出错" + loader.OperationException);
+                }
+                else if(loader.Task.Exception!=null)
+                {
+                    Debug.LogError("加载资源表[" + Label + "]出错" + loader.Task.Exception);
+                }
+                else
+                {
                     foreach (var result in loader.Result)
                     {
                         Set(result);
                     }
-                    QToolDebug.Log(()=>"[" + Label + "]加载完成总数" + objDic.Count);
+                    Debug.Log("[" + Label + "]加载完成:\n" + objDic.ToOneString());
                     _loadOver = true;
                 }
-                else
-                {
-                    if (loader.OperationException != null)
-                    {
-                        QToolDebug.Log(() => "加载资源表[" + Label + "]出错" + loader.OperationException);
-                    }
-                }
-
             }
             else
             {
@@ -345,7 +338,7 @@ namespace QTool.Asset
                             }
                         }
                     }
-                    QToolDebug.Log(() => "[" + Label + "]加载完成总数" + objDic.Count);
+                    Debug.Log("[" + Label + "]加载完成\n" + objDic.ToOneString());
                     _loadOver = true;
                 }
                 catch (Exception e)
