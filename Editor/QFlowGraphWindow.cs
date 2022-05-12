@@ -105,7 +105,7 @@ namespace QTool.FlowGraph
                 if (curPortId != null)
                 {
 
-                    menu.AddItem(new GUIContent("清空" + curPortId + "端口连接"), false, ()=> GraphAsset.Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.listKey));
+                    menu.AddItem(new GUIContent("清空" + curPortId + "端口连接"), false, ()=> GraphAsset.Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.index));
                 }
                 else
                 {
@@ -183,6 +183,9 @@ namespace QTool.FlowGraph
             {
                 if (curPortId == null)
                 {
+                    if (curNode.Key == connectStartPort?.node) {
+                        nearPortId = null;return;
+                    }
                     nearPortId = null;
                     var minDis = float.MaxValue;
                     foreach (var port in curNode.Ports)
@@ -446,7 +449,7 @@ namespace QTool.FlowGraph
                                 }
                                 break;
                             case KeyCode.V:
-                                if (Event.current.control)
+                                if (Event.current.control&&curNode==null) 
                                 {
                                     Parse();
                                 }
@@ -597,11 +600,11 @@ namespace QTool.FlowGraph
                     {
                         if(port.FlowPort == null)
                         {
-                            port.Value = port.Value.Draw(port.name, port.ValueType);
+                            port.Value = port.Value.Draw(port.name, port.ValueType, (obj) => {  port.Value = obj; });
                         }
                         else
                         {
-                            port.Value = port.Value.Draw(port.name, port.ValueType, null,  DrawFlowListDot,port.IndexChange);
+                            port.Value = port.Value.Draw(port.name, port.ValueType,(obj)=> { port.Value = obj; },null,  DrawFlowListDot,port.IndexChange);
                         }
                             
                     }
@@ -661,7 +664,7 @@ namespace QTool.FlowGraph
             ControlState = EditorState.None;
             if (endPort != null)
             {
-               Graph[ connectStartPort].Connect(endPort);
+               Graph[connectStartPort].Connect(endPort,connectStartPort.Value.index);
             }
             else
             {

@@ -29,7 +29,7 @@ namespace QTool.FlowGraph
         public ConnectInfo GetConnectInfo(PortId? portId)
         {
             if (portId == null) return null;
-            return this[portId]?[portId.Value.listKey];
+            return this[portId]?[portId.Value.index];
         }
         public QFlowPort this[PortId? portId]
         {
@@ -126,13 +126,13 @@ namespace QTool.FlowGraph
                 var port= curNode.NextNodePort;
                 if (port != null)
                 {
-                    if (port.Key == QFlowKey.FromPort)
+                    if (port.Value.port == QFlowKey.FromPort)
                     {
-                        curNode = port.Node;
+                        curNode =this[port.Value.node];
                     }
                     else
                     {
-                        port.Node.TriggerPort(port);
+                        this[port.Value.node].TriggerPort(port.Value);
                         curNode = null; ;
                     }
                   
@@ -161,16 +161,16 @@ namespace QTool.FlowGraph
     {
         public string node;
         public string port;
-        public int listKey ;
-        public PortId(QFlowPort statePort,int listKey=0)
+        public int index ;
+        public PortId(QFlowPort statePort,int index=0)
         {
             node = statePort.Node.Key;
             port = statePort.Key;
-            this.listKey = listKey;
+            this.index = index;
         }
         public override string ToString()
         {
-            return listKey==0? port:port+"["+listKey+"]";
+            return index==0? port:port+"["+index+"]";
         }
     }
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
@@ -260,16 +260,16 @@ namespace QTool.FlowGraph
                 }
             }
         }
-        public ConnectInfo this[int listKey]
+        public ConnectInfo this[int index]
         {
             get
             {
-                if (listKey < 0) return null;
-                if (ConnectInfolist[listKey]== null)
+                if (index < 0) return null;
+                if (ConnectInfolist[index]== null)
                 {
-                    ConnectInfolist[listKey] = new ConnectInfo();
+                    ConnectInfolist[index] = new ConnectInfo();
                 }
-                return ConnectInfolist[listKey];
+                return ConnectInfolist[index];
             }
         }
         public bool onlyoneConnect;
@@ -350,6 +350,7 @@ namespace QTool.FlowGraph
                         _value = value;
                     }
                 }
+                _value = value;
                 stringValue = value.ToQData(ValueType);
             }
         }
@@ -423,14 +424,15 @@ namespace QTool.FlowGraph
             if (isOutput == port.isOutput) return false;
             return CanConnect(port.ConnectType);
         }
-        public void Connect(QFlowPort port, int listKey = 0)
+        public void Connect(QFlowPort port, int index = 0)
         {
             if (port == null) return;
-            Connect(new PortId(port), listKey);
+            Connect(new PortId(port), index);
         }
-        public void Connect(PortId? portId, int listKey =0)
+        public void Connect(PortId? portId, int index =0)
         {
             if (portId == null) return;
+
             var targetPort = Node.Graph[portId];
             if (targetPort == null) return;
             if (!CanConnect(targetPort))
@@ -440,36 +442,36 @@ namespace QTool.FlowGraph
             }
             if (onlyoneConnect)
             {
-                ClearAllConnect(listKey);
+                ClearAllConnect(index);
             }
             if (targetPort.onlyoneConnect)
             {
-                targetPort.ClearAllConnect(portId.Value.listKey);
+                targetPort.ClearAllConnect(portId.Value.index);
             }
-            this[listKey].ConnectList.AddCheckExist(portId.Value);
-            targetPort[portId.Value.listKey].ConnectList.AddCheckExist(new PortId(this, listKey));
+            this[index].ConnectList.AddCheckExist(portId.Value);
+            targetPort[portId.Value.index].ConnectList.AddCheckExist(new PortId(this, index));
 
 
         }
      
-        public void DisConnect(PortId? connect, int listKey = 0)
+        public void DisConnect(PortId? connect, int index = 0)
         {
             if (connect == null) return;
-            this[listKey].ConnectList.Remove(connect.Value);
+            this[index].ConnectList.Remove(connect.Value);
             var port = Node.Graph[connect];
             if (port==null)
             {
                 Debug.LogError("不存在端口 " + port);
                 return;
             }
-            port[connect.Value.listKey]?.ConnectList.Remove(new PortId(this, listKey));
+            port[connect.Value.index]?.ConnectList.Remove(new PortId(this, index));
         }
      
-        public void ClearAllConnect(int listKey = 0)
+        public void ClearAllConnect(int index = 0)
         {
-            foreach (var connect in this[listKey].ConnectList.ToArray())
+            foreach (var connect in this[index].ConnectList.ToArray())
             {
-                DisConnect(connect,listKey);
+                DisConnect(connect,index);
             }
 
         }
@@ -541,7 +543,7 @@ namespace QTool.FlowGraph
         [QIgnore]
         public QCommandInfo command { get; private set; }
         [QIgnore]
-        public List<string> TriggerPortList { get; private set; } = new List<string>();
+        public List<PortId> TriggerPortList { get; private set; } = new List<PortId>();
         public QFlowNode()
         {
 
@@ -552,11 +554,15 @@ namespace QTool.FlowGraph
         }
         public QFlowPort AddPort(string key, QOutputPortAttribute outputPort = null, string name="",Type type=null,QFlowPortAttribute FlowPort=null)
         {
+            
             if (type == null)
             {
                 type = QFlow.Type;
             }
-         
+
+            var typeInfo = QSerializeType.Get(type);
+
+
             if (!Ports.ContainsKey(key))
             {
                 Ports.Set(key, new QFlowPort());
@@ -572,12 +578,13 @@ namespace QTool.FlowGraph
             }
             port.Key = key;
             port.ValueType = type;
-            port.ConnectType = FlowPort ==null ? type : QFlow.Type;
             port.isOutput = outputPort!=null;
-            port.FlowPort = FlowPort ?? (type == QFlow.Type ? QFlowPortAttribute.Normal : null);
+            port.FlowPort = FlowPort ?? ((type == QFlow.Type|| typeInfo.ElementType==QFlow.Type) ? QFlowPortAttribute.Normal : null);
+
+            port.ConnectType = port.FlowPort == null ? type : QFlow.Type;
             port.OutputPort = outputPort;
             port.onlyoneConnect = (port.FlowPort != null)== port.isOutput ;
-            port.isFlowList = (type.IsArray || typeof(IList).IsAssignableFrom(type))&&port.FlowPort!=null;
+            port.isFlowList = typeInfo .IsList&& port.FlowPort!=null;
             port.Init(this);
             return port;
         }
@@ -660,11 +667,18 @@ namespace QTool.FlowGraph
             }
             Ports.RemoveAll((port) => port.Node == null);
         }
-        internal QFlowPort NextNodePort
+        internal PortId? NextNodePort
         {
             get
             {
-                return Graph[Ports[_nextFlowPort]?.ConnectInfo.ConnectPort()];
+                if (_nextFlowPort == null)
+                {
+                    return Ports[QFlowKey.NextPort]?.ConnectInfo.ConnectPort();
+                }
+                else
+                {
+                    return Ports[_nextFlowPort.Value.port]?[_nextFlowPort.Value.index].ConnectPort();
+                }
             }
         }
         public void ClearAllConnect()
@@ -680,20 +694,20 @@ namespace QTool.FlowGraph
         }
 
         public QList<string, QFlowPort> Ports { get; private set; } = new QList<string, QFlowPort>();
-        string _nextFlowPort;
-        public void SetNetFlowPort(string portKey)
+        PortId? _nextFlowPort;
+        public void SetNetFlowPort(string portKey,int listIndex=0)
         {
             if (!Ports.ContainsKey(portKey))
             {
                 Debug.LogError(ViewName + "不存在端口[" + portKey + "]");
             }
-            _nextFlowPort = portKey;
+            _nextFlowPort = new PortId(Ports[portKey], listIndex);
         }
         object[] commandParams;
         static Func<object,object> TaskReturnValueGet;
         object InvokeCommand()
         {
-            _nextFlowPort = QFlowKey.NextPort;
+            _nextFlowPort = null;
             for (int i = 0; i < command.paramInfos.Length; i++)
             {
                 var info = command.paramInfos[i];
@@ -729,9 +743,9 @@ namespace QTool.FlowGraph
                 port.Value = commandParams[port.paramIndex];
             }
         }
-        internal void TriggerPort(QFlowPort port)
+        internal void TriggerPort(PortId port)
         {
-            TriggerPortList.AddCheckExist(port.Key);
+            TriggerPortList.AddCheckExist(port);
         }
         public void RunPort(string portKey)
         {

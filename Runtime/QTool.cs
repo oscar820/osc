@@ -116,7 +116,6 @@ namespace QTool
             {
                 case TypeCode.Object:
                     {
-                        if (obj == null) return "";
                         using (var writer = new StringWriter())
                         {
                             var typeInfo = QSerializeType.Get(type);
@@ -124,6 +123,7 @@ namespace QTool
                             {
                                 case QObjectType.Object:
                                     {
+                                        if (obj == null) return "";
                                         writer.Write('{');
                                         if(typeInfo.IsUnityObject)
                                         {
@@ -157,6 +157,7 @@ namespace QTool
                                 case QObjectType.List:
                                     {
                                         var list = obj as IList;
+                                        if (list == null) return "";
                                         writer.Write('[');
                                         for (int i = 0; i < list.Count; i++)
                                         {
@@ -175,6 +176,7 @@ namespace QTool
                                 case QObjectType.Array:
                                     {
                                         var array = obj as Array;
+                                        if (array == null) return "";
                                         array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
                                         {
                                             writer.Write(ToQData(array.GetValue(indexArray), typeInfo.ElementType,hasName) );
@@ -426,7 +428,7 @@ namespace QTool
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Debug.LogError("解析类型【"+type+"】出错：" + qdataStr+"\n");
                 return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
             }
       

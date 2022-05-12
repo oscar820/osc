@@ -436,7 +436,7 @@ namespace QTool.Inspector
         static Color BackColor = new Color(0, 0, 0, 0.6f);
         static GUIStyle BackStyle = new GUIStyle("helpBox");
 
-        public static object Draw(this object obj,string name,Type type,Rect? rect=null,Action<int> DrawElementCall=null,Action<int,int> IndexChange=null)
+        public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null, Rect? rect = null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null)
         {
             if (type == null)
             {
@@ -448,7 +448,6 @@ namespace QTool.Inspector
                 {
                     EditorGUI.LabelField(rect.Value, name);
                 }
-                return obj;
             }
             var typeInfo = QSerializeType.Get(type);
             switch (typeInfo.Code)
@@ -456,12 +455,12 @@ namespace QTool.Inspector
                 case TypeCode.Boolean:
                     if (rect == null)
                     {
-                        return EditorGUILayout.Toggle(name, (bool)obj);
+                        obj= EditorGUILayout.Toggle(name, (bool)obj);
                     }
                     else
                     {
-                        return EditorGUI.Toggle(rect.Value, name, (bool)obj);
-                    }
+                        obj= EditorGUI.Toggle(rect.Value, name, (bool)obj);
+                    }break;
                 case TypeCode.Char:
                 case TypeCode.SByte:
                 case TypeCode.Byte:
@@ -473,59 +472,59 @@ namespace QTool.Inspector
                     {
                         if (rect == null)
                         {
-                            return EditorGUILayout.EnumPopup(name, (Enum)obj);
+                            obj= EditorGUILayout.EnumPopup(name, (Enum)obj);
                         }
                         else
                         {
-                            return EditorGUI.EnumPopup(rect.Value, name, (Enum)obj);
+                            obj= EditorGUI.EnumPopup(rect.Value, name, (Enum)obj);
                         }
                     }
                     if (rect == null)
                     {
-                        return EditorGUILayout.IntField(name, (int)obj);
+                        obj= EditorGUILayout.IntField(name, (int)obj);
                     }
                     else
                     {
-                        return EditorGUI.IntField(rect.Value, name, (int)obj);
-                    }
+                        obj= EditorGUI.IntField(rect.Value, name, (int)obj);
+                    }break;
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
                     if (rect == null)
                     {
-                        return EditorGUILayout.LongField(name, (long)obj);
+                        obj= EditorGUILayout.LongField(name, (long)obj);
                     }
                     else
                     {
-                        return EditorGUI.LongField(rect.Value, name, (long)obj);
-                    }
+                        obj= EditorGUI.LongField(rect.Value, name, (long)obj);
+                    }break;
                 case TypeCode.Single:
                     if (rect == null)
                     {
-                        return EditorGUILayout.FloatField(name, (float)obj);
+                        obj= EditorGUILayout.FloatField(name, (float)obj);
                     }
                     else
                     {
-                        return EditorGUI.FloatField(rect.Value, name, (float)obj);
-                    }
+                        obj= EditorGUI.FloatField(rect.Value, name, (float)obj);
+                    }break;
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                     if (rect == null)
                     {
-                        return EditorGUILayout.DoubleField(name, (double)obj);
+                        obj= EditorGUILayout.DoubleField(name, (double)obj);
                     }
                     else
                     {
-                        return EditorGUI.DoubleField(rect.Value, name, (double)obj);
-                    }
+                        obj= EditorGUI.DoubleField(rect.Value, name, (double)obj);
+                    }break;
                 case TypeCode.String:
                     if (rect == null)
                     {
-                        return EditorGUILayout.TextField(name, obj?.ToString());
+                        obj= EditorGUILayout.TextField(name, obj?.ToString());
                     }
                     else
                     {
-                        return EditorGUI.TextField(rect.Value,name, obj?.ToString());
-                    }
+                        obj= EditorGUI.TextField(rect.Value,name, obj?.ToString());
+                    }break;
                 case TypeCode.Object:
                     switch (typeInfo.objType)
                     {
@@ -533,11 +532,10 @@ namespace QTool.Inspector
                             if (type == typeof(object))
                             {
                                 EditorGUILayout.LabelField(name);
-                                return obj;
                             }
                             else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
                             {
-                                return EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true);
+                                obj= EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true);
                             }
                             else
                             {
@@ -547,7 +545,7 @@ namespace QTool.Inspector
                                 }
                                 if (typeof(QObjectReference).IsAssignableFrom(type))
                                 {
-                                    return QObjectReferenceDrawer.Draw(name, (QObjectReference)obj);
+                                    obj= QObjectReferenceDrawer.Draw(name, (QObjectReference)obj);
                                 }
                                 var color = GUI.backgroundColor;
                                 GUI.backgroundColor = BackColor;
@@ -562,25 +560,39 @@ namespace QTool.Inspector
                                             EditorGUILayout.Space(10);
                                             using (new EditorGUILayout.VerticalScope())
                                             {
+                                               
                                                 foreach (var member in typeInfo.Members)
                                                 {
-                                                    member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+                                                    if (member.Type.IsValueType)
+                                                    {
+                                                        member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+                                                    }
+                                                    else
+                                                    {
+                                                        member.Set(obj, member.Get(obj).Draw(member.Name, member.Type, (value) => member.Set(obj, value)));
+                                                    }
+                                                  
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                return obj;
-                            }
+                            }break;
+
+                        case QObjectType.Array:
                         case QObjectType.List:
                             {
                                 if(typeof(IList).IsAssignableFrom( type) )
                                 {
-                                    if (obj == null)
+                                    if (typeInfo.ArrayRank > 1)
                                     {
-                                        obj= type.CreateInstance();
+                                        break;
                                     }
                                     var list = obj as IList;
+                                    if (list == null)
+                                    {
+                                        obj= typeInfo.ArrayRank==0?type.CreateInstance():type.CreateInstance(null,0);
+                                    }
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;
                                     using (new EditorGUILayout.VerticalScope(BackStyle))
@@ -613,32 +625,22 @@ namespace QTool.Inspector
                                                         {
                                                             var btnRect = elementRect;
                                                             btnRect.size = Vector3.one * 18;
-                                                            btnRect.position += new Vector2(elementRect.width - 40, 2);
+                                                            btnRect.position += new Vector2(elementRect.width*0.4f, 2);
                                                             if (GUI.Button(btnRect,"+"))
                                                             {
-                                                                list.Insert(i+1,list[i]);
+                                                                obj = list.CreateAt(typeInfo,i);
                                                                 IndexChange?.Invoke(-1, i+1);
                                                             }
                                                             btnRect.position += new Vector2(20, 0);
                                                             if (GUI.Button(btnRect, "-"))
                                                             {
-                                                                list.RemoveAt(i);
+                                                                obj= list.RemoveAt(typeInfo,i);
                                                                 IndexChange?.Invoke(i, -1);
                                                             }
                                                         }
-                                                     
 
-                                                        //if(Event.current.type== EventType.MouseDown)
-                                                        //{
-                                                        //    if (Event.current.button == 1&& )
-                                                        //    {
-                                                        //        GenericMenu menu = new GenericMenu();
-                                                        //        menu.AddItem(new GUIContent( "删除 "+ key),false, () => {  list.Remove(element); });
-                                                        //        menu.ShowAsContext();
-                                                        //        Event.current.Use();
 
-                                                        //    }
-                                                        //}
+                                                   
                                                     }
 
                                                 }
@@ -647,20 +649,16 @@ namespace QTool.Inspector
                                             {
                                                 if (GUILayout.Button("添加新元素", GUILayout.Height(20)))
                                                 {
-                                                    list.Add(typeInfo.ElementType.CreateInstance());
-
-                                                    Debug.Log("[" + typeInfo.ElementType.CreateInstance() + "]");
+                                                    obj= list.CreateAt(typeInfo);
                                                 }
                                             }
                                            
                                         }
                                     }
-                                    return list;
                                 }
                             }
                             break;
-                        case QObjectType.Array:
-                            break;
+                    
                         default:
                             break;
                     }
@@ -671,9 +669,39 @@ namespace QTool.Inspector
                 default:;
                     break;
             }
+            if (changeValue!=null)
+            {
+                GUILayoutUtility.GetLastRect().RightMenu((menu) =>
+                {
+                    menu.AddItem(new GUIContent("复制" + name), false, () => GUIUtility.systemCopyBuffer = obj.ToQData(type));
+                    if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
+                    {
+                        menu.AddItem(new GUIContent("粘贴" + name), false, () => changeValue(GUIUtility.systemCopyBuffer.ParseQData(type, true, obj)));
+                    }
 
-            EditorGUILayout.LabelField(name + " (不支持类型" + type + ")");
+                });
+            }
+         
             return obj;
+        }
+        public static void RightMenu(this Rect rect, System.Action<GenericMenu> action)
+        {
+            if (EventType.MouseDown.Equals(Event.current.type))
+            {
+                if (Event.current.button == 1)
+                {
+                    if (rect.Contains(Event.current.mousePosition))
+                    {
+                        if (action != null)
+                        {
+                            var rightMenu = new GenericMenu();
+                            action.Invoke(rightMenu);
+                            rightMenu.ShowAsContext();
+                        }
+                        Event.current.Use();
+                    }
+                }
+            }
         }
         public static bool Draw(this SerializedProperty property,string parentKey="", Rect? rect=null)
         {

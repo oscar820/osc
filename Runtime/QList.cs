@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 using UnityEngine;
+using QTool.Inspector;
+using QTool.Reflection;
 namespace QTool
 {
     public interface IKey<KeyType>
@@ -334,6 +336,60 @@ namespace QTool
             array[indexA] = array[indexB];
             array[indexB] = temp;
             return array;
+        }
+        public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1)
+        {
+            var newObj = typeInfo.ElementType.CreateInstance(index<0 ? null : list[index]);
+            if (list.IsFixedSize)
+            {
+                if (typeInfo.ArrayRank == 1)
+                {
+                    var newList= typeInfo.Type.CreateInstance(null, list.Count + 1) as IList;
+                 
+                    for (int i = 0; i < index; i++)
+                    {
+                        newList[i] = list[i];
+                    }
+                    newList[index] = newObj;
+                    for (int i = index+1; i < newList.Count; i++)
+                    {
+                        newList[i] = list[i-1];
+                    }
+                    return newList;
+                }
+            }
+            else
+            {
+                list.Add(newObj);
+            }
+            return list;
+
+        }
+        public static IList RemoveAt(this IList list,QSerializeType typeInfo,  int index)
+        {
+            if (list.IsFixedSize)
+            {
+                if (typeInfo.ArrayRank == 1)
+                {
+                    var newList = typeInfo.Type.CreateInstance(null, list.Count -1) as IList;
+
+                    for (int i = 0; i < index; i++)
+                    {
+                        newList[i] = list[i];
+                    }
+                    for (int i = index ; i < newList.Count; i++)
+                    {
+                        newList[i] = list[i +1];
+                    }
+                    return newList;
+                }
+            }
+            else
+            {
+                list.RemoveAt(index);
+            }
+            return list;
+
         }
         public static bool ContainsKey<T, KeyType>(this ICollection<T> array, KeyType key) where T : IKey<KeyType>
         {
