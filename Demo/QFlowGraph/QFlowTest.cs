@@ -54,7 +54,7 @@ public static class QFlowNodeTest
         await Task.Delay(time*1000);
         return strValue;
     }
-    public static void LogErrorTest(string value="test1")
+    public static void LogErrorTest(object value)
     {
         Debug.LogError(value);
     }

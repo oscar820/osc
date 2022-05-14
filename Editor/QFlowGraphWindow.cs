@@ -370,6 +370,7 @@ namespace QTool.FlowGraph
                                 {
                                     var endPos = mousePos;
                                     SelectBox = new Rect(Mathf.Min(StartPos.x, endPos.x), Mathf.Min(StartPos.y, endPos.y), Mathf.Abs(StartPos.x - endPos.x), Mathf.Abs(StartPos.y - endPos.y));
+                                    Repaint();
                                 }
                                 break;
                             case EditorState.None:
@@ -382,7 +383,7 @@ namespace QTool.FlowGraph
                                 }
                                 break;
                             case EditorState.ConnectPort:
-                                UpdateNearPort();
+                                UpdateNearPort(); Repaint();
                                 break;
                             default:
                                 break;
