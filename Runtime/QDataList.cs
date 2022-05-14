@@ -6,7 +6,7 @@ using System.Text;
 
 namespace QTool{
     
-    public class QDataList: QAutoList<string, QDataLine>
+    public class QDataList: QAutoList<string, QDataRow>
     {
         public static QDataList QToolSetting => GetData(nameof(QToolSetting)+".qdata");
         public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
@@ -31,7 +31,7 @@ namespace QTool{
         }
 
         static QDictionary<string, QDataList> dataList = new QDictionary<string, QDataList>();
-        public override void OnCreate(QDataLine obj)
+        public override void OnCreate(QDataRow obj)
         {
             obj.OwnerData = this;
             base.OnCreate(obj);
@@ -54,7 +54,7 @@ namespace QTool{
             }
             return index >= 0;
         }
-        public QDataLine TitleLine
+        public QDataRow TitleLine
         {
             get
             {
@@ -65,13 +65,13 @@ namespace QTool{
                 return null;
             }
         }
-        public new QDataLine this[int index]
+        public new QDataRow this[int index]
         {
             get
             {
                 if (index >= Count)
                 {
-                    var line=new QDataLine();
+                    var line=new QDataRow();
                     line.OwnerData = this;
                     base[index] = line;
                 }
@@ -84,7 +84,7 @@ namespace QTool{
             var lineStrs = dataStr.Split('\n');
             foreach (var lineStr in lineStrs)
             {
-                Add(new QDataLine(lineStr, this));
+                Add(new QDataRow(lineStr, this));
             }
         }
         public override string ToString()
@@ -94,7 +94,7 @@ namespace QTool{
 
     }
 
-    public class QDataLine:QList<string>,IKey<string>
+    public class QDataRow:QList<string>,IKey<string>
     {
         public string Key { get => base[0]; set
             {
@@ -154,11 +154,11 @@ namespace QTool{
 
             }
         }
-        public QDataLine()
+        public QDataRow()
         {
         }
         public QDataList OwnerData { get; internal set; }
-        public QDataLine(string lineStr,QDataList ownerData)
+        public QDataRow(string lineStr,QDataList ownerData)
         {
             var valueS = lineStr.Split('\t');
             for (int i = 0; i < valueS.Length; i++)

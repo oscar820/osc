@@ -26,7 +26,7 @@ namespace QTool
             }
             return KeyColor[colorKey];
         }
-        public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null)
+        public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null, Func<string> getInfo = null)
         {
             var last = System.DateTime.Now;
             try
@@ -38,7 +38,16 @@ namespace QTool
                 Debug.LogError("【" + name + "】运行出错:"+e);
                 return;
             }
-            Debug.LogError("【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds + (getLength == null ? "" : " 长度" + getLength().ToSizeString()));
+            var checkInfo = "【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds;
+            if (getLength != null)
+            {
+                checkInfo += " " + " 大小" + getLength().ToSizeString();
+            }
+            if (getInfo != null)
+            {
+                checkInfo += "\n" + getInfo();
+            }
+            Debug.LogError(checkInfo);
         }
 
         public static bool PercentRandom(float percent)

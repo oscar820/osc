@@ -16,7 +16,7 @@ namespace QTool.Test
 {
    
     
-    [ScriptToggle("scriptList")]
+    [ScriptToggle(nameof(scriptList))]
     public class QToolTest : MonoBehaviour
     {
         public QObjectReference instanceTest;
@@ -79,7 +79,7 @@ namespace QTool.Test
                 {
                     testBytes = FileManager.XmlSerialize(test1).GetBytes();
             }
-            }, () => testBytes.Length);
+            },() => testBytes.Length,()=> FileManager.XmlSerialize(test1));
             Tool.RunTimeCheck("Xml读取", () =>
             {
                 for (int i = 0; i < 4000; i++)
@@ -107,7 +107,7 @@ namespace QTool.Test
                 {
                     testBytes = test1.ToQData().GetBytes();
                 }
-            }, () => testBytes.Length);
+            }, () => testBytes.Length, () => test1.ToQData());
             Tool.RunTimeCheck("QData读取", () =>
             {
                 for (int i = 0; i < 4000; i++)
@@ -121,7 +121,7 @@ namespace QTool.Test
                 {
                     testBytes = test1.ToQData(false).GetBytes();
                 }
-            }, () => testBytes.Length);
+            }, () => testBytes.Length, () => test1.ToQData(false));
             Tool.RunTimeCheck("QData读取Name", () =>
             {
                 for (int i = 0; i < 4000; i++)
