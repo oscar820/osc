@@ -27,7 +27,7 @@ namespace QTool
     /// 使数据在inspector视窗不可更改
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class ReadOnlyAttribute : ViewNameAttribute
+    public class ReadOnlyAttribute : Attribute
     {
         public ReadOnlyAttribute() 
         {

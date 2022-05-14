@@ -341,18 +341,16 @@ namespace QTool.Inspector
                 EditorGUI.BeginChangeCheck(); ;
             }
             var readonlyAtt = property.GetAttribute<ReadOnlyAttribute>();
-            if (readonlyAtt != null && readonlyAtt.Active(property.serializedObject.targetObject))
+            if (readonlyAtt != null )
             {
                 var last = GUI.enabled;
                 GUI.enabled = false;
                 property.Draw();
-                //  EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
                 GUI.enabled = last;
             }
             else
             {
                 property.Draw();
-                // EditorGUILayout.PropertyField(property, new GUIContent(property.ViewName()), true);
             }
             if (changeCall != null)
             {

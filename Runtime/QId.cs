@@ -233,7 +233,7 @@ namespace QTool
         }
         public string Key { get => InstanceId; set { } }
         [ReadOnly]
-        [ViewName("预制体Id", "HasPrefabId")]
+        [ViewName("预制体Id", nameof(HasPrefabId) )]
         public string PrefabId;
         [ReadOnly]
         [ViewName("实例Id")]
