@@ -449,6 +449,7 @@ namespace QTool.Inspector
                     EditorGUI.LabelField(rect.Value, name);
                 }
             }
+         
             var typeInfo = QSerializeType.Get(type);
             if (type!=typeof(object)&& !TypeList.Contains(type)&&!type.IsGenericType)
             {
@@ -484,14 +485,18 @@ namespace QTool.Inspector
                             obj= EditorGUI.EnumPopup(rect.Value, name, (Enum)obj);
                         }
                     }
-                    if (rect == null)
-                    {
-                        obj= EditorGUILayout.IntField(name, (int)obj);
-                    }
                     else
                     {
-                        obj= EditorGUI.IntField(rect.Value, name, (int)obj);
-                    }break;
+                        if (rect == null)
+                        {
+                            obj = EditorGUILayout.IntField(name, (int)obj);
+                        }
+                        else
+                        {
+                            obj = EditorGUI.IntField(rect.Value, name, (int)obj);
+                        }
+                    }
+                    break;
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
                     if (rect == null)

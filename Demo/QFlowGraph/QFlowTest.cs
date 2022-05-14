@@ -18,8 +18,6 @@ public class QFlowTest : MonoBehaviour
     [ContextMenu("Test")]
     public void Test()
     {
-        var c = QCommand.GetCommand(nameof(QFlowNodeTest.OutTest));
-        QCommand.FreshCommands(typeof(QFlowNodeTest));
         var graph = new QFlowGraph();
         var logNode= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
         logNode["value"] = "QState≤‚ ‘";
