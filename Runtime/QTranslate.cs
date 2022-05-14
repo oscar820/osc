@@ -52,7 +52,7 @@ namespace QTool
         #endregion
         #region 全局翻译
         public static string globalLanguage = "中文";
-        public static async void ChangeGlobalLanguage(string value)
+        public static void ChangeGlobalLanguage(string value)
         {
             if (globalLanguage == value)
             {

@@ -182,6 +182,13 @@ namespace QTool.Test
         [XmlIgnore]
         public byte[,,] arrayTest = new byte[1, 2, 2] { { { 1, 2 }, { 3, 4 } } };
         public TestClass2 child;
+        [XmlIgnore]
+        public object obj = new Vector3
+        {
+            x = 1,
+            y = 2,
+            z = 3
+        };
        
     }
     [System.Serializable]

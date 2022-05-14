@@ -235,7 +235,6 @@ namespace QTool.FlowGraph
         public string name;
         public bool isOutput = false;
         public string stringValue;
-
         public bool isFlowList;
         public void IndexChange(int a,int b)
         {
@@ -318,21 +317,14 @@ namespace QTool.FlowGraph
             get
             {
                 if (ValueType == QFlow.Type) return null;
-                if (FlowPort == null || ValueType == QFlow.Type)
+                if (FlowPort == null && !isOutput && HasConnect)
                 {
-                    if (isOutput)
+                    var port = Node.Graph[ConnectInfo.ConnectPort()];
+                    if (port.OutputPort.autoRunNode)
                     {
-                        return _value;
+                        port.Node.Run();
                     }
-                    else if (HasConnect)
-                    {
-                        var port = Node.Graph[ConnectInfo.ConnectPort()];
-                        if (port.OutputPort.autoRunNode)
-                        {
-                            port.Node.Run();
-                        }
-                        return port.Value;
-                    }
+                    return port.Value;
                 }
                 if (_value == null)
                 {
@@ -343,13 +335,6 @@ namespace QTool.FlowGraph
             set
             {
                 if (ValueType == QFlow.Type) return;
-                if (FlowPort == null)
-                {
-                    if (isOutput || HasConnect)
-                    {
-                        _value = value;
-                    }
-                }
                 _value = value;
                 stringValue = value.ToQData(ValueType);
             }
@@ -358,11 +343,9 @@ namespace QTool.FlowGraph
         public void Init(QFlowNode node)
         {
             this.Node = node;
-            if (isFlowList)
+            if (isFlowList && Value is IList list)
             {
-                var list = Value as IList;
                 ConnectInfolist.RemoveAll((obj) => ConnectInfolist.IndexOf(obj)>= list.Count|| ConnectInfolist.IndexOf(obj) < 0); 
-           
             }
         }
         public static QDictionary<Type, List<Type>> CanConnectList = new QDictionary<Type, List<Type>>()

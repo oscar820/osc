@@ -527,6 +527,7 @@ namespace QTool.Inspector
                     switch (typeInfo.objType)
                     {
                         case QObjectType.Object:
+                          
                             if (type == typeof(object))
                             {
                                 EditorGUILayout.LabelField(name);
@@ -543,33 +544,37 @@ namespace QTool.Inspector
                                 }
                                 if (typeof(QObjectReference).IsAssignableFrom(type))
                                 {
-                                    obj= QObjectReferenceDrawer.Draw(name, (QObjectReference)obj);
+                                    obj = QObjectReferenceDrawer.Draw(name, (QObjectReference)obj);
                                 }
-                                var color = GUI.backgroundColor;
-                                GUI.backgroundColor = BackColor;
-                                using (new EditorGUILayout.VerticalScope(BackStyle))
+                                else
                                 {
-                                    GUI.backgroundColor = color;
-                                    FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
-                                    if (FoldoutDic[name])
+
+                                    var color = GUI.backgroundColor;
+                                    GUI.backgroundColor = BackColor;
+                                    using (new EditorGUILayout.VerticalScope(BackStyle))
                                     {
-                                        using (new EditorGUILayout.HorizontalScope())
+                                        GUI.backgroundColor = color;
+                                        FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
+                                        if (FoldoutDic[name])
                                         {
-                                            EditorGUILayout.Space(10);
-                                            using (new EditorGUILayout.VerticalScope())
+                                            using (new EditorGUILayout.HorizontalScope())
                                             {
-                                               
-                                                foreach (var member in typeInfo.Members)
+                                                EditorGUILayout.Space(10);
+                                                using (new EditorGUILayout.VerticalScope())
                                                 {
-                                                    if (member.Type.IsValueType)
+
+                                                    foreach (var member in typeInfo.Members)
                                                     {
-                                                        member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+                                                        if (member.Type.IsValueType)
+                                                        {
+                                                            member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+                                                        }
+                                                        else
+                                                        {
+                                                            member.Set(obj, member.Get(obj).Draw(member.Name, member.Type, (value) => member.Set(obj, value)));
+                                                        }
+
                                                     }
-                                                    else
-                                                    {
-                                                        member.Set(obj, member.Get(obj).Draw(member.Name, member.Type, (value) => member.Set(obj, value)));
-                                                    }
-                                                  
                                                 }
                                             }
                                         }
@@ -590,6 +595,7 @@ namespace QTool.Inspector
                                     if (list == null)
                                     {
                                         obj= typeInfo.ArrayRank==0?type.CreateInstance():type.CreateInstance(null,0);
+                                        list = obj as IList;
                                     }
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;

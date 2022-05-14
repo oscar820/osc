@@ -111,10 +111,6 @@ namespace QTool
         public static string ToQData<T>(this T obj,bool hasName=true)
         {
             var type = typeof(T);
-            if (type == typeof(object))
-            {
-                throw new Exception("不能以 object 类型序列化["+obj+"]");
-            }
             return ToQData(obj, type,hasName);
         }
         
@@ -133,8 +129,14 @@ namespace QTool
                                 case QObjectType.Object:
                                     {
                                         if (obj == null) return "";
+                                        
                                         writer.Write('{');
-                                        if(typeInfo.IsUnityObject)
+                                        if (type == typeof(object))
+                                        {
+                                            var runtimeType = obj.GetType();
+                                            writer.Write(runtimeType.Name+"=");
+                                            writer.Write(ToQData(obj, runtimeType));
+                                        }else if(typeInfo.IsUnityObject)
                                         {
                                             writer.Write( QObjectReference.GetId(obj as UnityEngine.Object));
                                         }
@@ -288,7 +290,18 @@ namespace QTool
                                                 for (int i = 0; i < strs.Length; i++)
                                                 {
                                                     var str = strs[i];
-                                                    if (typeInfo.IsUnityObject)
+                                                    if (type == typeof(object))
+                                                    {
+                                                        using (var childReader = new StringReader(str))
+                                                        {
+                                                            if (childReader.ReadSplit('=', out var name, out var memberStr))
+                                                            {
+                                                                var runtimeType = QReflection.ParseType(name);
+                                                                target = ParseQData(memberStr, runtimeType, hasName, target);
+                                                            }
+                                                        }     
+                                                    }
+                                                    else if (typeInfo.IsUnityObject)
                                                     {
                                                         target = QObjectReference.GetObject(str);
 
