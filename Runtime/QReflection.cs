@@ -309,12 +309,12 @@ namespace QTool.Reflection
                 throw new Exception("通过" + type + "(" + param.ToOneString(",") + ")创建对象" + type + "出错", e);
             }
         }
-        static Dictionary<string, Type> typeDic = new Dictionary<string, Type>();
+        static Dictionary<string, Type> TypeBuffer = new Dictionary<string, Type>();
         public static Type ParseType(string typeString)
         {
-            if (typeDic.ContainsKey(typeString))
+            if (TypeBuffer.ContainsKey(typeString))
             {
-                return typeDic[typeString];
+                return TypeBuffer[typeString];
             }
             else
             {
@@ -326,7 +326,7 @@ namespace QTool.Reflection
                     type = assemblyArray[i].GetType(typeString);
                     if (type != null)
                     {
-                        typeDic.Add(typeString, type);
+                        TypeBuffer.Add(typeString, type);
                         return type;
                     }
                     
@@ -340,14 +340,15 @@ namespace QTool.Reflection
                             type = eType;
                             if (type != null)
                             {
-                                typeDic.Add(typeString, type);
+                                TypeBuffer.Add(typeString, type);
                                 return type;
                             }
                         }
                     }
                 }
+
             }
-            typeDic.Add(typeString, null);
+            TypeBuffer.Add(typeString, null);
             Debug.LogError("类型[" + typeString + "]未解析成功");
             return null;
 

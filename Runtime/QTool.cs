@@ -134,8 +134,8 @@ namespace QTool
                                         if (type == typeof(object))
                                         {
                                             var runtimeType = obj.GetType();
-                                            writer.Write(runtimeType.Name+"=");
-                                            writer.Write(ToQData(obj, runtimeType));
+                                            writer.Write(runtimeType.FullName+"=");
+                                            writer.Write(ToQData(obj, runtimeType,hasName));
                                         }else if(typeInfo.IsUnityObject)
                                         {
                                             writer.Write( QObjectReference.GetId(obj as UnityEngine.Object));
@@ -274,7 +274,6 @@ namespace QTool
                 {
                     case TypeCode.Object:
                         {
-                            if (type == typeof(object)) return qdataStr;
                             using (var reader = new StringReader(qdataStr))
                             {
                                 var typeInfo = QSerializeType.Get(type);
@@ -297,7 +296,7 @@ namespace QTool
                                                             if (childReader.ReadSplit('=', out var name, out var memberStr))
                                                             {
                                                                 var runtimeType = QReflection.ParseType(name);
-                                                                target = ParseQData(memberStr, runtimeType, hasName, target);
+                                                                target = ParseQData(memberStr, runtimeType, hasName);
                                                             }
                                                         }     
                                                     }

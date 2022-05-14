@@ -341,7 +341,7 @@ namespace QTool.Inspector
                 EditorGUI.BeginChangeCheck(); ;
             }
             var readonlyAtt = property.GetAttribute<ReadOnlyAttribute>();
-            if (readonlyAtt != null )
+            if (readonlyAtt != null)
             {
                 var last = GUI.enabled;
                 GUI.enabled = false;
@@ -434,6 +434,8 @@ namespace QTool.Inspector
         static Color BackColor = new Color(0, 0, 0, 0.6f);
         static GUIStyle BackStyle = new GUIStyle("helpBox");
 
+        public static List<string> TypeMenuList = new List<string>();
+        public static List<Type> TypeList = new List<Type>();
         public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null, Rect? rect = null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null)
         {
             if (type == null)
@@ -448,6 +450,11 @@ namespace QTool.Inspector
                 }
             }
             var typeInfo = QSerializeType.Get(type);
+            if (type!=typeof(object)&& !TypeList.Contains(type)&&!type.IsGenericType)
+            {
+                TypeList.Add(type);
+                TypeMenuList.AddCheckExist(type.FullName.Replace('.', '/'));
+            }
             switch (typeInfo.Code)
             {
                 case TypeCode.Boolean:
@@ -530,7 +537,23 @@ namespace QTool.Inspector
                           
                             if (type == typeof(object))
                             {
-                                EditorGUILayout.LabelField(name);
+                                using (new EditorGUILayout.HorizontalScope())
+                                {
+                                    if (obj == null)
+                                    {
+                                        obj = "";
+                                    }
+                                    var objType = obj.GetType();
+                                    var oldType = TypeList.IndexOf(objType); 
+                                    var newType = EditorGUILayout.Popup(oldType, TypeMenuList.ToArray(),GUILayout.Width(20), GUILayout.Height(20));
+                                    if (newType != oldType)
+                                    {
+                                        objType = TypeList[newType];
+                                        obj = objType.CreateInstance();
+                                    }
+                                    obj = Draw(obj, name, objType);
+
+                                }
                             }
                             else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
                             {
