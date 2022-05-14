@@ -378,6 +378,7 @@ namespace QTool.FlowGraph
                                 {
                                     ViewRange.position -= Event.current.delta;
                                     ControlState = EditorState.MoveOffset;
+                                    Repaint();
                                 }
                                 break;
                             case EditorState.ConnectPort:
@@ -484,7 +485,6 @@ namespace QTool.FlowGraph
                 for (int y = 0; y <= yTex + 1; y++)
                 {
                     GUI.DrawTexture(new Rect(xStart + BackTex.width * x, yStart + BackTex.height * y, BackTex.width, BackTex.height), BackTex);
-                    Repaint();
                 }
             }
         }

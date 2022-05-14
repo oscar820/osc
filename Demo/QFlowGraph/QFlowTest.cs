@@ -20,7 +20,7 @@ public class QFlowTest : MonoBehaviour
     {
         var graph = new QFlowGraph();
         var logNode= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
-        logNode["value"] = "QState≤‚ ‘";
+        logNode["value"] = "QFlowGraph≤‚ ‘";
         var waitNode = graph.Add(nameof(QFlowNodeTest.CoroutineWaitTest));
         waitNode["time"]=3;
         logNode.SetNextNode(waitNode);

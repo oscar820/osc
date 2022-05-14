@@ -17,7 +17,22 @@ namespace QTool.FlowGraph
         
         public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
         public Action<IEnumerator> StartCoroutineOverride;
+        public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
+        public T GetValue<T>(string key)
+        {
+            var type = typeof(T);
+            var obj = Values[key];
+            if (obj==null&& type.IsValueType)
+            {
+                obj = type.CreateInstance();
+            }
+            return (T)obj;
+        }
 
+        public void SetValue<T>(string key,T value)
+        {
+            Values[key] = value;
+        }
         public QFlowNode this[string key]
         {
             get
