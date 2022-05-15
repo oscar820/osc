@@ -173,14 +173,7 @@ namespace QTool
         public static void ClearData(this string path)
         {
             var directoryPath = GetFolderPath(path);
-            directoryPath.ForeachDirectory((path) =>
-            {
-                Directory.Delete(path);
-            });
-            directoryPath.ForeachFiles((path) =>
-            {
-                File.Delete(path);
-            });
+            Directory.Delete(directoryPath, true);
          
         }
         /// <summary>
