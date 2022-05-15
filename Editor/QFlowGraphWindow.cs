@@ -355,6 +355,7 @@ namespace QTool.FlowGraph
                                 }
                                 else
                                 {
+                                    SelectNodes.Clear();
                                     ControlState = EditorState.MoveNode;
                                 }
                             }
@@ -408,6 +409,7 @@ namespace QTool.FlowGraph
                                             SelectNodes.Add(node);
                                         }
                                     }
+                                    Repaint();
                                 }
                                 break;
                             case EditorState.ConnectPort:
