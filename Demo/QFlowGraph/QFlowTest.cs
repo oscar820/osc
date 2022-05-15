@@ -10,12 +10,17 @@ using QTool.Test;
 
 public class QFlowTest : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public QFlowGraphAsset graphAsset;
     void Start()
     {
-        
+        graphAsset?.Graph.Run(nameof(QFlowNodeTest.Start));
     }
-    [ContextMenu("Test")]
+    [ContextMenu("运行【测试事件】")]
+    public void RunEventTest()
+    {
+        graphAsset?.Graph.Run("测试事件");
+    }
+    [ContextMenu("运行时创建QFlowGraph测试")]
     public void Test()
     {
         var graph = new QFlowGraph();
@@ -44,7 +49,16 @@ public static class QFlowNodeTest
     {
         QCommand.FreshCommands(typeof(QFlowNodeTest));
     }
-    
+    [QStartNode]
+    public static void Start()
+    {
+
+    }
+    [QStartNode]
+    public static void EventStartTest([QNodeKeyName]string eventKey="事件名")
+    {
+
+    }
     public static IEnumerator CoroutineWaitTest(float time)
     {
         yield return new WaitForSeconds(time);

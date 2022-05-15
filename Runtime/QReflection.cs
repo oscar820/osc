@@ -194,10 +194,16 @@ namespace QTool.Reflection
     #endregion
     public static class QReflection
     {
-        public static T GetAttribute<T>(this ParameterInfo paramInfo) where T :Attribute
+        public static T GetAttribute<T>(this MethodInfo info) where T : Attribute
         {
             var type = typeof(T);
-            var array= paramInfo.GetCustomAttributes(typeof(T), true);
+            var array = info.GetCustomAttributes(typeof(T), true);
+            return array.QueuePeek() as T;
+        }
+        public static T GetAttribute<T>(this ParameterInfo info) where T :Attribute
+        {
+            var type = typeof(T);
+            var array= info.GetCustomAttributes(typeof(T), true);
             return array.QueuePeek() as T;
         }
         public static string ViewName(this MemberInfo type)

@@ -438,9 +438,6 @@ namespace QTool.FlowGraph
                     {
                         switch (Event.current.keyCode)
                         {
-                            case KeyCode.Space:
-                                ShowMenu();
-                                break;
                             case KeyCode.Delete:
                                 DeleteSelectNodes();
                                 break;

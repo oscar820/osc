@@ -16,6 +16,7 @@ namespace QTool.FlowGraph
         }
         
         public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
+        [QIgnore]
         public Action<IEnumerator> StartCoroutineOverride;
         public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
         public T GetValue<T>(string key)
@@ -188,6 +189,9 @@ namespace QTool.FlowGraph
             return index==0? port:port+"["+index+"]";
         }
     }
+    /// <summary>
+    ///  指定参数端口为输出端口
+    /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class QOutputPortAttribute : Attribute
     {
@@ -198,6 +202,9 @@ namespace QTool.FlowGraph
         {
         }
     }
+    /// <summary>
+    /// 指定参数端口为流程端口
+    /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class QFlowPortAttribute : Attribute
     {
@@ -205,6 +212,26 @@ namespace QTool.FlowGraph
 
         public bool showValue = false;
         public QFlowPortAttribute()
+        {
+        }
+    }
+    /// <summary>
+    /// 指定参数端口自动更改节点Key值与名字 两个相同Key节点会报错
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    public class QNodeKeyNameAttribute : Attribute
+    {
+        public QNodeKeyNameAttribute()
+        {
+        }
+    }
+    /// <summary>
+    /// 指定函数节点为起点节点 即没有流程输入端口 节点Key为函数名
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public class QStartNodeAttribute : Attribute
+    {
+        public QStartNodeAttribute()
         {
         }
     }
@@ -306,6 +333,8 @@ namespace QTool.FlowGraph
             }
         }
         [QIgnore]
+        public QNodeKeyNameAttribute KeyNameAttribute;
+        [QIgnore]
         public QOutputPortAttribute OutputPort;
         [QIgnore]
         public QFlowPortAttribute FlowPort;
@@ -350,8 +379,14 @@ namespace QTool.FlowGraph
             set
             {
                 if (ValueType == QFlow.Type) return;
+             
                 _value = value;
                 stringValue = value.ToQData(ValueType);
+                if (KeyNameAttribute != null)
+                {
+                    Node.Key = _value?.ToString();
+                    Node.name = Node.Key;
+                }
             }
         }
 
@@ -509,6 +544,7 @@ namespace QTool.FlowGraph
         public List<QFlowPort> OutParamPorts = new List<QFlowPort>();
         public string Key { get;  set; } = QId.GetNewId();
         public string name;
+        public bool IsStartNode { private set; get; }
         public string ViewName { 
             get
             {
@@ -600,7 +636,14 @@ namespace QTool.FlowGraph
                 return;
             }
             this.name = command.name;
-            AddPort(QFlowKey.FromPort);
+            if (command.method.GetAttribute<QStartNodeAttribute>() == null)
+            {
+                AddPort(QFlowKey.FromPort);
+            }
+            else
+            {
+                Key = name;
+            }
             AddPort(QFlowKey.NextPort, QOutputPortAttribute.Normal);
             commandParams = new object[command.paramInfos.Length];
             OutParamPorts.Clear();
@@ -611,7 +654,8 @@ namespace QTool.FlowGraph
                 var outputAtt = paramInfo.GetAttribute<QOutputPortAttribute>() ?? (paramInfo.IsOut ? QOutputPortAttribute.Normal : null);
                 var port = AddPort(paramInfo.Name, outputAtt, paramInfo.ViewName(), paramInfo.ParameterType.GetTrueType(), paramInfo.GetAttribute<QFlowPortAttribute>());
                 port.paramIndex = i;
-                if (paramInfo.HasDefaultValue)
+                port.KeyNameAttribute = paramInfo.GetAttribute<QNodeKeyNameAttribute>();
+                if (paramInfo.HasDefaultValue&&port.Value==null)
                 {
                     port.Value = paramInfo.DefaultValue;
                 }
