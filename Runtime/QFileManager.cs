@@ -170,11 +170,30 @@ namespace QTool
             }
             return File.ReadAllBytes(path);
         }
-     
+        public static void ClearData(this string path)
+        {
+            var directoryPath = GetFolderPath(path);
+            directoryPath.ForeachDirectory((path) =>
+            {
+                Directory.Delete(path);
+            });
+            directoryPath.ForeachFiles((path) =>
+            {
+                File.Delete(path);
+            });
+         
+        }
+        /// <summary>
+        /// 获取文件夹路径
+        /// </summary>
+        public static string GetFolderPath(this string path)
+        {
+            return Path.GetDirectoryName(path);
+        }
         public static void Save(string path, byte[] bytes)
         {
             CheckFolder(path);
-            var directoryPath = Path.GetDirectoryName(path);
+            var directoryPath = GetFolderPath(path);
             if (!System.IO.Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
