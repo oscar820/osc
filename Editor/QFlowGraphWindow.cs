@@ -39,7 +39,7 @@ namespace QTool.FlowGraph
 
             return false;
         }
-        [MenuItem("Assets/Create/QTool/QFlowGraph", priority = 0)]
+        [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
         public static void CreateNewFile()
         {
             FileManager.Save(EditorUtility.SaveFilePanel("±£´æQFGÎÄ¼þ", Application.dataPath, nameof(QFlowGraphAsset), "qfg"), (new QFlowGraph()).ToQData());
