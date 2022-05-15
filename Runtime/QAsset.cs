@@ -285,6 +285,13 @@ namespace QTool.Asset
 
             if (Application.isPlaying)
             {
+#if UNITY_EDITOR
+                if (AddressableTool.AssetSetting == null)
+                {
+                    Debug.LogError("未创建Addressable文件");
+                    return;
+                }
+#endif
                 UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<IList<TObj>> loader = default;
                 try
                 {
@@ -292,7 +299,7 @@ namespace QTool.Asset
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError( "Addressables不存在Lable[" +Label+"]:"+e);
+                    Debug.LogWarning( "Addressables不存在Lable[" +Label+"]:"+e);
                     return;
                 }
                 loaderTask = loader.Task;
