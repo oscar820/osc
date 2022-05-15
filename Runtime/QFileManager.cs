@@ -14,7 +14,10 @@ namespace QTool
         {
             return XmlDeserialize<T>(XmlSerialize(target));
         }
-
+        public static string ToAssetPath(this string path)
+        {
+            return "Assets" + path.SplitEndString(Application.dataPath);
+        }
         public static void ForeachDirectoryFiles(this string rootPath, Action<string> action)
         {
             ForeachFiles(rootPath, action);

@@ -2,6 +2,7 @@ using QTool.Inspector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
@@ -25,26 +26,52 @@ namespace QTool.FlowGraph
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line)
         {
-
             var asset = EditorUtility.InstanceIDToObject(instanceID) as QFlowGraphAsset;
             if (asset != null)
             {
-                var window = GetWindow<QFlowGraphWindow>();
-                window.minSize = new Vector2(500, 400);
-                window.titleContent = new GUIContent(asset.name + " - "+nameof(QFlowGraph));
-                window.GraphAsset = asset;
-                window.ViewRange = new Rect(Vector2.zero, window.position.size);
+                Open(asset);
                 return true;
             }
-
             return false;
         }
-        [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
-        public static void CreateNewFile()
+
+        private static QFlowGraphWindow window;
+        public static void OpenPath(string path)
         {
-            FileManager.Save(EditorUtility.SaveFilePanel("保存QFG文件", Application.dataPath, nameof(QFlowGraphAsset), "qfg"), (new QFlowGraph()).ToQData());
-            AssetDatabase.Refresh();
+            Open(AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path));
         }
+        public static void Open(QFlowGraphAsset asset)
+        {
+            if (asset == null) return;
+            if (window == null)
+            {
+                window = GetWindow<QFlowGraphWindow>();
+                window.minSize = new Vector2(500, 400);
+            }
+            window.titleContent = new GUIContent(asset.name + " - " + nameof(QFlowGraph));
+            window.GraphAsset = asset;
+            window.ViewRange = new Rect(Vector2.zero, window.position.size);
+            window.Repaint();
+        }
+        [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
+        public static async void CreateNewFile()
+        {
+            var selectPath = Application.dataPath;
+            if(Selection.activeObject !=null)
+            {
+                selectPath= AssetDatabase.GetAssetPath(Selection.activeObject);
+            }
+            var path = EditorUtility.SaveFilePanel("保存QFG文件", selectPath, nameof(QFlowGraphAsset), "qfg");
+            FileManager.Save(path, (new QFlowGraph()).ToQData());
+            AssetDatabase.Refresh();
+            OpenPath(path.ToAssetPath());
+        }
+        [MenuItem("QTool/QFlowGraph编辑器")]
+        public static void OpenWindow()
+        {
+            Open(null);
+        }
+
         private void OnFocus()
         {
         }

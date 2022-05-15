@@ -381,7 +381,7 @@ namespace QTool.Inspector
             private Vector2 scrollVector2 = Vector2.zero;
             private string search = "";
 
-            [MenuItem("QTool/GUIStyle查看器")]
+            [MenuItem("QTool/工具/GUIStyle查看器")]
             public static void InitWindow()
             {
                 EditorWindow.GetWindow(typeof(QStylesWindows));

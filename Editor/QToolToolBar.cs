@@ -49,12 +49,12 @@ namespace QTool
                 return "Builds/Windows/test.exe";
             }
         }
-        [MenuItem("QTool/Tool/运行测试包 %T")]
+        [MenuItem("QTool/工具/运行测试包 %T")]
         public static void RunTest()
         {
             System.Diagnostics.Process.Start(BasePath + WindowsLocalPath);
         }
-        [MenuItem("QTool/Tool/打包测试当前场景 %#T")]
+        [MenuItem("QTool/工具/打包测试当前场景 %#T")]
         public static void TestBuild()
         {
             if (!BuildPipeline.isBuildingPlayer)

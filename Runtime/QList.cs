@@ -260,7 +260,7 @@ namespace QTool
         {
             if (str.Contains(splitStart)){
 
-                return str.Substring(str.LastIndexOf(splitStart)+1);
+                return str.Substring(str.LastIndexOf(splitStart)+splitStart.Length);
             }
             else
             {
