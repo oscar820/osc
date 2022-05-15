@@ -354,7 +354,12 @@ namespace QTool.Reflection
                 }
 
             }
+         
             TypeBuffer.Add(typeString, null);
+            if (typeString.Contains("System.Threading.Tasks.Task"))
+            {
+                return null;
+            }
             Debug.LogError("类型[" + typeString + "]未解析成功");
             return null;
 

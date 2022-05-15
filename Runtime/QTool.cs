@@ -208,7 +208,6 @@ namespace QTool
                                         return writer.ToString();
                                     }
                                 default:
-                                    Debug.LogError("不支持类型[" + type + "]");
                                     return "";
                             }
                         }
@@ -296,7 +295,10 @@ namespace QTool
                                                             if (childReader.ReadSplit('=', out var name, out var memberStr))
                                                             {
                                                                 var runtimeType = QReflection.ParseType(name);
-                                                                target = ParseQData(memberStr, runtimeType, hasName);
+                                                                if (runtimeType != null)
+                                                                {
+                                                                    target = ParseQData(memberStr, runtimeType, hasName);
+                                                                }
                                                             }
                                                         }     
                                                     }
@@ -412,7 +414,6 @@ namespace QTool
                                             return null;
                                         }
                                     default:
-                                        Debug.LogError("不支持类型[" + type + "]");
                                         return null;
                                 }
                             }
@@ -462,7 +463,7 @@ namespace QTool
             }
             catch (Exception e)
             {
-                Debug.LogError("解析类型【"+type+"】出错：" + qdataStr+"\n");
+                Debug.LogError("解析类型【"+type+"】出错：" + qdataStr+"\n"+e);
                 return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
             }
       
@@ -663,6 +664,7 @@ namespace QTool
         Object,
         List,
         Array,
+        CantSerialize,
     }
     public class QSerializeType : QTypeInfo<QSerializeType>
     {
@@ -696,6 +698,11 @@ namespace QTool
             base.Init(type);
             if (Code == TypeCode.Object)
             {
+                if (typeof(Task).IsAssignableFrom(type))
+                {
+                    objType = QObjectType.CantSerialize;
+                    return;
+                }
                 IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
                 IsIQData = typeof(IQData).IsAssignableFrom(type);
                 IsUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(type);
@@ -704,6 +711,7 @@ namespace QTool
                     objType = QObjectType.Object;
                     return;
                 }
+          
                 if (IsArray)
                 {
                     objType = QObjectType.Array;
