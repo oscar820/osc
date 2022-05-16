@@ -15,7 +15,7 @@ namespace QTool{
     }
     public class QDataList: QAutoList<string, QDataRow>
     {
-        public static QDataList QToolSetting => GetData(StreamingPathRoot+nameof(QToolSetting)+".qdl");
+        public static QDataList QToolSetting => GetData(StreamingPathRoot+nameof(QToolSetting)+".txt");
         public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
         static QDataList()
         {
