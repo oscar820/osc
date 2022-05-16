@@ -493,7 +493,86 @@ namespace QTool
         {
             return reader.Peek() < 0;
         }
-        public static bool ReadSplit(this StringReader reader, char split, out string start,out string end)
+        public static string ReadElement(this StringReader reader ,out bool newLine )
+        {
+            newLine = true;
+            using (var writer = new StringWriter())
+            {
+                if (reader.Peek() == '\"')
+                {
+                    bool ignoreFlag = false;
+                    while (!reader.IsEnd())
+                    {
+                        var c = reader.Read();
+                        writer.Write((char)c);
+                        if (c == '\"')
+                        {
+                            if (ignoreFlag)
+                            {
+                                ignoreFlag = false;
+                            }
+                            else
+                            {
+                                if (reader.NextIs('\n')) break;
+                                if (reader.NextIs('\t'))
+                                {
+                                    newLine = false;
+                                    break;
+                                }
+                                if (reader.Peek() == '\"')
+                                {
+                                    ignoreFlag = true;
+                                }
+                            }
+                        }
+                    }
+                    var value = writer.ToString();
+                    if (value.Contains("\n"))
+                    {
+                        return value.Trim('\"');
+                    }
+                    else
+                    {
+                        return value;
+                    }
+                }
+                else
+                {
+                    while (!reader.IsEnd()&&!reader.NextIs('\n'))
+                    {
+                        var c = (char)reader.Read();
+                        writer.Write(c);
+                        if (reader.NextIs('\t'))
+                        {
+                            newLine = false;
+                            break;
+                        }
+                    }
+                    return writer.ToString();
+                }
+               
+            }
+        }
+        public static void WriteElement(this StringWriter writer,string value)
+        {
+            if (string.IsNullOrEmpty(value)) {
+                return;
+            }
+            if (value.Contains("\t"))
+            {
+                value = value.Replace("\t", " ");
+            }
+            if (value.Contains("\n"))
+            {
+                if (value.Contains("\""))
+                {
+                    value = value.Replace("\"", "\"\"");
+                }
+                value = "\"" + value + "\"";
+            }
+            writer.Write(value);
+        }
+        public static bool ReadSplit(this StringReader reader, char split, out string start, out string end)
         {
             using (var writer = new StringWriter())
             {

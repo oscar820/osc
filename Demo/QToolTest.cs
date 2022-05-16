@@ -137,15 +137,16 @@ namespace QTool.Test
             QTool.Command.QCommand.Invoke(commandStr);
         }
         [TextArea(5,10)]
-        public string QDataStr;
+        public string QDataStr; 
         [ViewButton("QData测试")]
         public void QDataTest()
         {
             var data = new QDataList(QDataStr);
+            Debug.LogError(data.ToString());
             data[2]["3"] = "2 3";
             data[3][4] = "3 4";
             data["newLine"][4] = "n 4";
-            data["setting"].Value = "off";
+            data["setting"].Value = "off\nOn";
             Debug.LogError(data);
             Debug.LogError(test1.ToQData());
             var tobj = test1.ToQData().ParseQData<TTestClass>();

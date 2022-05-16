@@ -5,10 +5,17 @@ using System.IO;
 using System.Text;
 
 namespace QTool{
-    
+
+    public class QDataList<T>:QDataList
+    {
+        public QDataList(string str):base(str)
+        {
+
+        }
+    }
     public class QDataList: QAutoList<string, QDataRow>
     {
-        public static QDataList QToolSetting => GetData(nameof(QToolSetting)+".qdata");
+        public static QDataList QToolSetting => GetData(StreamingPathRoot+nameof(QToolSetting)+".qdl");
         public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
         static QDataList()
         {
@@ -78,18 +85,51 @@ namespace QTool{
                 return base[index];
             }
         }
-       
+       public void Parse(string dataStr)
+        {
+            Clear();
+            using (var reader = new StringReader(dataStr))
+            {
+                int index = 0;
+                var row = new QDataRow(this);
+                var count = 0;
+                while (!reader.IsEnd()&&count++<=100)
+                {
+                    var value = reader.ReadElement(out var newLine);
+                    row[index] = value;
+                    index++;
+                    if (newLine)
+                    {
+                        if (row.Count > 0)
+                        {
+                            Add(row);
+                        }
+                        index = 0;
+                        row = new QDataRow(this);
+                    }
+                   
+                }
+            }
+        }
         public QDataList(string dataStr)
         {
-            var lineStrs = dataStr.Split('\n');
-            foreach (var lineStr in lineStrs)
-            {
-                Add(new QDataRow(lineStr, this));
-            }
+            Parse(dataStr);
         }
         public override string ToString()
         {
-            return this.ToOneString("\n");
+            using (var writer =new StringWriter())
+            {
+                for (int i = 0; i < this.Count; i++)
+                {
+                    writer.Write(this[i].ToString());
+                    if (i < Count - 1)
+                    {
+                        writer.Write('\n');
+                    }
+                }
+                return writer.ToString();
+            }
+          
         }
 
     }
@@ -158,19 +198,25 @@ namespace QTool{
         {
         }
         public QDataList OwnerData { get; internal set; }
-        public QDataRow(string lineStr,QDataList ownerData)
+        public QDataRow(QDataList ownerData)
         {
-            var valueS = lineStr.Split('\t');
-            for (int i = 0; i < valueS.Length; i++)
-            {
-                var value = valueS[i];
-                this[i] = value;
-            }
             OwnerData = ownerData;
         }
         public override string ToString()
         {
-            return this.ToOneString("\t");
+            using (var writer=new StringWriter())
+            {
+                for (int j = 0; j < Count; j++)
+                {
+                    var qdata = this[j];
+                    writer.WriteElement(qdata);
+                    if (j < Count - 1)
+                    {
+                        writer.Write('\t');
+                    }
+                }
+                return writer.ToString();
+            }
         }
     }
 }
