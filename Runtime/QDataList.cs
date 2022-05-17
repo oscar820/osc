@@ -76,11 +76,7 @@ namespace QTool{
         }
         public bool TryGetTitleIndex(string title,out int index)
         {
-            index = -1;
-            if (TitleRow != null)
-            {
-                index= TitleRow.IndexOf(title); 
-            }
+            index = TitleRow.IndexOf(title);
             return index >= 0;
         }
         public QDataRow TitleRow

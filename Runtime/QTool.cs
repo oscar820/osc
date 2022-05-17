@@ -531,13 +531,17 @@ namespace QTool
                     while (!reader.IsEnd())
                     {
                         var c = reader.Read();
-                        writer.Write((char)c);
+                        if (c != '\r')
+                        {
+                            writer.Write((char)c);
+                        }
                         if (c == '\"')
                         {
                             checkExit = !checkExit;
                         }
                         if (checkExit)
                         {
+                            reader.NextIgnore('\r');
                             if (reader.NextIs('\n')) break;
                             if (reader.NextIs('\t'))
                             {
@@ -555,7 +559,10 @@ namespace QTool
                     while (!reader.IsEnd()&&!reader.NextIs('\n'))
                     {
                         var c = (char)reader.Read();
-                        writer.Write(c);
+                        if (c != '\r')
+                        {
+                            writer.Write(c);
+                        }
                         if (reader.NextIs('\t'))
                         {
                             newLine = false;
