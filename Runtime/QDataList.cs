@@ -130,7 +130,7 @@ namespace QTool{
                    
                 }
             }
-            Debug.Log(dataStr + "\n=>\n" + this);
+            QToolDebug.Log(()=>dataStr + "\n=>\n" + this);
         }
         public QDataList()
         {
