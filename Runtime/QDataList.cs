@@ -113,8 +113,7 @@ namespace QTool{
             {
                 int index = 0;
                 var row = new QDataRow(this);
-                var count = 0;
-                while (!reader.IsEnd()&&count++<=100)
+                while (!reader.IsEnd())
                 {
                     var value = reader.ReadElement(out var newLine);
                     row[index] = value;
@@ -131,6 +130,7 @@ namespace QTool{
                    
                 }
             }
+            Debug.Log(dataStr + "\n=>\n" + this);
         }
         public QDataList()
         {
