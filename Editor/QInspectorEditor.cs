@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -432,7 +432,8 @@ namespace QTool.Inspector
         public static QDictionary<string, Action<SerializedProperty, Func<float, float>>> DrawFloatAction = new QDictionary<string, Action<SerializedProperty, Func<float, float>>>();
 
         static Color BackColor = new Color(0, 0, 0, 0.6f);
-        static GUIStyle BackStyle = new GUIStyle("helpBox");
+		static GUIStyle _backStyle; 
+		static GUIStyle BackStyle =>_backStyle??=new GUIStyle("helpBox");
 
         public static List<string> TypeMenuList = new List<string>();
         public static List<Type> TypeList = new List<Type>();
