@@ -10,18 +10,18 @@ using System.IO;
 
 namespace QTool
 {
-   
-    
+
+
     public static partial class Tool
     {
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
-        public static Color ToColor(this string key, float s = 0.5f, float v =1f)
+        public static Color ToColor(this string key, float s = 0.5f, float v = 1f)
         {
             if (string.IsNullOrWhiteSpace(key)) return Color.white;
             var colorKey = key + s + v;
             if (!KeyColor.ContainsKey(colorKey))
             {
-                var colorValue = Mathf.Abs(key[0].GetHashCode() %800) + Mathf.Abs(key.GetHashCode() %200f);
+                var colorValue = Mathf.Abs(key[0].GetHashCode() % 800) + Mathf.Abs(key.GetHashCode() % 200f);
                 KeyColor[colorKey] = Color.HSVToRGB(colorValue / 1000, s, v);
             }
             return KeyColor[colorKey];
@@ -35,7 +35,7 @@ namespace QTool
             }
             catch (Exception e)
             {
-                Debug.LogError("【" + name + "】运行出错:"+e);
+                Debug.LogError("【" + name + "】运行出错:" + e);
                 return;
             }
             var checkInfo = "【" + name + "】运行时间:" + (System.DateTime.Now - last).TotalMilliseconds;
@@ -59,7 +59,7 @@ namespace QTool
         {
             return list[UnityEngine.Random.Range(0, list.Count)];
         }
-      
+
         public static IList<T> Random<T>(this IList<T> list)
         {
             for (int i = 0; i < list.Count; i++)
@@ -84,7 +84,7 @@ namespace QTool
             }
             return Application.isPlaying;
         }
-        internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call,Action start=null,Action end=null,Action mid=null)
+        internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
         {
             start?.Invoke();
             var length = array.GetLength(deep);
@@ -93,28 +93,28 @@ namespace QTool
                 indexArray[deep] = i;
                 if (deep + 1 < indexArray.Length)
                 {
-                    ForeachArray(array, deep + 1, indexArray, Call,start,end,mid);
+                    ForeachArray(array, deep + 1, indexArray, Call, start, end, mid);
                 }
                 else
                 {
                     Call?.Invoke(indexArray);
                 }
-                if (i < length-1)
+                if (i < length - 1)
                 {
 
                     mid?.Invoke();
                 }
-            
+
             }
             end?.Invoke();
         }
-        public static string ToQData<T>(this T obj,bool hasName=true)
+        public static string ToQData<T>(this T obj, bool hasName = true)
         {
             var type = typeof(T);
-            return ToQData(obj, type,hasName);
+            return ToQData(obj, type, hasName);
         }
-        
-        public static string ToQData(this object obj,Type type, bool hasName = true)
+
+        public static string ToQData(this object obj, Type type, bool hasName = true)
         {
             var typeCode = Type.GetTypeCode(type);
             switch (typeCode)
@@ -129,16 +129,16 @@ namespace QTool
                                 case QObjectType.Object:
                                     {
                                         if (obj == null) return "";
-                                        
+
                                         writer.Write('{');
                                         if (type == typeof(object))
                                         {
                                             var runtimeType = obj.GetType();
-                                            writer.Write(runtimeType.FullName+"=");
-                                            writer.Write(ToQData(obj, runtimeType,hasName));
-                                        }else if(typeInfo.IsUnityObject)
+                                            writer.Write(runtimeType.FullName + "=");
+                                            writer.Write(ToQData(obj, runtimeType, hasName));
+                                        } else if (typeInfo.IsUnityObject)
                                         {
-                                            writer.Write( QObjectReference.GetId(obj as UnityEngine.Object));
+                                            writer.Write(QObjectReference.GetId(obj as UnityEngine.Object));
                                         }
                                         else if (typeInfo.IsIQData)
                                         {
@@ -173,7 +173,7 @@ namespace QTool
                                                     }
                                                 }
                                             }
-                                         
+
                                         }
                                         writer.Write('}');
 
@@ -186,7 +186,7 @@ namespace QTool
                                         writer.Write('[');
                                         for (int i = 0; i < list.Count; i++)
                                         {
-                                            writer.Write(ToQData(list[i], typeInfo.ElementType,hasName));
+                                            writer.Write(ToQData(list[i], typeInfo.ElementType, hasName));
                                             if (i < list.Count - 1)
                                             {
                                                 writer.Write(',');
@@ -203,8 +203,8 @@ namespace QTool
                                         if (array == null) return "";
                                         array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
                                         {
-                                            writer.Write(ToQData(array.GetValue(indexArray), typeInfo.ElementType,hasName) );
-                                        },()=>writer.Write('['),()=>writer.Write(']'),()=>writer.Write(','));
+                                            writer.Write(ToQData(array.GetValue(indexArray), typeInfo.ElementType, hasName));
+                                        }, () => writer.Write('['), () => writer.Write(']'), () => writer.Write(','));
                                         return writer.ToString();
                                     }
                                 default:
@@ -213,29 +213,29 @@ namespace QTool
                         }
                     }
                 case TypeCode.String:
-                    return "\""+ obj+"\"";
+                    return ToElement(obj?.ToString());
                 default:
                     return obj?.ToString();
             }
         }
-        static bool ArrayParse(string[] strs,List<int> indexArray,List<string> strList,int rank,bool addLength=true)
+        static bool ArrayParse(string[] strs, List<int> indexArray, List<string> strList, int rank, bool addLength = true)
         {
             if (addLength)
             {
                 indexArray.Add(strs.Length);
             }
-          
+
             int i = 0;
             foreach (var str in strs)
             {
                 using (var childReader = new StringReader(str))
                 {
-                    if (rank>1&& childReader.Peek() == '[')
+                    if (rank > 1 && childReader.Peek() == '[')
                     {
-                      
+
                         if (childReader.ReadSplit('[', ']', ',', out var childStrs))
                         {
-                            if (!ArrayParse(childStrs,indexArray,strList,rank,i==0))
+                            if (!ArrayParse(childStrs, indexArray, strList, rank, i == 0))
                             {
                                 return false;
                             }
@@ -252,15 +252,15 @@ namespace QTool
                 }
                 i++;
             }
-           
+
             return true;
         }
-        public static object ParseQData(this string qdataStr,Type type, bool hasName=true,object target=null)
+        public static object ParseQData(this string qdataStr, Type type, bool hasName = true, object target = null)
         {
 
             if (string.IsNullOrEmpty(qdataStr))
             {
-                return type.IsValueType ? QReflection.CreateInstance(type,target) : null;
+                return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
             }
             var typeCode = Type.GetTypeCode(type);
             if (type.IsEnum)
@@ -300,7 +300,7 @@ namespace QTool
                                                                     target = ParseQData(memberStr, runtimeType, hasName);
                                                                 }
                                                             }
-                                                        }     
+                                                        }
                                                     }
                                                     else if (typeInfo.IsUnityObject)
                                                     {
@@ -445,11 +445,7 @@ namespace QTool
                     case TypeCode.Single:
                         return float.Parse(qdataStr);
                     case TypeCode.String:
-                        if (qdataStr.StartsWith("\"") && qdataStr.EndsWith("\""))
-                        {
-                            return qdataStr.Substring(1, qdataStr.Length - 2);
-                        }
-                        return qdataStr;
+                        return ParseElement(qdataStr);
                     case TypeCode.UInt16:
                         return ushort.Parse(qdataStr);
                     case TypeCode.UInt32:
@@ -463,15 +459,15 @@ namespace QTool
             }
             catch (Exception e)
             {
-                Debug.LogError("解析类型【"+type+"】出错：" + qdataStr+"\n"+e);
+                Debug.LogError("解析类型【" + type + "】出错：" + qdataStr + "\n" + e);
                 return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
             }
-      
+
 
         }
-        public static T ParseQData<T>(this string qdataStr,bool hasName=true,T target=default)
+        public static T ParseQData<T>(this string qdataStr, bool hasName = true, T target = default)
         {
-            return (T)ParseQData(qdataStr, typeof(T),hasName,target);
+            return (T)ParseQData(qdataStr, typeof(T), hasName, target);
         }
         public static bool NextIs(this StringReader reader, char value)
         {
@@ -493,6 +489,37 @@ namespace QTool
         {
             return reader.Peek() < 0;
         }
+        internal static string ToElement(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return "";
+            }
+            if (value.Contains("\t"))
+            {
+                value = value.Replace("\t", " ");
+            }
+
+            if (value.Contains("\n"))
+            {
+                if (value.Contains("\""))
+                {
+                    value = value.Replace("\"", "\"\"");
+                }
+                value = "\"" + value + "\"";
+            }
+            return value;
+        }
+        internal static string ParseElement(string value)
+        {
+            if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n")||true))
+            {
+                value = value.Substring(1, value.Length - 2);
+                value = value.Replace("\"\"", "\"");
+                return value;
+            }
+            return value;
+        }
         public static string ReadElement(this StringReader reader ,out bool newLine )
         {
             newLine = true;
@@ -500,41 +527,28 @@ namespace QTool
             {
                 if (reader.Peek() == '\"')
                 {
-                    bool ignoreFlag = false;
+                    var checkExit = true;
                     while (!reader.IsEnd())
                     {
                         var c = reader.Read();
                         writer.Write((char)c);
                         if (c == '\"')
                         {
-                            if (ignoreFlag)
+                            checkExit = !checkExit;
+                        }
+                        if (checkExit)
+                        {
+                            if (reader.NextIs('\n')) break;
+                            if (reader.NextIs('\t'))
                             {
-                                ignoreFlag = false;
-                            }
-                            else
-                            {
-                                if (reader.NextIs('\n')) break;
-                                if (reader.NextIs('\t'))
-                                {
-                                    newLine = false;
-                                    break;
-                                }
-                                if (reader.Peek() == '\"')
-                                {
-                                    ignoreFlag = true;
-                                }
+                                newLine = false;
+                                break;
                             }
                         }
+                     
                     }
                     var value = writer.ToString();
-                    if (value.Contains("\n"))
-                    {
-                        return value.Trim('\"');
-                    }
-                    else
-                    {
-                        return value;
-                    }
+                    return value;
                 }
                 else
                 {
@@ -553,25 +567,7 @@ namespace QTool
                
             }
         }
-        public static void WriteElement(this StringWriter writer,string value)
-        {
-            if (string.IsNullOrEmpty(value)) {
-                return;
-            }
-            if (value.Contains("\t"))
-            {
-                value = value.Replace("\t", " ");
-            }
-            if (value.Contains("\n"))
-            {
-                if (value.Contains("\""))
-                {
-                    value = value.Replace("\"", "\"\"");
-                }
-                value = "\"" + value + "\"";
-            }
-            writer.Write(value);
-        }
+       
         public static bool ReadSplit(this StringReader reader, char split, out string start, out string end)
         {
             using (var writer = new StringWriter())

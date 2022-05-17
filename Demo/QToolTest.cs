@@ -56,7 +56,12 @@ namespace QTool.Test
                 }
             });
            Debug.LogError( (TTestClass)Activator.CreateInstance(QReflection.ParseType(nameof(TTestClass))));
-        
+
+        }
+        [ContextMenu("切换语言")]
+        public void ChangeLangua()
+        {
+            QTranslate.ChangeGlobalLanguage(QTranslate.globalLanguage == "中文" ? "English" : "中文");
         }
         public byte[] scenebytes;
         [ContextMenu("保存场景")]
@@ -143,11 +148,13 @@ namespace QTool.Test
         {
             var data = new QDataList(QDataStr);
             Debug.LogError(data.ToString());
-            data[2]["3"] = "2 3";
+            data[2].SetValue("3", "2 3");
             data[3][4] = "3 4";
             data["newLine"][4] = "n 4";
-            data["setting"].Value = "off\nOn";
+            data["newLine"].SetValue("5", true);
+            data["setting"].SetValue( "off\nOn");
             Debug.LogError(data);
+            Debug.LogError(data["setting"].GetValue<string>());
             Debug.LogError(test1.ToQData());
             var tobj = test1.ToQData().ParseQData<TTestClass>();
             Debug.LogError(tobj.ToQData());

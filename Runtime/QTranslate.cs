@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 namespace QTool
 {
-
-   
     public class QTranslate : MonoBehaviour
     {
-        public static QDataList LanguageData => QDataList.GetData(QDataList.StreamingPathRoot+ "LanguageData.txt"); 
+        public static QDataList LanguageData => QDataList.GetData(QDataList.StreamingPathRoot + "LanguageData.txt", (data) => {
+            data.SetTitles("Key", "中文", "English");
+            data["文本语言"].SetValue("中文", "文本语言").SetValue("English", "Language");
+        }); 
         #region 基础数据
 
         [HideInInspector]
@@ -63,7 +64,7 @@ namespace QTool
                 globalLanguage = value;
                 OnLanguageChange?.Invoke();
             }
-
+            Debug.Log("文本语言：" + value);
         }
         static event System.Action OnLanguageChange;
         #endregion
@@ -109,7 +110,7 @@ namespace QTool
         {
             if (LanguageData.ContainsKey(value))
             {
-                var translate = LanguageData[value][globalLanguage];
+                var translate = LanguageData[value].GetValue<string>(globalLanguage); ;
                 if (!string.IsNullOrEmpty(translate))
                 {
                     return translate;
@@ -121,7 +122,8 @@ namespace QTool
             }
             return value;
         }
-        private  void CheckFresh()
+        [ViewButton("翻译刷新")]
+        private void CheckFresh()
         {
             if (curValue != value)
             {
@@ -132,12 +134,15 @@ namespace QTool
             {
                 translateResult = Translate(value);
                 OnTranslateChange?.Invoke(translateResult);
+               
             }
             catch (System.Exception e)
             {
                 Debug.LogError("翻译[" + value + "]出错" + e);
             }
         }
+       
+      
 
     }
 }

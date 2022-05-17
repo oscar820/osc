@@ -15,7 +15,7 @@ namespace QTool{
     }
     public class QDataList: QAutoList<string, QDataRow>
     {
-        public static QDataList QToolSetting => GetData(StreamingPathRoot+nameof(QToolSetting)+".txt");
+        public static QDataList QToolSetting => GetData(StreamingPathRoot+nameof(QToolSetting)+".txt",(data)=> { data[nameof(QToolDebug)].SetValue(false); });
         public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
         static QDataList()
         {
@@ -27,12 +27,34 @@ namespace QTool{
                 }
             };
         }
-        public static QDataList GetData(string path)
+        public static QDataList GetData(string path,System.Action<QDataList> autoCreate=null)
         {
             if (!dataList.ContainsKey(path))
             {
-                dataList[path] = new QDataList(FileManager.Load(path));
-                dataList[path].LoadPath = path;
+                if (FileManager.ExistsFile(path))
+                {
+                    try
+                    {
+                        dataList[path] = new QDataList(FileManager.Load(path));
+                        dataList[path].LoadPath = path;
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
+                    }
+                }
+                else
+                {
+                    if (autoCreate!=null)
+                    {
+                        var qdataList = new QDataList();
+                        qdataList.LoadPath = path;
+                        dataList[path] = qdataList;
+                        autoCreate(qdataList);
+                        qdataList.Save();
+                        Debug.LogWarning("不存在QDataList自动创建[" + path + "]");
+                    }
+                }
             }
             return dataList[path];
         }
@@ -55,21 +77,24 @@ namespace QTool{
         public bool TryGetTitleIndex(string title,out int index)
         {
             index = -1;
-            if (TitleLine != null)
+            if (TitleRow != null)
             {
-                index= TitleLine.IndexOf(title); 
+                index= TitleRow.IndexOf(title); 
             }
             return index >= 0;
         }
-        public QDataRow TitleLine
+        public QDataRow TitleRow
         {
             get
             {
-                if (Count > 0)
-                {
-                    return base[0];
-                }
-                return null;
+                return this[0];
+            }
+        }
+        public void SetTitles(params string[] titles)
+        {
+            for (int i = 0; i < titles.Length; i++)
+            {
+                TitleRow[i] = titles[i];
             }
         }
         public new QDataRow this[int index]
@@ -111,6 +136,9 @@ namespace QTool{
                 }
             }
         }
+        public QDataList()
+        {
+        }
         public QDataList(string dataStr)
         {
             Parse(dataStr);
@@ -142,58 +170,40 @@ namespace QTool{
                 base[0] = value;
             }
         }
-        public T GetValue<T>()
+        public T GetValue<T>(int index=1)
         {
-            return Value.ParseQData<T>();
+            return base[index].ParseQData<T>();
         }
-        public void SetValue<T>(T value)
+        public void SetValue<T>(T value, int index=1)
         {
-            Value = value?.ToString();
+            base[index] = value.ToQData();
         }
-        public string Value
+        public T GetValue<T>(string title)
         {
-            get
+            if (OwnerData.TryGetTitleIndex(title, out var index))
             {
-                if (Count > 1)
-                {
-                    return base[1];
-                }
-                else
-                {
-                    return "";
-                }
+                return GetValue<T>(index);
             }
-            set
+            else
             {
-                base[1] = value;
+                throw new System.Exception("不存在的列名[" + title + "]");
             }
         }
-        public string this[string title]
+        public QDataRow SetValue<T>(string title,T value)
         {
-            get
+            if (OwnerData.TryGetTitleIndex(title, out var index))
             {
-                if(OwnerData.TryGetTitleIndex(title,out var index))
-                {
-                    return this[index];
-                }
-                else
-                {
-                    throw new System.Exception("不存在的列名[" + title + "]");
-                }
+                SetValue(value, index);
             }
-            set
+            else
             {
-                if (OwnerData.TryGetTitleIndex(title, out var index))
-                {
-                    this[index] = value;
-                }
-                else
-                {
-                    throw new System.Exception("不存在的列名[" + title + "]");
-                }
-
+                Debug.LogWarning("不存在的列名[" + title + "]自动创建");
+                OwnerData[0].Add(title);
+                SetValue(title, value);
             }
+            return this;
         }
+      
         public QDataRow()
         {
         }
@@ -209,7 +219,7 @@ namespace QTool{
                 for (int j = 0; j < Count; j++)
                 {
                     var qdata = this[j];
-                    writer.WriteElement(qdata);
+                    writer.Write(qdata);
                     if (j < Count - 1)
                     {
                         writer.Write('\t');
