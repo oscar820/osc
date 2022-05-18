@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace QTool
 {
-    public static class QToolToolBar
+    public static class QToolEditor
     {
      
         [MenuItem("QTool/清空缓存/清空全部缓存")]
@@ -54,37 +54,58 @@ namespace QTool
             {
                 return "Builds/Windows/test.exe";
             }
+
         }
-        [MenuItem("QTool/工具/运行测试包 %T")]
-        public static void RunTest()
+		static string GetBuildPath(BuildTarget buildTarget)
+		{
+			switch (buildTarget)
+			{
+				case BuildTarget.StandaloneWindows:
+					return "Builds/" + buildTarget + "/"+PlayerSettings.productName+".exe";
+				default:
+					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
+			}
+		}
+		public static string Build(BuildTarget buildTarget= BuildTarget.StandaloneWindows)
+		{
+			if (!BuildPipeline.isBuildingPlayer)
+			{
+				var sceneList = new List<string>();
+				sceneList.Add(SceneManager.GetActiveScene().path);
+				foreach (var scene in EditorBuildSettings.scenes)
+				{
+					sceneList.Add(scene.path);
+				}
+				var buildOption = new BuildPlayerOptions
+				{
+					scenes = sceneList.ToArray(),
+					locationPathName = GetBuildPath(buildTarget),
+					target = buildTarget,
+					options = BuildOptions.None,
+				};
+				var buildInfo = BuildPipeline.BuildPlayer(buildOption);
+				if (buildInfo.summary.result == BuildResult.Succeeded)
+				{
+					Debug.Log("打包成功" + buildOption.locationPathName);
+					return buildOption.locationPathName;
+				}
+				else
+				{
+					Debug.LogError("打包失败");
+				}
+			}
+			return "";
+		}
+     
+        [MenuItem("QTool/工具/打包测试当前场景")]
+        private static void BuildRandRun()
         {
-            System.Diagnostics.Process.Start(BasePath + WindowsLocalPath);
+			var path = Build();
+			if (!string.IsNullOrWhiteSpace(path))
+			{
+				System.Diagnostics.Process.Start(path);
+			}
         }
-        [MenuItem("QTool/工具/打包测试当前场景 %#T")]
-        public static void TestBuild()
-        {
-            if (!BuildPipeline.isBuildingPlayer)
-            {
-                var buildOption = new BuildPlayerOptions
-                {
-                    scenes = new string[] { SceneManager.GetActiveScene().path },
-                    locationPathName = WindowsLocalPath,
-                    target = BuildTarget.StandaloneWindows,
-                    options = BuildOptions.None,
-                };
-                var buildInfo = BuildPipeline.BuildPlayer(buildOption);
-                if (buildInfo.summary.result == BuildResult.Succeeded)
-                {
-                    QToolDebug.Log(()=>"打包成功" + BasePath+WindowsLocalPath);
-                    System.Diagnostics.Process.Start(BasePath + WindowsLocalPath);
-                }
-                else
-                {
-                   Debug.LogError("打包失败");
-                }
-            }
-        }
-       
     }
 }
 

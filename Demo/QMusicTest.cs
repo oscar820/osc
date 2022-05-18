@@ -20,10 +20,10 @@ public class QMusicTest : MonoBehaviour
         CubePool = new ObjectPool<GameObject>("QMusicPool", () => Instantiate(cubePrefab)); ;
         QMusicManager.ParseMusic(audio.clip);
         audio.Play();
-        lines[0].gameObject.InvokeEvent("ÏÔÊ¾Ãû", "QMusic");
+        lines[0].gameObject.InvokeEvent("æ˜¾ç¤ºå", "QMusic");
         for (int i = 0; i < 6; i++)
         {
-            lines[i + 1].gameObject.InvokeEvent("ÏÔÊ¾Ãû", ((FFTWindow)i).ToString());
+            lines[i + 1].gameObject.InvokeEvent("æ˜¾ç¤ºå", ((FFTWindow)i).ToString());
         }
 
     }
