@@ -7,9 +7,42 @@ using QTool.Reflection;
 using QTool.Command;
 namespace QTool.FlowGraph
 {
-
+	[ViewName("åŸºç¡€")]
+	public static class QFlowGraphNode
+	{
+		[ViewName("æ•°å€¼/è·å–å˜é‡")]
+		public static object GetValue(QFlowNode This, string key)
+		{
+			return This.Graph.Values[key];
+		}
+		[ViewName("æ•°å€¼/è®¾ç½®å˜é‡")]
+		public static void SetValue(QFlowNode This, string key, object value)
+		{
+			This.Graph.Values[key] = value;
+		}
+		[QStartNode]
+		[ViewName("èµ·ç‚¹/Start")]
+		public static void Start()
+		{
+		}
+		[QStartNode]
+		[ViewName("èµ·ç‚¹/Event")]
+		public static void Event([QNodeKeyName] string eventKey = "äº‹ä»¶å")
+		{
+		}
+		[ViewName("æ—¶é—´/å»¶è¿Ÿ")]
+		public static IEnumerator Deley(float time)
+		{
+			yield return new WaitForSeconds(time);
+		}
+	
+	}
     public class QFlowGraph
     {
+		static QFlowGraph()
+		{
+			QCommand.FreshCommands(typeof(QFlowGraphNode));
+		}
         public override string ToString()
         {
             return this.ToQData();
@@ -190,7 +223,7 @@ namespace QTool.FlowGraph
         }
     }
     /// <summary>
-    ///  Ö¸¶¨²ÎÊı¶Ë¿ÚÎªÊä³ö¶Ë¿Ú
+    ///  æŒ‡å®šå‚æ•°ç«¯å£ä¸ºè¾“å‡ºç«¯å£
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class QOutputPortAttribute : Attribute
@@ -203,7 +236,7 @@ namespace QTool.FlowGraph
         }
     }
     /// <summary>
-    /// Ö¸¶¨²ÎÊı¶Ë¿ÚÎªÁ÷³Ì¶Ë¿Ú
+    /// æŒ‡å®šå‚æ•°ç«¯å£ä¸ºæµç¨‹ç«¯å£
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class QFlowPortAttribute : Attribute
@@ -216,7 +249,7 @@ namespace QTool.FlowGraph
         }
     }
     /// <summary>
-    /// Ö¸¶¨²ÎÊı¶Ë¿Ú×Ô¶¯¸ü¸Ä½ÚµãKeyÖµÓëÃû×Ö Á½¸öÏàÍ¬Key½Úµã»á±¨´í
+    /// æŒ‡å®šå‚æ•°ç«¯å£è‡ªåŠ¨æ›´æ”¹èŠ‚ç‚¹Keyå€¼ä¸åå­— ä¸¤ä¸ªç›¸åŒKeyèŠ‚ç‚¹ä¼šæŠ¥é”™
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class QNodeKeyNameAttribute : Attribute
@@ -226,7 +259,7 @@ namespace QTool.FlowGraph
         }
     }
     /// <summary>
-    /// Ö¸¶¨º¯Êı½ÚµãÎªÆğµã½Úµã ¼´Ã»ÓĞÁ÷³ÌÊäÈë¶Ë¿Ú ½ÚµãKeyÎªº¯ÊıÃû
+    /// æŒ‡å®šå‡½æ•°èŠ‚ç‚¹ä¸ºèµ·ç‚¹èŠ‚ç‚¹ å³æ²¡æœ‰æµç¨‹è¾“å…¥ç«¯å£ èŠ‚ç‚¹Keyä¸ºå‡½æ•°å
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class QStartNodeAttribute : Attribute
@@ -271,7 +304,7 @@ namespace QTool.FlowGraph
     {
         public override string ToString()
         {
-            return "¶Ë¿Ú" + Key + "(" + ValueType + ")";
+            return "ç«¯å£" + Key + "(" + ValueType + ")";
         }
         public string Key { get; set; }
         public string name;
@@ -470,7 +503,7 @@ namespace QTool.FlowGraph
             if (targetPort == null) return;
             if (!CanConnect(targetPort))
             {
-                Debug.LogError("²»ÄÜ½« " + this + " Á¬½Ó " + targetPort);
+                Debug.LogError("ä¸èƒ½å°† " + this + " è¿æ¥ " + targetPort);
                 return;
             }
             if (onlyoneConnect)
@@ -494,7 +527,7 @@ namespace QTool.FlowGraph
             var port = Node.Graph[connect];
             if (port==null)
             {
-                Debug.LogError("²»´æÔÚ¶Ë¿Ú " + port);
+                Debug.LogError("ä¸å­˜åœ¨ç«¯å£ " + port);
                 return;
             }
             port[connect.Value.index]?.ConnectList.Remove(new PortId(this, index));
@@ -551,10 +584,10 @@ namespace QTool.FlowGraph
                 switch (returnType)
                 {
                     case ReturnType.CoroutineDelay:
-                        return name + " (Ğ­³Ì)";
+                        return name + " (åç¨‹)";
                     case ReturnType.TaskDelayValue:
                     case ReturnType.TaskDelayVoid:
-                        return name + " (Ïß³Ì)";
+                        return name + " (çº¿ç¨‹)";
                     default:
                         return name;
                 }
@@ -632,17 +665,17 @@ namespace QTool.FlowGraph
                 {
                     port.Init(this);
                 }
-                Debug.LogError("²»´æÔÚÃüÁî¡¾" + commandKey + "¡¿");
+                Debug.LogError("ä¸å­˜åœ¨å‘½ä»¤ã€" + commandKey + "ã€‘");
                 return;
             }
-            this.name = command.name;
+            this.name = command.name.SplitEndString("/");
             if (command.method.GetAttribute<QStartNodeAttribute>() == null)
             {
                 AddPort(QFlowKey.FromPort);
             }
             else
             {
-                Key = name;
+                Key = this.name;
             }
             AddPort(QFlowKey.NextPort, QOutputPortAttribute.Normal);
             commandParams = new object[command.paramInfos.Length];
@@ -699,12 +732,12 @@ namespace QTool.FlowGraph
                 {
                     returnType = ReturnType.TaskDelayValue;
                     TaskReturnValueGet = command.method.ReturnType.GetProperty("Result").GetValue;
-                    AddPort(QFlowKey.ResultPort, QOutputPortAttribute.Normal, "½á¹û", command.method.ReturnType.GetTrueType());
+                    AddPort(QFlowKey.ResultPort, QOutputPortAttribute.Normal, "ç»“æœ", command.method.ReturnType.GetTrueType());
                 }
             }
             else
             {
-                AddPort(QFlowKey.ResultPort, QOutputPortAttribute.Normal, "½á¹û", command.method.ReturnType.GetTrueType());
+                AddPort(QFlowKey.ResultPort, QOutputPortAttribute.Normal, "ç»“æœ", command.method.ReturnType.GetTrueType());
                 returnType = ReturnType.ReturnValue;
             }
             Ports.RemoveAll((port) => port.Node == null);
@@ -741,7 +774,7 @@ namespace QTool.FlowGraph
         {
             if (!Ports.ContainsKey(portKey))
             {
-                Debug.LogError(ViewName + "²»´æÔÚ¶Ë¿Ú[" + portKey + "]");
+                Debug.LogError(ViewName + "ä¸å­˜åœ¨ç«¯å£[" + portKey + "]");
             }
             _nextFlowPort = new PortId(Ports[portKey], listIndex);
         }
@@ -775,7 +808,7 @@ namespace QTool.FlowGraph
                 case ReturnType.CoroutineDelay:
                 case ReturnType.TaskDelayVoid:
                 case ReturnType.TaskDelayValue:
-                    Debug.LogError(commandKey+" µÈ´ıÂß¼­ÎŞ·¨×Ô¶¯ÔËĞĞ");
+                    Debug.LogError(commandKey+" ç­‰å¾…é€»è¾‘æ— æ³•è‡ªåŠ¨è¿è¡Œ");
                     break;
                 default:
                     break;
@@ -802,7 +835,7 @@ namespace QTool.FlowGraph
             }
             else
             {
-                Debug.LogError("²»´æÔÚ¶Ë¿Ú[" + portKey + "]");
+                Debug.LogError("ä¸å­˜åœ¨ç«¯å£[" + portKey + "]");
                 return null;
             }
         }

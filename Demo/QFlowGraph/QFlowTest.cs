@@ -10,22 +10,26 @@ using QTool.Test;
 
 public class QFlowTest : MonoBehaviour
 {
-    public QFlowGraphAsset graphAsset;
+	static QFlowTest()
+	{
+		QCommand.FreshCommands(typeof(QFlowNodeTest));
+	}
+	public QFlowGraphAsset graphAsset;
     void Start()
     {
         graphAsset?.Graph.Run(nameof(QFlowNodeTest.Start));
     }
-    [ContextMenu("ÔËĞĞ¡¾²âÊÔÊÂ¼ş¡¿")]
+    [ContextMenu("è¿è¡Œã€æµ‹è¯•äº‹ä»¶ã€‘")]
     public void RunEventTest()
     {
-        graphAsset?.Graph.Run("²âÊÔÊÂ¼ş");
+        graphAsset?.Graph.Run("æµ‹è¯•äº‹ä»¶");
     }
-    [ContextMenu("ÔËĞĞÊ±´´½¨QFlowGraph²âÊÔ")]
+    [ContextMenu("è¿è¡Œæ—¶åˆ›å»ºQFlowGraphæµ‹è¯•")]
     public void Test()
     {
         var graph = new QFlowGraph();
         var logNode= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
-        logNode["value"] = "QFlowGraph²âÊÔ";
+        logNode["value"] = "QFlowGraphæµ‹è¯•";
         var waitNode = graph.Add(nameof(QFlowNodeTest.CoroutineWaitTest));
         waitNode["time"]=3;
         logNode.SetNextNode(waitNode);
@@ -42,20 +46,17 @@ public class QFlowTest : MonoBehaviour
 #if UNITY_EDITOR
 [UnityEditor.InitializeOnLoad]
 #endif
-[ViewName("QFlowNode²âÊÔ")]
+[ViewName("QFlowNodeæµ‹è¯•")]
 public static class QFlowNodeTest
 {
-    static QFlowNodeTest()
-    {
-        QCommand.FreshCommands(typeof(QFlowNodeTest));
-    }
+	
     [QStartNode]
     public static void Start()
     {
 
     }
     [QStartNode]
-    public static void EventStartTest([QNodeKeyName]string eventKey="ÊÂ¼şÃû")
+    public static void EventStartTest([QNodeKeyName]string eventKey="äº‹ä»¶å")
     {
 
     }
@@ -83,7 +84,7 @@ public static class QFlowNodeTest
         value = testEnum2.ToString();
         Debug.LogError(value + "  " + defaultTest1);
     }
-    public static void OutTest([ViewName("ÊäÈëBool")] bool inBool, [ViewName("Êä³öBool")] out bool outBool, int inInt, out int outInt, float inFloat, out float outFloat)
+    public static void OutTest([ViewName("è¾“å…¥Bool")] bool inBool, [ViewName("è¾“å‡ºBool")] out bool outBool, int inInt, out int outInt, float inFloat, out float outFloat)
     {
         outBool = inBool;
         outInt = inInt;
@@ -121,13 +122,13 @@ public static class QFlowNodeTest
     {
         This[nameof(result)] = a + b;
     }
-    [ViewName("Òì²½²âÊÔ")]
+    [ViewName("å¼‚æ­¥æµ‹è¯•")]
     public static void AsyncTest(QFlowNode This, [QOutputPort]QFlow One, [QOutputPort] QFlow Tow)
     {
         This.SetNetFlowPort(nameof(One));
         This.RunPort(nameof( Tow));
     }
-    [ViewName("ÈÎÎñ²âÊÔ")]
+    [ViewName("ä»»åŠ¡æµ‹è¯•")]
     public static IEnumerator TaskTest(QFlowNode This,List<QFlow> task, QFlow failureEvent, [QOutputPort,QFlowPort(showValue = true)] QFlow success, [QOutputPort, QFlowPort(showValue = true)] string failure)
     {
         List<int> taskList = new List<int> { };
@@ -136,19 +137,19 @@ public static class QFlowNodeTest
             taskList.Add(i);
         }
         This.TriggerPortList.Clear();
-        Debug.LogError("ÈÎÎñ¿ªÊ¼");
+        Debug.LogError("ä»»åŠ¡å¼€å§‹");
         while (taskList.Count>0)
         {
             foreach (var port in This.TriggerPortList)
             {
                 if (port.port == nameof(task))
                 {
-                    Debug.LogError("Íê³É "+nameof(task)+port.index );
+                    Debug.LogError("å®Œæˆ "+nameof(task)+port.index );
                     taskList.Remove(port.index);
                 }
                 else if(port.port== nameof(failureEvent))
                 {
-                    Debug.LogError("ÈÎÎñÊ§°Ü");
+                    Debug.LogError("ä»»åŠ¡å¤±è´¥");
                     This.SetNetFlowPort(nameof(failure));
                     yield break;
                 }
@@ -156,7 +157,7 @@ public static class QFlowNodeTest
             This.TriggerPortList.Clear();
             yield return null;
         }
-        Debug.LogError("ÈÎÎñ³É¹¦");
+        Debug.LogError("ä»»åŠ¡æˆåŠŸ");
         This.SetNetFlowPort(nameof(success));
     }
 }

@@ -26,12 +26,16 @@ namespace QTool
         static QDictionary<object, float> timeScaleList = new QDictionary<object, float>();
         public static void ChangeScale(object obj, float timeScale)
         {
-            if (timeScale >= 0)
+            if (timeScale==1)
             {
-                timeScaleList[obj] = timeScale;
-                UpdateTimeScale();
-            }
-        }
+				timeScaleList.RemoveKey(obj);
+			}
+			else
+			{
+				timeScaleList[obj] = timeScale;
+			}
+			UpdateTimeScale();
+		}
         public static void RevertScale(object obj)
         {
             timeScaleList.RemoveKey(obj);

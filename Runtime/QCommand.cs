@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using QTool.FlowGraph;
 
 namespace QTool.Command
 {
@@ -68,8 +69,9 @@ namespace QTool.Command
                 FreshTypeCommands(t);
             }
             foreach (var t in types)
-            {
-                if (!TypeList.Contains(t))
+			{
+				Debug.Log("åˆå§‹åŒ–å‘½ä»¤ï¼š" + t.Name);
+				if (!TypeList.Contains(t))
                 {
                     FreshTypeCommands(t);
                 }
@@ -91,20 +93,30 @@ namespace QTool.Command
             }, BindingFlags.Public | BindingFlags.Static);
             TypeList.AddCheckExist(type);
         }
-        [ViewName("»ù´¡")]
+        [ViewName("åŸºç¡€")]
         public static class BaseCommands
         {
-            [ViewName("ÈÕÖ¾")]
+            [ViewName("æ—¥å¿—/æ™®é€šæ—¥å¿—")]
             public static void Log(object obj)
             {
                 Debug.Log(obj);
-            }
-            [ViewName("´íÎóÈÕÖ¾")]
+			}
+			[ViewName("æ—¥å¿—/è­¦å‘Šæ—¥å¿—")]
+			public static void LogWarning(object obj)
+			{
+				Debug.LogWarning(obj);
+			}
+			[ViewName("æ—¥å¿—/é”™è¯¯æ—¥å¿—")]
             public static void LogError(object obj)
             {
                 Debug.LogError(obj);
-            }
-        }
+			}
+			[ViewName("æ—¶é—´/æ—¶é—´æ§åˆ¶")]
+			public static void TimeScale(float timeScale,object flag)
+			{
+				QTime.ChangeScale(flag, timeScale);
+			}
+		}
 
     }
 
@@ -149,7 +161,7 @@ namespace QTool.Command
                     catch (Exception e)
                     {
 
-                        Debug.LogError("Í¨¹ı[" + commands.ToOneString(" ") + "]µ÷ÓÃÃüÁî[" + this + "]³ö´í " + "²ÎÊı[" + pInfo + "]½âÎö³ö´í :\n" + e);
+                        Debug.LogError("é€šè¿‡[" + commands.ToOneString(" ") + "]è°ƒç”¨å‘½ä»¤[" + this + "]å‡ºé”™ " + "å‚æ•°[" + pInfo + "]è§£æå‡ºé”™ :\n" + e);
                         return false;
                     }
                 }
@@ -159,7 +171,7 @@ namespace QTool.Command
                 }
                 else
                 {
-                    Debug.LogError("Í¨¹ı[" + commands.ToOneString(" ") + "]µ÷ÓÃÃüÁî[" + this + "]³ö´í " + "È±ÉÙ²ÎÊı[" + pInfo + "]");
+                    Debug.LogError("é€šè¿‡[" + commands.ToOneString(" ") + "]è°ƒç”¨å‘½ä»¤[" + this + "]å‡ºé”™ " + "ç¼ºå°‘å‚æ•°[" + pInfo + "]");
                     return false;
                 }
             }
