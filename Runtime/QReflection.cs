@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace QTool.Reflection
 {
-    #region ÀàĞÍ·´Éä
+    #region ç±»å‹åå°„
 
     public class QMemeberInfo : IKey<string>
     {
@@ -32,7 +32,7 @@ namespace QTool.Reflection
             Name = info.Name;
             Type = info.PropertyType;
             if (info.SetMethod != null)
-            {
+			{
                 Set = info.SetValue;
             }
             if (info.GetMethod != null)
@@ -312,7 +312,7 @@ namespace QTool.Reflection
             }
             catch (Exception e)
             {
-                throw new Exception("Í¨¹ı" + type + "(" + param.ToOneString(",") + ")´´½¨¶ÔÏó" + type + "³ö´í", e);
+                throw new Exception("é€šè¿‡" + type + "(" + param.ToOneString(",") + ")åˆ›å»ºå¯¹è±¡" + type + "å‡ºé”™", e);
             }
         }
         static Dictionary<string, Type> TypeBuffer = new Dictionary<string, Type>();
@@ -360,7 +360,7 @@ namespace QTool.Reflection
             {
                 return null;
             }
-            Debug.LogError("ÀàĞÍ[" + typeString + "]Î´½âÎö³É¹¦");
+            Debug.LogError("ç±»å‹[" + typeString + "]æœªè§£ææˆåŠŸ");
             return null;
 
         }

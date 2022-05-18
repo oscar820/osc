@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Serialization;
@@ -748,78 +748,81 @@ namespace QTool
         Array,
         CantSerialize,
     }
-    public class QSerializeType : QTypeInfo<QSerializeType>
-    {
-        public static QDictionary<Type, List<string>> TypeMembers = new QDictionary<Type, List<string>>()
-        {
-            new QKeyValue<Type, List<string>>
-            {
-                 Key=typeof(Rect),
-                 Value=new List<string>
-                 {
-                     "position",
-                     "size",
-                 }
-            }
-        };
-        static bool IsQSValue(MemberInfo info)
-        {
-            if (info.GetCustomAttribute<QIgnoreAttribute>() != null)
-            {
-                return false;
-            }
-            return true;
-        }
-        public QObjectType objType = QObjectType.Object;
-        public bool IsIQSerialize { private set; get; }
-        public bool IsIQData { private set; get; }
-        public bool IsUnityObject { private set; get; }
-        protected override void Init(Type type)
-        {  
-            Functions = null;
-            base.Init(type);
-            if (Code == TypeCode.Object)
-            {
-                if (typeof(Task).IsAssignableFrom(type))
-                {
-                    objType = QObjectType.CantSerialize;
-                    return;
-                }
-                IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
-                IsIQData = typeof(IQData).IsAssignableFrom(type);
-                IsUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(type);
-                if (IsIQSerialize || IsIQData)
-                {
-                    objType = QObjectType.Object;
-                    return;
-                }
-          
-                if (IsArray)
-                {
-                    objType = QObjectType.Array;
-                }
-                else if (IsList)
-                {
-                    objType = QObjectType.List;
-                }
-                else
-                {
-                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        Debug.LogError("不支持序列化【" + type + "】Nullable类型");
-                    }
-                    Members.RemoveAll((info) =>
-                    {
-                        if (TypeMembers.ContainsKey(type))
-                        {
-                            return !TypeMembers[type].Contains(info.Key);
-                        }
-                        return !IsQSValue(info.MemeberInfo) || info.Key == "Item" || info.Set == null || info.Get == null;
-                    });
-                }
-            }
-        }
+	public class QSerializeType : QTypeInfo<QSerializeType>
+	{
+		public static QDictionary<Type, List<string>> TypeMembers = new QDictionary<Type, List<string>>()
+		{
+			new QKeyValue<Type, List<string>>
+			{
+				 Key=typeof(Rect),
+				 Value=new List<string>
+				 {
+					 "position",
+					 "size",
+				 }
+			}
+		};
+		static bool IsQSValue(MemberInfo info)
+		{
+			if (info.GetCustomAttribute<QIgnoreAttribute>() != null)
+			{
+				return false;
+			}
+			return true;
+		}
+		public QObjectType objType = QObjectType.Object;
+		public bool IsIQSerialize { private set; get; }
+		public bool IsIQData { private set; get; }
+		public bool IsUnityObject { private set; get; }
+		protected override void Init(Type type)
+		{
 
-    }
+			Functions = null;
+			base.Init(type);
+			if (Code == TypeCode.Object)
+			{
+				if (typeof(Task).IsAssignableFrom(type))
+				{
+					objType = QObjectType.CantSerialize;
+					return;
+				}
+				IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
+				IsIQData = typeof(IQData).IsAssignableFrom(type);
+				IsUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(type);
+				if (IsIQSerialize || IsIQData)
+				{
+					objType = QObjectType.Object;
+				}
+
+				if (IsArray)
+				{
+					objType = QObjectType.Array;
+				}
+				else if (IsList)
+				{
+					objType = QObjectType.List;
+				}
+				else
+				{
+					if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+					{
+						Debug.LogError("不支持序列化【" + type + "】Nullable类型");
+					}
+				}
+			}
+
+			Members.RemoveAll((member) =>
+			{
+
+				if (TypeMembers.ContainsKey(type))
+				{
+					return !TypeMembers[type].Contains(member.Key);
+				}
+				return !IsQSValue(member.MemeberInfo) || member.Key == "Item" || member.Set == null || member.Get == null;
+			});
+
+		}
+
+	}
 
 }

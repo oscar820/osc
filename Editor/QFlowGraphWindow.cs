@@ -54,19 +54,19 @@ namespace QTool.FlowGraph
             window.Repaint();
         }
         [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
-        public static async void CreateNewFile()
+        public static void CreateNewFile()
         {
             var selectPath = Application.dataPath;
             if(Selection.activeObject !=null)
             {
                 selectPath= AssetDatabase.GetAssetPath(Selection.activeObject);
             }
-            var path = EditorUtility.SaveFilePanel("±£´æQFGÎÄ¼ş", selectPath, nameof(QFlowGraphAsset), "qfg");
+            var path = EditorUtility.SaveFilePanel("ä¿å­˜QFGæ–‡ä»¶", selectPath, nameof(QFlowGraphAsset), "qfg");
             FileManager.Save(path, (new QFlowGraph()).ToQData());
             AssetDatabase.Refresh();
             OpenPath(path.ToAssetPath());
         }
-        [MenuItem("QTool/QFlowGraph±à¼­Æ÷")]
+        [MenuItem("QTool/QFlowGraphç¼–è¾‘å™¨")]
         public static void OpenWindow()
         {
             Open(null);
@@ -120,11 +120,11 @@ namespace QTool.FlowGraph
                 menu.AddSeparator("");
                 if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
                 {
-                    menu.AddItem(new GUIContent("Õ³Ìù"), false, Parse);
+                    menu.AddItem(new GUIContent("ç²˜è´´"), false, Parse);
                 }
                 else
                 {
-                    menu.AddDisabledItem(new GUIContent("Õ³Ìù"));
+                    menu.AddDisabledItem(new GUIContent("ç²˜è´´"));
                 }
             }
             else
@@ -132,28 +132,28 @@ namespace QTool.FlowGraph
                 if (curPortId != null)
                 {
 
-                    menu.AddItem(new GUIContent("Çå¿Õ" + curPortId + "¶Ë¿ÚÁ¬½Ó"), false, ()=> GraphAsset.Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.index));
+                    menu.AddItem(new GUIContent("æ¸…ç©º" + curPortId + "ç«¯å£è¿æ¥"), false, ()=> GraphAsset.Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.index));
                 }
                 else
                 {
-                    menu.AddItem(new GUIContent("¸´ÖÆ"), false, Copy);
+                    menu.AddItem(new GUIContent("å¤åˆ¶"), false, Copy);
                     if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
                     {
-                        menu.AddItem(new GUIContent("Õ³Ìù"), false, Parse);
+                        menu.AddItem(new GUIContent("ç²˜è´´"), false, Parse);
                     }
-                    menu.AddItem(new GUIContent("É¾³ı"), false, DeleteSelectNodes);
-                    menu.AddItem(new GUIContent("Çå¿ÕÁ¬½Ó"), false, ClearAllConnect);
+                    menu.AddItem(new GUIContent("åˆ é™¤"), false, DeleteSelectNodes);
+                    menu.AddItem(new GUIContent("æ¸…ç©ºè¿æ¥"), false, ClearAllConnect);
                     menu.AddSeparator("");
                     if (Application.isPlaying)
                     {
-                        menu.AddItem(new GUIContent("ÔËĞĞ½Úµã"), false, () =>
+                        menu.AddItem(new GUIContent("è¿è¡ŒèŠ‚ç‚¹"), false, () =>
                         {
                             QToolManager.Instance.StartCoroutine(GraphAsset.Graph.RunIEnumerator(curNode.Key));
                         });
                     }
                     else
                     {
-                        menu.AddDisabledItem(new GUIContent("ÔËĞĞ½Úµã"));
+                        menu.AddDisabledItem(new GUIContent("è¿è¡ŒèŠ‚ç‚¹"));
                     }
                 }
 
@@ -178,7 +178,7 @@ namespace QTool.FlowGraph
             }
             catch (Exception e)
             {
-                throw new Exception("Õ³Ìù³ö´í", e);
+                throw new Exception("ç²˜è´´å‡ºé”™", e);
             }
         }
         void ClearAllConnect()
@@ -288,7 +288,7 @@ namespace QTool.FlowGraph
             DrawBackground();
             if (GraphAsset == null||GraphAsset.Graph==null)
             {
-                if (GUILayout.Button("´´½¨ĞÂµÄQFlowGraph"))
+                if (GUILayout.Button("åˆ›å»ºæ–°çš„QFlowGraph"))
                 {
                     CreateNewFile();
                 }
@@ -489,7 +489,7 @@ namespace QTool.FlowGraph
                 default: break;
             }
         }
-        #region Í¼ĞÎ»æÖÆ
+        #region å›¾å½¢ç»˜åˆ¶
         static float Fix(float pos, float min, float max, float fixStep)
         {
             while (pos > max)
@@ -532,7 +532,7 @@ namespace QTool.FlowGraph
             }
             else
             {
-                GUILayout.Label("ÕÒ²»µ½ÃüÁî¡¾" + node.commandKey + "¡¿ ");
+                GUILayout.Label("æ‰¾ä¸åˆ°å‘½ä»¤ã€" + node.commandKey + "ã€‘ ");
             }
             
             EditorGUILayout.EndVertical();

@@ -429,8 +429,8 @@ namespace QTool.Inspector
             }
         }
         public static QDictionary<string, bool> FoldoutDic = new QDictionary<string, bool>();
-        public static QDictionary<string, Action<SerializedProperty, Func<float, float>>> DrawFloatAction = new QDictionary<string, Action<SerializedProperty, Func<float, float>>>();
-
+        public static QDictionary<string, Action<SerializedProperty, Func<float, float>>> DrawPropertyToFloat = new QDictionary<string, Action<SerializedProperty, Func<float, float>>>();
+		public static QDictionary<Type, Func<object, string, object>> DrawOverride = new QDictionary<Type, Func<object, string, object>>();
         static Color BackColor = new Color(0, 0, 0, 0.6f);
 		static GUIStyle _backStyle; 
 		static GUIStyle BackStyle =>_backStyle??=new GUIStyle("helpBox");
@@ -450,9 +450,17 @@ namespace QTool.Inspector
                     EditorGUI.LabelField(rect.Value, name);
                 }
             }
-         
-            var typeInfo = QSerializeType.Get(type);
-            if (type!=typeof(object)&& !TypeList.Contains(type)&&!type.IsGenericType)
+			if (obj == null && type.IsValueType)
+			{
+				obj = type.CreateInstance();
+			}
+			if (DrawOverride.ContainsKey(type))
+			{
+				return DrawOverride[type].Invoke(obj, name);
+			}
+
+			var typeInfo = QSerializeType.Get(type);
+			if (type!=typeof(object)&& !TypeList.Contains(type)&&!type.IsGenericType)
             {
                 TypeList.Add(type);
                 TypeMenuList.AddCheckExist(type.FullName.Replace('.', '/'));
@@ -560,7 +568,7 @@ namespace QTool.Inspector
                                     obj = Draw(obj, name, objType);
 
                                 }
-                            }
+							}
                             else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
                             {
                                 obj= EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true);
@@ -591,17 +599,24 @@ namespace QTool.Inspector
                                                 EditorGUILayout.Space(10);
                                                 using (new EditorGUILayout.VerticalScope())
                                                 {
-
+													
                                                     foreach (var member in typeInfo.Members)
                                                     {
-                                                        if (member.Type.IsValueType)
-                                                        {
-                                                            member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
-                                                        }
-                                                        else
-                                                        {
-                                                            member.Set(obj, member.Get(obj).Draw(member.Name, member.Type, (value) => member.Set(obj, value)));
-                                                        }
+														try
+														{
+															if (member.Type.IsValueType)
+															{
+																member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+															}
+															else
+															{
+																member.Set(obj, member.Get(obj).Draw(member.Name, member.Type, (value) => member.Set(obj, value)));
+															}
+														}
+														catch (Exception e)
+														{
+															Debug.LogError("序列化【" + member.Name + "】出错\n"+e);
+														}
 
                                                     }
                                                 }
@@ -739,9 +754,9 @@ namespace QTool.Inspector
         public static bool Draw(this SerializedProperty property,string parentKey="", Rect? rect=null)
         {
             var cur= property.Copy();
-            if (DrawFloatAction.ContainsKey(cur.type) && DrawFloatAction[cur.type]!=null)
+            if (DrawPropertyToFloat.ContainsKey(cur.type) && DrawPropertyToFloat[cur.type]!=null)
             {
-                DrawFloatAction[cur.type](cur, (value) => {
+                DrawPropertyToFloat[cur.type](cur, (value) => {
                     var range = cur.GetAttribute<RangeAttribute>();
                     if (range == null)
                     {

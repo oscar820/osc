@@ -23,7 +23,7 @@ namespace QTool.FlowGraph
             }
             catch (System.Exception e)
             {
-                Debug.LogError(name + " ╤ах║ЁЖ╢М " + e);
+                Debug.LogError(name + " Х╞╩Е▐√Е┤╨И■≥ " + e);
                 return null;
             }
         }
@@ -40,7 +40,7 @@ namespace QTool.FlowGraph
             }
             catch (System.Exception e)
             {
-                Debug.LogError(name + " ╢╒╢ФЁЖ╢М :" + e);
+                Debug.LogError(name + " Е┌╗Е╜≤Е┤╨И■≥ :" + e);
                 return;
             }
 
