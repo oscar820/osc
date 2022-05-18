@@ -39,6 +39,10 @@ namespace QTool.FlowGraph
 	}
     public class QFlowGraph
     {
+		public QFlowGraph CreateInstance()
+		{
+			return this.ToQData().ParseQData<QFlowGraph>().Init();
+		}
 		static QFlowGraph()
 		{
 			QCommand.FreshCommands(typeof(QFlowGraphNode));

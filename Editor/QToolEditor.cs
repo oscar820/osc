@@ -56,7 +56,7 @@ namespace QTool
             }
 
         }
-		static string GetBuildPath(BuildTarget buildTarget)
+		public static string GetBuildPath(BuildTarget buildTarget= BuildTarget.StandaloneWindows)
 		{
 			switch (buildTarget)
 			{
