@@ -397,7 +397,7 @@ namespace QTool.FlowGraph
         {
             get
             {
-                if (ValueType == QFlow.Type) return null;
+                if (ValueType == QFlow.Type|| Node.command==null) return null;
                 if (FlowPort == null && !isOutput && HasConnect)
                 {
                     var port = Node.Graph[ConnectInfo.ConnectPort()];
@@ -413,9 +413,9 @@ namespace QTool.FlowGraph
                 }
                 return _value;
             }
-            set
-            {
-                if (ValueType == QFlow.Type) return;
+			set
+			{
+				if (ValueType == QFlow.Type || Node.command == null) return;
              
                 _value = value;
                 stringValue = value.ToQData(ValueType);
@@ -845,6 +845,11 @@ namespace QTool.FlowGraph
         }
         public IEnumerator RunIEnumerator()
         {
+			if (command == null)
+			{
+				Debug.LogError("不存在命令【" + commandKey + "】");
+				yield break;
+			}
             var returnObj = InvokeCommand();
             switch (returnType)
             {

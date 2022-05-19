@@ -10,6 +10,10 @@ using QTool.Test;
 
 public class QFlowTest : MonoBehaviour
 {
+	static QFlowTest()
+	{
+		QTool.Command.QCommand.FreshCommands(typeof(QFlowNodeTest));
+	}
 	public QFlowGraphAsset graphAsset;
     void Start()
     {

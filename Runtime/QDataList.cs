@@ -40,7 +40,7 @@ namespace QTool{
                     }
                     catch (System.Exception e)
                     {
-                        Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
+                        Debug.LogError("璇诲彇QDataList[" + path + "]鍑洪敊锛歕n" + e);
                     }
                 }
                 else
@@ -52,7 +52,7 @@ namespace QTool{
                         dataList[path] = qdataList;
                         autoCreate(qdataList);
                         qdataList.Save();
-                        Debug.LogWarning("不存在QDataList自动创建[" + path + "]");
+                        Debug.LogWarning("涓嶅瓨鍦≦DataList鑷姩鍒涘缓[" + path + "]");
                     }
                 }
             }
@@ -181,7 +181,7 @@ namespace QTool{
             }
             else
             {
-                throw new System.Exception("不存在的列名[" + title + "]");
+                throw new System.Exception("涓嶅瓨鍦ㄧ殑鍒楀悕[" + title + "]");
             }
         }
         public QDataRow SetValue<T>(string title,T value)
@@ -192,7 +192,7 @@ namespace QTool{
             }
             else
             {
-                Debug.LogWarning("不存在的列名[" + title + "]自动创建");
+                Debug.LogWarning("涓嶅瓨鍦ㄧ殑鍒楀悕[" + title + "]鑷姩鍒涘缓");
                 OwnerData[0].Add(title);
                 SetValue(title, value);
             }

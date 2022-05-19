@@ -113,6 +113,22 @@ namespace QTool
             var type = typeof(T);
             return ToQData(obj, type, hasName);
         }
+		static System.Text.StringBuilder ToQDataListBuilder = new System.Text.StringBuilder();
+		public static QDataList<T> ToQDataList<T>(IList<T> list)
+		{
+			ToQDataListBuilder.Clear();
+			foreach (var item in list)
+			{
+				using (var reader=new StringReader(item.ToQData(false)))
+				{
+					if (reader.ReadSplit('{', '}', ';', out var strs))
+					{
+						ToQDataListBuilder.Append(strs.ToOneString("\t"));
+					}
+				}
+			}
+			return new QDataList<T>(ToQDataListBuilder.ToString());
+		}
 
         public static string ToQData(this object obj, Type type, bool hasName = true)
         {

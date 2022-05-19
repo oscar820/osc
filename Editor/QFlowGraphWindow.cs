@@ -704,6 +704,7 @@ namespace QTool.FlowGraph
    
         public Color GetTypeColor(Type type,float s=0.4f,float v=0.9f)
         {
+			if (type == null) return Color.black;
             if (type == QFlow.Type) return Color.HSVToRGB(0.6f, s, v);
             return type.Name.ToColor(s,v);
         }
