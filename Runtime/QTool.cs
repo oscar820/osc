@@ -368,8 +368,15 @@ namespace QTool
                                                     }
                                                 }
                                                 return target;
-                                            };
-                                            Debug.LogError("读取类型出错[" + type + "]:[" + qdataStr + "]");
+											}
+											else
+											{
+												if (typeInfo.IsUnityObject)
+												{
+													target = QObjectReference.GetObject(qdataStr);
+													return target;
+												}
+											}
                                             return null;
                                         }
                                     case QObjectType.List:
