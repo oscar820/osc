@@ -39,15 +39,19 @@ namespace QTool
         }
         public static T Get<T>(string id)where T:Object
         {
-            if (typeof(MonoBehaviour).IsAssignableFrom(typeof(T)))
-            {
-                return Get<GameObject>(id)?.GetComponent<T>();
-            }
-            else
-            {
-                return GetObject(id) as T;
-            }
+			return GetObject(id, typeof(T)) as T;
         }
+		public static Object GetObject(string id,System.Type type)
+		{
+			if (typeof(MonoBehaviour).IsAssignableFrom(type))
+			{
+				return Get<GameObject>(id)?.GetComponent(type);
+			}
+			else
+			{
+				return GetObject(id);
+			}
+		}
       
         public static string GetId(Object obj)
         {

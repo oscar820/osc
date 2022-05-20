@@ -320,7 +320,7 @@ namespace QTool
                                                     }
                                                     else if (typeInfo.IsUnityObject)
                                                     {
-                                                        target = QObjectReference.GetObject(str);
+                                                        target = QObjectReference.GetObject(str,type);
 
                                                     }
                                                     else if (typeInfo.IsIQData)
@@ -373,7 +373,7 @@ namespace QTool
 											{
 												if (typeInfo.IsUnityObject)
 												{
-													target = QObjectReference.GetObject(qdataStr);
+													target = QObjectReference.GetObject(qdataStr,type);
 													return target;
 												}
 											}
