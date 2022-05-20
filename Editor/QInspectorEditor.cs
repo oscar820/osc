@@ -55,8 +55,8 @@ namespace QTool.Inspector
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-       //     var id = property.FindPropertyRelative(nameof(QObjectReference.id));
-        //    id.stringValue= Draw(label.text, id.stringValue,typeof(UnityEngine.Object),position);
+			var id = property.FindPropertyRelative(nameof(QObjectReference.id));
+			id.stringValue= Draw(label.text, id.stringValue,typeof(UnityEngine.Object),position);
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
