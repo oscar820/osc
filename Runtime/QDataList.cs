@@ -16,7 +16,7 @@ namespace QTool{
 		static QDataList(){ 
 			var type = typeof(T);
 			var typeInfo = QSerializeType.Get(type);
-			var path = "QDataListAsset\\" + type.Name;
+			var path = "QDataListAssets\\" + type.Name;
 			var text= Resources.Load<TextAsset>(path);
 			if (text != null&&!string.IsNullOrWhiteSpace(text.text))
 			{
