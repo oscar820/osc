@@ -7,9 +7,12 @@ using QTool.Asset;
 using QTool.Reflection;
 
 namespace QTool{
-
 	public class QDataList<T>  where T : QDataList<T>, IKey<string>
 	{
+		public static T Get(string key)
+		{
+			return list[key];
+		}
 		static QDataList(){ 
 			var type = typeof(T);
 			var typeInfo = QSerializeType.Get(type);
