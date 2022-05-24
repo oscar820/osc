@@ -3,15 +3,61 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Text;
+using QTool.Asset;
+using QTool.Reflection;
 
 namespace QTool{
 
-    public class QDataList<T>:QDataList
-    {
-        public QDataList(string str):base(str)
-        {
-
-        }
+	public class QDataList<T>  where T : QDataList<T>, IKey<string>
+	{
+		static QDataList(){ 
+			var type = typeof(T);
+			var typeInfo = QSerializeType.Get(type);
+			var path = "QDataListAsset\\" + type.Name;
+			var text= Resources.Load<TextAsset>(path);
+			if (text != null&&!string.IsNullOrWhiteSpace(text.text))
+			{
+				list.Clear();
+				var qdataList = new QDataList(text.text);
+				var titleRow = qdataList.TitleRow;
+				var memeberList = new List<QMemeberInfo>();
+				foreach (var title in titleRow)
+				{
+					var member = typeInfo.Members[title];
+					if (member == null)
+					{
+						member = typeInfo.Members.Get(title, (obj) => obj.MemeberInfo.ViewName());
+					}
+					if (member == null)
+					{
+						Debug.LogError("读取 "+type.Name+"出错 不存在属性 " + title);
+					}
+					memeberList.Add(member);
+				}
+				foreach (var row in qdataList)
+				{
+					if (row == titleRow) continue;
+					var obj= type.CreateInstance();
+					var t = (obj as T);
+					for (int i = 0; i < titleRow.Count; i++)
+					{
+						var member = memeberList[i];
+						if (member!=null)
+						{
+							member.Set(t, row[i].ParseQData(member.Type, false));
+						}
+					}
+					t.Key = row.Key; 
+					list.Add(t);
+				}
+				Debug.Log("读取 " + type.Name + "List [Resources\\" + path + "]完成：\n" + list.ToOneString());
+			}
+			else
+			{
+				Debug.LogError("读取 " + type.Name + "List [Resources\\" + path + "]出错");
+			}
+		}
+		public static QList<string, T> list = new QList<string, T>();
     }
     public class QDataList: QAutoList<string, QDataRow>
     {
@@ -167,11 +213,11 @@ namespace QTool{
         }
         public T GetValue<T>(int index=1)
         {
-            return base[index].ParseQData<T>();
+            return base[index].ParseQData<T>(false);
         }
         public void SetValue<T>(T value, int index=1)
         {
-            base[index] = value.ToQData();
+            base[index] = value.ToQData(false);
         }
         public T GetValue<T>(string title)
         {

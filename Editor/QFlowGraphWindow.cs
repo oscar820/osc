@@ -188,7 +188,8 @@ namespace QTool.FlowGraph
         void DeleteSelectNodes()
         {
             ForeachSelectNodes((node) => GraphAsset.Graph.Remove(node));
-        }
+			Repaint();
+		}
         void ForeachSelectNodes(System.Action<QFlowNode> action)
         {
             if (SelectNodes.Count > 0)
@@ -519,6 +520,7 @@ namespace QTool.FlowGraph
         void DrawNode(int id)
         {
             var node = GraphAsset.Graph.NodeList[id];
+			if (node == null) return;
             windowRect = node.rect;
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.Space(dotSize);

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QTool;
@@ -143,7 +143,7 @@ namespace QTool.Test
         }
         [TextArea(5,10)]
         public string QDataStr; 
-        [ViewButton("QData测试")]
+        [ViewButton("QDataList测试")]
         public void QDataTest()
         {
             var data = new QDataList(QDataStr);
@@ -164,8 +164,21 @@ namespace QTool.Test
             Debug.LogError(tobj.ToQData(false));
 
             Debug.LogError((new int[][] {new int[] { 1, 2 },new int[] { 3, 4 } }).ToQData().ParseQData<int[][]>().ToQData());
+
+
+			Debug.LogError(QDataListTestType.list.ToOneString());
         }
-    }
+		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
+		{
+			public string Key { get ; set ; }
+			[ViewName("数值")] 
+			public float value=0;
+			public override string ToString()
+			{
+				return Key + ":" + value;
+			}
+		}
+	}
     [Flags]
     public enum TestEnum
     {
