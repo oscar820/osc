@@ -7,6 +7,7 @@ namespace QTool.FlowGraph
     public class QFlowGraphAsset : ScriptableObject
     {
         public List<QObjectReference> ObjList;
+		[TextArea(1,30)]
         public string stringValue;
         public QFlowGraph Graph =>_graph??=
             Load();

@@ -105,7 +105,19 @@ namespace QTool
 			{
 				System.Diagnostics.Process.Start(path);
 			}
-        }
-    }
+		}
+		[MenuItem("Assets/QTool/添加对象引用Id")]
+		public static void AddObjectReferenceId()
+		{
+			if (Selection.objects.Length > 0)
+			{
+				foreach (var obj in Selection.objects)
+				{
+					var id= QObjectReference.GetId(obj);
+				}
+			}
+			
+		}
+	}
 }
 
