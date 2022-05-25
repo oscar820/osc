@@ -47,7 +47,16 @@ namespace QTool{
 						var member = memeberList[i];
 						if (member!=null)
 						{
-							member.Set(t, row[i].ParseQData(member.Type, false));
+							try
+							{
+								member.Set(t, row[i].ParseQData(member.Type, false));
+							}
+							catch (System.Exception e)
+							{
+
+								Debug.LogError("读取 " + type.Name + "出错 设置属性 "+member.Name+"("+member.Type+")异常：\n"+e);
+							}
+							
 						}
 					}
 					t.Key = row.Key; 
