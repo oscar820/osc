@@ -580,16 +580,16 @@ namespace QTool
                 else
                 {
                     while (!reader.IsEnd()&&!reader.NextIs('\n'))
-                    {
-                        var c = (char)reader.Read();
+					{
+						if (reader.NextIs('\t'))
+						{
+							newLine = false;
+							break;
+						}
+						var c = (char)reader.Read();
                         if (c != '\r')
                         {
                             writer.Write(c);
-                        }
-                        if (reader.NextIs('\t'))
-                        {
-                            newLine = false;
-                            break;
                         }
                     }
                     return writer.ToString();
