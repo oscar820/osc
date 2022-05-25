@@ -54,7 +54,7 @@ namespace QTool{
 							catch (System.Exception e)
 							{
 
-								Debug.LogError("读取 " + type.Name + "出错 设置属性 "+member.Name+"("+member.Type+")异常：\n"+e);
+								Debug.LogError("读取 " + type.Name + "出错 设置["+row.Key+"]属性 "+member.Name+"("+member.Type+")异常：\n"+e);
 							}
 							
 						}
