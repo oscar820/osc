@@ -70,6 +70,7 @@ namespace QTool
 		{
 			if (!BuildPipeline.isBuildingPlayer)
 			{
+				var startTime = DateTime.Now;
 				var versions = PlayerSettings.bundleVersion.Split('.');
 				if (versions.Length > 0)
 				{
@@ -107,6 +108,7 @@ namespace QTool
 				if (buildInfo.summary.result == BuildResult.Succeeded)
 				{
 					Debug.Log("打包成功" + buildOption.locationPathName);
+					Debug.Log("打包用时：" + Math.Ceiling((DateTime.Now - startTime).TotalMinutes) + " 分钟");
 					return buildOption.locationPathName;
 				}
 				else
