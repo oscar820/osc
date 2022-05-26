@@ -11,7 +11,12 @@ namespace QTool{
 	{
 		public static T Get(string key)
 		{
-			return list[key];
+			var value= list[key]; ;
+			if (value == null)
+			{
+				Debug.LogError(typeof(T).Name + " 未找到[" + key + "]");
+			}
+			return value;
 		}
 		static QDataList(){ 
 			var type = typeof(T);
@@ -62,11 +67,11 @@ namespace QTool{
 					t.Key = row.Key; 
 					list.Add(t);
 				}
-				Debug.Log("读取 " + type.Name + "List [Resources\\" + path + "]完成：\n" + list.ToOneString());
+				Debug.Log("读取 Resources\\" + path + "]完成：\n" + list.ToOneString());
 			}
 			else
 			{
-				Debug.LogError("读取 " + type.Name + "List [Resources\\" + path + "]出错");
+				Debug.LogError("读取 Resources\\" + path + "]出错");
 			}
 		}
 		public static QList<string, T> list = new QList<string, T>();
