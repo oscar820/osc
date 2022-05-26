@@ -41,7 +41,7 @@ namespace QTool
         {
             if (_instance != null) return;
             _instance = this as T;
-            Debug.Log("³õÊ¼»¯µ¥Àı¡¾" + typeof(T).Name + "¡¿");
+            Debug.Log("åˆå§‹åŒ–å•ä¾‹ã€" + typeof(T).Name + "ã€‘");
         }
     }
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>

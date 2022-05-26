@@ -36,7 +36,10 @@ namespace QTool.FlowGraph
                 this.stringValue = Graph.ToQData();
 #if UNITY_EDITOR
                 FileManager.Save(UnityEditor.AssetDatabase.GetAssetPath(this), this.stringValue);
-                UnityEditor.AssetDatabase.Refresh();
+				if (!Application.isPlaying)
+				{
+					UnityEditor.AssetDatabase.Refresh();
+				}
 #endif
             }
             catch (System.Exception e)

@@ -13,23 +13,23 @@ namespace QTool.Asset {
     public static  class AddressableToolEditor
     {
 #if Addressable
-        [MenuItem("Assets/QTool/批量生成Addressable资源", priority = 0)]
+        [MenuItem("Assets/QTool/鎵归噺鐢熸垚Addressable璧勬簮", priority = 0)]
         public static void AutoAddressableResource()
         {
             if (Selection.activeObject is DefaultAsset)
             {
                 var groupName = Selection.activeObject.name;
                 var directory = AssetDatabase.GetAssetPath(Selection.activeObject);
-                if (EditorUtility.DisplayDialog("批量添加Addressable资源",
-                    "以文件夹[" + directory + "] \n生成组名与标签为[" + groupName + "]的资源组"
-                    , "确认", "取消"))
+                if (EditorUtility.DisplayDialog("鎵归噺娣诲姞Addressable璧勬簮",
+                    "浠ユ枃浠跺す[" + directory + "] \n鐢熸垚缁勫悕涓庢爣绛句负[" + groupName + "]鐨勮祫婧愮粍"
+                    , "纭", "鍙栨秷"))
                 {
 
                     var count = directory.DirectoryFileCount();
                     var index = 1f;
                     directory.ForeachDirectoryFiles((path) =>
                     {
-                        EditorUtility.DisplayProgressBar("批量添加Addressable资源", "添加资源(" + index + "/" + count + ") : " + path, index / count);
+                        EditorUtility.DisplayProgressBar("鎵归噺娣诲姞Addressable璧勬簮", "娣诲姞璧勬簮(" + index + "/" + count + ") : " + path, index / count);
                         var key = path.Substring(directory.Length + 1);
                         key = key.Substring(0, key.LastIndexOf('.'));
                         AddressableTool.SetAddresableGroup(path, groupName, key);
@@ -40,7 +40,7 @@ namespace QTool.Asset {
 
             }
         }
-        [MenuItem("Assets/QTool/添加Addressable资源", priority = 0)]
+        [MenuItem("Assets/QTool/娣诲姞Addressable璧勬簮", priority = 0)]
         public static void AddAddressableResource()
         {
             var index = 0;
@@ -49,7 +49,7 @@ namespace QTool.Asset {
                 if (obj == null) continue;
                 index++;
                 var path= AssetDatabase.GetAssetPath(obj);
-                EditorUtility.DisplayProgressBar("添加Addressable资源", "添加资源: " + path, index/Selection.objects.Length);
+                EditorUtility.DisplayProgressBar("娣诲姞Addressable璧勬簮", "娣诲姞璧勬簮: " + path, index/Selection.objects.Length);
                 //var key = path.Substring(path.Length + 1);
                 var start = path.LastIndexOf('/')+1;
                  var key = path.Substring(start, path.LastIndexOf('.')- start);
