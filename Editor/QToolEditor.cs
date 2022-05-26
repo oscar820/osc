@@ -61,7 +61,7 @@ namespace QTool
 			switch (buildTarget)
 			{
 				case BuildTarget.StandaloneWindows:
-					return "Builds/" + buildTarget + "/"+PlayerSettings.productName+".exe";
+					return "Builds/" + buildTarget + "/"+PlayerSettings.productName+" v"+ PlayerSettings.bundleVersion+"/"+ PlayerSettings.productName +".exe";
 				default:
 					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
 			}
@@ -121,7 +121,7 @@ namespace QTool
         private static void BuildRandRun()
         {
 			var path = Build();
-			if (!string.IsNullOrWhiteSpace(path))
+			if (FileManager.ExistsFile(path))
 			{
 				System.Diagnostics.Process.Start(path);
 			}
