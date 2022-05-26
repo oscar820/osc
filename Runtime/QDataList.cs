@@ -11,6 +11,7 @@ namespace QTool{
 	{
 		public static T Get(string key)
 		{
+			key = key.Trim();
 			var value= list[key]; ;
 			if (value == null)
 			{
