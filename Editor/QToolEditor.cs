@@ -70,11 +70,31 @@ namespace QTool
 		{
 			if (!BuildPipeline.isBuildingPlayer)
 			{
+				var versions = PlayerSettings.bundleVersion.Split('.');
+				if (versions.Length > 0)
+				{
+					versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
+				}
+				PlayerSettings.bundleVersion = versions.ToOneString(".");
+				QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
+
+#if Addressable
+				UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent(out var result);
+				if(string.IsNullOrWhiteSpace(result.Error))
+				{
+					Debug.Log("Addressable Build 完成 ：" + result.Duration+"s");
+				}
+				else
+				{
+					Debug.LogError("Addressable Build 失败 ："+result.Error);
+					return "";
+				}
+#endif
 				var sceneList = new List<string>();
-				sceneList.Add(SceneManager.GetActiveScene().path);
+				sceneList.AddCheckExist(SceneManager.GetActiveScene().path);
 				foreach (var scene in EditorBuildSettings.scenes)
 				{
-					sceneList.Add(scene.path);
+					sceneList.AddCheckExist(scene.path);
 				}
 				var buildOption = new BuildPlayerOptions
 				{
