@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -300,7 +300,7 @@ namespace QTool
             qSerializes.AddRange( GetComponents<IQSerialize>());
             qSerializes.Remove(this);
         }
-        protected virtual void OnDestory()
+        protected virtual void OnDestroy()
         {
             if (InstanceIdList.ContainsKey(InstanceId)){
                 if (InstanceIdList[InstanceId] == this)
