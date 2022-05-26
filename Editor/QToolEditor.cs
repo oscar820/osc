@@ -71,13 +71,7 @@ namespace QTool
 			if (!BuildPipeline.isBuildingPlayer)
 			{
 				var startTime = DateTime.Now;
-				var versions = PlayerSettings.bundleVersion.Split('.');
-				if (versions.Length > 0)
-				{
-					versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
-				}
-				PlayerSettings.bundleVersion = versions.ToOneString(".");
-				QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
+			
 
 #if Addressable
 				UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent(out var result);
@@ -109,6 +103,13 @@ namespace QTool
 				{
 					Debug.Log("打包成功" + buildOption.locationPathName);
 					Debug.Log("打包用时：" + Math.Ceiling((DateTime.Now - startTime).TotalMinutes) + " 分钟");
+					var versions = PlayerSettings.bundleVersion.Split('.');
+					if (versions.Length > 0)
+					{
+						versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
+					}
+					PlayerSettings.bundleVersion = versions.ToOneString(".");
+					QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
 					return buildOption.locationPathName;
 				}
 				else
