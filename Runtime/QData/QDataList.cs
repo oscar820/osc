@@ -68,7 +68,7 @@ namespace QTool{
 					t.Key = row.Key; 
 					list.Add(t);
 				}
-				Debug.Log("读取 Resources\\" + path + "]完成：\n" + list.ToOneString());
+				Debug.Log("读取 Resources\\" + path + "]完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList); 
 			}
 			else
 			{
@@ -231,14 +231,29 @@ namespace QTool{
         }
         public T GetValue<T>(int index=1)
         {
-            return base[index].ParseQData<T>(default,false);
+			if (typeof(T) == typeof(string))
+			{
+				return (T)(object)base[index] ;
+			}
+			else
+			{
+				return base[index].ParseQData<T>(default, false);
+			}
         }
         public void SetValue<T>(T value, int index=1)
         {
-            base[index] = value.ToQData(false);
+			if (typeof(T) == typeof(string))
+			{
+				base[index] = (string)(object)value;
+			}
+			else
+			{
+
+				base[index] = value.ToQData(false);
+			}
         }
         public T GetValue<T>(string title)
-        {
+		{
             if (OwnerData.TryGetTitleIndex(title, out var index))
             {
                 return GetValue<T>(index);
@@ -278,7 +293,7 @@ namespace QTool{
                 for (int j = 0; j < Count; j++)
                 {
                     var qdata = this[j];
-                    writer.Write(qdata);
+                    writer.Write(qdata.ToElement());
                     if (j < Count - 1)
                     {
                         writer.Write('\t');
@@ -290,7 +305,7 @@ namespace QTool{
     }
 	public static class QDataListTool
 	{
-		public static string ToQDataListElement(string value)
+		public static string ToElement(this string value)
 		{
 			if (string.IsNullOrEmpty(value))
 			{
@@ -311,7 +326,7 @@ namespace QTool{
 			}
 			return value;
 		}
-		public static string ParseQDataListElement(string value)
+		public static string ParseElement(string value)
 		{
 			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n") || true))
 			{
@@ -352,7 +367,7 @@ namespace QTool{
 						}
 
 					}
-					var value = writer.ToString();
+					var value = ParseElement( writer.ToString());
 					return value;
 				}
 				else

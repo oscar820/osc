@@ -173,7 +173,7 @@ namespace QTool.Test
             var data = new QDataList(QDataStr);
             Debug.LogError(data.ToString());
             data[2].SetValue("3", "2 3");
-            data[3][4] = "3 4";
+            data[3][4] = "3\n4";
             data["newLine"][4] = "n 4";
             data["newLine"].SetValue("5", true);
             data["setting"].SetValue( "off\nOn");
@@ -196,10 +196,10 @@ namespace QTool.Test
 		{
 			public string Key { get ; set ; }
 			[ViewName("数值")] 
-			public float value=0;
+			public string value="";
 			public override string ToString()
 			{
-				return Key + ":" + value;
+				return Key + ":[" + value+"]";
 			}
 		}
 	
@@ -227,7 +227,7 @@ namespace QTool.Test
         public byte[] array = new byte[] { 123 };
         [XmlIgnore]
         public byte[,,] arrayTest = new byte[1, 2, 2] { { { 1, 2 }, { 3, 4 } } };
-        public TestClass2 child;
+        public TestClass2 child; 
         [XmlIgnore]
         public object obj = new Vector3
         {
