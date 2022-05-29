@@ -231,7 +231,7 @@ namespace QTool{
         }
         public T GetValue<T>(int index=1)
         {
-            return base[index].ParseQData<T>(false);
+            return base[index].ParseQData<T>(default,false);
         }
         public void SetValue<T>(T value, int index=1)
         {

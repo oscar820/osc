@@ -16,7 +16,7 @@ namespace QTool
 			var type = typeof(T);
 			return ToQDataType(obj, type, hasName);
 		}
-		public static T ParseQData<T>(this string qdataStr, bool hasName = true, T target = default)
+		public static T ParseQData<T>(this string qdataStr, T target = default, bool hasName = true)
 		{
 			return (T)ParseQDataType(qdataStr, typeof(T), hasName, target);
 		}
@@ -172,7 +172,7 @@ namespace QTool
 					break;
 			}
 		}
-		public static object Read<T>(this StringReader reader, bool hasName = true, T target = default)
+		public static object Read<T>(this StringReader reader, T target = default,bool hasName = true)
 		{
 			return ReadType(reader, typeof(T), hasName, target);
 		}

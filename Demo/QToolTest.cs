@@ -126,14 +126,14 @@ namespace QTool.Test
 			{
 				for (int i = 0; i < testTimes; i++)
 				{
-					test2 = testBytes.GetString().ParseQData<TTestClass>(true);
+					test2 = testBytes.GetString().ParseQData<TTestClass>(null, true);
 				}
 			});
 			Tool.RunTimeCheck("QData读取 有Target", () =>
             {
                 for (int i = 0; i < testTimes; i++)
                 {
-					test2 = testBytes.GetString().ParseQData<TTestClass>(true, test2);
+					test2 = testBytes.GetString().ParseQData<TTestClass>(test2, true);
                 }
             });
             Tool.RunTimeCheck("QData写入 无Name", () =>
@@ -148,14 +148,14 @@ namespace QTool.Test
 			{
 				for (int i = 0; i < testTimes; i++)
 				{
-					test2 = testBytes.GetString().ParseQData<TTestClass>(false);
+					test2 = testBytes.GetString().ParseQData<TTestClass>(null,false);
 				}
 			});
 			Tool.RunTimeCheck("QData读取 无Name 有Target", () =>
             {
                 for (int i = 0; i < testTimes; i++)
                 {
-					test2 = testBytes.GetString().ParseQData<TTestClass>(false,test2);
+					test2 = testBytes.GetString().ParseQData<TTestClass>(test2,false);
                 }
             });
         }
@@ -184,7 +184,7 @@ namespace QTool.Test
             Debug.LogError(tobj.ToQData());
 
             Debug.LogError(test1.ToQData(false));
-            tobj = test1.ToQData(false).ParseQData<TTestClass>(false);
+            tobj = test1.ToQData(false).ParseQData<TTestClass>(null,false);
             Debug.LogError(tobj.ToQData(false));
 
             Debug.LogError((new int[][] {new int[] { 1, 2 },new int[] { 3, 4 } }).ToQData().ParseQData<int[][]>().ToQData());
@@ -243,16 +243,17 @@ namespace QTool.Test
         public List<float> list;
         [ViewName("名字测试2")]
         public string asdl;
-        public float f1;
 
 		public void ParseQData(StringReader reader)
 		{
-			reader.Read(true,list);
+			reader.Read(list);
+			reader.Read(asdl);
 		}
 
 		public void ToQData(StringBuilder writer)
 		{
 			writer.Write(list);
+			writer.Write(asdl);
 		}
 	}
 
