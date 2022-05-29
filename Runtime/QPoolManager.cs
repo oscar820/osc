@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
@@ -193,15 +193,6 @@ namespace QTool
                     throw new Exception("对象池创建函数为空  " + this);
                 }
                 var obj = newFunc();
-                QToolDebug.Log(() =>
-                {
-                    var info = "【" + Key + "】对象池当前池大小：" + AllCount + '\n';
-                    foreach (var item in UsingPool)
-                    {
-                        info += "[" + item + "]" + item.GetType() + "|" + item.GetHashCode() + "\n";
-                    }
-                    return info;
-                });
                 return CheckGet(obj);
             }
         }

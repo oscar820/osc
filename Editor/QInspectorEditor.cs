@@ -721,7 +721,7 @@ namespace QTool.Inspector
             {
                 GUILayoutUtility.GetLastRect().RightMenu((menu) =>
                 {
-                    menu.AddItem(new GUIContent("复制" + name), false, () => GUIUtility.systemCopyBuffer = obj.ToQData(type));
+                    menu.AddItem(new GUIContent("复制" + name), false, () => GUIUtility.systemCopyBuffer = obj.ToQDataType(type));
                     if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
                     {
                         menu.AddItem(new GUIContent("粘贴" + name), false, () => changeValue(GUIUtility.systemCopyBuffer.ParseQData(type, true, obj)));

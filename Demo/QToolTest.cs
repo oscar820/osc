@@ -74,64 +74,65 @@ namespace QTool.Test
         {
             QId.InstanceIdList.LoadAllInstance(scenebytes);
         }
+		public int testTimes = 1;
         [ContextMenu("序列化测试")]
         public void TestFunc()
         {
            
             Tool.RunTimeCheck("Xml写入", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
                     testBytes = FileManager.XmlSerialize(test1).GetBytes();
             }
             },() => testBytes.Length,()=> FileManager.XmlSerialize(test1));
             Tool.RunTimeCheck("Xml读取", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
                     test2 = FileManager.XmlDeserialize<TTestClass>(testBytes.GetString());
                 }
             });
             Tool.RunTimeCheck("QSerialize写入", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
                     testBytes = QSerialize.Serialize(test1);
             }
             }, () => testBytes.Length);
             Tool.RunTimeCheck("QSerialize读取", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
                     test2 = QSerialize.Deserialize<TTestClass>(testBytes);
                 }
             });
             Tool.RunTimeCheck("QData写入", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
                     testBytes = test1.ToQData().GetBytes();
                 }
             }, () => testBytes.Length, () => test1.ToQData());
             Tool.RunTimeCheck("QData读取", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
-                    test2 = testBytes.GetString().ParseQData<TTestClass>();
+					test2 = testBytes.GetString().ParseQData<TTestClass>();
                 }
             });
             Tool.RunTimeCheck("QData写入无Name", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
                     testBytes = test1.ToQData(false).GetBytes();
                 }
             }, () => testBytes.Length, () => test1.ToQData(false));
-            Tool.RunTimeCheck("QData读取Name", () =>
+            Tool.RunTimeCheck("QData读取无Name", () =>
             {
-                for (int i = 0; i < 4000; i++)
+                for (int i = 0; i < testTimes; i++)
                 {
-                    test2 = testBytes.GetString().ParseQData<TTestClass>(false);
+					test2 = testBytes.GetString().ParseQData<TTestClass>(false);
                 }
             });
         }
@@ -178,6 +179,7 @@ namespace QTool.Test
 				return Key + ":" + value;
 			}
 		}
+	
 	}
     [Flags]
     public enum TestEnum
@@ -219,7 +221,6 @@ namespace QTool.Test
         [ViewName("名字测试2")]
         public string asdl;
         public float f1;
-
       
     }
 

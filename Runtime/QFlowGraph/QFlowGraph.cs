@@ -418,7 +418,7 @@ namespace QTool.FlowGraph
 				if (ValueType == QFlow.Type || Node.command == null) return;
              
                 _value = value;
-                stringValue = value.ToQData(ValueType);
+                stringValue = value.ToQDataType(ValueType);
                 if (KeyNameAttribute != null)
                 {
                     Node.Key = _value?.ToString();
