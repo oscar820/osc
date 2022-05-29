@@ -69,7 +69,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("´íÎó" + " ²»´æÔÚÎÄ¼ş¼Ğ" + rootPath);
+                Debug.LogError("é”™è¯¯" + " ä¸å­˜åœ¨æ–‡ä»¶å¤¹" + rootPath);
             }
         }
         public static void ForeachFiles(this string rootPath, Action<string> action)
@@ -88,7 +88,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("´íÎó" + " ²»´æÔÚÎÄ¼ş¼Ğ" + rootPath);
+                Debug.LogError("é”™è¯¯" + " ä¸å­˜åœ¨æ–‡ä»¶å¤¹" + rootPath);
             }
         }
 
@@ -117,7 +117,7 @@ namespace QTool
             {
                 if (t == null)
                 {
-                    Debug.LogError("ĞòÁĞ»¯Êı¾İÎª¿Õ" + typeof(T));
+                    Debug.LogError("åºåˆ—åŒ–æ•°æ®ä¸ºç©º" + typeof(T));
                     return null;
                 }
                 GetSerializer(typeof(T), extraTypes).Serialize(sw, t);
@@ -135,7 +135,7 @@ namespace QTool
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("XmlĞòÁĞ»¯³ö´í£º\n" + e);
+                    Debug.LogError("Xmlåºåˆ—åŒ–å‡ºé”™ï¼š\n" + e);
                     return default;
                 }
             }
@@ -149,7 +149,7 @@ namespace QTool
             string data = "";
             if (!ExistsFile(path))
             {
-                Debug.LogError("²»´æÔÚÎÄ¼ş£º" + path);
+                Debug.LogError("ä¸å­˜åœ¨æ–‡ä»¶ï¼š" + path);
                 return data;
             }
             using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
@@ -165,7 +165,7 @@ namespace QTool
         {
             if (!System.IO.File.Exists(path))
             {
-                Debug.LogError("²»´æÔÚÎÄ¼ş£º" + path);
+                Debug.LogError("ä¸å­˜åœ¨æ–‡ä»¶ï¼š" + path);
                 return null;
             }
             return File.ReadAllBytes(path);
@@ -177,7 +177,7 @@ namespace QTool
          
         }
         /// <summary>
-        /// »ñÈ¡ÎÄ¼ş¼ĞÂ·¾¶
+        /// è·å–æ–‡ä»¶å¤¹è·¯å¾„
         /// </summary>
         public static string GetFolderPath(this string path)
         {
@@ -241,7 +241,7 @@ namespace QTool
             catch (Exception e)
             {
 
-                Debug.LogError("±£´æÊ§°Ü¡¾" + path + "¡¿" + e);
+                Debug.LogError("ä¿å­˜å¤±è´¥ã€" + path + "ã€‘" + e);
             }
 
             return path;
@@ -249,7 +249,7 @@ namespace QTool
 
  
 
-        public static string SelectOpenPath(string title = "´ò¿ªÎÄ¼ş", string extension = "obj", string directory = "Assets")
+        public static string SelectOpenPath(string title = "æ‰“å¼€æ–‡ä»¶", string extension = "obj", string directory = "Assets")
         {
             var dialog = new FileDialog
             {
@@ -264,7 +264,7 @@ namespace QTool
             }
             return "";
         }
-        public static string SelectSavePath(string title = "±£´æÎÄ¼ş", string directory= "Assets", string defaultName="newfile", string extension = "obj" )
+        public static string SelectSavePath(string title = "ä¿å­˜æ–‡ä»¶", string directory= "Assets", string defaultName="newfile", string extension = "obj" )
         {
             var dialog = new FileDialog
             {

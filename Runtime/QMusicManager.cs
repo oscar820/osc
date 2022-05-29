@@ -26,11 +26,11 @@ namespace QTool
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError("╤ах║ЁЖ╢Мё╨" + e);
+                    Debug.LogError("Х╞╩Е▐√Е┤╨И■≥О╪ " + e);
                 }
                 if (AllData != null)
                 {
-                    Debug.LogError("╤ах║║╬" + clip.name + "║©");
+                    Debug.LogError("Х╞╩Е▐√Ц─░" + clip.name + "Ц─▒");
                     return;
                 }
                 PlayerPrefs.DeleteKey(key);
