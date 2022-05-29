@@ -53,7 +53,11 @@ namespace QTool
 		}
 
 		static ObjectPool<StringBuilder> StringBuilderPool = new ObjectPool<System.Text.StringBuilder>(nameof(StringBuilderPool), () => new System.Text.StringBuilder());
-		internal static void WriteType(this StringBuilder writer, object obj, Type type, bool hasName)
+		public static void Write<T>(this StringBuilder writer, T obj, bool hasName = true)
+		{
+			WriteType(writer, obj, typeof(T), hasName);
+		}
+		public static void WriteType(this StringBuilder writer, object obj, Type type, bool hasName=true)
 		{
 			var typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
@@ -80,7 +84,7 @@ namespace QTool
 									}
 									else if (typeInfo.IsIQData)
 									{
-										WriteCheckString(writer, (obj as IQData).ToQData());
+										(obj as IQData).ToQData(writer);
 									}
 									else
 									{
@@ -168,8 +172,11 @@ namespace QTool
 					break;
 			}
 		}
-
-		internal static object ReadType(this StringReader reader, Type type, bool hasName = true, object target = null)
+		public static object Read<T>(this StringReader reader, bool hasName = true, T target = default)
+		{
+			return ReadType(reader, typeof(T), hasName, target);
+		}
+		public static object ReadType(this StringReader reader, Type type, bool hasName = true, object target = null)
 		{
 			var typeCode = Type.GetTypeCode(type);
 
@@ -205,7 +212,8 @@ namespace QTool
 										}
 										else if (typeInfo.IsIQData)
 										{
-											target = (QReflection.CreateInstance(type, target) as IQData).ParseQData(reader.ReadCheckString()); reader.NextIs('}');
+											target = QReflection.CreateInstance(type, target) ;
+											(target as IQData).ParseQData(reader); reader.NextIs('}');
 										}
 										else
 										{
@@ -409,7 +417,7 @@ namespace QTool
 		const string BlockStart = "{[\"";
 		const string BlockEnd = "}]\",;=:";
 		static Stack<char> BlockStack = new Stack<char>();
-		static string ReadValueString(this StringReader reader)
+		public static string ReadValueString(this StringReader reader)
 		{
 			var builder = StringBuilderPool.Get();
 			lock (BlockStack)
@@ -447,7 +455,7 @@ namespace QTool
 			return value;
 		}
 
-		static void WriteCheckString(this StringBuilder writer, string value)
+		public static void WriteCheckString(this StringBuilder writer, string value)
 		{
 			if (value == null)
 			{
@@ -491,7 +499,7 @@ namespace QTool
 				writer.Append("\"");
 			}
 		}
-		static string ReadCheckString(this StringReader reader)
+		public static string ReadCheckString(this StringReader reader)
 		{
 			if (reader.NextIs('\"'))
 			{
@@ -544,8 +552,8 @@ namespace QTool
 	}
 	public interface IQData
 	{
-		string ToQData();
-		object ParseQData(string qdataStr);
+		void ToQData(StringBuilder writer);
+		void ParseQData(StringReader reader);
 	}
 
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Interface)]

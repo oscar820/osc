@@ -11,6 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using QTool.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using System.IO;
 
 namespace QTool.Test
 {
@@ -237,13 +238,22 @@ namespace QTool.Test
        
     }
     [System.Serializable]
-    public class TestClass2
+    public class TestClass2 :IQData
     {
         public List<float> list;
         [ViewName("名字测试2")]
         public string asdl;
         public float f1;
-      
-    }
+
+		public void ParseQData(StringReader reader)
+		{
+			reader.Read(true,list);
+		}
+
+		public void ToQData(StringBuilder writer)
+		{
+			writer.Write(list);
+		}
+	}
 
 }
