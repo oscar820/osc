@@ -5,13 +5,22 @@ using UnityEngine;
 namespace QTool
 {
 	public class QAnalysisTest : MonoBehaviour
-	{
-		public string email;
-		public string pass ;
-		[ViewButton("邮件获取测试")]
-		public void EmailReceiveTest() 
+	{		
+		[ViewButton("刷新数据")]
+		public void FreshData() 
 		{
-			QMailTool.GetEmails(email,pass);
+			QAnalysisData.FreshData();
+		}
+	
+		[ViewButton("登录")]
+		public void Login()
+		{
+			QAnalysis.Login("TestAccount"+ "_" + Random.Range(1, 4));
+		}
+		[ViewButton("退出")]
+		public void Logout()
+		{
+			QAnalysis.logout();
 		}
 	}
 

@@ -13,22 +13,20 @@ namespace QTool
 
 	public static class QMailTool
     {
-        public static async Task Send(string fromAddress, string password, string toAddres, string disPlayName, string title, string messageInfo, params string[] files)
+	
+		public static void Send(QMailAccount account, string toAddres, string title, string messageInfo, params string[] files)
+		{
+			_=SendAsync(account, toAddres, title, messageInfo, files);
+		}
+		
+		public static async Task SendAsync(QMailAccount account, string toAddres, string title, string messageInfo ,params string[] files)
         {
             SmtpClient client = null;
-            if (fromAddress.Contains("@"))
-            {
-                client = new SmtpClient("smtp." + fromAddress.Substring(fromAddress.IndexOf("@") + 1));
-            }
-            if (client == null)
-            {
-                Debug.LogError("不支持的邮箱:" + fromAddress);
-                return;
-            }
-            client.Credentials = new System.Net.NetworkCredential(fromAddress, password);
+			client = new SmtpClient(account.smtpServer);
+			client.Credentials = new System.Net.NetworkCredential(account.account, account.password);
             client.EnableSsl = true;
 			var message = new MailMessage();
-			message.From = new MailAddress(fromAddress, disPlayName);
+			message.From = new MailAddress(account.account);
 			message.To.Add(toAddres);
 			message.IsBodyHtml = true;
 			message.BodyEncoding = System.Text.Encoding.UTF8;
@@ -50,7 +48,7 @@ namespace QTool
             }
             else
             {
-                Debug.Log("发送邮件成功");
+                Debug.Log("发送邮件成功 "+message.Subject+" \n"+message.Body);
             }
         }
 		static async Task<bool> CheckReadLine(this StreamReader reader,Action<string[]> trueAction=null)
@@ -74,7 +72,8 @@ namespace QTool
 			}
 		}
 		public static List<string> OldMailIdList;
-		static async Task GetEmail(StreamWriter writer,StreamReader reader, int index)
+		public static event Action<QMailInfo> OnReceiveMail;
+		static async Task GetNewEmail(StreamWriter writer,StreamReader reader, int index)
 		{
 			if (OldMailIdList == null)
 			{
@@ -96,7 +95,7 @@ namespace QTool
 			{
 				Debug.LogError("读取第 " + index + " 封邮件ID出错");
 				return;
-			};
+			}; 
 			if (!newflie) {
 				return;
 			}
@@ -113,16 +112,18 @@ namespace QTool
 			string result = null;
 			while (( result = await reader.ReadLineAsync()) != ".")
 			{
-				info += result + "\n";
+				info += result + "\n"; 
 			}
-			Debug.Log("新邮件 "+new QMailInfo(info));
+			var newMail = new QMailInfo(info);
+			OnReceiveMail?.Invoke(newMail);
+			Debug.Log("新邮件 " +newMail);
 			PlayerPrefs.SetString(nameof(QMailInfo) + "." + nameof(OldMailIdList), OldMailIdList.ToQData());
 
 		}
-		public static async void GetEmails(string user, string pass)
+		public static async Task FreshEmails(QMailAccount account)
 		{
 			TcpClient clientSocket = new TcpClient();
-			clientSocket.Connect("pop.qq.com", 995);
+			clientSocket.Connect(account.popServer, 995);
 			//建立SSL连接
 			SslStream stream = new SslStream(
 				clientSocket.GetStream(),
@@ -130,11 +131,8 @@ namespace QTool
 				(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors errors) => {
 					return true;//接收所有的远程SSL链接
 				});
-			stream.AuthenticateAsClient("pop.qq.com");//验证
-
-			//得到输入流
+			stream.AuthenticateAsClient(account.popServer);
 			StreamReader reader = new StreamReader(stream, Encoding.Default, true);
-			//得到输出流
 			StreamWriter writer = new StreamWriter(stream);
 			writer.AutoFlush = true;
 			if(!await reader.CheckReadLine())
@@ -142,14 +140,13 @@ namespace QTool
 				Debug.LogError("连接服务器出错");
 				return;
 			}
-			await writer.WriteLineAsync("USER "+user);
+			await writer.WriteLineAsync("USER "+ account.account);
 			if (!await reader.CheckReadLine())
 			{
 				Debug.LogError("用户名错误");
 				return;
 			}
-
-			await writer.WriteLineAsync("PASS "+pass);
+			await writer.WriteLineAsync("PASS "+ account.password);
 			if (!await reader.CheckReadLine())
 			{
 				Debug.LogError("密码错误");
@@ -166,14 +163,42 @@ namespace QTool
 				Debug.LogError("获取邮件统计信息出错");
 				return;
 			}
-			for (int i =mailCount-10; i < mailCount; i++)
+			for (int i =0; i < mailCount; i++)
 			{
-				await GetEmail(writer, reader, i+1);
+				await GetNewEmail(writer, reader, i+1);
 			}
+			Debug.Log("接收邮件完成");
 		}
 		
 	}
-	
+	[System.Serializable]
+	public class QMailAccount
+	{
+		public string account;
+		public string password;
+		public string popServer;
+		public string smtpServer;
+		public void Init()
+		{
+			this.popServer = string.IsNullOrEmpty(this.popServer) ? GetServer(account, "pop.") : this.popServer;
+			this.smtpServer = string.IsNullOrEmpty(this.smtpServer) ? GetServer(account, "smtp.") : this.smtpServer;
+		}
+		static string GetServer(string emailAddress, string start)
+		{
+			if (emailAddress.IndexOf('@') < 0)
+			{
+				throw new Exception("不支持邮箱 " + emailAddress);
+			}
+			return start + "." + emailAddress.Substring(emailAddress.IndexOf("@") + 1);
+		}
+		public bool InitOver
+		{
+			get
+			{
+				return !string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(popServer) && !string.IsNullOrEmpty(smtpServer);
+			}
+		}
+	}
 	public class QMailInfo
 	{
 
@@ -199,7 +224,7 @@ namespace QTool
 				}
 			}
 
-			Body = "未能解析格式：\n" + mailStr;
+			//Body = "未能解析格式：\n" + mailStr;
 		}
 		public override string ToString()
 		{

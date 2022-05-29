@@ -79,18 +79,7 @@ namespace QTool{
     }
     public class QDataList: QAutoList<string, QDataRow>
     {
-        public static QDataList QToolSetting => GetData(StreamingPathRoot+nameof(QToolSetting)+".txt",(data)=> { data[nameof(QToolDebug)].SetValue(false); });
         public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
-        static QDataList()
-        {
-            Application.focusChanged += (focus) =>
-            {
-                if (!focus)
-                {
-                    QToolSetting.Save();
-                }
-            };
-        }
         public static QDataList GetData(string path,System.Action<QDataList> autoCreate=null)
         {
             if (!dataList.ContainsKey(path))

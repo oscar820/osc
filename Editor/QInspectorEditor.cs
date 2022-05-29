@@ -1122,8 +1122,6 @@ namespace QTool.Inspector
                                         kv.Value.Invoke(target, obj);
                                     }
                                     pickId = -1;
-
-
                                 }
                             }
                         }
