@@ -156,7 +156,7 @@ namespace QTool.Command
                 {
                     try
                     {
-                        paramObjs[i] = commands[i].ParseQData(pInfo.ParameterType);
+                        paramObjs[i] = commands[i].ParseQDataType(pInfo.ParameterType);
                     }
                     catch (Exception e)
                     {

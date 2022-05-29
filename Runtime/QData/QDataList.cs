@@ -55,7 +55,7 @@ namespace QTool{
 						{
 							try
 							{
-								member.Set(t, row[i].ParseQData(member.Type, false));
+								member.Set(t, row[i].ParseQDataType(member.Type, false));
 							}
 							catch (System.Exception e)
 							{
@@ -288,4 +288,93 @@ namespace QTool{
             }
         }
     }
+	public static class QDataListTool
+	{
+		public static string ToQDataListElement(string value)
+		{
+			if (string.IsNullOrEmpty(value))
+			{
+				return "";
+			}
+			if (value.Contains("\t"))
+			{
+				value = value.Replace("\t", " ");
+			}
+
+			if (value.Contains("\n"))
+			{
+				if (value.Contains("\""))
+				{
+					value = value.Replace("\"", "\"\"");
+				}
+				value = "\"" + value + "\"";
+			}
+			return value;
+		}
+		public static string ParseQDataListElement(string value)
+		{
+			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n") || true))
+			{
+				value = value.Substring(1, value.Length - 2);
+				value = value.Replace("\"\"", "\"");
+				return value;
+			}
+			return value;
+		}
+		public static string ReadElement(this StringReader reader, out bool newLine)
+		{
+			newLine = true;
+			using (var writer = new StringWriter())
+			{
+				if (reader.Peek() == '\"')
+				{
+					var checkExit = true;
+					while (!reader.IsEnd())
+					{
+						var c = reader.Read();
+						if (c != '\r')
+						{
+							writer.Write((char)c);
+						}
+						if (c == '\"')
+						{
+							checkExit = !checkExit;
+						}
+						if (checkExit)
+						{
+							reader.NextIgnore('\r');
+							if (reader.NextIs('\n')) break;
+							if (reader.NextIs('\t'))
+							{
+								newLine = false;
+								break;
+							}
+						}
+
+					}
+					var value = writer.ToString();
+					return value;
+				}
+				else
+				{
+					while (!reader.IsEnd() && !reader.NextIs('\n'))
+					{
+						if (reader.NextIs('\t'))
+						{
+							newLine = false;
+							break;
+						}
+						var c = (char)reader.Read();
+						if (c != '\r')
+						{
+							writer.Write(c);
+						}
+					}
+					return writer.ToString();
+				}
+
+			}
+		}
+
+	}
 }
