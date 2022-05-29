@@ -162,15 +162,18 @@ namespace QTool.Binary
                                 var count = reader.ReadInt32();
 								var obj = QReflection.CreateInstance(type, typeInfo.IsArray? null:target, count);
 								var list = obj as IList;
-								for (int i = 0; i < list.Count; i++)
+								for (int i = 0; i < count; i++)
 								{
-									list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
+									if (i < list.Count)
+									{
+										list[i] = DeserializeType(reader, typeInfo.ElementType, list[i]);
+									}
+									else
+									{
+										list.Add(DeserializeType(reader, typeInfo.ElementType));
+									}
 								}
-								for (int i = list.Count; i < count; i++)
-								{
-									list.Add(reader.DeserializeType(typeInfo.ElementType));
-								}
-                                return list;
+								return list;
                             }
                         case QObjectType.Object:
                             {
@@ -187,17 +190,16 @@ namespace QTool.Binary
                                     {
                                         foreach (var memeberInfo in typeInfo.Members)
                                         {
-                                            memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type, memeberInfo.Get?.Invoke(target) ));
-                                        }
+                                            memeberInfo.Set.Invoke(obj, DeserializeType(reader, memeberInfo.Type, memeberInfo.Get(target) ));
+										}
                                     }
                                     else
                                     {
                                         foreach (var memeberInfo in typeInfo.Members)
                                         {
-                                            memeberInfo.Set.Invoke(obj, reader.DeserializeType(memeberInfo.Type));
+                                            memeberInfo.Set.Invoke(obj, DeserializeType(reader, memeberInfo.Type));
                                         }
                                     }
-                                  
                                     return obj;
                                 }
                             }
@@ -254,7 +256,7 @@ namespace QTool.Binary
         {
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {
-                return reader.DeserializeType(type, target);
+				return DeserializeType(reader, type, target);
             }
         }
     }
