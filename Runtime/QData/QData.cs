@@ -23,11 +23,11 @@ namespace QTool
 
 		public static string ToQDataType(this object obj, Type type, bool hasName = true)
 		{
-			var builder = StringBuilderPool.Get();
+			var builder =Tool.StringBuilderPool.Get();
 			WriteType(builder, obj, type, hasName);
 			var str = builder.ToString();
 			builder.Clear();
-			StringBuilderPool.Push(builder);
+			Tool.StringBuilderPool.Push(builder);
 			return str;
 		}
 		public static object ParseQDataType(this string qdataStr, Type type, bool hasName = true, object target = null)
@@ -52,7 +52,6 @@ namespace QTool
 
 		}
 
-		static ObjectPool<StringBuilder> StringBuilderPool = new ObjectPool<System.Text.StringBuilder>(nameof(StringBuilderPool), () => new System.Text.StringBuilder());
 		public static void Write<T>(this StringBuilder writer, T obj, bool hasName = true)
 		{
 			WriteType(writer, obj, typeof(T), hasName);
@@ -144,6 +143,7 @@ namespace QTool
 						}
 						break;
 					}
+				case TypeCode.DateTime:
 				case TypeCode.String:
 					WriteCheckString(writer, obj?.ToString());
 					break;
@@ -227,38 +227,36 @@ namespace QTool
 												{
 													var name = reader.ReadCheckString();
 													var memeberInfo = typeInfo.Members[name];
-													if (memeberInfo != null)
-													{
 
-														object result = null;
-														try
+													object result = null;
+													try
+													{
+														if (!(reader.NextIs(':') || reader.NextIs('=')))
 														{
-															if (reader.NextIs(':') || reader.NextIs('='))
-															{
-																result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
-																memeberInfo.Set(target, result);
-															}
-															else
-															{
-																throw new Exception("缺少分隔符 : 或 =");
-															}
-															if (!(reader.NextIs(';') || reader.NextIs(',')))
-															{
-																if (reader.NextIs('}'))
-																{
-																	break;
-																}
-															}
+															throw new Exception("缺少分隔符 : 或 =");
 														}
-														catch (Exception e)
+														if (memeberInfo != null)
 														{
-															Debug.LogError("读取成员【" + type.Name + "." + memeberInfo.Name + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
-															throw e;
+															result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
+															memeberInfo.Set(target, result);
+														
+														}
+														else
+														{
+															Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadValueString());
 														}
 													}
-													else
+													catch (Exception e)
 													{
-														Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name);
+														Debug.LogError("读取成员【" + type.Name + "." + memeberInfo.Name + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+														throw e;
+													}
+													if (!(reader.NextIs(';') || reader.NextIs(',')))
+													{
+														if (reader.NextIs('}'))
+														{
+															break;
+														}
 													}
 												}
 											}
@@ -301,7 +299,16 @@ namespace QTool
 											{
 												list.Add(reader.ReadType(typeInfo.ElementType, hasName));
 											}
-											var next = reader.NextIs(';') || reader.NextIs(',');
+											if(!( reader.NextIs(';') || reader.NextIs(','))){
+												if (reader.NextIs(']'))
+												{
+													break;
+												}
+												else
+												{
+													throw new Exception("格式出错 缺少;或,"); ;
+												}
+											}
 										}
 									}
 									else
@@ -318,7 +325,17 @@ namespace QTool
 										for (int i = 0; !reader.IsEnd() && !reader.NextIs(']'); i++)
 										{
 											list.Add(reader.ReadType(typeInfo.ElementType, hasName));
-											var next = reader.NextIs(';') || reader.NextIs(',');
+											if (!(reader.NextIs(';') || reader.NextIs(',')))
+											{
+												if (reader.NextIs(']'))
+												{
+													break;
+												}
+												else
+												{
+													throw new Exception("格式出错 缺少;或,"); ;
+												}
+											}
 										}
 									}
 									else
@@ -343,7 +360,7 @@ namespace QTool
 				case TypeCode.Char:
 					return char.Parse(ReadValueString(reader));
 				case TypeCode.DateTime:
-					return DateTime.Parse(ReadValueString(reader));
+					return DateTime.Parse(ReadCheckString(reader));
 				case TypeCode.DBNull:
 					return null;
 				case TypeCode.Decimal:
@@ -419,7 +436,7 @@ namespace QTool
 		static Stack<char> BlockStack = new Stack<char>();
 		public static string ReadValueString(this StringReader reader)
 		{
-			var builder = StringBuilderPool.Get();
+			var builder = Tool.StringBuilderPool.Get();
 			lock (BlockStack)
 			{
 				int index = -1;
@@ -451,7 +468,7 @@ namespace QTool
 			}
 			var value = builder.ToString();
 			builder.Clear();
-			StringBuilderPool.Push(builder);
+			Tool.StringBuilderPool.Push(builder);
 			return value;
 		}
 

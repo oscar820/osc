@@ -310,24 +310,41 @@ namespace QTool
                 return dblSByte.ToString("f1") + "" + Suffix[i];
             }
         }
-        public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n")
+        public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n",Func<T,string> toString=null)
         {
             if (array == null)
             {
                 return "";
             }
-            var str = "";
+			var builder = Tool.StringBuilderPool.Get();
+			builder.Clear();
             int i = 0;
-            foreach (var item in array)
-            {
-                str+=item;
-                if (i < array.Count - 1)
-                {
-                    str+=splitChar; 
-                }
-                i++;
-            }
-            return str;
+			if (toString == null)
+			{
+				foreach (var item in array)
+				{
+					builder.Append( item);
+					if (i < array.Count - 1)
+					{
+						builder.Append(splitChar);
+					}
+					i++;
+				}
+			}
+			else
+			{
+				foreach (var item in array)
+				{
+					builder.Append(toString(item));
+					if (i < array.Count - 1)
+					{
+						builder.Append(splitChar);
+					}
+					i++;
+				}
+			}
+          
+            return builder.ToString();
         }
         public static IList<T> Replace<T>(this IList<T> array, int indexA, int indexB)
         {

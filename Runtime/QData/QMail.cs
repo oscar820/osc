@@ -147,7 +147,7 @@ namespace QTool
 			{
 				Debug.LogError("连接服务器出错");
 				return;
-			}
+			}	
 			await writer.WriteLineAsync("USER "+ account.account);
 			if (!await reader.CheckReadLine())
 			{

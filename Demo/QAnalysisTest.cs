@@ -7,9 +7,10 @@ namespace QTool
 	public class QAnalysisTest : MonoBehaviour
 	{		
 		[ViewButton("刷新数据")]
-		public void FreshData() 
+		public async void FreshData() 
 		{
-			QAnalysisData.FreshData();
+			await QAnalysisData.FreshData();
+			Debug.LogError(QAnalysisData.AnalysisData.ToOneString());
 		}
 	
 		[ViewButton("登录")]

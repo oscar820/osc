@@ -16,12 +16,6 @@ namespace QTool.Binary
         {
             return (T)DeserializeType(bytes, typeof(T), targetObj);
         }
-
-
-      
-
-
-  
         public static QBinaryWriter SerializeType(this QBinaryWriter writer, object value, Type type)
         {
             try

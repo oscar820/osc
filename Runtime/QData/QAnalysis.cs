@@ -82,9 +82,26 @@ namespace QTool
 	}
 	public static class QAnalysisData
 	{
-		public static QDictionary<string, List<QAnalysisEvent>> Data = new QDictionary<string, List<QAnalysisEvent>>();
+		public class QPlayerData:IKey<string>
+		{
+			public QDictionary<string, object> Data = new QDictionary<string, object>();
+			public string Key { get; set; }
+			public List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
+			public void Add(QAnalysisEvent eventData)
+			{
+				EventList.Add(eventData);
+				Data[eventData.eventKey] = eventData.eventKey+":"+ eventData.evventValue;
+			}
+			public override string ToString()
+			{
+				return Key + "\t" + EventList.ToOneString("\t", (eventData) => eventData.eventKey);
+			}
+		}
+		public static QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
+		public static QAutoList<string, QPlayerData> AnalysisData = new QAutoList<string, QPlayerData>();
 		static QAnalysisData()
 		{
+			LoadData();
 			QMailTool.OnReceiveMail += (mailInfo) =>
 			{
 				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
@@ -93,32 +110,42 @@ namespace QTool
 				}
 			};
 		}
-		public static async Task FreshData()
+		public static async Task FreshData() 
 		{
 			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail);
+			SaveData();
 		}
-		public static void AddEvent(List<QAnalysisEvent> eventList)
+		static void SaveData()
 		{
-			foreach (var eventData in eventList)
+			PlayerPrefs.SetString(QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
+			PlayerPrefs.SetString(QAnalysis.StartKey + "_" + nameof(AnalysisData), AnalysisData.ToQData());
+		}
+		static void LoadData()
+		{
+			PlayerPrefs.GetString(QAnalysis.StartKey + "_" + nameof(EventList),"[]").ParseQData(EventList);
+			PlayerPrefs.GetString(QAnalysis.StartKey + "_" + nameof(AnalysisData),"[]").ParseQData(AnalysisData);
+		}
+		public static void AddEvent(List<QAnalysisEvent> newEventList)
+		{
+			foreach (var eventData in newEventList)
 			{
-				var playerData = Data[eventData.accountId];
-				if (playerData == null)
-				{
-					playerData = new List<QAnalysisEvent>();
-					Data[eventData.accountId] = playerData;
-				}
+				EventList.Add(eventData);
+				AnalysisData[eventData.accountId].Add(eventData);
 			}
 		}
 
 	}
 
-	public class QAnalysisEvent
+	public class QAnalysisEvent:IKey<string>
 	{
 		public string eventKey;
 		public object evventValue;
 		public DateTime eventTime = DateTime.Now;
 		public string accountId;
 		public string eventId = QId.GetNewId();
+
+		[QIgnore]
+		public string Key { get => eventId; set => eventId = value; }
 		public override string ToString()
 		{
 			return this.ToQData();

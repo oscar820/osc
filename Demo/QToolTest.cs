@@ -158,6 +158,7 @@ namespace QTool.Test
 					test2 = testBytes.GetString().ParseQData<TTestClass>(test2,false);
                 }
             });
+			Debug.Log("QData类型更改反序列化测试：" + "{newKey:asldkj,rect:{position:{x:1,z:2}}".ParseQData<TTestClass>().rect.ToQData());
         }
         public string commandStr;
         [ViewButton("命令测试")]
