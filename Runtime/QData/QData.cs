@@ -119,6 +119,7 @@ namespace QTool
 									break;
 								}
 							case QObjectType.List:
+							case QObjectType.Array:
 								{
 									var list = obj as IList;
 									if (list == null) break;
@@ -132,23 +133,6 @@ namespace QTool
 										}
 									}
 									writer.Append(']');
-									break;
-								}
-							case QObjectType.Array:
-								{
-
-									var list = obj as IList;
-									if (list == null) break;
-									writer.Append('[');
-									for (int i = 0; i < list.Count; i++)
-									{
-										WriteType(writer, list[i], typeInfo.ElementType, hasName);
-										if (i < list.Count - 1)
-										{
-											writer.Append(',');
-										}
-									}
-									writer.Append(']'); ;
 									break;
 								}
 							default:
@@ -320,7 +304,6 @@ namespace QTool
 								}
 							case QObjectType.Array:
 								{
-
 									List<object> list = new List<object>();
 									if (reader.NextIs('['))
 									{
@@ -332,7 +315,7 @@ namespace QTool
 									}
 									else
 									{
-										throw new Exception("读取List出错[" + type + "][" + reader.ToString() + "]");
+										throw new Exception("读取Array出错[" + type + "][" + reader.ToString() + "]");
 									}
 									var array = QReflection.CreateInstance(type, null, list.Count) as Array;
 									for (int i = 0; i < list.Count; i++)

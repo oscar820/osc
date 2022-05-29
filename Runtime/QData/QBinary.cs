@@ -39,21 +39,16 @@ namespace QTool.Binary
                             {
 
                                 case QObjectType.List:
-                                    var list = value as IList;
+								case QObjectType.Array:
+									var list = value as IList;
                                     writer.Write(list.Count);
                                     foreach (var item in list)
                                     {
                                         writer.SerializeType(item, typeInfo.ElementType);
                                     }
                                     break;
-                                case QObjectType.Array:
                                     var array = value as Array;
-                                    writer.Write((byte)typeInfo.ArrayRank);
-                                    for (int i = 0; i < typeInfo.ArrayRank; i++)
-                                    {
-                                        writer.Write(array.GetLength(i));
-                                    }
-                                    array.ForeachArray(0, typeInfo.IndexArray, (indexArray) => { writer.SerializeType(array.GetValue(indexArray), typeInfo.ElementType); });
+									writer.Write(array.Length);
                                     break;
                                 case QObjectType.Object:
 
@@ -161,56 +156,21 @@ namespace QTool.Binary
                     switch (typeInfo.objType)
                     {
 
-                        case QObjectType.List:
-                            {
-                                var obj = QReflection.CreateInstance(type, target);
-                                var list = obj as IList;
+						case QObjectType.List:
+						case QObjectType.Array:
+							{
                                 var count = reader.ReadInt32();
-                                if (hasTarget)
-                                {
-                                    for (int i = 0; i < list.Count; i++)
-                                    {
-                                        list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
-                                    }
-                                    for (int i = list.Count; i < count; i++)
-                                    {
-                                        list.Add(reader.DeserializeType(typeInfo.ElementType));
-                                    }
-                                }
-                                else
-                                {
-                                    for (int i = 0; i < count; i++)
-                                    {
-                                        list.Add(reader.DeserializeType(typeInfo.ElementType));
-                                    }
-                                }
-                              
+								var obj = QReflection.CreateInstance(type, typeInfo.IsArray? null:target, count);
+								var list = obj as IList;
+								for (int i = 0; i < list.Count; i++)
+								{
+									list[i] = reader.DeserializeType(typeInfo.ElementType, list[i]);
+								}
+								for (int i = list.Count; i < count; i++)
+								{
+									list.Add(reader.DeserializeType(typeInfo.ElementType));
+								}
                                 return list;
-                            }
-                        case QObjectType.Array:
-                            {
-                                var rank = reader.ReadByte();
-                                for (int i = 0; i < rank; i++)
-                                {
-                                    typeInfo.IndexArray[i] = reader.ReadInt32();
-                                }
-                                var array = (Array)QReflection.CreateInstance(type, target, typeInfo.IndexArray.ToObjects());
-                                if (hasTarget)
-                                {
-                                    array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
-                                    {
-                                        array.SetValue(reader.DeserializeType(typeInfo.ElementType, array.GetValue(indexArray)), indexArray);
-                                    });
-                                }
-                                else
-                                {
-                                    array.ForeachArray(0, typeInfo.IndexArray, (indexArray) =>
-                                    {
-                                        array.SetValue(reader.DeserializeType(typeInfo.ElementType), indexArray);
-                                    });
-                                }
-                            
-                                return array;
                             }
                         case QObjectType.Object:
                             {
