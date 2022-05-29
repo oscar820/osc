@@ -144,6 +144,8 @@ namespace QTool
 						break;
 					}
 				case TypeCode.DateTime:
+					WriteCheckString(writer,((DateTime)obj).ToString("yyyy-MM-dd HH:mm:ss zzz"));
+					break;
 				case TypeCode.String:
 					WriteCheckString(writer, obj?.ToString());
 					break;

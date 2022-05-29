@@ -148,7 +148,7 @@ namespace QTool
 		public string Key { get => eventId; set => eventId = value; }
 		public override string ToString()
 		{
-			return this.ToQData();
+			return eventKey + " " + eventTime.ToString("yyyy-MM-dd HH:mm:ss zzz") +" "+accountId;
 		}
 	}
 
