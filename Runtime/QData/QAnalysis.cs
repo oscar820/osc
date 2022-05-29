@@ -68,8 +68,8 @@ namespace QTool
 				var eventData=new QAnalysisEvent
 				{
 					accountId = AccountId,
-					key=eventKey,
-					value=value,
+					eventKey=eventKey,
+					evventValue=value,
 				};
 				triggerEventList.Add(eventData);
 				Debug.Log(StartKey + " 触发事件 " + eventData);
@@ -83,16 +83,39 @@ namespace QTool
 	public static class QAnalysisData
 	{
 		public static QDictionary<string, List<QAnalysisEvent>> Data = new QDictionary<string, List<QAnalysisEvent>>();
+		static QAnalysisData()
+		{
+			QMailTool.OnReceiveMail += (mailInfo) =>
+			{
+				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
+				{
+					AddEvent(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
+				}
+			};
+		}
 		public static async Task FreshData()
 		{
 			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail);
 		}
+		public static void AddEvent(List<QAnalysisEvent> eventList)
+		{
+			foreach (var eventData in eventList)
+			{
+				var playerData = Data[eventData.accountId];
+				if (playerData == null)
+				{
+					playerData = new List<QAnalysisEvent>();
+					Data[eventData.accountId] = playerData;
+				}
+			}
+		}
+
 	}
 
 	public class QAnalysisEvent
 	{
-		public string key;
-		public object value;
+		public string eventKey;
+		public object evventValue;
 		public DateTime eventTime = DateTime.Now;
 		public string accountId;
 		public string eventId = QId.GetNewId();

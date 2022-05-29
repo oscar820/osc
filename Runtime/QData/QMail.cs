@@ -115,9 +115,17 @@ namespace QTool
 				info += result + "\n"; 
 			}
 			var newMail = new QMailInfo(info);
-			OnReceiveMail?.Invoke(newMail);
 			Debug.Log("新邮件 " +newMail);
+			
 			PlayerPrefs.SetString(nameof(QMailInfo) + "." + nameof(OldMailIdList), OldMailIdList.ToQData());
+			try
+			{
+				OnReceiveMail?.Invoke(newMail);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("接收邮件出错：" + e);
+			}
 
 		}
 		public static async Task FreshEmails(QMailAccount account)
