@@ -80,61 +80,7 @@ namespace QTool
 		
 		
 	}
-	public static class QAnalysisData
-	{
-		public class QPlayerData:IKey<string>
-		{
-			public QDictionary<string, object> Data = new QDictionary<string, object>();
-			public string Key { get; set; }
-			public List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
-			public void Add(QAnalysisEvent eventData)
-			{
-				EventList.Add(eventData);
-				Data[eventData.eventKey] = eventData.eventKey+":"+ eventData.evventValue;
-			}
-			public override string ToString()
-			{
-				return Key + "\t" + EventList.ToOneString("\t", (eventData) => eventData.eventKey);
-			}
-		}
-		public static QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
-		public static QAutoList<string, QPlayerData> AnalysisData = new QAutoList<string, QPlayerData>();
-		static QAnalysisData()
-		{
-			LoadData();
-			QMailTool.OnReceiveMail += (mailInfo) =>
-			{
-				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
-				{
-					AddEvent(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
-				}
-			};
-		}
-		public static async Task FreshData() 
-		{
-			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail);
-			SaveData();
-		}
-		static void SaveData()
-		{
-			PlayerPrefs.SetString(QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
-			PlayerPrefs.SetString(QAnalysis.StartKey + "_" + nameof(AnalysisData), AnalysisData.ToQData());
-		}
-		static void LoadData()
-		{
-			PlayerPrefs.GetString(QAnalysis.StartKey + "_" + nameof(EventList),"[]").ParseQData(EventList);
-			PlayerPrefs.GetString(QAnalysis.StartKey + "_" + nameof(AnalysisData),"[]").ParseQData(AnalysisData);
-		}
-		public static void AddEvent(List<QAnalysisEvent> newEventList)
-		{
-			foreach (var eventData in newEventList)
-			{
-				EventList.Add(eventData);
-				AnalysisData[eventData.accountId].Add(eventData);
-			}
-		}
-
-	}
+	
 
 	public class QAnalysisEvent:IKey<string>
 	{

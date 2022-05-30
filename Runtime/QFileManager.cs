@@ -144,22 +144,21 @@ namespace QTool
         {
             return File.Exists(path);
         }
-        public static string Load(string path)
+        public static string Load(string path,string defaultValue="")
         {
-            string data = "";
             if (!ExistsFile(path))
             {
                 Debug.LogError("不存在文件：" + path);
-                return data;
+                return defaultValue;
             }
             using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
             {
                 using (var sw = new System.IO.StreamReader(file))
                 {
-                    data = sw.ReadToEnd();
-                }
+					var data = sw.ReadToEnd();
+					return data;
+				}
             }
-            return data;
         }
         public static byte[] LoadBytes(string path)
         {

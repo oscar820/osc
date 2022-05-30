@@ -8,18 +8,11 @@ using UnityEditor.Callbacks;
 using UnityEngine;
 namespace QTool.FlowGraph
 {
-
+	
     public class QFlowGraphWindow : EditorWindow
     {
         const float dotSize = 16;
-        static Texture2D DotTex => _dotTex ??= Resources.Load<Texture2D>("NodeEditorDot");
-        static Texture2D _dotTex;
-        static GUIStyle IutputPortStyle => _iutputPortStyle ??= new GUIStyle(EditorStyles.label);
-        static GUIStyle _iutputPortStyle;
-        static GUIStyle OutputPortStyle=> _outputPortStyle??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
-        static GUIStyle _outputPortStyle;
-        static Texture2D BackTex => _backTex ??= Resources.Load<Texture2D>("NodeEditorBackground");
-        static Texture2D _backTex = null;
+
 
         public QFlowGraphAsset GraphAsset = null;
         public QFlowGraph Graph => GraphAsset?.Graph;
@@ -35,23 +28,22 @@ namespace QTool.FlowGraph
             return false;
         }
 
-        private static QFlowGraphWindow window;
+        public static QFlowGraphWindow Instance { get; private set; }
         public static void OpenPath(string path)
         {
             Open(AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path));
         }
         public static void Open(QFlowGraphAsset asset)
         {
-            if (asset == null) return;
-            if (window == null)
+            if (Instance == null)
             {
-                window = GetWindow<QFlowGraphWindow>();
-                window.minSize = new Vector2(500, 400);
+                Instance = GetWindow<QFlowGraphWindow>();
+                Instance.minSize = new Vector2(400, 300);
             }
-            window.titleContent = new GUIContent(asset.name + " - " + nameof(QFlowGraph));
-            window.GraphAsset = asset;
-            window.ViewRange = new Rect(Vector2.zero, window.position.size);
-            window.Repaint();
+            Instance.titleContent = new GUIContent((asset==null?"":asset.name + " - ") + nameof(QFlowGraph));
+            Instance.GraphAsset = asset;
+            Instance.ViewRange = new Rect(Vector2.zero, Instance.position.size);
+            Instance.Repaint();
         }
         [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
         public static void CreateNewFile()
@@ -66,7 +58,7 @@ namespace QTool.FlowGraph
             AssetDatabase.Refresh();
             OpenPath(path.ToAssetPath());
         }
-        [MenuItem("QTool/QFlowGraph编辑器")]
+        [MenuItem("QTool/窗口/流程图")]
         public static void OpenWindow()
         {
             Open(null);
@@ -322,11 +314,12 @@ namespace QTool.FlowGraph
             {
                 case EditorState.BoxSelect:
                     {
-                        GUI.color = Color.black;
+						QGUITool.SetColor(Color.black);
                         var box = SelectBox;
                         box.position -= ViewRange.position;
                         GUI.Box(box, "");
-                    }
+						QGUITool.RevertColor();
+					}
                     break;
                 default:
                     break;
@@ -504,15 +497,15 @@ namespace QTool.FlowGraph
         }
         void DrawBackground()
         {
-            var xTex = position.width / BackTex.width;
-            var yTex = position.height / BackTex.height;
-            var xStart = Fix(-ViewRange.x,-BackTex.width, 0, BackTex.width);
-            var yStart = Fix(-ViewRange.y,-BackTex.height, 0, BackTex.height);
+            var xTex = position.width / QGUITool.NodeEditorBackTexture2D.width;
+            var yTex = position.height / QGUITool.NodeEditorBackTexture2D.height;
+            var xStart = Fix(-ViewRange.x,-QGUITool.NodeEditorBackTexture2D.width, 0, QGUITool.NodeEditorBackTexture2D.width);
+            var yStart = Fix(-ViewRange.y,-QGUITool.NodeEditorBackTexture2D.height, 0, QGUITool.NodeEditorBackTexture2D.height);
             for (int x = 0; x <= xTex + 1; x++)
             {
                 for (int y = 0; y <= yTex + 1; y++)
                 {
-                    GUI.DrawTexture(new Rect(xStart + BackTex.width * x, yStart + BackTex.height * y, BackTex.width, BackTex.height), BackTex);
+                    GUI.DrawTexture(new Rect(xStart + QGUITool.NodeEditorBackTexture2D.width * x, yStart + QGUITool.NodeEditorBackTexture2D.height * y, QGUITool.NodeEditorBackTexture2D.width, QGUITool.NodeEditorBackTexture2D.height), QGUITool.NodeEditorBackTexture2D);
                 }
             }
         }
@@ -602,11 +595,10 @@ namespace QTool.FlowGraph
             var rect = new Rect();
             rect.size = Vector3.one * size;
             rect.center = center;
-            Color col = GUI.color;
-            GUI.color = color;
-            GUI.DrawTexture(rect, DotTex);
-            GUI.color = col;
-            return rect;
+			QGUITool.SetColor(color);
+            GUI.DrawTexture(rect, QGUITool.DotTexture2D);
+			QGUITool.RevertColor();
+			return rect;
         }
        
         void DrawPort(QFlowPort port)
@@ -640,7 +632,7 @@ namespace QTool.FlowGraph
                 }
                 else
                 {
-                    EditorGUILayout.LabelField(port.name, port.isOutput ? OutputPortStyle : IutputPortStyle);
+                    EditorGUILayout.LabelField(port.name, port.isOutput ? QGUITool.RightLabel : QGUITool.LeftLable);
                 }
                 lastRect = GUILayoutUtility.GetLastRect();
             }

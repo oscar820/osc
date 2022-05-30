@@ -73,32 +73,13 @@ namespace QTool
 		}
 		public static List<string> OldMailIdList;
 		public static event Action<QMailInfo> OnReceiveMail;
-		static async Task GetNewEmail(StreamWriter writer,StreamReader reader, int index)
+		static async Task GetEmail(StreamWriter writer,StreamReader reader, int index)
 		{
 			if (OldMailIdList == null)
 			{
 				OldMailIdList = PlayerPrefs.GetString(nameof(QMailInfo) + "." + nameof(OldMailIdList),new List<string>().ToQData()).ParseQData<List<string>>();
 			}
-			await writer.WriteLineAsync("UIDL "+index);
-			var newflie = true;
-			if (!await reader.CheckReadLine((infos) => {
-				var id = infos[2];
-				if (OldMailIdList.Contains(id))
-				{
-					newflie = false;
-				}
-				else
-				{
-					OldMailIdList.AddCheckExist(id);
-				}
-			}))
-			{
-				Debug.LogError("读取第 " + index + " 封邮件ID出错");
-				return;
-			}; 
-			if (!newflie) {
-				return;
-			}
+		
 			await writer.WriteLineAsync("RETR " + index);
 			if(!await reader.CheckReadLine((infos)=> {
 				Debug.Log("读取第 " + index + " 封邮件 大小："+int.Parse(infos[1]).ToSizeString());
@@ -108,13 +89,7 @@ namespace QTool
 				Debug.LogError("读取第 " + index + " 封邮件出错");
 				return;
 			}
-			var info = "";
-			string result = null;
-			while (( result = await reader.ReadLineAsync()) != ".")
-			{
-				info += result + "\n"; 
-			}
-			var newMail = new QMailInfo(info);
+			var newMail = new QMailInfo(await reader.ReadAllAsync());
 			Debug.Log("新邮件 " +newMail);
 			
 			PlayerPrefs.SetString(nameof(QMailInfo) + "." + nameof(OldMailIdList), OldMailIdList.ToQData());
@@ -127,6 +102,17 @@ namespace QTool
 				Debug.LogError("接收邮件出错：" + e);
 			}
 
+		}
+		static async Task<string> ReadAllAsync(this StreamReader reader)
+		{
+			var builder = Tool.StringBuilderPool.Get();
+			builder.Clear();
+			string result = null;
+			while ((result = await reader.ReadLineAsync()) != ".")
+			{
+				builder.Append(result + "\n");
+			}
+			return builder.ToString();
 		}
 		public static async Task FreshEmails(QMailAccount account)
 		{
@@ -171,10 +157,21 @@ namespace QTool
 				Debug.LogError("获取邮件统计信息出错");
 				return;
 			}
-			for (int i =0; i < mailCount; i++)
+			await writer.WriteLineAsync("LIST");
+			if (!await reader.CheckReadLine())
 			{
-				await GetNewEmail(writer, reader, i+1);
+				Debug.LogError("获取邮件列表出错");
+				return;
 			}
+			Debug.LogError(await reader.ReadAllAsync());
+			//if (!newflie)
+			//{
+			//	return;
+			//}
+			//for (int i =0; i < mailCount; i++)
+			//{
+			//	await GetEmail(writer, reader, i+1);
+			//}
 			Debug.Log("接收邮件完成");
 		}
 		

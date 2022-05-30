@@ -76,15 +76,25 @@ namespace QTool
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
             return await Tool.Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
         }
-        public static async Task<bool> Wait(Func<bool> flagFunc)
-        {
-            if (flagFunc == null) return Application.isPlaying;
-            while (!flagFunc.Invoke() && Application.isPlaying)
-            {
-                await Task.Delay(100);
-            }
-            return Application.isPlaying;
-        }
+		public static Action StopAllWait;
+		public static async Task<bool> Wait(Func<bool> flagFunc)
+		{
+			var WaitStop = false;
+			if (flagFunc == null) return Application.isPlaying ;
+			Action OnWaitStop = () => { WaitStop = true; };
+			StopAllWait += OnWaitStop;
+			while (!flagFunc.Invoke())
+			{
+				await Task.Delay(100);
+				if (Application.isPlaying && !WaitStop)
+				{
+					StopAllWait -= OnWaitStop;
+					return false;
+				}
+			}
+			StopAllWait -= OnWaitStop;
+			return true;
+		}
         internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
         {
             start?.Invoke();

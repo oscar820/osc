@@ -94,15 +94,11 @@ namespace QTool.Inspector
         {
             if (property.propertyType == SerializedPropertyType.Boolean)
             {
-                position.height = att.height;
-                var boxstyle = new GUIStyle();
-                var back = new Texture2D(1, 1); ;
-                var color = GUI.color;
-                GUI.color = property.boolValue ? Color.Lerp(Color.black, Color.grey, 0.3f) : Color.Lerp(Color.black, Color.grey, 0.7f);
-                boxstyle.normal.background = back;
-                property.boolValue = EditorGUI.Toggle(position, property.boolValue, boxstyle);
-                GUI.color = color;
-                var style = EditorStyles.largeLabel;
+                position.height = att.height;;
+				QGUITool.SetColor(property.boolValue ? Color.Lerp(Color.black, Color.grey, 0.3f) : Color.Lerp(Color.black, Color.grey, 0.7f));
+                property.boolValue = EditorGUI.Toggle(position, property.boolValue, QGUITool.BackStyle);
+				QGUITool.RevertColor();
+				var style = EditorStyles.largeLabel;
                 style.alignment = TextAnchor.MiddleCenter;
                 EditorGUI.LabelField(position, att.name, style);
             }
@@ -204,20 +200,7 @@ namespace QTool.Inspector
     [CustomPropertyDrawer(typeof(TitleAttribute))]
     public class TitleAttributeDrawer : DecoratorDrawBase<TitleAttribute>
     {
-        public static GUIStyle style = new GUIStyle
-        {
-
-            fontSize = 10,
-            fontStyle = FontStyle.Bold,
-            alignment = TextAnchor.MiddleCenter,
-            normal = new GUIStyleState
-            {
-                background = Texture2D.blackTexture,
-
-            },
-
-        };
-
+    
         public override void OnGUI(Rect position)
         {
             var falg = GUI.enabled;
@@ -225,10 +208,10 @@ namespace QTool.Inspector
             var titleRect = position;
             titleRect.y += 10;
             titleRect.height = att.height;
-            GUI.Label(titleRect, att.title, style);
+            GUI.Label(titleRect, att.title, QGUITool.TitleLable);
             titleRect.y += 4;
             titleRect.height -= 4;
-            GUI.Label(titleRect, "__________________________________", style);
+            GUI.Label(titleRect, "__________________________________", QGUITool.TitleLable);
             GUI.enabled = falg;
         }
         public override float GetHeight()
@@ -432,8 +415,6 @@ namespace QTool.Inspector
         public static QDictionary<string, Action<SerializedProperty, Func<float, float>>> DrawPropertyToFloat = new QDictionary<string, Action<SerializedProperty, Func<float, float>>>();
 		public static QDictionary<Type, Func<object, string, object>> DrawOverride = new QDictionary<Type, Func<object, string, object>>();
         static Color BackColor = new Color(0, 0, 0, 0.6f);
-		static GUIStyle _backStyle; 
-		static GUIStyle BackStyle =>_backStyle??=new GUIStyle("helpBox");
 
         public static List<string> TypeMenuList = new List<string>();
         public static List<Type> TypeList = new List<Type>();
@@ -588,7 +569,7 @@ namespace QTool.Inspector
 
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;
-                                    using (new EditorGUILayout.VerticalScope(BackStyle))
+                                    using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle))
                                     {
                                         GUI.backgroundColor = color;
                                         FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
@@ -643,7 +624,7 @@ namespace QTool.Inspector
                                     }
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;
-                                    using (new EditorGUILayout.VerticalScope(BackStyle))
+                                    using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle))
                                     {
                                         GUI.backgroundColor = color;
                                         var canHideChild = DrawElementCall==null;
