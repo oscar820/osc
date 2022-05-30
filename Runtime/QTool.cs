@@ -76,6 +76,10 @@ namespace QTool
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
             return await Tool.Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
         }
+		public static string ToQTimeString(this DateTime time)
+		{
+			return time.ToString("yyyy-MM-dd HH:mm:ss zzz");
+		}
 		public static Action StopAllWait;
 		public static async Task<bool> Wait(Func<bool> flagFunc)
 		{

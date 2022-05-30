@@ -69,7 +69,7 @@ namespace QTool
 				{
 					accountId = AccountId,
 					eventKey=eventKey,
-					evventValue=value,
+					eventValue=value,
 				};
 				triggerEventList.Add(eventData);
 				Debug.Log(StartKey + " 触发事件 " + eventData);
@@ -85,16 +85,17 @@ namespace QTool
 	public class QAnalysisEvent:IKey<string>
 	{
 		public string eventKey;
-		public object evventValue;
+		public object eventValue;
 		public DateTime eventTime = DateTime.Now;
 		public string accountId;
 		public string eventId = QId.GetNewId();
 
 		[QIgnore]
 		public string Key { get => eventId; set => eventId = value; }
+	
 		public override string ToString()
 		{
-			return eventKey + " " + eventTime.ToString("yyyy-MM-dd HH:mm:ss zzz") +" "+accountId;
+			return eventKey + " " + eventTime.ToQTimeString() +" "+accountId;
 		}
 	}
 

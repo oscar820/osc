@@ -54,25 +54,24 @@ namespace QTool
 		static async Task<string[]> CommondCheckReadLine(this StreamWriter writer,string command,StreamReader reader)
 		{
 			await writer.WriteLineAsync(command);
-			return await reader.CheckReadLine();
+			return await reader.CheckReadLine(command);
 		}
-		static async Task<string[]> CheckReadLine(this StreamReader reader)
+		static async Task<string[]> CheckReadLine(this StreamReader reader,string checkFlag)
 		{
-			var task= reader.ReadLineAsync();
-			var info = await task;
-			if (task.Exception != null)
+			var info = await reader.ReadLineAsync();
+			if (info == null)
 			{
-				Debug.LogError("读取出错：\n" + task.Exception);
+				await reader.ReadLineAsync();
 			}
-			if (info.StartsWith("+OK"))
+			if (info != null && info.StartsWith("+OK"))
 			{
 				var infos = info.Split(' ');
-				return infos;
+				return infos; 
 			}
 			else
 			{
-				Debug.LogError(info);
-				throw new Exception("Pop命令出错 "+info);
+				Debug.LogError(checkFlag + "读取出错 " + info);
+				throw new Exception(checkFlag+"读取出错 " +info);
 			}
 		}
 		static async Task<QMailInfo> ReceiveEmail(StreamWriter writer,StreamReader reader, long index,bool getId=false)
@@ -83,7 +82,7 @@ namespace QTool
 				Id = (await writer.CommondCheckReadLine("UIDL " + index, reader))[2];
 			}
 			await writer.WriteLineAsync("RETR " + index);
-			Debug.Log("读取第 " + index + " 封邮件 大小：" + int.Parse((await reader.CheckReadLine())[1]).ToSizeString());
+			Debug.Log("读取第 " + index + " 封邮件 大小：" + int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString());
 			var info = "";
 			string result = null;
 			while (( result = await reader.ReadLineAsync()) != ".")
@@ -94,69 +93,86 @@ namespace QTool
 			Debug.Log("邮件 " +mail);
 			return mail;
 		}
-		public static async Task FreshEmails(QMailAccount account,Action<QMailInfo> callBack,QMailInfo lastMail)
+		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo> callBack, QMailInfo lastMail)
 		{
-			TcpClient clientSocket = new TcpClient();
-			clientSocket.Connect(account.popServer, 995);
-			//建立SSL连接
-			SslStream stream = new SslStream(
-				clientSocket.GetStream(),
-				false,
-				(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors errors) => {
-					return true;//接收所有的远程SSL链接
-				});
-			stream.AuthenticateAsClient(account.popServer);
-			StreamReader reader = new StreamReader(stream, Encoding.Default, true);
-			StreamWriter writer = new StreamWriter(stream);
-			writer.AutoFlush = true;
-			await reader.CheckReadLine();
-			await writer.CommondCheckReadLine("USER "+ account.account,reader);
-			await writer.CommondCheckReadLine("PASS "+ account.password,reader);
-			var infos= await writer.CommondCheckReadLine("STAT",reader);
-			var mailCount = long.Parse(infos[1]);
-			Debug.Log("邮件总数：" + mailCount + " 总大小：" + long.Parse(infos[2]).ToSizeString());
-		
-			long startIndex = 1;
-			if (!string.IsNullOrWhiteSpace(lastMail?.Id))
+			using (TcpClient clientSocket = new TcpClient())
 			{
-				Debug.Log("上一封邮件：" + lastMail);
-				if( await writer.IdCheck(lastMail.Index, lastMail.Id, reader)){
-					startIndex = lastMail.Index+1;
-				}
-				else
+				clientSocket.Connect(account.popServer, 995);
+				//建立SSL连接
+				using (SslStream stream = new SslStream(clientSocket.GetStream(), false, (object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors errors) => { return true; }))
 				{
-					for (long i = lastMail.Index-1; i >=1; i--)
+
+					stream.AuthenticateAsClient(account.popServer);
+					using (StreamReader reader = new StreamReader(stream, Encoding.Default, true))
 					{
-						if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
+						using (StreamWriter writer = new StreamWriter(stream))
 						{
-							startIndex = lastMail.Index+1;
-							break;
+							writer.AutoFlush = true;
+
+							try
+							{
+								await reader.CheckReadLine("SSL连接");
+								await writer.CommondCheckReadLine("USER " + account.account, reader);
+								await writer.CommondCheckReadLine("PASS " + account.password, reader);
+								var infos = await writer.CommondCheckReadLine("STAT", reader);
+								var mailCount = long.Parse(infos[1]);
+								Debug.Log("邮件总数：" + mailCount + " 总大小：" + long.Parse(infos[2]).ToSizeString());
+
+
+
+								long startIndex = 1;
+								if (!string.IsNullOrWhiteSpace(lastMail?.Id))
+								{
+									Debug.Log("上一封邮件：" + lastMail);
+									if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
+									{
+										startIndex = lastMail.Index + 1;
+									}
+									else
+									{
+										for (long i = lastMail.Index - 1; i >= 1; i--)
+										{
+											if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
+											{
+												startIndex = lastMail.Index + 1;
+												break;
+											}
+										}
+									}
+									var count = (mailCount - startIndex + 1);
+									if (count > 0)
+									{
+										Debug.Log("读取 " + startIndex + "->" + mailCount + " 共 " + count + " 封新邮件");
+									}
+									else
+									{
+										Debug.Log("无新邮件");
+									}
+								}
+								for (long i = startIndex; i <= mailCount; i++)
+								{
+									var mail = await ReceiveEmail(writer, reader, i, i == mailCount);
+									try
+									{
+										callBack(mail);
+									}
+									catch (Exception e)
+									{
+										Debug.LogError("读取邮件出错：" + mail.Subject + "\n" + e);
+									}
+								}
+								Debug.Log("接收邮件完成");
+							}
+							catch (Exception e)
+							{
+
+								Debug.LogError("邮件读取出错：" + e);
+							}
+							clientSocket.Close();
 						}
 					}
 				}
-				var count = (mailCount - startIndex + 1);
-				if (count > 0)
-				{
-					Debug.Log("读取 " + startIndex + "->" + mailCount + " 共 " + count + " 封新邮件");
-				}
-				else
-				{
-					Debug.Log("无新邮件");
-				}
 			}
-			for (long i = startIndex; i <= mailCount; i++)
-			{ 
-				var mail= await ReceiveEmail(writer, reader, i, i == mailCount);
-				try
-				{
-					callBack(mail);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("读取邮件出错：" + mail.Subject + "\n" + e);
-				}
-			}
-			Debug.Log("接收邮件完成");
 		}
 		public static async Task<bool> IdCheck(this StreamWriter writer ,long index,string Id, StreamReader reader)
 		{

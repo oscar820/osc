@@ -144,7 +144,7 @@ namespace QTool
 						break;
 					}
 				case TypeCode.DateTime:
-					WriteCheckString(writer,((DateTime)obj).ToString("yyyy-MM-dd HH:mm:ss zzz"));
+					WriteCheckString(writer,((DateTime)obj).ToQTimeString());
 					break;
 				case TypeCode.String:
 					WriteCheckString(writer, obj?.ToString());
@@ -207,6 +207,7 @@ namespace QTool
 												target = ReadType(reader, runtimeType, hasName);
 											}
 											reader.NextIs('}');
+
 										}
 										else if (typeInfo.IsUnityObject)
 										{
@@ -291,16 +292,10 @@ namespace QTool
 									var list = QReflection.CreateInstance(type, target) as IList;
 									if (reader.NextIs('['))
 									{
-										for (int i = 0; !reader.IsEnd() && !reader.NextIs(']'); i++)
+										list.Clear();
+										for (var i = 0; !reader.IsEnd() && !reader.NextIs(']'); i++)
 										{
-											if (i < list.Count)
-											{
-												list[i] = reader.ReadType(typeInfo.ElementType, hasName, list[i]);
-											}
-											else
-											{
-												list.Add(reader.ReadType(typeInfo.ElementType, hasName));
-											}
+											list.Add(reader.ReadType(typeInfo.ElementType, hasName));
 											if(!( reader.NextIs(';') || reader.NextIs(','))){
 												if (reader.NextIs(']'))
 												{

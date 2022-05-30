@@ -11,7 +11,7 @@ namespace QTool
 		[ViewButton("登录")]
 		public void Login()
 		{
-			QAnalysis.Login("TestAccount"+ "_" + Random.Range(1, 4));
+			QAnalysis.Login("TestAccount"+ "_" + Random.Range(1, 50)); 
 		}
 		[ViewButton("退出")]
 		public void Logout()
