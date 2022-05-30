@@ -86,7 +86,7 @@ namespace QTool
 			while (!flagFunc.Invoke())
 			{
 				await Task.Delay(100);
-				if (Application.isPlaying && !WaitStop)
+				if (!Application.isPlaying||WaitStop)
 				{
 					StopAllWait -= OnWaitStop;
 					return false;
