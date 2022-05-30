@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Threading.Tasks;
+using System;
 
 namespace QTool
 {
@@ -45,25 +46,32 @@ namespace QTool
 					{
 						FreshData();
 					}
+					var lastRect = GUILayoutUtility.GetLastRect();
+					Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
 				}
 				using (var titleHor = new GUILayout.HorizontalScope())
 				{
 					DrawCell("用户Id");
+					var lastRect = GUILayoutUtility.GetLastRect();
+					Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
 				}
 				using (var playerLeftRight = new GUILayout.HorizontalScope())
 				{
 					using (var playerKey = new GUILayout.VerticalScope())
 					{
-						foreach (var data in QAnalysisData.AnalysisData)
+						foreach (var data in QAnalysisData.Instance.AnalysisData)
 						{
 							DrawCell(data.Key);
+							var lastRect = GUILayoutUtility.GetLastRect();
+							Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
+						//	Handles.DrawLine(new Vector3(rect.xMin - 2, rect.yMax + 2), new Vector3(rect.xMax, rect.yMax + 2));
 						}
 					}
 					using (var playerDataScroll = new GUILayout.ScrollViewScope(viewPos))
 					{
 						using (var playerDataVer = new GUILayout.VerticalScope())
 						{
-							foreach (var playerData in QAnalysisData.AnalysisData)
+							foreach (var playerData in QAnalysisData.Instance.AnalysisData)
 							{
 								using (var playerDataHor = new GUILayout.HorizontalScope())
 								{
@@ -88,17 +96,46 @@ namespace QTool
 		public void DrawCell(string value)
 		{
 			GUILayout.Label(value, QGUITool.CenterLable, GUILayout.Width(100), GUILayout.Height(50));
-			var rect = GUILayoutUtility.GetLastRect();
-			Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, rect.yMax+2));
-			Handles.DrawLine(new Vector3(rect.xMin-2, rect.yMax+2), new Vector3(rect.xMax, rect.yMax + 2));
+		
 		}
 		public bool DrawButton(string name)
 		{
 			return GUILayout.Button(name);
 		}
 	}
-	public static class QAnalysisData
+	public class QAnalysisData
 	{
+		public readonly static QAnalysisData Instance = Activator.CreateInstance<QAnalysisData>();
+		public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
+		public QAutoList<string, QPlayerData> AnalysisData = new QAutoList<string, QPlayerData>();
+		public QMailInfo LastMail=null;
+		static QAnalysisData()
+		{
+			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
+		}
+		public static async Task FreshData() 
+		{
+			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail, (mailInfo) =>
+			{ 
+				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
+				{
+					AddEvent(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
+				}
+				Instance.LastMail = mailInfo;
+			}, Instance.LastMail);
+
+			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
+		}
+		public static void AddEvent(List<QAnalysisEvent> newEventList)
+		{
+			foreach (var eventData in newEventList)
+			{
+				Instance.EventList.Add(eventData);
+				Instance.AnalysisData[eventData.accountId].Add(eventData);
+			}
+		}
+
+	}
 		public class QPlayerData : IKey<string>
 		{
 			public QDictionary<string, object> Data = new QDictionary<string, object>();
@@ -114,45 +151,6 @@ namespace QTool
 				return Key + "\t" + EventList.ToOneString("\t", (eventData) => eventData.eventKey);
 			}
 		}
-		public static QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
-		public static QAutoList<string, QPlayerData> AnalysisData = new QAutoList<string, QPlayerData>();
-		static QAnalysisData()
-		{
-			LoadData();
-			QMailTool.OnReceiveMail += (mailInfo) =>
-			{
-				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
-				{
-					AddEvent(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
-				}
-			};
-		}
-		public static async Task FreshData()
-		{
-			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail);
-			SaveData();
-		}
-		public static void SaveData()
-		{
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "/" + nameof(EventList), EventList.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "/" + nameof(AnalysisData), AnalysisData.ToQData());
-		}
-		public static void LoadData()
-		{
-			FileManager.Load("QTool/" + QAnalysis.StartKey + "/" + nameof(EventList), "[]").ParseQData(EventList);
-			FileManager.Load("QTool/" + QAnalysis.StartKey + "/" + nameof(AnalysisData), "[]").ParseQData(AnalysisData);
-		}
-		public static void AddEvent(List<QAnalysisEvent> newEventList)
-		{
-			foreach (var eventData in newEventList)
-			{
-				EventList.Add(eventData);
-				AnalysisData[eventData.accountId].Add(eventData);
-			}
-		}
-
-	}
-
 	public static class QGUITool
 	{
 		static Stack<Color> colorStack = new Stack<Color>();

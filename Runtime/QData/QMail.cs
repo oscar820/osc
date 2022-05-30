@@ -51,7 +51,12 @@ namespace QTool
                 Debug.Log("发送邮件成功 "+message.Subject+" \n"+message.Body);
             }
         }
-		static async Task<bool> CheckReadLine(this StreamReader reader,Action<string[]> trueAction=null)
+		static async Task<string[]> CommondCheckReadLine(this StreamWriter writer,string command,StreamReader reader)
+		{
+			await writer.WriteLineAsync(command);
+			return await reader.CheckReadLine();
+		}
+		static async Task<string[]> CheckReadLine(this StreamReader reader)
 		{
 			var task= reader.ReadLineAsync();
 			var info = await task;
@@ -62,59 +67,34 @@ namespace QTool
 			if (info.StartsWith("+OK"))
 			{
 				var infos = info.Split(' ');
-				trueAction?.Invoke(infos);
-				return true;
+				return infos;
 			}
 			else
 			{
 				Debug.LogError(info);
-				return false;
+				throw new Exception("Pop命令出错 "+info);
 			}
 		}
-		public static List<string> OldMailIdList;
-		public static event Action<QMailInfo> OnReceiveMail;
-		static async Task GetEmail(StreamWriter writer,StreamReader reader, int index)
+		static async Task<QMailInfo> ReceiveEmail(StreamWriter writer,StreamReader reader, long index,bool getId=false)
 		{
-			if (OldMailIdList == null)
+			string Id ="";
+			if (getId)
 			{
-				OldMailIdList = PlayerPrefs.GetString(nameof(QMailInfo) + "." + nameof(OldMailIdList),new List<string>().ToQData()).ParseQData<List<string>>();
+				Id = (await writer.CommondCheckReadLine("UIDL " + index, reader))[2];
 			}
-		
 			await writer.WriteLineAsync("RETR " + index);
-			if(!await reader.CheckReadLine((infos)=> {
-				Debug.Log("读取第 " + index + " 封邮件 大小："+int.Parse(infos[1]).ToSizeString());
-			}
-			))
-			{
-				Debug.LogError("读取第 " + index + " 封邮件出错");
-				return;
-			}
-			var newMail = new QMailInfo(await reader.ReadAllAsync());
-			Debug.Log("新邮件 " +newMail);
-			
-			PlayerPrefs.SetString(nameof(QMailInfo) + "." + nameof(OldMailIdList), OldMailIdList.ToQData());
-			try
-			{
-				OnReceiveMail?.Invoke(newMail);
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("接收邮件出错：" + e);
-			}
-
-		}
-		static async Task<string> ReadAllAsync(this StreamReader reader)
-		{
-			var builder = Tool.StringBuilderPool.Get();
-			builder.Clear();
+			Debug.Log("读取第 " + index + " 封邮件 大小：" + int.Parse((await reader.CheckReadLine())[1]).ToSizeString());
+			var info = "";
 			string result = null;
-			while ((result = await reader.ReadLineAsync()) != ".")
+			while (( result = await reader.ReadLineAsync()) != ".")
 			{
-				builder.Append(result + "\n");
+				info += result + "\n"; 
 			}
-			return builder.ToString();
+			var mail = new QMailInfo(info,index,Id);
+			Debug.Log("邮件 " +mail);
+			return mail;
 		}
-		public static async Task FreshEmails(QMailAccount account)
+		public static async Task FreshEmails(QMailAccount account,Action<QMailInfo> callBack,QMailInfo lastMail)
 		{
 			TcpClient clientSocket = new TcpClient();
 			clientSocket.Connect(account.popServer, 995);
@@ -129,53 +109,61 @@ namespace QTool
 			StreamReader reader = new StreamReader(stream, Encoding.Default, true);
 			StreamWriter writer = new StreamWriter(stream);
 			writer.AutoFlush = true;
-			if(!await reader.CheckReadLine())
+			await reader.CheckReadLine();
+			await writer.CommondCheckReadLine("USER "+ account.account,reader);
+			await writer.CommondCheckReadLine("PASS "+ account.password,reader);
+			var infos= await writer.CommondCheckReadLine("STAT",reader);
+			var mailCount = long.Parse(infos[1]);
+			Debug.Log("邮件总数：" + mailCount + " 总大小：" + long.Parse(infos[2]).ToSizeString());
+		
+			long startIndex = 1;
+			if (!string.IsNullOrWhiteSpace(lastMail?.Id))
 			{
-				Debug.LogError("连接服务器出错");
-				return;
-			}	
-			await writer.WriteLineAsync("USER "+ account.account);
-			if (!await reader.CheckReadLine())
-			{
-				Debug.LogError("用户名错误");
-				return;
+				Debug.Log("上一封邮件：" + lastMail);
+				if( await writer.IdCheck(lastMail.Index, lastMail.Id, reader)){
+					startIndex = lastMail.Index+1;
+				}
+				else
+				{
+					for (long i = lastMail.Index-1; i >=1; i--)
+					{
+						if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
+						{
+							startIndex = lastMail.Index+1;
+							break;
+						}
+					}
+				}
+				var count = (mailCount - startIndex + 1);
+				if (count > 0)
+				{
+					Debug.Log("读取 " + startIndex + "->" + mailCount + " 共 " + count + " 封新邮件");
+				}
+				else
+				{
+					Debug.Log("无新邮件");
+				}
 			}
-			await writer.WriteLineAsync("PASS "+ account.password);
-			if (!await reader.CheckReadLine())
-			{
-				Debug.LogError("密码错误");
-				return;
+			for (long i = startIndex; i <= mailCount; i++)
+			{ 
+				var mail= await ReceiveEmail(writer, reader, i, i == mailCount);
+				try
+				{
+					callBack(mail);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("读取邮件出错：" + mail.Subject + "\n" + e);
+				}
 			}
-			var mailCount = 0;
-			await writer.WriteLineAsync("STAT");
-			if (!await reader.CheckReadLine((infos) =>
-			{
-				mailCount = int.Parse(infos[1]);
-				Debug.Log("邮件总数：" + mailCount + " 总大小："+ long.Parse(infos[2]).ToSizeString());
-			}))
-			{
-				Debug.LogError("获取邮件统计信息出错");
-				return;
-			}
-			await writer.WriteLineAsync("LIST");
-			if (!await reader.CheckReadLine())
-			{
-				Debug.LogError("获取邮件列表出错");
-				return;
-			}
-			Debug.LogError(await reader.ReadAllAsync());
-			//if (!newflie)
-			//{
-			//	return;
-			//}
-			//for (int i =0; i < mailCount; i++)
-			//{
-			//	await GetEmail(writer, reader, i+1);
-			//}
 			Debug.Log("接收邮件完成");
 		}
-		
+		public static async Task<bool> IdCheck(this StreamWriter writer ,long index,string Id, StreamReader reader)
+		{
+			return (await writer.CommondCheckReadLine("UIDL " + index, reader))[2] == Id;
+		}
 	}
+	
 	[System.Serializable]
 	public class QMailAccount
 	{
@@ -213,13 +201,21 @@ namespace QTool
 		public string To;
 		public string Date;
 		public string Body;
-		public QMailInfo(string mailStr)
+		public long Index;
+		public string Id;
+		public QMailInfo()
 		{
+
+		}
+		public QMailInfo(string mailStr, long Index,string Id)
+		{
+			this.Index = Index;
+			this.Id = Id;
 			Subject = GetString(mailStr, "Subject: ");
 			From = GetString(mailStr, "From: ").Trim();
-			Cc = GetString(mailStr, "Cc: ").Trim();
+			Cc = GetString(mailStr, "Cc: ").Trim(); 
 			To = GetString(mailStr, "To: ").Trim();
-			Date= GetString(mailStr, "Date: ");
+			Date= GetString(mailStr, "Date: "); 
 			if (GetString(mailStr, "Content-Type: ") == "text/html; charset=utf-8")
 			{
 				if (GetString(mailStr, "Content-Transfer-Encoding: ") == "base64")
