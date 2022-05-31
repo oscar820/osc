@@ -51,6 +51,11 @@ namespace QTool
 				//	QAnalysisData.Instance.TitleList.Clear();
 				//	FreshData();
 				//}
+				if (DrawButton("复制表格数据"))
+				{
+					GUIUtility.systemCopyBuffer = QAnalysisData.Copy();
+					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功：\n "+GUIUtility.systemCopyBuffer, "确认");
+				}
 				var lastRect = GUILayoutUtility.GetLastRect();
 				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
 			}
@@ -340,6 +345,12 @@ namespace QTool
 			Instance = Activator.CreateInstance<QAnalysisData>();
 			Instance.TitleList = titleInfo;
 		}
+		public static string Copy()
+		{
+			var data="玩家ID\t"+ Instance.TitleList.ToOneString("\t", (title) => title.Key)+"\n";
+			data += Instance.PlayerDataList.ToOneString("\n", (playerData) => playerData.Key+"\t"+ playerData.AnalysisData.ToOneString("\t"));
+			return data;
+		}
 		public static void AddEvent(List<QAnalysisEvent> newEventList)
 		{
 			foreach (var eventData in newEventList)
@@ -523,6 +534,11 @@ namespace QTool
 				default:
 					break;
 			}
+		}
+
+		public override string ToString()
+		{
+			return value?.ToString();
 		}
 
 	}
