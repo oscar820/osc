@@ -37,8 +37,17 @@ namespace QTool
 				return;
 			}
 			Trigger("游戏开始",new StartInfo());
+
+			Application.focusChanged += OnFocus;
+			Application.quitting += Stop;
 		}
-	
+		static void OnFocus(bool focus)
+		{
+			if (!focus)
+			{
+				SendEventList();
+			}
+		}
 		public static void Stop() 
 		{
 			if (!InitOver)
@@ -47,6 +56,8 @@ namespace QTool
 			}
 			Trigger("游戏结束");
 			SendEventList();
+			Application.focusChanged -= OnFocus;
+			Application.quitting -= Stop;
 			AccountId = null;
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;

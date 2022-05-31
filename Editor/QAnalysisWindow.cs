@@ -72,7 +72,7 @@ namespace QTool
 						DrawCell("玩家ID", 250, true, true);
 						foreach (var title in QAnalysisData.Instance.TitleList)
 						{
-							DrawCell(title.Key+"\n<size=10>"+title.DataSetting+"</size>", title.width, false, true,(menu)=> {
+							DrawCell(title.Key+"\n<size=8>"+title.DataSetting+"</size>", title.width, false, true,(menu)=> {
 								
 								foreach (var eventKey in QAnalysisData.Instance.EventKeyList)
 								{
@@ -122,10 +122,9 @@ namespace QTool
 						{
 							foreach (var data in QAnalysisData.Instance.PlayerDataList)
 							{
-								DrawCell(data.Key, 250, true,false);
+								DrawCell("<size=10>"+data.Key+"</size>", 250, true,false);
 							}
 						}
-
 						using (new GUILayout.VerticalScope())
 						{
 							foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
@@ -157,31 +156,30 @@ namespace QTool
 		{
 			DrawCell(value,width);
 			var lastRect = GUILayoutUtility.GetLastRect();
+
+			var lastColor = Handles.color;
+			if (!drawXLine || !drawYLine)
+			{
+				Handles.color = Color.grey;
+			}
 			if (drawXLine)
 			{
 				Handles.DrawLine(new Vector3(viewPos.x, lastRect.yMax), new Vector3(viewPos.x+position.xMax, lastRect.yMax));
 			}
 			if (drawYLine)
 			{
-				if (drawXLine)
-				{
-					Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.yMax)); ;
-				}
-				else
-				{
-					var lastColor = Handles.color;
-					Handles.color = Color.grey;
-					Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.yMax)); ;
-					Handles.color = lastColor;
-				}
-				
+				Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.yMax)); 
+			}
+			if (!drawXLine || !drawYLine)
+			{
+				Handles.color = lastColor;
 			}
 			if (menu != null)
 			{
 				lastRect.RightMenu(menu);
 			}
 		}
-		public void DrawCell(object value,float width=200)
+		public void DrawCell(object value,float width)
 		{
 			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(36));
 		}
