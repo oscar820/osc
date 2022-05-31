@@ -302,10 +302,9 @@ namespace QTool
 		}
 		public static bool IsLoading { get; private set; } = false;
 		public void AddTitle(QTitleInfo newTitle)
-		{
+		{ 
 			TitleList.Add(newTitle);
 			FreshKey(newTitle.Key);
-			SaveData();
 		}
 		public void RemveTitle(QTitleInfo title)
 		{

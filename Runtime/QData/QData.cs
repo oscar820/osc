@@ -138,6 +138,10 @@ namespace QTool
 									writer.Append(']');
 									break;
 								}
+							case QObjectType.TimeSpan:
+								{
+									writer.Write(((TimeSpan)obj).Ticks);
+								}break;
 							default:
 								break;
 						}
@@ -174,9 +178,9 @@ namespace QTool
 					break;
 			}
 		}
-		public static object Read<T>(this StringReader reader, T target = default,bool hasName = true)
+		public static T Read<T>(this StringReader reader, T target = default,bool hasName = true)
 		{
-			return ReadType(reader, typeof(T), hasName, target);
+			return (T)ReadType(reader, typeof(T), hasName, target);
 		}
 		public static object ReadType(this StringReader reader, Type type, bool hasName = true, object target = null)
 		{
@@ -348,6 +352,11 @@ namespace QTool
 									}
 									return array;
 								}
+							case QObjectType.TimeSpan:
+								{
+									return TimeSpan.FromTicks(reader.Read<long>());
+								}
+								break;
 							default:
 								return null;
 						}
@@ -588,6 +597,7 @@ namespace QTool
 		Object,
 		List,
 		Array,
+		TimeSpan,
 		CantSerialize,
 	}
 	public class QSerializeType : QTypeInfo<QSerializeType>
@@ -642,6 +652,10 @@ namespace QTool
 				else if (IsList)
 				{
 					objType = QObjectType.List;
+				}
+				else if(type==typeof(TimeSpan))
+				{
+					objType = QObjectType.TimeSpan;
 				}
 				else
 				{

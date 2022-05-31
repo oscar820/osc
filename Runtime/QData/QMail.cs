@@ -123,7 +123,7 @@ namespace QTool
 								long startIndex = 1;
 								if (!string.IsNullOrWhiteSpace(lastMail?.Id))
 								{
-									Debug.Log("上一封邮件：" + lastMail);
+									Debug.Log("上一封邮件：" + lastMail.Date);
 									if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
 									{
 										startIndex = lastMail.Index + 1;

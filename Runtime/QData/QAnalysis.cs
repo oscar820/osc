@@ -56,7 +56,7 @@ namespace QTool
 			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
 			{
 				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
-				return;
+				return; 
 			}
 			if (PlayerPrefs.HasKey(EventListKey))
 			{
