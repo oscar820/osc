@@ -29,7 +29,46 @@ namespace QTool
             }
             return KeyColor[colorKey];
         }
-        public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null, Func<string> getInfo = null)
+		public static float ToComputeFloat(this object value)
+		{
+			if (value == null) return 0;
+			if(value is string str)
+			{
+				if(float.TryParse(str, out var newFloat))
+				{
+					return newFloat;
+				}
+				else
+				{
+					List<string> numbers = new List<string>();
+					var newNamber ="";
+					for (int i = str.Length-1; i>=0; i--)
+					{
+						var c = str[i];
+						if (char.IsNumber(c))
+						{
+							newNamber += c;
+						}
+						else
+						{
+							if (newNamber.Length > 0)
+							{
+								numbers.Add(newNamber);
+								newNamber = "";
+							}
+						}
+					}
+					var sum = 0f;
+					for (int i = 0; i < numbers.Count; i++)
+					{
+						sum += float.Parse(numbers[i]) * Mathf.Pow(10, i * 2);
+					}
+					return sum;
+				}
+			}
+			return Convert.ToSingle(value);
+		}
+		public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null, Func<string> getInfo = null)
         {
             var last = System.DateTime.Now;
             try
@@ -198,7 +237,8 @@ namespace QTool
                 return (DateTime.Now - new DateTime()).TotalSeconds;
             }
         }
-        public void Push(float value)
+		
+		public void Push(float value)
         {
             if (StartTime<0)
             {
