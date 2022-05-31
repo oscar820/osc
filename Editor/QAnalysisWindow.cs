@@ -69,10 +69,10 @@ namespace QTool
 
 					using (new GUILayout.HorizontalScope())
 					{
-						DrawCell("玩家ID", 200, true, true);
+						DrawCell("玩家ID", 250, true, true);
 						foreach (var title in QAnalysisData.Instance.TitleList)
 						{
-							DrawCell(title.ToString(), title.width, false, true,(menu)=> {
+							DrawCell(title.Key+"\n<size=10>"+title.DataSetting+"</size>", title.width, false, true,(menu)=> {
 								
 								foreach (var eventKey in QAnalysisData.Instance.EventKeyList)
 								{
@@ -122,7 +122,7 @@ namespace QTool
 						{
 							foreach (var data in QAnalysisData.Instance.PlayerDataList)
 							{
-								DrawCell(data.Key, 200, true,false);
+								DrawCell(data.Key, 250, true,false);
 							}
 						}
 
@@ -162,8 +162,19 @@ namespace QTool
 				Handles.DrawLine(new Vector3(viewPos.x, lastRect.yMax), new Vector3(viewPos.x+position.xMax, lastRect.yMax));
 			}
 			if (drawYLine)
-			{ 
-				Handles.DrawLine(new Vector3(lastRect.xMax,viewPos.y + lastRect.yMin ), new Vector3(lastRect.xMax, viewPos.y + position.yMax));;
+			{
+				if (drawXLine)
+				{
+					Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.yMax)); ;
+				}
+				else
+				{
+					var lastColor = Handles.color;
+					Handles.color = Color.grey;
+					Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.yMax)); ;
+					Handles.color = lastColor;
+				}
+				
 			}
 			if (menu != null)
 			{
@@ -172,7 +183,7 @@ namespace QTool
 		}
 		public void DrawCell(object value,float width=200)
 		{
-			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(50));
+			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(36));
 		}
 		public bool DrawButton(string name)
 		{
@@ -400,10 +411,6 @@ namespace QTool
 			DataSetting.dataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key,true);
 		}
-		public override string ToString()
-		{
-			return Key+"\n"+DataSetting;
-		}
 	}
 	public enum QAnalysisMode
 	{
@@ -412,12 +419,12 @@ namespace QTool
 		最新时间,
 		起始时间,
 		次数,
-		最新时间区间,
-		总时间区间,
+		最新时长,
+		总时长,
 	}
 	public class QAnalysisSetting
 	{
-		public string dataKey;
+		public string dataKey; 
 		public QAnalysisMode mode = QAnalysisMode.最新数据;
 		public string EventKey
 		{
@@ -439,8 +446,8 @@ namespace QTool
 			{
 				switch (mode)
 				{
-					case QAnalysisMode.最新时间区间:
-					case QAnalysisMode.总时间区间:
+					case QAnalysisMode.最新时长:
+					case QAnalysisMode.总时长:
 						if (EventKey.EndsWith("结束"))
 						{
 							return EventKey.Replace("结束", "开始");
@@ -499,7 +506,7 @@ namespace QTool
 				case QAnalysisMode.次数:
 					value = EventList.Count;
 					break;
-				case QAnalysisMode.最新时间区间:
+				case QAnalysisMode.最新时长:
 					{
 						var endData = QAnalysisData.Instance.EventList[EventList.StackPeek()];
 						var playerData = QAnalysisData.Instance.PlayerDataList[endData.playerId];
@@ -507,7 +514,7 @@ namespace QTool
 						value = endData.eventTime - startData.GetTime(endData.eventTime);
 					}
 					break;
-				case QAnalysisMode.总时间区间:
+				case QAnalysisMode.总时长:
 					{
 						var eventData = QAnalysisData.Instance.EventList[EventList.StackPeek()];
 						var playerData = QAnalysisData.Instance.PlayerDataList[eventData.playerId];
@@ -600,7 +607,7 @@ namespace QTool
 		}
 		public static GUIStyle TitleLable => _titleLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
 		static GUIStyle _titleLabel;
-		public static GUIStyle CenterLable => _centerLable ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter };
+		public static GUIStyle CenterLable => _centerLable ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter,richText=true };
 		static GUIStyle _centerLable;
 		public static GUIStyle TextArea => _textArea ??= new GUIStyle(EditorStyles.textField) { alignment = TextAnchor.MiddleCenter };
 		static GUIStyle _textArea;
