@@ -15,6 +15,8 @@ namespace QTool
 
     public static partial class Tool
     {
+		public static string Version => Application.version;
+		public static bool IsTestVersion => Application.version.StartsWith("0.");
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
         public static Color ToColor(this string key, float s = 0.5f, float v = 1f)
         {
