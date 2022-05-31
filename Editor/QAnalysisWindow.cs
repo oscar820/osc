@@ -303,6 +303,11 @@ namespace QTool
 		public static async Task FreshData() 
 		{
 			if (IsLoading) return;
+			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
+			{
+				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
+				return;
+			}
 			IsLoading = true;
 			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail, (mailInfo) =>
 			{ 

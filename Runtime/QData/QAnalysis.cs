@@ -24,11 +24,6 @@ namespace QTool
 		}
 		public static void Start(string id)
 		{
-			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
-			{
-				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
-				return;
-			}
 			SendEventList();
 			if (id == AccountId)
 			{
@@ -36,6 +31,10 @@ namespace QTool
 				return;
 			}
 			AccountId = id;
+			if (!InitOver)
+			{
+				return;
+			}
 			Trigger("游戏开始",new StartInfo());
 		}
 	
@@ -53,6 +52,11 @@ namespace QTool
 		public static string EventListKey => StartKey + "_" + nameof(triggerEventList);
 		public static void SendEventList()
 		{
+			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
+			{
+				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
+				return;
+			}
 			if (PlayerPrefs.HasKey(EventListKey))
 			{
 				var data =PlayerPrefs.GetString( EventListKey);
