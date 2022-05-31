@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QTool
 {
-	public static class QAnalysis 
+	public static class QAnalysis
 	{
 		public static string AccountId { private set; get; }
 		public static bool InitOver
@@ -22,6 +22,7 @@ namespace QTool
 				return true;
 			}
 		}
+		public static int SendCount { get; set; } =30;
 		public static void Start(string id)
 		{
 			SendEventList();
@@ -79,10 +80,12 @@ namespace QTool
 				triggerEventList.Add(eventData);
 				Debug.Log(StartKey + " 触发事件 " + eventData);
 				PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
+				if (SendCount >= 1 && triggerEventList.Count>= SendCount)
+				{
+					SendEventList();
+				}
 			}
 		}
-	
-		
 		
 	}
 	public class StartInfo
