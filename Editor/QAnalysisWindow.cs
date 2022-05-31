@@ -1,13 +1,86 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System.Threading.Tasks;
+using QTool.Inspector;
 using System;
-
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEditor;
+using UnityEngine;
 namespace QTool
 {
-	
+	public class QNewTitleWindow:EditorWindow
+	{
+		public static QNewTitleWindow Instance { private set; get; }
+		public static bool GetNewTitle(out QTitleInfo newInfo)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<QNewTitleWindow>();
+				Instance.minSize = new Vector2(300, 100);
+				Instance.maxSize = new Vector2(300, 100);
+			}
+			Instance.titleContent = new GUIContent("新建数据列");
+			Instance.confirm = false;
+			Instance.ShowModal();
+			newInfo = Instance.titleInfo;
+			return Instance.confirm;
+		} 
+		public QTitleInfo titleInfo = new QTitleInfo();
+		public bool confirm = false;
+		private void OnGUI()
+		{
+			using(new GUILayout.VerticalScope())
+			{
+				titleInfo.Key = (string)titleInfo.Key.Draw("列名", typeof(string));
+				var names = QAnalysisData.Instance.EventKeyList;
+				if (names.Count > 0)
+				{
+					if (names.IndexOf(titleInfo.DataSetting.eventKey) < 0)
+					{
+						titleInfo.DataSetting.eventKey = names[0];
+					}
+					titleInfo.DataSetting.eventKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.eventKey), names.ToArray())];
+				}
+				titleInfo.DataSetting.mode = (QAnalysisMode)titleInfo.DataSetting.mode.Draw("计算方式", typeof(QAnalysisMode));
+				GUILayout.FlexibleSpace();
+
+				using (new GUILayout.HorizontalScope())
+				{
+					if (GUILayout.Button("确认")) 
+					{
+						if (string.IsNullOrWhiteSpace(titleInfo.Key))
+						{
+							if (EditorUtility.DisplayDialog("错误的列名", "不能为空", "确认"))
+							{
+								return;
+							}
+						}
+						if(QAnalysisData.Instance.TitleList.ContainsKey(titleInfo.Key))
+						{
+							if (EditorUtility.DisplayDialog("错误的列名", "已存在列名"+titleInfo.Key, "确认"))
+							{
+								return;
+							}
+						}
+						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.eventKey))
+						{
+							if (EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认"))
+							{
+								return;
+							}
+						}
+						confirm = true;
+						Close();
+					}
+					if (GUILayout.Button("取消"))
+					{
+						confirm = false;
+						Close();
+					}
+				}
+			}
+			
+		
+		}
+	}
 	public class QAnalysisWindow : EditorWindow
 	{
 		public static QAnalysisWindow Instance { private set; get; }
@@ -19,14 +92,14 @@ namespace QTool
 				Instance = GetWindow<QAnalysisWindow>();
 				Instance.minSize = new Vector2(400, 300);
 			}
-			Instance.titleContent = new GUIContent(nameof(QAnalysis)+" - "+Application.productName);
-			FreshData();
+			Instance.titleContent = new GUIContent(nameof(QAnalysis) + " - " + Application.productName);
+			Instance.Show();
+			Instance.FreshData();
 		}
-		static async void FreshData()
+		public async void FreshData()
 		{
-			if (QAnalysisData.IsLoading) return;
 			await QAnalysisData.FreshData();
-			Instance?.Repaint();
+			Repaint();
 		}
 		Vector2 viewPos;
 		private void OnGUI()
@@ -60,7 +133,40 @@ namespace QTool
 						DrawCell("玩家ID", 200, true, true);
 						foreach (var title in QAnalysisData.Instance.TitleList)
 						{
-							DrawCell(title.Key, title.width, false, true);
+							DrawCell(title.Key, title.width, false, true,(menu)=> {
+								menu.AddItem(new GUIContent("新建数据列"), false, () =>
+								{
+									if (QNewTitleWindow.GetNewTitle(out var newTitle))
+									{
+										QAnalysisData.Instance.AddTitle(newTitle);
+									}
+								});
+								menu.AddItem(new GUIContent("删除数据列"), false, () => {
+									if(EditorUtility.DisplayDialog("删除确认", "删除数据列 " + title.Key, "确认","取消"))
+									{
+										QAnalysisData.Instance.RemveTitle(title);
+									}
+								}); 
+								menu.AddItem(new GUIContent("刷新数据列"), false, () => {
+									QAnalysisData.Instance.FreshKey(title.Key,true);
+								});
+								foreach (var eventKey in QAnalysisData.Instance.EventKeyList)
+								{
+									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.eventKey, () =>
+									{
+										title.ChangeEvent(eventKey);
+									});
+								}
+								var modes = Enum.GetNames(typeof(QAnalysisMode));
+								
+								foreach (var mode in modes)
+								{
+									menu.AddItem(new GUIContent("计算方式/" + mode), mode == title.DataSetting.mode.ToString(), () =>
+									{
+										title.ChangeMode(mode);
+									});
+								}
+							});
 						}
 						GUILayout.FlexibleSpace();
 					}
@@ -68,15 +174,15 @@ namespace QTool
 					{
 						using (new GUILayout.VerticalScope())
 						{
-							foreach (var data in QAnalysisData.Instance.AnalysisData)
+							foreach (var data in QAnalysisData.Instance.PlayerDataList)
 							{
-								DrawCell(data.Key, 200, true);
+								DrawCell(data.Key, 200, true,false);
 							}
 						}
 
 						using (new GUILayout.VerticalScope())
 						{
-							foreach (var playerData in QAnalysisData.Instance.AnalysisData)
+							foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
 							{
 								using (new GUILayout.HorizontalScope())
 								{
@@ -101,7 +207,7 @@ namespace QTool
 		}
 
 	
-		public void DrawCell(string value,float width,bool drawXLine,bool drawYLine=false)
+		public void DrawCell(string value,float width,bool drawXLine,bool drawYLine,Action<GenericMenu> menu=null)
 		{
 			DrawCell(value,width);
 			var lastRect = GUILayoutUtility.GetLastRect();
@@ -112,6 +218,10 @@ namespace QTool
 			if (drawYLine)
 			{ 
 				Handles.DrawLine(new Vector3(lastRect.xMax,viewPos.y + lastRect.yMin ), new Vector3(lastRect.xMax, viewPos.y + position.yMax));;
+			}
+			if (menu != null)
+			{
+				lastRect.RightMenu(menu);
 			}
 		}
 		public void DrawCell(string value,float width=200)
@@ -127,14 +237,37 @@ namespace QTool
 	{
 		public static QAnalysisData Instance { get; private set; } = Activator.CreateInstance<QAnalysisData>();
 		public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
-		public QAutoList<string, QPlayerData> AnalysisData = new QAutoList<string, QPlayerData>();
+		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
 		public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
+		public List<string> EventKeyList = new List<string>();
 		public QMailInfo LastMail=null;
+		public static QAnalysisEvent GetEvent(string eventId)
+		{
+			return Instance.EventList[eventId];
+		}
 		static QAnalysisData()
 		{
 			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
 		}
 		public static bool IsLoading { get; private set; } = false;
+		public void AddTitle(QTitleInfo newTitle)
+		{
+			TitleList.Add(newTitle);
+			FreshKey(newTitle.Key);
+			SaveData();
+		}
+		public void RemveTitle(QTitleInfo title)
+		{
+			if (TitleList.ContainsKey(title.Key))
+			{
+				TitleList.Remove(title.Key);
+				foreach (var playerData in PlayerDataList)
+				{
+					playerData.AnalysisData.Remove(title.Key);
+				}
+				SaveData();
+			}
+		}
 		public static async Task FreshData() 
 		{
 			if (IsLoading) return;
@@ -148,12 +281,27 @@ namespace QTool
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
 
-			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
+			SaveData();
 			IsLoading = false;
+		}
+		
+		public static void SaveData()
+		{
+			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
+		}
+		public void FreshKey(string titleKey,bool freshEventList=false)
+		{
+			foreach (var playerData in PlayerDataList)
+			{
+				playerData.FreshKey(titleKey, freshEventList);
+			}
+			SaveData();
 		}
 		public static void Clear()
 		{
+			var titleInfo = Instance.TitleList;
 			Instance = Activator.CreateInstance<QAnalysisData>();
+			Instance.TitleList = titleInfo;
 		}
 		public static void AddEvent(List<QAnalysisEvent> newEventList)
 		{
@@ -161,10 +309,20 @@ namespace QTool
 			{
 				if (!Instance.TitleList.ContainsKey(eventData.eventKey))
 				{
-					Instance.TitleList[eventData.eventKey].width = 200;
+					var title = Instance.TitleList[eventData.eventKey];
+					title.DataSetting.eventKey = eventData.eventKey;
+					if (eventData.eventValue == null)
+					{
+						title.DataSetting.mode = QAnalysisMode.最新时间;
+					}
+					else
+					{
+						title.DataSetting.mode = QAnalysisMode.最新数据;
+					}
 				}
+				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 				Instance.EventList.Add(eventData);
-				Instance.AnalysisData[eventData.accountId].Add(eventData);
+				Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			}
 		}
 
@@ -172,50 +330,179 @@ namespace QTool
 	public class QTitleInfo:IKey<string>
 	{
 		public string Key { get; set; }
-		public float width;
-		public QAnalysisSetting analysisSetting;
-		
+		public float width = 200;
+		public QAnalysisSetting DataSetting = new QAnalysisSetting();
+		public void ChangeMode(string modeKey)
+		{
+			DataSetting.mode=(QAnalysisMode) Enum.Parse(typeof(QAnalysisMode), modeKey);
+			QAnalysisData.Instance.FreshKey(Key);
+		}
+		public void ChangeEvent(string eventKey)
+		{
+			DataSetting.eventKey = eventKey;
+			QAnalysisData.Instance.FreshKey(Key,true);
+		}
 	}
 	public enum QAnalysisMode
 	{
-		普通,
-		计数,
+		最新数据,
+		起始数据,
+		最新时间,
+		起始时间,
+		次数,
+		最新时间区间,
+		总时间区间,
 	}
 	public class QAnalysisSetting
 	{
-		public string Key;
-		public QAnalysisMode mode = QAnalysisMode.普通;
+		public string eventKey;
+		public QAnalysisMode mode = QAnalysisMode.最新数据;
+		public string TargetKey
+		{
+			get
+			{
+				switch (mode)
+				{
+					case QAnalysisMode.最新时间区间:
+					case QAnalysisMode.总时间区间:
+						if (eventKey.EndsWith("结束"))
+						{
+							return eventKey.Replace("结束", "开始");
+						}
+						else
+						{
+							return eventKey;
+						}
+					default:
+						return eventKey;
+				}
+			
+
+			}
+		}
 	}
 	public class QAnalysisInfo:IKey<string>
 	{
 		public string Key { get; set; }
 		public object value;
-		public DateTime updateTime;
+		public DateTime UpdateTime;
+		public List<string> EventList = new List<string>();
 		public string ToViewString()
 		{
-			return value == null ? updateTime.ToQTimeString() : value.ToString();
+			return value?.ToString();
 		}
-		public void SetValue(object newValue, DateTime time)
+		public void AddEvent(QAnalysisEvent eventData)
 		{
-			updateTime = time;
-			value = newValue;
+			UpdateTime = eventData.eventTime;
+			EventList.AddCheckExist(eventData.Key);
+			FreshMode();
 		}
+		public DateTime GetTime(DateTime defaulTime )
+		{
+			if (EventList.Count == 0) return defaulTime;
+			return QAnalysisData.GetEvent(EventList.StackPeek()).eventTime;
+		}
+		public void FreshMode()
+		{
+			var setting = QAnalysisData.Instance.TitleList[Key].DataSetting;
+			if (EventList.Count == 0) { UpdateTime = default; value = null;return; }
+			switch (setting.mode)
+			{
+				case QAnalysisMode.最新数据:
+					value = QAnalysisData.Instance.EventList[EventList.StackPeek()].eventValue;
+					break;
+				case QAnalysisMode.起始数据:
+					value = QAnalysisData.Instance.EventList[EventList.QueuePeek()].eventValue;
+					break;
+				case QAnalysisMode.最新时间:
+					value = QAnalysisData.Instance.EventList[EventList.StackPeek()].eventTime;
+					break;
+				case QAnalysisMode.起始时间:
+					value = QAnalysisData.Instance.EventList[EventList.QueuePeek()].eventTime;
+					break;
+				case QAnalysisMode.次数:
+					value = EventList.Count;
+					break;
+				case QAnalysisMode.最新时间区间:
+					{
+						var endData = QAnalysisData.Instance.EventList[EventList.StackPeek()];
+						var playerData = QAnalysisData.Instance.PlayerDataList[endData.playerId];
+						var startData = playerData.AnalysisData[setting.TargetKey];
+						value = endData.eventTime - startData.GetTime(endData.eventTime);
+					}
+					break;
+				case QAnalysisMode.总时间区间:
+					{
+						var eventData = QAnalysisData.Instance.EventList[EventList.StackPeek()];
+						var playerData = QAnalysisData.Instance.PlayerDataList[eventData.playerId];
+						var startData = playerData.AnalysisData[setting.TargetKey];
+						var startIndex = startData.EventList.Count-1;
+						var endIndex =EventList.Count-1;
+						TimeSpan allTime = default;
+						while (startIndex>=0&&endIndex>=0)
+						{
+							var startTime =QAnalysisData.GetEvent(startData.EventList[startIndex]).eventTime;
+							var endTime = QAnalysisData.GetEvent(EventList[endIndex]).eventTime;
+							if (startTime <= endTime)
+							{
+								allTime += endTime - startTime;
+								startIndex--;
+								endIndex--;
+							}
+							else
+							{
+								startIndex--;
+							}
+						}
+						value = allTime;
+
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
 	}
 	public class QPlayerData : IKey<string>
 	{
 		public QAutoList<string, QAnalysisInfo> AnalysisData = new QAutoList<string, QAnalysisInfo>();
 		public string Key { get; set; }
-		public List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
 		public DateTime UpdateTime;
+		public List<string> EventList = new List<string>();
 		public void Add(QAnalysisEvent eventData)
 		{
 			UpdateTime = eventData.eventTime;
-			EventList.Add(eventData);
-			AnalysisData[eventData.eventKey].SetValue( eventData.eventValue,eventData.eventTime);
+			EventList.AddCheckExist(eventData.eventId);
+			foreach (var title in QAnalysisData.Instance.TitleList)
+			{
+				if (title.DataSetting.eventKey == eventData.eventKey)
+				{
+					AnalysisData[title.Key].AddEvent(eventData);
+				}
+				else if(title.DataSetting.TargetKey == eventData.eventKey)
+				{
+					AnalysisData[title.Key].FreshMode();
+				}
+			}
 		}
-		public override string ToString()
+		public void FreshKey(string titleKey,bool freshEventList)
 		{
-			return Key + "\t" + EventList.ToOneString("\t", (eventData) => eventData.eventKey);
+			var info = AnalysisData[titleKey];
+			if (freshEventList)
+			{
+				info.EventList.Clear();
+				var setting = QAnalysisData.Instance.TitleList[titleKey].DataSetting;
+				foreach (var eventId in EventList)
+				{
+					var eventData = QAnalysisData.Instance.EventList[eventId];
+					if (eventData.eventKey == setting.eventKey)
+					{
+						info.EventList.AddCheckExist(eventData.eventId);
+					}
+				}
+			}
+			info.FreshMode();
 		}
 	}
 	public static class QGUITool

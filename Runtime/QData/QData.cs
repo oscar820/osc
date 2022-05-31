@@ -37,7 +37,7 @@ namespace QTool
 			{
 				return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
 			}
-			try
+			try 
 			{
 				using (var reader = new StringReader(qdataStr))
 				{
@@ -46,7 +46,7 @@ namespace QTool
 			}
 			catch (Exception e)
 			{
-				Debug.LogError("解析类型【" + type + "】出错：" + qdataStr + "\n" + e);
+				Debug.LogError("解析类型【" + type + "】出错：" + "\n" + e+"\n"+ qdataStr);
 				return type.IsValueType ? QReflection.CreateInstance(type, target) : null;
 			}
 
@@ -232,28 +232,29 @@ namespace QTool
 													var memeberInfo = typeInfo.Members[name];
 
 													object result = null;
-													try
+
+													if (!(reader.NextIs(':') || reader.NextIs('=')))
 													{
-														if (!(reader.NextIs(':') || reader.NextIs('=')))
-														{
-															throw new Exception("缺少分隔符 : 或 =");
-														}
-														if (memeberInfo != null)
+														throw new Exception("缺少分隔符 : 或 =\n"+reader.ReadLine());
+													}
+													if (memeberInfo != null)
+													{
+														try
 														{
 															result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
 															memeberInfo.Set(target, result);
-														
 														}
-														else
+														catch (Exception e)
 														{
-															Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadValueString());
+															Debug.LogError("读取成员【" + type.Name + "." + memeberInfo.Name + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+															throw e;
 														}
 													}
-													catch (Exception e)
+													else
 													{
-														Debug.LogError("读取成员【" + type.Name + "." + memeberInfo.Name + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
-														throw e;
+														Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadValueString());
 													}
+
 													if (!(reader.NextIs(';') || reader.NextIs(',')))
 													{
 														if (reader.NextIs('}'))
@@ -424,7 +425,7 @@ namespace QTool
 					return null;
 			}
 
-
+			 
 		}
 
 
@@ -457,6 +458,10 @@ namespace QTool
 						if (BlockStack.Peek() == c)
 						{
 							BlockStack.Pop();
+						}
+						else if ((index = BlockStart.IndexOf(c)) >= 0)
+						{
+							BlockStack.Push(BlockEnd[index]);
 						}
 					}
 					reader.Read();

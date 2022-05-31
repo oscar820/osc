@@ -22,7 +22,7 @@ namespace QTool
 				return true;
 			}
 		}
-		public static void Login(string id)
+		public static void Start(string id)
 		{
 			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
 			{
@@ -36,15 +36,15 @@ namespace QTool
 				return;
 			}
 			AccountId = id;
-			Trigger(nameof(Login)); 
+			Trigger("游戏开始");
 		}
-		public static void logout() 
+		public static void Stop() 
 		{
 			if (!InitOver)
 			{
 				return;
 			}
-			Trigger(nameof(logout));
+			Trigger("游戏结束");
 			SendEventList();
 			AccountId = null;
 		}
@@ -67,7 +67,7 @@ namespace QTool
 			{
 				var eventData=new QAnalysisEvent
 				{
-					accountId = AccountId,
+					playerId = AccountId,
 					eventKey=eventKey,
 					eventValue=value,
 				};
@@ -87,7 +87,7 @@ namespace QTool
 		public string eventKey;
 		public object eventValue;
 		public DateTime eventTime = DateTime.Now;
-		public string accountId;
+		public string playerId;
 		public string eventId = QId.GetNewId();
 
 		[QIgnore]
@@ -95,7 +95,7 @@ namespace QTool
 	
 		public override string ToString()
 		{
-			return eventKey + " " + eventTime.ToQTimeString() +" "+accountId;
+			return eventKey + " " + eventTime.ToQTimeString() +" "+playerId;
 		}
 	}
 

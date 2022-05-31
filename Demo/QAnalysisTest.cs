@@ -11,12 +11,12 @@ namespace QTool
 		[ViewButton("登录")]
 		public void Login()
 		{
-			QAnalysis.Login("TestAccount"+ "_" + Random.Range(1, 50)); 
+			QAnalysis.Start("TestAccount"+ "_" + Random.Range(1, 10)); 
 		}
 		[ViewButton("退出")]
 		public void Logout()
 		{
-			QAnalysis.logout();
+			QAnalysis.Stop();
 		}
 	}
 
