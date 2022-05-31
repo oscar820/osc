@@ -113,7 +113,6 @@ namespace QTool
 			{
 				var memeberKey = dataKey.SplitEndString("/");
 				var typeInfo = QSerializeType.Get(eventValue.GetType());
-				Debug.LogError(dataKey + " : " + typeInfo.Members[memeberKey].Get(eventValue));
 				return typeInfo.Members[memeberKey].Get(eventValue);
 			}
 			else

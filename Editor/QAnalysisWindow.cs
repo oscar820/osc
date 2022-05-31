@@ -6,81 +6,7 @@ using UnityEditor;
 using UnityEngine;
 namespace QTool
 {
-	public class QNewTitleWindow:EditorWindow
-	{
-		public static QNewTitleWindow Instance { private set; get; }
-		public static bool GetNewTitle(out QTitleInfo newInfo)
-		{
-			if (Instance == null)
-			{
-				Instance = GetWindow<QNewTitleWindow>();
-				Instance.minSize = new Vector2(300, 100);
-				Instance.maxSize = new Vector2(300, 100);
-			}
-			Instance.titleContent = new GUIContent("新建数据列");
-			Instance.confirm = false;
-			Instance.ShowModal();
-			newInfo = Instance.titleInfo;
-			return Instance.confirm;
-		} 
-		public QTitleInfo titleInfo = new QTitleInfo();
-		public bool confirm = false;
-		private void OnGUI()
-		{
-			using(new GUILayout.VerticalScope())
-			{
-				titleInfo.Key = (string)titleInfo.Key.Draw("列名", typeof(string));
-				var names = QAnalysisData.Instance.EventKeyList;
-				if (names.Count > 0)
-				{
-					if (names.IndexOf(titleInfo.DataSetting.dataKey) < 0)
-					{
-						titleInfo.DataSetting.dataKey = names[0];
-					}
-					titleInfo.DataSetting.dataKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.dataKey), names.ToArray())];
-				}
-				titleInfo.DataSetting.mode = (QAnalysisMode)titleInfo.DataSetting.mode.Draw("计算方式", typeof(QAnalysisMode));
-				GUILayout.FlexibleSpace();
 
-				using (new GUILayout.HorizontalScope())
-				{
-					if (GUILayout.Button("确认")) 
-					{
-						if (string.IsNullOrWhiteSpace(titleInfo.Key))
-						{
-							if (EditorUtility.DisplayDialog("错误的列名", "不能为空", "确认"))
-							{
-								return;
-							}
-						}
-						if(QAnalysisData.Instance.TitleList.ContainsKey(titleInfo.Key))
-						{
-							if (EditorUtility.DisplayDialog("错误的列名", "已存在列名"+titleInfo.Key, "确认"))
-							{
-								return;
-							}
-						}
-						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.dataKey))
-						{
-							if (EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认"))
-							{
-								return;
-							}
-						}
-						confirm = true;
-						Close();
-					}
-					if (GUILayout.Button("取消"))
-					{
-						confirm = false;
-						Close();
-					}
-				}
-			}
-			
-		
-		}
-	}
 	public class QAnalysisWindow : EditorWindow
 	{
 		public static QAnalysisWindow Instance { private set; get; }
@@ -119,12 +45,12 @@ namespace QTool
 					QAnalysisData.Clear();
 					FreshData();
 				}
-				if (DrawButton("重新生成列信息"))
-				{
-					QAnalysisData.Clear();
-					QAnalysisData.Instance.TitleList.Clear();
-					FreshData();
-				}
+				//if (DrawButton("重新生成列信息"))
+				//{
+				//	QAnalysisData.Clear();
+				//	QAnalysisData.Instance.TitleList.Clear();
+				//	FreshData();
+				//}
 				var lastRect = GUILayoutUtility.GetLastRect();
 				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
 			}
@@ -138,23 +64,8 @@ namespace QTool
 						DrawCell("玩家ID", 200, true, true);
 						foreach (var title in QAnalysisData.Instance.TitleList)
 						{
-							DrawCell(title.Key, title.width, false, true,(menu)=> {
-								menu.AddItem(new GUIContent("新建数据列"), false, () =>
-								{
-									if (QNewTitleWindow.GetNewTitle(out var newTitle))
-									{
-										QAnalysisData.Instance.AddTitle(newTitle);
-									}
-								});
-								menu.AddItem(new GUIContent("删除数据列"), false, () => {
-									if(EditorUtility.DisplayDialog("删除确认", "删除数据列 " + title.Key, "确认","取消"))
-									{
-										QAnalysisData.Instance.RemveTitle(title);
-									}
-								}); 
-								menu.AddItem(new GUIContent("刷新数据列"), false, () => {
-									QAnalysisData.Instance.FreshKey(title.Key,true);
-								});
+							DrawCell(title.ToString(), title.width, false, true,(menu)=> {
+								
 								foreach (var eventKey in QAnalysisData.Instance.EventKeyList)
 								{
 									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
@@ -171,6 +82,28 @@ namespace QTool
 										title.ChangeMode(mode);
 									});
 								}
+								menu.AddSeparator("");
+								menu.AddItem(new GUIContent("新建数据列"), false, () =>
+								{
+									if (QNewTitleWindow.GetNewTitle(out var newTitle))
+									{
+										QAnalysisData.Instance.AddTitle(newTitle);
+										QAnalysisData.Instance.FreshKey(newTitle.Key, true);
+									}
+								});
+							
+								menu.AddItem(new GUIContent("设置数据列"), false, () => {
+									if (QNewTitleWindow.ChangeTitle(title))
+									{
+										QAnalysisData.Instance.FreshKey(title.Key, true);
+									}
+								});
+								menu.AddItem(new GUIContent("删除数据列"), false, () => {
+									if (EditorUtility.DisplayDialog("删除确认", "删除数据列 " + title.Key, "确认", "取消"))
+									{
+										QAnalysisData.Instance.RemveTitle(title);
+									}
+								});
 							});
 						}
 						GUILayout.FlexibleSpace();
@@ -193,7 +126,7 @@ namespace QTool
 								{
 									foreach (var title in QAnalysisData.Instance.TitleList)
 									{
-										DrawCell(playerData.AnalysisData[title.Key].value);
+										DrawCell(playerData.AnalysisData[title.Key].value,title.width);
 									}
 									GUILayout.FlexibleSpace();
 								}
@@ -236,6 +169,100 @@ namespace QTool
 		public bool DrawButton(string name)
 		{
 			return GUILayout.Button(name, GUILayout.Width(100));
+		}
+	}
+	public class QNewTitleWindow : EditorWindow
+	{
+		public static QNewTitleWindow Instance { private set; get; }
+		public static bool GetNewTitle(out QTitleInfo newInfo)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<QNewTitleWindow>();
+				Instance.minSize = new Vector2(300, 100);
+				Instance.maxSize = new Vector2(300, 100);
+			}
+			Instance.titleContent = new GUIContent("新建数据列");
+			Instance.confirm = false;
+			Instance.create = true;
+			Instance.titleInfo = new QTitleInfo();
+			Instance.ShowModal();
+			newInfo = Instance.titleInfo;
+			return Instance.confirm;
+		}
+		public static bool ChangeTitle(QTitleInfo info)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<QNewTitleWindow>();
+				Instance.minSize = new Vector2(300, 100);
+				Instance.maxSize = new Vector2(300, 100);
+			}
+			Instance.titleContent = new GUIContent("设置列信息");
+			Instance.create = false;
+			Instance.confirm = false;
+			Instance.titleInfo = info;
+			Instance.ShowModal();
+			return Instance.confirm;
+		}
+		bool create = false;
+		public QTitleInfo titleInfo = new QTitleInfo();
+		public bool confirm = false;
+		private void OnGUI()
+		{
+			using (new GUILayout.VerticalScope())
+			{
+				titleInfo.Key = (string)titleInfo.Key.Draw("列名", typeof(string));
+				var names = QAnalysisData.Instance.EventKeyList;
+				if (names.Count > 0)
+				{
+					if (names.IndexOf(titleInfo.DataSetting.dataKey) < 0)
+					{
+						titleInfo.DataSetting.dataKey = names[0];
+					}
+					titleInfo.DataSetting.dataKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.dataKey), names.ToArray())];
+				}
+				titleInfo.DataSetting.mode = (QAnalysisMode)titleInfo.DataSetting.mode.Draw("计算方式", typeof(QAnalysisMode));
+				titleInfo.width =Mathf.Clamp( (int)((int)titleInfo.width).Draw("列宽", typeof(int)),10,500);
+				GUILayout.FlexibleSpace();
+
+				using (new GUILayout.HorizontalScope())
+				{
+					if (GUILayout.Button("确认"))
+					{
+						if (string.IsNullOrWhiteSpace(titleInfo.Key))
+						{
+							if (EditorUtility.DisplayDialog("错误的列名", "不能为空", "确认"))
+							{
+								return;
+							}
+						}
+						if (Instance.create&&QAnalysisData.Instance.TitleList.ContainsKey(titleInfo.Key))
+						{
+							if (EditorUtility.DisplayDialog("错误的列名", "已存在列名" + titleInfo.Key, "确认"))
+							{
+								return;
+							}
+						}
+						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.dataKey))
+						{
+							if (EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认"))
+							{
+								return;
+							}
+						}
+						confirm = true;
+						Close();
+					}
+					if (GUILayout.Button("取消"))
+					{
+						confirm = false;
+						Close();
+					}
+				}
+			}
+
+
 		}
 	}
 	public class QAnalysisData
@@ -354,6 +381,10 @@ namespace QTool
 			DataSetting.dataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key,true);
 		}
+		public override string ToString()
+		{
+			return Key+"\n"+DataSetting;
+		}
 	}
 	public enum QAnalysisMode
 	{
@@ -405,6 +436,10 @@ namespace QTool
 			
 
 			}
+		}
+		public override string ToString()
+		{
+			return "("+dataKey + " " + mode+")";
 		}
 	}
 	public class QAnalysisInfo:IKey<string>
