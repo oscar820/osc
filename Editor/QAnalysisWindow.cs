@@ -20,12 +20,15 @@ namespace QTool
 			}
 			Instance.titleContent = new GUIContent(nameof(QAnalysis) + " - " + Application.productName);
 			Instance.Show();
-			Instance.FreshData();
 		}
 		public async void FreshData()
 		{
 			await QAnalysisData.FreshData();
 			Repaint();
+		}
+		private void OnFocus()
+		{
+			FreshData();
 		}
 		Vector2 viewPos;
 		private void OnGUI()
