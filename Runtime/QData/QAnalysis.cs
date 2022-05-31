@@ -36,8 +36,9 @@ namespace QTool
 				return;
 			}
 			AccountId = id;
-			Trigger("游戏开始");
+			Trigger("游戏开始",new StartInfo());
 		}
+	
 		public static void Stop() 
 		{
 			if (!InitOver)
@@ -80,7 +81,13 @@ namespace QTool
 		
 		
 	}
-	
+	public class StartInfo
+	{
+		public RuntimePlatform platform = Application.platform;
+		public string version = Application.version;
+		public string deviceName = SystemInfo.deviceName;
+		public string deviceUniqueIdentifier = SystemInfo.deviceUniqueIdentifier;
+	}
 
 	public class QAnalysisEvent:IKey<string>
 	{
@@ -89,13 +96,30 @@ namespace QTool
 		public DateTime eventTime = DateTime.Now;
 		public string playerId;
 		public string eventId = QId.GetNewId();
-
 		[QIgnore]
 		public string Key { get => eventId; set => eventId = value; }
 	
 		public override string ToString()
 		{
 			return eventKey + " " + eventTime.ToQTimeString() +" "+playerId;
+		}
+		public object GetValue(string dataKey)
+		{
+			if (eventValue == null)
+			{
+				return eventValue;
+			}
+			if (dataKey.Contains("/"))
+			{
+				var memeberKey = dataKey.SplitEndString("/");
+				var typeInfo = QSerializeType.Get(eventValue.GetType());
+				Debug.LogError(dataKey + " : " + typeInfo.Members[memeberKey].Get(eventValue));
+				return typeInfo.Members[memeberKey].Get(eventValue);
+			}
+			else
+			{
+				return eventValue;
+			}
 		}
 	}
 

@@ -418,19 +418,13 @@ namespace QTool.Inspector
 
         public static List<string> TypeMenuList = new List<string>();
         public static List<Type> TypeList = new List<Type>();
-        public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null, Rect? rect = null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null)
-        {
-            if (type == null)
-            {
-                if (rect == null)
-                {
-                    EditorGUILayout.LabelField(name);
-                }
-                else
-                {
-                    EditorGUI.LabelField(rect.Value, name);
-                }
-            }
+        public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null,params GUILayoutOption[] layoutOption)
+		{
+			var hasName = !string.IsNullOrWhiteSpace(name);
+			if (type == null)
+			{
+				EditorGUILayout.LabelField(name, layoutOption);
+			}
 			if (obj == null && type.IsValueType)
 			{
 				obj = type.CreateInstance();
@@ -449,14 +443,7 @@ namespace QTool.Inspector
             switch (typeInfo.Code)
             {
                 case TypeCode.Boolean:
-                    if (rect == null)
-                    {
-                        obj= EditorGUILayout.Toggle(name, (bool)obj);
-                    }
-                    else
-                    {
-                        obj= EditorGUI.Toggle(rect.Value, name, (bool)obj);
-                    }break;
+                        obj= EditorGUILayout.Toggle(name, (bool)obj, layoutOption);break;
                 case TypeCode.Char:
                 case TypeCode.SByte:
                 case TypeCode.Byte:
@@ -466,73 +453,31 @@ namespace QTool.Inspector
                 case TypeCode.UInt32:
                     if (type.IsEnum)
                     {
-                        if (rect == null)
-                        {
-                            obj= EditorGUILayout.EnumPopup(name, (Enum)obj);
-                        }
-                        else
-                        {
-                            obj= EditorGUI.EnumPopup(rect.Value, name, (Enum)obj);
-                        }
+                       
+                            obj= EditorGUILayout.EnumPopup(name, (Enum)obj, layoutOption);
                     }
                     else
                     {
-                        if (rect == null)
-                        {
-                            obj = EditorGUILayout.IntField(name, (int)obj);
-                        }
-                        else
-                        {
-                            obj = EditorGUI.IntField(rect.Value, name, (int)obj);
-                        }
+                            obj = EditorGUILayout.IntField(name, (int)obj, layoutOption);
                     }
                     break;
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
-                    if (rect == null)
-                    {
-                        obj= EditorGUILayout.LongField(name, (long)obj);
-                    }
-                    else
-                    {
-                        obj= EditorGUI.LongField(rect.Value, name, (long)obj);
-                    }break;
+                        obj= EditorGUILayout.LongField(name, (long)obj, layoutOption);break;
                 case TypeCode.Single:
-                    if (rect == null)
-                    {
-                        obj= EditorGUILayout.FloatField(name, (float)obj);
-                    }
-                    else
-                    {
-                        obj= EditorGUI.FloatField(rect.Value, name, (float)obj);
-                    }break;
+                        obj= EditorGUILayout.FloatField(name, (float)obj, layoutOption);break;
                 case TypeCode.Decimal:
                 case TypeCode.Double:
-                    if (rect == null)
-                    {
-                        obj= EditorGUILayout.DoubleField(name, (double)obj);
-                    }
-                    else
-                    {
-                        obj= EditorGUI.DoubleField(rect.Value, name, (double)obj);
-                    }break;
+                        obj= EditorGUILayout.DoubleField(name, (double)obj, layoutOption);break;
                 case TypeCode.String:
-                    if (rect == null)
-                    {
-                        obj= EditorGUILayout.TextField(name, obj?.ToString());
-                    }
-                    else
-                    {
-                        obj= EditorGUI.TextField(rect.Value,name, obj?.ToString());
-                    }break;
+                        obj= EditorGUILayout.TextField(name, obj?.ToString(), layoutOption);break;
                 case TypeCode.Object:
                     switch (typeInfo.objType)
                     {
                         case QObjectType.Object:
-                          
                             if (type == typeof(object))
                             {
-                                using (new EditorGUILayout.HorizontalScope())
+                                using (new EditorGUILayout.HorizontalScope(layoutOption))
                                 {
                                     if (obj == null)
                                     {
@@ -552,7 +497,7 @@ namespace QTool.Inspector
 							}
                             else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
                             {
-                                obj= EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true);
+                                obj= EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true, layoutOption);
                             }
                             else
                             {
@@ -562,22 +507,28 @@ namespace QTool.Inspector
                                 }
                                 if (typeof(QObjectReference).IsAssignableFrom(type))
                                 {
-                                    obj = QObjectReferenceDrawer.Draw(name, (QObjectReference)obj);
+                                    obj = QObjectReferenceDrawer.Draw(name, (QObjectReference)obj, layoutOption);
                                 }
                                 else
                                 {
 
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;
-                                    using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle))
+                                    using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle, layoutOption))
                                     {
                                         GUI.backgroundColor = color;
-                                        FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
-                                        if (FoldoutDic[name])
+										if (hasName)
+										{
+											FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
+										}
+                                        if (!hasName||FoldoutDic[name])
                                         {
-                                            using (new EditorGUILayout.HorizontalScope())
+                                            using (new EditorGUILayout.HorizontalScope( layoutOption))
                                             {
-                                                EditorGUILayout.Space(10);
+												if (hasName)
+												{
+													EditorGUILayout.Space(10);
+												}
                                                 using (new EditorGUILayout.VerticalScope())
                                                 {
 													
@@ -624,23 +575,30 @@ namespace QTool.Inspector
                                     }
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;
-                                    using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle))
+
+									using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle, layoutOption))
                                     {
                                         GUI.backgroundColor = color;
                                         var canHideChild = DrawElementCall==null;
-                                        if (canHideChild)
-                                        {
-                                            FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
-                                        }
-                                        else
-                                        {
-                                            EditorGUILayout.LabelField(name);
-                                        }
-                                        if (!canHideChild || FoldoutDic[name])
+										if (hasName)
+										{
+											if (canHideChild)
+											{
+												FoldoutDic[name] = EditorGUILayout.Foldout(FoldoutDic[name], name);
+											}
+											else
+											{
+												EditorGUILayout.LabelField(name);
+											}
+										}
+                                        if (!canHideChild|| !hasName  || FoldoutDic[name])
                                         {
                                             using (new EditorGUILayout.HorizontalScope())
                                             {
-                                                EditorGUILayout.Space(10);
+												if (hasName)
+												{
+													EditorGUILayout.Space(10);
+												}
                                                 using (new EditorGUILayout.VerticalScope())
                                                 {
                                                     for (int i = 0; i < list.Count; i++)
@@ -692,12 +650,15 @@ namespace QTool.Inspector
                             break;
                     }
                     break;
-                case TypeCode.Empty:
-                case TypeCode.DateTime:
+
+				case TypeCode.DateTime:
+					
+				case TypeCode.Empty:
                 case TypeCode.DBNull:
                 default:;
-                    break;
-            }
+						 EditorGUILayout.LabelField(name, obj?.ToString(), layoutOption);
+					break;
+			}
             if (changeValue!=null)
             {
                 GUILayoutUtility.GetLastRect().RightMenu((menu) =>

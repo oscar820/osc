@@ -266,8 +266,20 @@ namespace QTool
             {
                 return str;
             }
-        }
-        public static string ToSizeString(this string array)
+		}
+		public static string SplitStartString(this string str, string splitStart)
+		{
+			if (str.Contains(splitStart))
+			{
+
+				return str.Substring(0,str.IndexOf(splitStart));
+			}
+			else
+			{
+				return str;
+			}
+		}
+		public static string ToSizeString(this string array)
         {
             return array.Length.ToSizeString();
         }

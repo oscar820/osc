@@ -33,11 +33,11 @@ namespace QTool
 				var names = QAnalysisData.Instance.EventKeyList;
 				if (names.Count > 0)
 				{
-					if (names.IndexOf(titleInfo.DataSetting.eventKey) < 0)
+					if (names.IndexOf(titleInfo.DataSetting.dataKey) < 0)
 					{
-						titleInfo.DataSetting.eventKey = names[0];
+						titleInfo.DataSetting.dataKey = names[0];
 					}
-					titleInfo.DataSetting.eventKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.eventKey), names.ToArray())];
+					titleInfo.DataSetting.dataKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.dataKey), names.ToArray())];
 				}
 				titleInfo.DataSetting.mode = (QAnalysisMode)titleInfo.DataSetting.mode.Draw("计算方式", typeof(QAnalysisMode));
 				GUILayout.FlexibleSpace();
@@ -60,7 +60,7 @@ namespace QTool
 								return;
 							}
 						}
-						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.eventKey))
+						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.dataKey))
 						{
 							if (EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认"))
 							{
@@ -119,7 +119,12 @@ namespace QTool
 					QAnalysisData.Clear();
 					FreshData();
 				}
-
+				if (DrawButton("重新生成列信息"))
+				{
+					QAnalysisData.Clear();
+					QAnalysisData.Instance.TitleList.Clear();
+					FreshData();
+				}
 				var lastRect = GUILayoutUtility.GetLastRect();
 				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
 			}
@@ -152,7 +157,7 @@ namespace QTool
 								});
 								foreach (var eventKey in QAnalysisData.Instance.EventKeyList)
 								{
-									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.eventKey, () =>
+									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
 									{
 										title.ChangeEvent(eventKey);
 									});
@@ -188,7 +193,7 @@ namespace QTool
 								{
 									foreach (var title in QAnalysisData.Instance.TitleList)
 									{
-										DrawCell(playerData.AnalysisData[title.Key].ToViewString());
+										DrawCell(playerData.AnalysisData[title.Key].value);
 									}
 									GUILayout.FlexibleSpace();
 								}
@@ -224,9 +229,9 @@ namespace QTool
 				lastRect.RightMenu(menu);
 			}
 		}
-		public void DrawCell(string value,float width=200)
+		public void DrawCell(object value,float width=200)
 		{
-			GUILayout.Label(value, QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(50));
+			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(50));
 		}
 		public bool DrawButton(string name)
 		{
@@ -310,7 +315,7 @@ namespace QTool
 				if (!Instance.TitleList.ContainsKey(eventData.eventKey))
 				{
 					var title = Instance.TitleList[eventData.eventKey];
-					title.DataSetting.eventKey = eventData.eventKey;
+					title.DataSetting.dataKey = eventData.eventKey;
 					if (eventData.eventValue == null)
 					{
 						title.DataSetting.mode = QAnalysisMode.最新时间;
@@ -321,6 +326,13 @@ namespace QTool
 					}
 				}
 				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
+				if (eventData.eventValue != null)
+				{
+					foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
+					{
+						Instance.EventKeyList.AddCheckExist(eventData.eventKey+"/"+memeberInfo.Name);
+					}
+				}
 				Instance.EventList.Add(eventData);
 				Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			}
@@ -339,7 +351,7 @@ namespace QTool
 		}
 		public void ChangeEvent(string eventKey)
 		{
-			DataSetting.eventKey = eventKey;
+			DataSetting.dataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key,true);
 		}
 	}
@@ -355,9 +367,23 @@ namespace QTool
 	}
 	public class QAnalysisSetting
 	{
-		public string eventKey;
+		public string dataKey;
 		public QAnalysisMode mode = QAnalysisMode.最新数据;
-		public string TargetKey
+		public string EventKey
+		{
+			get
+			{
+				if (dataKey.Contains("/"))
+				{
+					return dataKey.SplitStartString("/");
+				}
+				else
+				{
+					return dataKey;
+				}
+			}
+		}
+		public string TargetKey 
 		{
 			get
 			{
@@ -365,16 +391,16 @@ namespace QTool
 				{
 					case QAnalysisMode.最新时间区间:
 					case QAnalysisMode.总时间区间:
-						if (eventKey.EndsWith("结束"))
+						if (EventKey.EndsWith("结束"))
 						{
-							return eventKey.Replace("结束", "开始");
+							return EventKey.Replace("结束", "开始");
 						}
 						else
 						{
-							return eventKey;
+							return EventKey;
 						}
 					default:
-						return eventKey;
+						return EventKey;
 				}
 			
 
@@ -387,10 +413,6 @@ namespace QTool
 		public object value;
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
-		public string ToViewString()
-		{
-			return value?.ToString();
-		}
 		public void AddEvent(QAnalysisEvent eventData)
 		{
 			UpdateTime = eventData.eventTime;
@@ -409,10 +431,10 @@ namespace QTool
 			switch (setting.mode)
 			{
 				case QAnalysisMode.最新数据:
-					value = QAnalysisData.Instance.EventList[EventList.StackPeek()].eventValue;
+					value = QAnalysisData.Instance.EventList[EventList.StackPeek()].GetValue(setting.dataKey);
 					break;
 				case QAnalysisMode.起始数据:
-					value = QAnalysisData.Instance.EventList[EventList.QueuePeek()].eventValue;
+					value = QAnalysisData.Instance.EventList[EventList.QueuePeek()].GetValue(setting.dataKey);
 					break;
 				case QAnalysisMode.最新时间:
 					value = QAnalysisData.Instance.EventList[EventList.StackPeek()].eventTime;
@@ -476,7 +498,7 @@ namespace QTool
 			EventList.AddCheckExist(eventData.eventId);
 			foreach (var title in QAnalysisData.Instance.TitleList)
 			{
-				if (title.DataSetting.eventKey == eventData.eventKey)
+				if (title.DataSetting.EventKey == eventData.eventKey)
 				{
 					AnalysisData[title.Key].AddEvent(eventData);
 				}
@@ -496,7 +518,7 @@ namespace QTool
 				foreach (var eventId in EventList)
 				{
 					var eventData = QAnalysisData.Instance.EventList[eventId];
-					if (eventData.eventKey == setting.eventKey)
+					if (eventData.eventKey == setting.EventKey)
 					{
 						info.EventList.AddCheckExist(eventData.eventId);
 					}
@@ -521,6 +543,8 @@ namespace QTool
 		static GUIStyle _titleLabel;
 		public static GUIStyle CenterLable => _centerLable ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter };
 		static GUIStyle _centerLable;
+		public static GUIStyle TextArea => _textArea ??= new GUIStyle(EditorStyles.textField) { alignment = TextAnchor.MiddleCenter };
+		static GUIStyle _textArea;
 		public static GUIStyle LeftLable => _leftLable ??= new GUIStyle(EditorStyles.label);
 		static GUIStyle _leftLable;
 		public static GUIStyle RightLabel => _rightLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
