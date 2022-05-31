@@ -398,7 +398,7 @@ namespace QTool
 	public class QTitleInfo:IKey<string>
 	{
 		public string Key { get; set; }
-		public float width = 200;
+		public float width = 100;
 		public QAnalysisSetting DataSetting = new QAnalysisSetting();
 		public void ChangeMode(string modeKey)
 		{
