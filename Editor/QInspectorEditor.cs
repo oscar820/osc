@@ -23,7 +23,7 @@ namespace QTool.Inspector
             using (new EditorGUILayout.HorizontalScope())
             {
                 var name = lable + "【" + (id == null ? "" : id.Substring(0, Mathf.Min(4, id.Length))) + "~】";
-                var oldObj =QObjectReference.GetObject(id);
+                var oldObj =QObjectReference.GetObject(id,type);
                 var newObj = oldObj;
 
                 if (rect == null)

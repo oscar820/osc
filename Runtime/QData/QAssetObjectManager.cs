@@ -25,7 +25,7 @@ namespace QTool
         {
             if (_obj == null)
             {
-                _obj = GetObject(id);
+                _obj = GetObject(id,typeof(Object));
             }
             return _obj;
         }
@@ -41,17 +41,7 @@ namespace QTool
         {
 			return GetObject(id, typeof(T)) as T;
         }
-		public static Object GetObject(string id,System.Type type)
-		{
-			if (typeof(MonoBehaviour).IsAssignableFrom(type))
-			{
-				return Get<GameObject>(id)?.GetComponent(type);
-			}
-			else
-			{
-				return GetObject(id);
-			}
-		}
+	
       
         public static string GetId(Object obj)
         {
@@ -113,18 +103,34 @@ namespace QTool
             }
             return "";
         }
-        public static Object GetObject(string id)
+        public static Object GetObject(string id,System.Type type)
         {
-            if (string.IsNullOrWhiteSpace(id)) return null;
+			if (typeof(MonoBehaviour).IsAssignableFrom(type))
+			{
+				return Get<GameObject>(id)?.GetComponent(type);
+			}
+			if (string.IsNullOrWhiteSpace(id)) return null;
             if (QId.InstanceIdList.ContainsKey(id) && QId.InstanceIdList[id] != null)
             {
                 return QId.InstanceIdList[id].gameObject;
-            }
-            else if (QAssetObjectManager.Instance.objList.ContainsKey(id))
+			}
+			else if (QAssetObjectManager.Instance.objList.ContainsKey(id))
             {
                 return QAssetObjectManager.Instance.objList.Get(id).obj;
             }
-            return null;
+
+#if UNITY_EDITOR
+			else if (id.StartsWith("Assets"))
+			{
+				var obj = UnityEditor.AssetDatabase.LoadAssetAtPath(id, type);
+				if (obj != null)
+				{
+					GetId(obj);
+					return obj;
+				}
+			}
+#endif
+			return null;
         }
 
     }
