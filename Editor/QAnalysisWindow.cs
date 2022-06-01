@@ -371,6 +371,10 @@ namespace QTool
 		{
 			foreach (var eventData in newEventList)
 			{
+				if (eventData.Key.Contains("_"))
+				{
+					eventData.Key = eventData.Key.Replace("_", "/");
+				}
 				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 				if (!Instance.TitleList.ContainsKey(eventData.eventKey))
 				{
