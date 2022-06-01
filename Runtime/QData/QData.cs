@@ -288,7 +288,14 @@ namespace QTool
 									}
 									else
 									{
-										return null;
+										if (typeInfo.IsUnityObject)
+										{
+											target = QObjectReference.GetObject(reader.ReadValueString(), type);
+										}
+										else
+										{
+											target = null;
+										}
 									}
 								}
 								return target;
