@@ -89,22 +89,34 @@ namespace QTool
 		{
 			if (InitOver)
 			{
-				var eventData=new QAnalysisEvent
+				try
 				{
-					playerId = PlayerId,
-					eventKey=eventKey,
-					eventValue=value,
-				};
-				triggerEventList.Add(eventData);
-				Debug.Log(StartKey + " 触发事件 " + eventData);
-				PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
-				if (SendCount >= 1 && triggerEventList.Count>= SendCount)
-				{
-					SendEventList();
+					var eventData = new QAnalysisEvent
+					{
+						playerId = PlayerId,
+						eventKey = eventKey,
+						eventValue = value,
+					};
+					triggerEventList.Add(eventData);
+					Debug.Log(StartKey + " 触发事件 " + eventData);
+					PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
+					if (SendCount >= 1 && triggerEventList.Count >= SendCount)
+					{
+						SendEventList();
+					}
+
 				}
+				catch (Exception e)
+				{
+					Debug.LogError(nameof(QAnalysis) + "触发事件 " + eventKey + " " + value + " 出错：\n" + e);
+				}
+				
 			}
 		}
-		
+		public static void Trigger(string eventKey,string key, object value)
+		{
+			Trigger(eventKey, new KeyValuePair<string, object>(key, value));
+		}
 	}
 	public class StartInfo
 	{
