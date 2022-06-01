@@ -91,6 +91,10 @@ namespace QTool
 			{
 				try
 				{
+					if (eventKey.Contains("_"))
+					{
+						eventKey = eventKey.Replace("_", "/");
+					}
 					var eventData = new QAnalysisEvent
 					{
 						playerId = PlayerId,
@@ -154,11 +158,23 @@ namespace QTool
 			{
 				return eventValue;
 			}
-			if (dataKey.Contains("/"))
+			if (eventKey == dataKey)
 			{
-				var memeberKey = dataKey.SplitEndString("/");
-				var typeInfo = QSerializeType.Get(eventValue.GetType());
-				return typeInfo.Members[memeberKey].Get(eventValue);
+				return eventValue;
+			}
+			else if (dataKey.Contains("/"))
+			{
+				try
+				{
+					var memeberKey = dataKey.SplitEndString("/");
+					var typeInfo = QSerializeType.Get(eventValue.GetType());
+					return typeInfo.Members[memeberKey].Get(eventValue);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("在 " + eventKey + " 中读取 " + dataKey + " 出错：\n" + e);
+					return eventValue;
+				}
 			}
 			else
 			{

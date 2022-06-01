@@ -22,8 +22,8 @@ namespace QTool
 			for (int i = 0; i < Random.Range(2,10); i++)
 			{
 				await Task.Delay(Random.Range(500,2000));
-				QAnalysis.Trigger("使用技能", "技能-" + Random.Range(1, 4));
-				QAnalysis.Trigger("获得分数",  Random.Range(1, 10));
+				QAnalysis.Trigger("战斗开始_使用技能", "技能-" + Random.Range(1, 4));
+				QAnalysis.Trigger("战斗开始_获得分数",  Random.Range(1, 10));
 			}
 			await Task.Delay(Random.Range(500, 2000));
 			QAnalysis.Trigger("战斗结束",Random.Range(0,100)<60);

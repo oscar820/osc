@@ -19,16 +19,13 @@ namespace QTool
 				Instance.minSize = new Vector2(400, 300);
 			}
 			Instance.titleContent = new GUIContent(nameof(QAnalysis) + " - " + Application.productName);
+			Instance.FreshData();
 			Instance.Show();
 		}
 		public async void FreshData()
 		{
 			await QAnalysisData.FreshData();
 			Repaint();
-		}
-		private void OnFocus()
-		{
-			FreshData();
 		}
 		Vector2 viewPos;
 		private void OnGUI()
@@ -354,7 +351,9 @@ namespace QTool
 		public static void Clear()
 		{
 			var titleInfo = Instance.TitleList;
+			var eventKeyList = Instance.EventKeyList;
 			Instance = Activator.CreateInstance<QAnalysisData>();
+			Instance.EventKeyList = eventKeyList;
 			Instance.TitleList = titleInfo;
 		}
 		public static string Copy()
@@ -367,6 +366,7 @@ namespace QTool
 		{
 			foreach (var eventData in newEventList)
 			{
+				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 				if (!Instance.TitleList.ContainsKey(eventData.eventKey))
 				{
 					var title = Instance.TitleList[eventData.eventKey];
@@ -380,7 +380,6 @@ namespace QTool
 						title.DataSetting.mode = QAnalysisMode.最新数据;
 					}
 				}
-				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 				if (eventData.eventValue != null)
 				{
 					foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
@@ -433,8 +432,9 @@ namespace QTool
 		{
 			get
 			{
-				if (dataKey.Contains("/"))
+				if (!QAnalysisData.Instance.EventKeyList.Contains(dataKey)&&dataKey.Contains("/"))
 				{
+					Debug.LogError(dataKey + ":\n" + QAnalysisData.Instance.EventKeyList.ToOneString());
 					return dataKey.SplitStartString("/");
 				}
 				else
