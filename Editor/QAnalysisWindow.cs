@@ -40,17 +40,19 @@ namespace QTool
 				{
 					FreshData();
 				}
-				if (DrawButton("重新获取全部数据"))
+				if (DrawButton("重新获取数据"))
 				{
 					QAnalysisData.Clear();
 					FreshData();
 				}
-				//if (DrawButton("重新生成列信息"))
-				//{
-				//	QAnalysisData.Clear();
-				//	QAnalysisData.Instance.TitleList.Clear();
-				//	FreshData();
-				//}
+				if (DrawButton("重置数据表"))
+				{
+					if (EditorUtility.DisplayDialog("重置数据表", "将会清空所有本地信息\n包含列信息设置", "确认","取消"))
+					{
+						QAnalysisData.Clear(true);
+						FreshData();
+					}
+				}
 				if (DrawButton("复制表格数据"))
 				{
 					GUIUtility.systemCopyBuffer = QAnalysisData.Copy();
@@ -71,7 +73,7 @@ namespace QTool
 						{
 							DrawCell(title.Key+"\n<size=8>"+title.DataSetting+"</size>", title.width, false, true,(menu)=> {
 								
-								foreach (var eventKey in QAnalysisData.Instance.EventKeyList)
+								foreach (var eventKey in QAnalysisData.Instance.DataKeyList)
 								{
 									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
 									{
@@ -227,7 +229,7 @@ namespace QTool
 			using (new GUILayout.VerticalScope())
 			{
 				titleInfo.Key = (string)titleInfo.Key.Draw("列名", typeof(string));
-				var names = QAnalysisData.Instance.EventKeyList;
+				var names = QAnalysisData.Instance.DataKeyList;
 				if (names.Count > 0)
 				{
 					if (names.IndexOf(titleInfo.DataSetting.dataKey) < 0)
@@ -246,24 +248,18 @@ namespace QTool
 					{
 						if (string.IsNullOrWhiteSpace(titleInfo.Key))
 						{
-							if (EditorUtility.DisplayDialog("错误的列名", "不能为空", "确认"))
-							{
-								return;
-							}
+							EditorUtility.DisplayDialog("错误的列名", "不能为空", "确认");
+							return;
 						}
 						if (Instance.create&&QAnalysisData.Instance.TitleList.ContainsKey(titleInfo.Key))
 						{
-							if (EditorUtility.DisplayDialog("错误的列名", "已存在列名" + titleInfo.Key, "确认"))
-							{
-								return;
-							}
+							EditorUtility.DisplayDialog("错误的列名", "已存在列名" + titleInfo.Key, "确认");
+							return;
 						}
 						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.dataKey))
 						{
-							if (EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认"))
-							{
-								return;
-							}
+							EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认");
+							return;
 						}
 						confirm = true;
 						Close();
@@ -286,6 +282,7 @@ namespace QTool
 		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
 		public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
 		public List<string> EventKeyList = new List<string>();
+		public List<string> DataKeyList = new List<string>();
 		public QMailInfo LastMail=null;
 		public static QAnalysisEvent GetEvent(string eventId)
 		{
@@ -348,13 +345,21 @@ namespace QTool
 			}
 			SaveData();
 		}
-		public static void Clear()
+		public static void Clear(bool clearTitleSetting=false)
 		{
-			var titleInfo = Instance.TitleList;
-			var eventKeyList = Instance.EventKeyList;
-			Instance = Activator.CreateInstance<QAnalysisData>();
-			Instance.EventKeyList = eventKeyList;
-			Instance.TitleList = titleInfo;
+			if (clearTitleSetting)
+			{
+				Instance = Activator.CreateInstance<QAnalysisData>();
+			}
+			else
+			{
+				var titleInfo = Instance.TitleList;
+				var eventKeyList = Instance.EventKeyList;
+				Instance = Activator.CreateInstance<QAnalysisData>();
+				Instance.EventKeyList = eventKeyList;
+				Instance.TitleList = titleInfo;
+			}
+		
 		}
 		public static string Copy()
 		{
@@ -380,11 +385,12 @@ namespace QTool
 						title.DataSetting.mode = QAnalysisMode.最新数据;
 					}
 				}
+				Instance.DataKeyList.AddCheckExist(eventData.eventKey);
 				if (eventData.eventValue != null)
 				{
 					foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
 					{
-						Instance.EventKeyList.AddCheckExist(eventData.eventKey+"/"+memeberInfo.Name);
+						Instance.DataKeyList.AddCheckExist(eventData.eventKey+"/"+memeberInfo.Name);
 					}
 				}
 				Instance.EventList.Add(eventData);
@@ -434,7 +440,6 @@ namespace QTool
 			{
 				if (!QAnalysisData.Instance.EventKeyList.Contains(dataKey)&&dataKey.Contains("/"))
 				{
-					Debug.LogError(dataKey + ":\n" + QAnalysisData.Instance.EventKeyList.ToOneString());
 					return dataKey.SplitStartString("/");
 				}
 				else

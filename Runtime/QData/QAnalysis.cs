@@ -156,7 +156,7 @@ namespace QTool
 		{
 			if (eventValue == null)
 			{
-				return eventValue;
+				return null;
 			}
 			if (eventKey == dataKey)
 			{
@@ -168,7 +168,8 @@ namespace QTool
 				{
 					var memeberKey = dataKey.SplitEndString("/");
 					var typeInfo = QSerializeType.Get(eventValue.GetType());
-					return typeInfo.Members[memeberKey].Get(eventValue);
+					var value= typeInfo.Members[memeberKey].Get(eventValue);
+					return value;
 				}
 				catch (Exception e)
 				{
