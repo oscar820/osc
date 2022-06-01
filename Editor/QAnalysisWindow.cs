@@ -27,6 +27,7 @@ namespace QTool
 			await QAnalysisData.FreshData();
 			Repaint();
 		}
+		string ViewInfo = "玩家Id";
 		Vector2 viewPos;
 		private void OnGUI()
 		{
@@ -68,10 +69,30 @@ namespace QTool
 
 					using (new GUILayout.HorizontalScope())
 					{
-						DrawCell("玩家ID", 250, true, true);
+						var rect= DrawCell(ViewInfo, 250, true, true);
+						if (ViewInfo != "玩家Id")
+						{
+							rect.xMax *= 0.2f;
+							rect.height *= 0.8f;
+							if (GUI.Button(rect,"返回"))
+							{
+								ViewInfo = "玩家Id";
+							}
+						}
 						foreach (var title in QAnalysisData.Instance.TitleList)
 						{
-							DrawCell(title.Key+"\n<size=8>"+title.DataSetting+"</size>", title.width, false, true,(menu)=> {
+							var viewKey = title.Key;
+							if (ViewInfo == "玩家Id")
+							{
+								if (title.Key.Contains("/")) continue;
+							}
+							else
+							{
+								if (!title.Key.StartsWith(ViewInfo)) continue;
+
+
+							}
+							DrawCell(title.ViewKey, title.width, false, true,(menu)=> {
 								
 								foreach (var eventKey in QAnalysisData.Instance.DataKeyList)
 								{
@@ -111,6 +132,9 @@ namespace QTool
 										QAnalysisData.Instance.RemveTitle(title);
 									}
 								});
+							}
+							,()=> {
+								ViewInfo = title.Key;
 							});
 						}
 						GUILayout.FlexibleSpace();
@@ -132,6 +156,14 @@ namespace QTool
 								{
 									foreach (var title in QAnalysisData.Instance.TitleList)
 									{
+										if (ViewInfo == "玩家Id")
+										{
+											if (title.Key.Contains("/")) continue;
+										}
+										else
+										{
+											if (!title.Key.StartsWith(ViewInfo)) continue;
+										}
 										DrawCell(playerData.AnalysisData[title.Key].value,title.width);
 									}
 									GUILayout.FlexibleSpace();
@@ -151,7 +183,7 @@ namespace QTool
 		}
 
 	
-		public void DrawCell(string value,float width,bool drawXLine,bool drawYLine,Action<GenericMenu> menu=null)
+		public Rect DrawCell(string value,float width,bool drawXLine,bool drawYLine,Action<GenericMenu> menu=null,Action cilck=null)
 		{
 			DrawCell(value,width);
 			var lastRect = GUILayoutUtility.GetLastRect();
@@ -175,8 +207,9 @@ namespace QTool
 			}
 			if (menu != null)
 			{
-				lastRect.RightMenu(menu);
+				lastRect.MouseMenuClick(menu, cilck);
 			}
+			return lastRect;
 		}
 		public void DrawCell(object value,float width)
 		{
@@ -376,45 +409,56 @@ namespace QTool
 					eventData.eventKey = eventData.eventKey.Replace("_", "/");
 				}
 				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
-				if (!Instance.TitleList.ContainsKey(eventData.eventKey))
-				{
-					var title = Instance.TitleList[eventData.eventKey];
-					title.DataSetting.dataKey = eventData.eventKey;
-					if (eventData.eventValue!= null&&Type.GetTypeCode(eventData.eventValue.GetType())!= TypeCode.Object)
-					{
-						title.DataSetting.mode = QAnalysisMode.最新数据;
-					}
-					else
-					{
-						title.DataSetting.mode = QAnalysisMode.次数;
-					}
-				}
+				CheckTitle(eventData.eventKey, eventData.eventValue);
 				Instance.DataKeyList.AddCheckExist(eventData.eventKey);
 				if (eventData.eventValue != null)
 				{
 					foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
 					{
-						Instance.DataKeyList.AddCheckExist(eventData.eventKey+"/"+memeberInfo.Name);
+						var key = eventData.eventKey + "/" + memeberInfo.Name;
+						CheckTitle(key, eventData.eventValue==null?null:memeberInfo.Get(eventData.eventValue));
+						Instance.DataKeyList.AddCheckExist();
 					}
 				}
 				Instance.EventList.Add(eventData);
 				Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			}
 		}
-
+		static void CheckTitle(string key,object value)
+		{
+			if (!Instance.TitleList.ContainsKey(key))
+			{
+				var title = Instance.TitleList[key];
+				title.DataSetting.dataKey = key;
+				if (value != null && Type.GetTypeCode(value.GetType()) != TypeCode.Object)
+				{
+					title.DataSetting.mode = QAnalysisMode.最新数据;
+				}
+				else
+				{
+					title.DataSetting.mode = QAnalysisMode.次数;
+				}
+			}
+		}
 	}
 	public class QTitleInfo:IKey<string>
 	{
 		public string Key { get; set; }
+		string _viewKey = null;
+		public string ViewKey => _viewKey ??= (Key.Contains("/") ? Key.SplitEndString("/") : Key) + "\n<size=8>" + DataSetting + "</size>";
 		public float width = 100;
+
+
 		public QAnalysisSetting DataSetting = new QAnalysisSetting();
 		public void ChangeMode(string modeKey)
 		{
+			_viewKey = null;
 			DataSetting.mode=(QAnalysisMode) Enum.Parse(typeof(QAnalysisMode), modeKey);
 			QAnalysisData.Instance.FreshKey(Key);
 		}
 		public void ChangeEvent(string eventKey)
 		{
+			_viewKey = null;
 			DataSetting.dataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key,true);
 		}

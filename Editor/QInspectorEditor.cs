@@ -661,7 +661,7 @@ namespace QTool.Inspector
 			}
             if (changeValue!=null)
             {
-                GUILayoutUtility.GetLastRect().RightMenu((menu) =>
+                GUILayoutUtility.GetLastRect().MouseMenuClick((menu) =>
                 {
                     menu.AddItem(new GUIContent("复制" + name), false, () => GUIUtility.systemCopyBuffer = obj.ToQDataType(type));
                     if (!string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
@@ -674,23 +674,40 @@ namespace QTool.Inspector
          
             return obj;
         }
-        public static void RightMenu(this Rect rect, System.Action<GenericMenu> action)
+        public static void MouseMenuClick(this Rect rect, System.Action<GenericMenu> action,Action click=null)
         {
             if (EventType.MouseDown.Equals(Event.current.type))
             {
-                if (Event.current.button == 1)
-                {
-                    if (rect.Contains(Event.current.mousePosition))
-                    {
-                        if (action != null)
-                        {
-                            var rightMenu = new GenericMenu();
-                            action.Invoke(rightMenu);
-                            rightMenu.ShowAsContext();
-                        }
-                        Event.current.Use();
-                    }
-                }
+				if (rect.Contains(Event.current.mousePosition))
+				{
+					switch (Event.current.button)
+					{
+						case 0:
+							{
+								if (click != null)
+								{
+									click.Invoke();
+									Event.current.Use();
+								}
+							}
+							break;
+						case 1:
+							{
+								if (action != null)
+								{
+									var rightMenu = new GenericMenu();
+									action.Invoke(rightMenu);
+									rightMenu.ShowAsContext();
+									Event.current.Use();
+								}
+								
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			
             }
         }
         public static bool Draw(this SerializedProperty property,string parentKey="", Rect? rect=null)
