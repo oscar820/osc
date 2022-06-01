@@ -29,15 +29,15 @@ namespace QTool
 			}
 		}
 		public static int SendCount { get; set; } =30;
-		public static void Start(string id)
+		public static void Start(string playerId)
 		{
 			SendEventList();
-			if (id == PlayerId)
+			if (playerId == PlayerId)
 			{
-				Debug.LogError(StartKey+" 已登录" + id);
+				Debug.LogError(StartKey+" 已登录" + playerId);
 				return;
 			}
-			PlayerId = id;
+			PlayerId = playerId;
 			if (!InitOver)
 			{
 				return;
@@ -45,7 +45,7 @@ namespace QTool
 			Trigger(nameof(QAnalysisEventName.游戏开始),new StartInfo());
 
 			Application.focusChanged += OnFocus;
-			Application.quitting += Stop;
+			Application.quitting += OnQuit;
 		}
 		static void OnFocus(bool focus)
 		{
@@ -55,7 +55,12 @@ namespace QTool
 				SendEventList();
 			}
 		}
-		public static void Stop() 
+		static void OnQuit()
+		{
+			if (!InitOver) return;
+			Trigger(nameof(QAnalysisEventName.游戏结束));
+		}
+		public static void Stop()
 		{
 			if (!InitOver)
 			{
@@ -64,7 +69,7 @@ namespace QTool
 			Trigger(nameof(QAnalysisEventName.游戏结束));
 			SendEventList();
 			Application.focusChanged -= OnFocus;
-			Application.quitting -= Stop;
+			Application.quitting -= OnQuit;
 			PlayerId = null;
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;

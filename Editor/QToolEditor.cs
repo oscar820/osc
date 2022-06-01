@@ -61,7 +61,7 @@ namespace QTool
 			switch (buildTarget)
 			{
 				case BuildTarget.StandaloneWindows:
-					return "Builds/" + buildTarget + "/"+PlayerSettings.productName+" v"+ PlayerSettings.bundleVersion+"/"+ PlayerSettings.productName +".exe";
+					return Application.dataPath.Substring(0, Application.dataPath.LastIndexOf( "Assets"))+"Builds/" + buildTarget + "/"+PlayerSettings.productName+"_v"+ PlayerSettings.bundleVersion.Replace(".","_")+"/"+ PlayerSettings.productName +".exe";
 				default:
 					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
 			}
@@ -123,10 +123,20 @@ namespace QTool
         [MenuItem("QTool/工具/打包测试当前场景")]
         private static void BuildRandRun()
         {
-			var path = Build();
-			if (FileManager.ExistsFile(path))
+			PlayerPrefs.SetString("QToolBuildPath", Build());
+			RunBuild();
+		}
+		[MenuItem("QTool/工具/运行测试包")]
+		private static void RunBuild()
+		{
+			var path = PlayerPrefs.GetString("QToolBuildPath", GetBuildPath());
+			try
 			{
 				System.Diagnostics.Process.Start(path);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("运行：" + path + "出错：\n" + e);
 			}
 		}
 		[MenuItem("Assets/QTool/添加对象引用Id")]
