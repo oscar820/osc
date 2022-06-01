@@ -380,13 +380,13 @@ namespace QTool
 				{
 					var title = Instance.TitleList[eventData.eventKey];
 					title.DataSetting.dataKey = eventData.eventKey;
-					if (eventData.eventValue == null||eventData.eventKey==nameof(QAnalysis.QAnalysisEventName.游戏开始))
+					if (eventData.eventValue!= null&&Type.GetTypeCode(eventData.eventValue.GetType())!= TypeCode.Object)
 					{
-						title.DataSetting.mode = QAnalysisMode.次数;
+						title.DataSetting.mode = QAnalysisMode.最新数据;
 					}
 					else
 					{
-						title.DataSetting.mode = QAnalysisMode.最新数据;
+						title.DataSetting.mode = QAnalysisMode.次数;
 					}
 				}
 				Instance.DataKeyList.AddCheckExist(eventData.eventKey);
