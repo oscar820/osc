@@ -417,7 +417,7 @@ namespace QTool
 					{
 						var key = eventData.eventKey + "/" + memeberInfo.Name;
 						CheckTitle(key, eventData.eventValue==null?null:memeberInfo.Get(eventData.eventValue));
-						Instance.DataKeyList.AddCheckExist();
+						Instance.DataKeyList.AddCheckExist(key);
 					}
 				}
 				Instance.EventList.Add(eventData);
