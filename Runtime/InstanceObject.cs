@@ -25,12 +25,15 @@ namespace QTool
                 {
                      _instance= Resources.Load<T>(typeof(T).Name);
 #if UNITY_EDITOR
-                    if (_instance==null&& !Application.isPlaying)
+                    if (_instance==null)
                     {
                         var obj = ScriptableObject.CreateInstance<T>();
                         _instance = obj;
                         UnityEditor.AssetDatabase.CreateAsset(obj, ("Assets/Resources/" + typeof(T).Name + ".asset").CheckFolder());
-                        UnityEditor.AssetDatabase.Refresh();
+						if (!Application.isPlaying)
+						{
+							UnityEditor.AssetDatabase.Refresh();
+						}
                     }
 #endif 
                 }
