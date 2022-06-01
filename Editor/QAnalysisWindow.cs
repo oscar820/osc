@@ -56,7 +56,44 @@ namespace QTool
 				}
 				if (DrawButton("复制表格数据"))
 				{
-					GUIUtility.systemCopyBuffer = QAnalysisData.Copy();
+					var builder = Tool.StringBuilderPool.Get();
+					builder.Clear();
+					builder.Append("玩家Id\t");
+
+					foreach (var title in QAnalysisData.Instance.TitleList)
+					{
+						if (ViewInfo == "玩家Id")
+						{
+							if (title.Key.Contains("/")) continue;
+						}
+						else
+						{
+							if (!title.Key.StartsWith(ViewInfo)) continue;
+						}
+						builder.Append(title.Key.SplitEndString("/"));
+						builder.Append("\t");
+					}
+					builder.Append("\n");
+					foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
+					{
+						builder.Append(playerData.Key + "\t");
+						foreach (var title in QAnalysisData.Instance.TitleList)
+						{
+							if (ViewInfo == "玩家Id")
+							{
+								if (title.Key.Contains("/")) continue;
+							}
+							else
+							{
+								if (!title.Key.StartsWith(ViewInfo)) continue;
+							}
+							builder.Append(playerData.AnalysisData[title.Key].value?.ToString().ToElement());
+							builder.Append("\t");
+						}
+						builder.Append("\n");
+					}
+
+					GUIUtility.systemCopyBuffer = builder.ToString();
 					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功：\n "+GUIUtility.systemCopyBuffer, "确认");
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();
@@ -394,12 +431,7 @@ namespace QTool
 			}
 		
 		}
-		public static string Copy()
-		{
-			var data="玩家ID\t"+ Instance.TitleList.ToOneString("\t", (title) => title.Key)+"\n";
-			data += Instance.PlayerDataList.ToOneString("\n", (playerData) => playerData.Key+"\t"+ playerData.AnalysisData.ToOneString("\t"));
-			return data;
-		}
+	
 		public static void AddEvent(List<QAnalysisEvent> newEventList)
 		{
 			foreach (var eventData in newEventList)
@@ -445,7 +477,7 @@ namespace QTool
 	{
 		public string Key { get; set; }
 		string _viewKey = null;
-		public string ViewKey => _viewKey ??= (Key.Contains("/") ? Key.SplitEndString("/") : Key) + "\n<size=8>" + DataSetting + "</size>";
+		public string ViewKey => _viewKey ??= Key.SplitEndString("/") + "\n<size=8>" + DataSetting + "</size>";
 		public float width = 100;
 
 
