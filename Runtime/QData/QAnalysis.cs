@@ -59,6 +59,7 @@ namespace QTool
 		{
 			if (!InitOver) return;
 			Trigger(nameof(QAnalysisEventName.游戏结束));
+			SendEventList(false);
 		}
 		public static void Stop()
 		{
@@ -74,7 +75,7 @@ namespace QTool
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
 		public static string EventListKey => StartKey + "_" + nameof(triggerEventList);
-		public static void SendEventList()
+		public static void SendEventList(bool clearEventList=true)
 		{
 			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
 			{
@@ -85,8 +86,11 @@ namespace QTool
 			{
 				var data =PlayerPrefs.GetString( EventListKey);
 				QMailTool.Send(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data);
-				triggerEventList.Clear();
-				PlayerPrefs.DeleteKey(EventListKey);
+				if (clearEventList)
+				{
+					triggerEventList.Clear();
+					PlayerPrefs.DeleteKey(EventListKey);
+				}
 			}
 		}
 		static List<QAnalysisEvent> triggerEventList = new List<QAnalysisEvent>();
