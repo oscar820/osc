@@ -92,8 +92,8 @@ namespace QTool
 						}
 						builder.Append("\n");
 					}
-
 					GUIUtility.systemCopyBuffer = builder.ToString();
+					Tool.StringBuilderPool.Push(builder);
 					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功：\n "+GUIUtility.systemCopyBuffer, "确认");
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();
@@ -381,6 +381,7 @@ namespace QTool
 				SaveData();
 			}
 		}
+		static List<QAnalysisEvent> newList = new List<QAnalysisEvent>();
 		public static async Task FreshData() 
 		{
 			if (IsLoading) return;
@@ -394,7 +395,8 @@ namespace QTool
 			{ 
 				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 				{
-					AddEvent(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
+					newList.Clear();
+					AddEvent(mailInfo.Body.ParseQData(newList));
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
