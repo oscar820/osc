@@ -328,35 +328,35 @@ namespace QTool
             {
                 return "";
             }
-			var builder = Tool.StringBuilderPool.Get();
-			builder.Clear();
-            int i = 0;
-			if (toString == null)
+			return Tool.BuildString((writer) =>
 			{
-				foreach (var item in array)
+				int i = 0;
+				if (toString == null)
 				{
-					builder.Append( item);
-					if (i < array.Count - 1)
+					foreach (var item in array)
 					{
-						builder.Append(splitChar);
+						writer.Write(item);
+						if (i < array.Count - 1)
+						{
+							writer.Write(splitChar);
+						}
+						i++;
 					}
-					i++;
 				}
-			}
-			else
-			{
-				foreach (var item in array)
+				else
 				{
-					builder.Append(toString(item));
-					if (i < array.Count - 1)
+					foreach (var item in array)
 					{
-						builder.Append(splitChar);
+						writer.Write(toString(item));
+						if (i < array.Count - 1)
+						{
+							writer.Write(splitChar);
+						}
+						i++;
 					}
-					i++;
 				}
-			}
-          
-            return builder.ToString();
+
+			});
         }
         public static IList<T> Replace<T>(this IList<T> array, int indexA, int indexB)
         {

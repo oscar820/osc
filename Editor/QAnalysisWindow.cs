@@ -56,27 +56,10 @@ namespace QTool
 				}
 				if (DrawButton("复制表格数据"))
 				{
-					var builder = Tool.StringBuilderPool.Get();
-					builder.Clear();
-					builder.Append("玩家Id\t");
+					GUIUtility.systemCopyBuffer =Tool.BuildString((writer) =>
+					{
+						writer.Write("玩家Id\t");
 
-					foreach (var title in QAnalysisData.Instance.TitleList)
-					{
-						if (ViewInfo == "玩家Id")
-						{
-							if (title.Key.Contains("/")) continue;
-						}
-						else
-						{
-							if (!title.Key.StartsWith(ViewInfo)) continue;
-						}
-						builder.Append(title.Key.SplitEndString("/"));
-						builder.Append("\t");
-					}
-					builder.Append("\n");
-					foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
-					{
-						builder.Append(playerData.Key + "\t");
 						foreach (var title in QAnalysisData.Instance.TitleList)
 						{
 							if (ViewInfo == "玩家Id")
@@ -87,13 +70,29 @@ namespace QTool
 							{
 								if (!title.Key.StartsWith(ViewInfo)) continue;
 							}
-							builder.Append(playerData.AnalysisData[title.Key].value?.ToString().ToElement());
-							builder.Append("\t");
+							writer.Write(title.Key.SplitEndString("/"));
+							writer.Write("\t");
 						}
-						builder.Append("\n");
-					}
-					GUIUtility.systemCopyBuffer = builder.ToString();
-					Tool.StringBuilderPool.Push(builder);
+						writer.Write("\n");
+						foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
+						{
+							writer.Write(playerData.Key + "\t");
+							foreach (var title in QAnalysisData.Instance.TitleList)
+							{
+								if (ViewInfo == "玩家Id")
+								{
+									if (title.Key.Contains("/")) continue;
+								}
+								else
+								{
+									if (!title.Key.StartsWith(ViewInfo)) continue;
+								}
+								writer.Write(playerData.AnalysisData[title.Key].value?.ToString().ToElement());
+								writer.Write("\t");
+							}
+							writer.Write("\n");
+						}
+					});
 					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功：\n "+GUIUtility.systemCopyBuffer, "确认");
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();

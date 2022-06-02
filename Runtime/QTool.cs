@@ -165,7 +165,14 @@ namespace QTool
             end?.Invoke();
         }
 
-		public static ObjectPool<StringBuilder> StringBuilderPool = new ObjectPool<System.Text.StringBuilder>(nameof(StringBuilderPool), () => new System.Text.StringBuilder());
+		public static string BuildString(Action<StringWriter> action)
+		{
+			using (var writer=new StringWriter())
+			{
+				action(writer);
+				return writer.ToString();
+			}
+		}
 		public static bool NextIs(this StringReader reader, char value)
         {
             if (reader.Peek() == value)

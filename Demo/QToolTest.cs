@@ -247,14 +247,14 @@ namespace QTool.Test
 
 		public void ParseQData(StringReader reader)
 		{
-			reader.Read(list);
-			reader.Read(asdl);
+			reader.ReadQData(list);
+			reader.ReadQData(asdl);
 		}
 
-		public void ToQData(StringBuilder writer)
+		public void ToQData(StringWriter writer)
 		{
-			writer.Write(list);
-			writer.Write(asdl);
+			writer.WriteQData(list);
+			writer.WriteQData(asdl);
 		}
 	}
 

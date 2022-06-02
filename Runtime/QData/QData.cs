@@ -23,12 +23,11 @@ namespace QTool
 
 		public static string ToQDataType(this object obj, Type type, bool hasName = true)
 		{
-			var builder =Tool.StringBuilderPool.Get();
-			WriteType(builder, obj, type, hasName);
-			var str = builder.ToString();
-			builder.Clear();
-			Tool.StringBuilderPool.Push(builder);
-			return str;
+			using (var writer=new StringWriter())
+			{
+				WriteType(writer, obj, type, hasName);
+				return writer.ToString();
+			}
 		}
 		public static object ParseQDataType(this string qdataStr, Type type, bool hasName = true, object target = null)
 		{
@@ -52,11 +51,11 @@ namespace QTool
 
 		}
 
-		public static void Write<T>(this StringBuilder writer, T obj, bool hasName = true)
+		public static void WriteQData<T>(this StringWriter writer, T obj, bool hasName = true)
 		{
 			WriteType(writer, obj, typeof(T), hasName);
 		}
-		public static void WriteType(this StringBuilder writer, object obj, Type type, bool hasName=true)
+		public static void WriteType(this StringWriter writer, object obj, Type type, bool hasName=true)
 		{
 			var typeCode = Type.GetTypeCode(type);
 			switch (typeCode)
@@ -68,18 +67,18 @@ namespace QTool
 						{
 							case QObjectType.Object:
 								{
-									if (obj == null) break;
-									writer.Append('{');
+									if (obj == null) { writer.Write("null"); break; }
+									writer.Write('{');
 									if (type == typeof(object))
 									{
 										var runtimeType = obj.GetType();
 										WriteCheckString(writer, runtimeType.FullName);
-										writer.Append(':');
+										writer.Write(':');
 										WriteType(writer, obj, runtimeType, hasName);
 									}
 									else if (typeInfo.IsUnityObject)
 									{
-										writer.Append(QObjectReference.GetId(obj as UnityEngine.Object));
+										writer.Write(QObjectReference.GetId(obj as UnityEngine.Object));
 									}
 									else if (typeInfo.IsIQData)
 									{
@@ -94,11 +93,11 @@ namespace QTool
 												var memberInfo = typeInfo.Members[i];
 												var member = memberInfo.Get(obj);
 												WriteCheckString(writer, memberInfo.Name);
-												writer.Append(':');
+												writer.Write(':');
 												WriteType(writer, member, memberInfo.Type, hasName);
 												if (i < typeInfo.Members.Count - 1)
 												{
-													writer.Append(',');
+													writer.Write(',');
 												}
 											}
 										}
@@ -111,13 +110,13 @@ namespace QTool
 												WriteType(writer, member, memberInfo.Type, hasName);
 												if (i < typeInfo.Members.Count - 1)
 												{
-													writer.Append(',');
+													writer.Write(',');
 												}
 											}
 										}
 
 									}
-									writer.Append('}');
+									writer.Write('}');
 
 									break;
 								}
@@ -126,16 +125,16 @@ namespace QTool
 								{
 									var list = obj as IList;
 									if (list == null) break;
-									writer.Append('[');
+									writer.Write('[');
 									for (int i = 0; i < list.Count; i++)
 									{
 										WriteType(writer, list[i], typeInfo.ElementType, hasName);
 										if (i < list.Count - 1)
 										{
-											writer.Append(',');
+											writer.Write(',');
 										}
 									}
-									writer.Append(']');
+									writer.Write(']');
 									break;
 								}
 							case QObjectType.TimeSpan:
@@ -154,7 +153,7 @@ namespace QTool
 					WriteCheckString(writer, obj?.ToString());
 					break;
 				case TypeCode.Boolean:
-					writer.Append(obj.ToString().ToLower());
+					writer.Write(obj.ToString().ToLower());
 					break;
 				case TypeCode.Byte:
 				case TypeCode.Int16:
@@ -170,23 +169,21 @@ namespace QTool
 					}
 					else
 					{
-						writer.Append(obj.ToString());
+						writer.Write(obj.ToString());
 					}
 					break;
 				default:
-					writer.Append(obj.ToString());
+					writer.Write(obj.ToString());
 					break;
 			}
 		}
-		public static T Read<T>(this StringReader reader, T target = default,bool hasName = true)
+		public static T ReadQData<T>(this StringReader reader, T target = default,bool hasName = true)
 		{
 			return (T)ReadType(reader, typeof(T), hasName, target);
 		}
 		public static object ReadType(this StringReader reader, Type type, bool hasName = true, object target = null)
 		{
 			var typeCode = Type.GetTypeCode(type);
-
-
 			switch (typeCode)
 			{
 				case TypeCode.Object:
@@ -292,7 +289,11 @@ namespace QTool
 										{
 											target = QObjectReference.GetObject(reader.ReadValueString(), type);
 										}
-										else
+										else if(reader.ReadValueString()=="null")
+										{
+											target = null;
+										}
+										else 
 										{
 											target = null;
 										}
@@ -361,7 +362,7 @@ namespace QTool
 								}
 							case QObjectType.TimeSpan:
 								{
-									return TimeSpan.FromTicks(reader.Read<long>());
+									return TimeSpan.FromTicks(reader.ReadQData<long>());
 								}
 								break;
 							default:
@@ -441,8 +442,6 @@ namespace QTool
 					Debug.LogError("不支持类型[" + typeCode + "]");
 					return null;
 			}
-
-			 
 		}
 
 
@@ -451,47 +450,45 @@ namespace QTool
 		static Stack<char> BlockStack = new Stack<char>();
 		public static string ReadValueString(this StringReader reader)
 		{
-			var builder = Tool.StringBuilderPool.Get();
-			lock (BlockStack)
+			return Tool.BuildString((writer) =>
 			{
-				int index = -1;
-				BlockStack.Clear();
-				while (!reader.IsEnd())
+				lock (BlockStack)
 				{
-					var c = (char)reader.Peek();
-					if (BlockStack.Count == 0)
+					int index = -1;
+					BlockStack.Clear();
+					while (!reader.IsEnd())
 					{
-						if (BlockEnd.IndexOf(c) >= 0)
+						var c = (char)reader.Peek();
+						if (BlockStack.Count == 0)
 						{
-							break;
+							if (BlockEnd.IndexOf(c) >= 0)
+							{
+								break;
+							}
+							else if ((index = BlockStart.IndexOf(c)) >= 0)
+							{
+								BlockStack.Push(BlockEnd[index]);
+							}
 						}
-						else if ((index = BlockStart.IndexOf(c)) >= 0)
+						else
 						{
-							BlockStack.Push(BlockEnd[index]);
+							if (BlockStack.Peek() == c)
+							{
+								BlockStack.Pop();
+							}
+							else if ((index = BlockStart.IndexOf(c)) >= 0)
+							{
+								BlockStack.Push(BlockEnd[index]);
+							}
 						}
+						reader.Read();
+						writer.Write(c);
 					}
-					else
-					{
-						if (BlockStack.Peek() == c)
-						{
-							BlockStack.Pop();
-						}
-						else if ((index = BlockStart.IndexOf(c)) >= 0)
-						{
-							BlockStack.Push(BlockEnd[index]);
-						}
-					}
-					reader.Read();
-					builder.Append(c);
 				}
-			}
-			var value = builder.ToString();
-			builder.Clear();
-			Tool.StringBuilderPool.Push(builder);
-			return value;
+			});
 		}
 
-		public static void WriteCheckString(this StringBuilder writer, string value)
+		public static void WriteCheckString(this StringWriter writer, string value)
 		{
 			if (value == null)
 			{
@@ -499,7 +496,7 @@ namespace QTool
 			}
 			using (StringReader reader = new StringReader(value))
 			{
-				writer.Append("\"");
+				writer.Write("\"");
 				while (!reader.IsEnd())
 				{
 
@@ -507,32 +504,32 @@ namespace QTool
 					switch (c)
 					{
 						case '"':
-							writer.Append("\\\"");
+							writer.Write("\\\"");
 							break;
 						case '\\':
-							writer.Append("\\\\");
+							writer.Write("\\\\");
 							break;
 						case '\b':
-							writer.Append("\\b");
+							writer.Write("\\b");
 							break;
 						case '\f':
-							writer.Append("\\f");
+							writer.Write("\\f");
 							break;
 						case '\n':
-							writer.Append("\\n");
+							writer.Write("\\n");
 							break;
 						case '\r':
-							writer.Append("\\r");
+							writer.Write("\\r");
 							break;
 						case '\t':
-							writer.Append("\\t");
+							writer.Write("\\t");
 							break;
 						default:
-							writer.Append(c);
+							writer.Write(c);
 							break;
 					}
 				}
-				writer.Append("\"");
+				writer.Write("\"");
 			}
 		}
 		public static string ReadCheckString(this StringReader reader)
@@ -588,7 +585,7 @@ namespace QTool
 	}
 	public interface IQData
 	{
-		void ToQData(StringBuilder writer);
+		void ToQData(StringWriter writer);
 		void ParseQData(StringReader reader);
 	}
 
