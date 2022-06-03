@@ -22,12 +22,16 @@ namespace QTool
 			Instance.FreshData();
 			Instance.Show();
 		}
+		private void OnEnable()
+		{
+			Instance = this;
+		}
 		public async void FreshData()
 		{
 			await QAnalysisData.FreshData();
 			Repaint();
 		}
-		string ViewInfo = "玩家Id";
+		public string ViewInfo = "玩家Id";
 		Vector2 viewPos;
 		private void OnGUI()
 		{
@@ -59,37 +63,20 @@ namespace QTool
 					GUIUtility.systemCopyBuffer =Tool.BuildString((writer) =>
 					{
 						writer.Write("玩家Id\t");
-
-						foreach (var title in QAnalysisData.Instance.TitleList)
+						QAnalysisData.ForeachTitle((title) =>
 						{
-							if (ViewInfo == "玩家Id")
-							{
-								if (title.Key.Contains("/")) continue;
-							}
-							else
-							{
-								if (!title.Key.StartsWith(ViewInfo)) continue;
-							}
 							writer.Write(title.Key.SplitEndString("/"));
 							writer.Write("\t");
-						}
+						});
 						writer.Write("\n");
 						foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
 						{
 							writer.Write(playerData.Key + "\t");
-							foreach (var title in QAnalysisData.Instance.TitleList)
+							QAnalysisData.ForeachTitle((title) =>
 							{
-								if (ViewInfo == "玩家Id")
-								{
-									if (title.Key.Contains("/")) continue;
-								}
-								else
-								{
-									if (!title.Key.StartsWith(ViewInfo)) continue;
-								}
 								writer.Write(playerData.AnalysisData[title.Key].value?.ToString().ToElement());
 								writer.Write("\t");
-							}
+							});
 							writer.Write("\n");
 						}
 					});
@@ -115,21 +102,11 @@ namespace QTool
 								ViewInfo = "玩家Id";
 							}
 						}
-						foreach (var title in QAnalysisData.Instance.TitleList)
+						QAnalysisData.ForeachTitle((title) =>
 						{
 							var viewKey = title.Key;
-							if (ViewInfo == "玩家Id")
-							{
-								if (title.Key.Contains("/")) continue;
-							}
-							else
-							{
-								if (!title.Key.StartsWith(ViewInfo)) continue;
+							DrawCell(title.ViewKey, title.width, false, true, (menu) => {
 
-
-							}
-							DrawCell(title.ViewKey, title.width, false, true,(menu)=> {
-								
 								foreach (var eventKey in QAnalysisData.Instance.DataKeyList)
 								{
 									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
@@ -138,7 +115,7 @@ namespace QTool
 									});
 								}
 								var modes = Enum.GetNames(typeof(QAnalysisMode));
-								
+
 								foreach (var mode in modes)
 								{
 									menu.AddItem(new GUIContent("计算方式/" + mode), mode == title.DataSetting.mode.ToString(), () =>
@@ -149,15 +126,15 @@ namespace QTool
 								menu.AddSeparator("");
 								menu.AddItem(new GUIContent("新建数据列"), false, () =>
 								{
-									if (QNewTitleWindow.GetNewTitle(out var newTitle))
+									if (QTitleWindow.GetNewTitle(out var newTitle))
 									{
 										QAnalysisData.Instance.AddTitle(newTitle);
 										QAnalysisData.Instance.FreshKey(newTitle.Key, true);
 									}
 								});
-							
+
 								menu.AddItem(new GUIContent("设置数据列"), false, () => {
-									if (QNewTitleWindow.ChangeTitle(title))
+									if (QTitleWindow.ChangeTitle(title))
 									{
 										QAnalysisData.Instance.FreshKey(title.Key, true);
 									}
@@ -169,10 +146,18 @@ namespace QTool
 									}
 								});
 							}
-							,()=> {
-								ViewInfo = title.Key;
+							, () => {
+								foreach (var newTitle in QAnalysisData.Instance.TitleList)
+								{
+									if (newTitle.Key.StartsWith(title.Key + "/"))
+									{
+										ViewInfo = title.Key;
+										break;
+									}
+								}
+								
 							});
-						}
+						});
 						GUILayout.FlexibleSpace();
 					}
 					using (new GUILayout.HorizontalScope())
@@ -190,18 +175,10 @@ namespace QTool
 							{
 								using (new GUILayout.HorizontalScope())
 								{
-									foreach (var title in QAnalysisData.Instance.TitleList)
+									QAnalysisData.ForeachTitle((title) =>
 									{
-										if (ViewInfo == "玩家Id")
-										{
-											if (title.Key.Contains("/")) continue;
-										}
-										else
-										{
-											if (!title.Key.StartsWith(ViewInfo)) continue;
-										}
-										DrawCell(playerData.AnalysisData[title.Key].value,title.width);
-									}
+										DrawCell(playerData.AnalysisData[title.Key].value, title.width);
+									});
 									GUILayout.FlexibleSpace();
 								}
 							}
@@ -256,14 +233,14 @@ namespace QTool
 			return GUILayout.Button(name, GUILayout.Width(100));
 		}
 	}
-	public class QNewTitleWindow : EditorWindow
+	public class QTitleWindow : EditorWindow
 	{
-		public static QNewTitleWindow Instance { private set; get; }
+		public static QTitleWindow Instance { private set; get; }
 		public static bool GetNewTitle(out QTitleInfo newInfo)
 		{
 			if (Instance == null)
 			{
-				Instance = GetWindow<QNewTitleWindow>();
+				Instance = GetWindow<QTitleWindow>();
 				Instance.minSize = new Vector2(300, 100);
 				Instance.maxSize = new Vector2(300, 100);
 			}
@@ -279,7 +256,7 @@ namespace QTool
 		{
 			if (Instance == null)
 			{
-				Instance = GetWindow<QNewTitleWindow>();
+				Instance = GetWindow<QTitleWindow>();
 				Instance.minSize = new Vector2(300, 100);
 				Instance.maxSize = new Vector2(300, 100);
 			}
@@ -361,6 +338,20 @@ namespace QTool
 		static QAnalysisData()
 		{
 			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
+		}
+		public static void ForeachTitle(Action<QTitleInfo> action, string viewInfo=null)
+		{
+			if (string.IsNullOrEmpty(viewInfo))
+			{
+				viewInfo = QAnalysisWindow.Instance.ViewInfo;
+			}
+			foreach (var title in Instance.TitleList)
+			{
+				if (title.CheckView(viewInfo))
+				{
+					action(title);
+				}
+			}
 		}
 		public static bool IsLoading { get; private set; } = false;
 		public void AddTitle(QTitleInfo newTitle)
@@ -494,6 +485,18 @@ namespace QTool
 			_viewKey = null;
 			DataSetting.dataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key,true);
+		}
+		public bool CheckView(string viewInfo)
+		{
+			if (viewInfo == "玩家Id")
+			{
+				if (Key.Contains("/")) return false;
+			}
+			else
+			{
+				if (!Key.StartsWith(viewInfo)) return false;
+			}
+			return true;
 		}
 	}
 	public enum QAnalysisMode
