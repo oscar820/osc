@@ -223,7 +223,7 @@ namespace QTool
         {
             return string.IsNullOrWhiteSpace(key) ? System.Guid.NewGuid().ToString("N") : System.Guid.Parse(key).ToString("N");
         }
-        private bool HasPrefabId
+        public bool HasPrefabId
         {
             get
             {

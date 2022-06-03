@@ -259,15 +259,7 @@ namespace QTool.Inspector
 				if (memebers.ContainsKey(path))
 				{
 					var Get = memebers[path].Get;
-					if (Get.Method.IsStatic)
-					{
-						return Get(null);
-					}
-					else
-					{
-						return Get(target);
-					}
-					
+					return Get(target);
 				}
 				else
 				{
