@@ -64,17 +64,12 @@ namespace QTool.Command
         }
         public static void FreshCommands(params Type[] types)
         {
-            foreach (var t in TypeList)
-            {
-                FreshTypeCommands(t);
-            }
             foreach (var t in types)
 			{
-				Debug.Log("初始化命令：" + t.Name);
 				if (!TypeList.Contains(t))
                 {
                     FreshTypeCommands(t);
-                }
+				}
             }
         }
         static void FreshTypeCommands(Type type)
@@ -92,35 +87,37 @@ namespace QTool.Command
                 }
             }, BindingFlags.Public | BindingFlags.Static);
             TypeList.AddCheckExist(type);
-        }
-        [ViewName("基础")]
-        public static class BaseCommands
-        {
-            [ViewName("日志/普通日志")]
-            public static void Log(object obj)
-            {
-                Debug.Log(obj);
-			}
-			[ViewName("日志/警告日志")]
-			public static void LogWarning(object obj)
-			{
-				Debug.LogWarning(obj);
-			}
-			[ViewName("日志/错误日志")]
-            public static void LogError(object obj)
-            {
-                Debug.LogError(obj);
-			}
-			[ViewName("时间/时间控制")]
-			public static void TimeScale(float timeScale,object flag)
-			{
-				QTime.ChangeScale(flag, timeScale);
-			}
+
+			Debug.Log("初始化命令："+type+"\n" + KeyDictionary.ToOneString());
 		}
+      
 
     }
-
-    public class QCommandInfo : IKey<string>
+	[ViewName("基础")]
+	public static class BaseCommands
+	{
+		[ViewName("日志/普通日志")]
+		public static void Log(object obj)
+		{
+			Debug.Log(obj);
+		}
+		[ViewName("日志/警告日志")] 
+		public static void LogWarning(object obj)
+		{
+			Debug.LogWarning(obj);
+		}
+		[ViewName("日志/错误日志")]
+		public static void LogError(object obj)
+		{
+			Debug.LogError(obj);
+		}
+		[ViewName("时间/时间控制")]
+		public static void TimeScale(float timeScale, object flag)
+		{
+			QTime.ChangeScale(flag, timeScale);
+		}
+	}
+	public class QCommandInfo : IKey<string>
     {
         public string Key { set; get; }
         public string name;

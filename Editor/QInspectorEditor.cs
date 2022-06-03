@@ -223,8 +223,62 @@ namespace QTool.Inspector
     #endregion
     public static class QEditorTool
     {
+		public static object GetPathObject(this object target, string path)
+		{
+			if (path.SplitTowString(".", out var start, out var end))
+			{
+				try
+				{
+					if (start == "Array" && end.StartsWith("data"))
+					{
+						var list = target as IList;
+						if (list == null)
+						{
+							return null;
+						}
+						else
+						{
+							return list[int.Parse(end.GetBlockValue('[',']'))];
+						}
+					}
+					else
+					{
 
-        public static Rect HorizontalRect(this Rect rect, float left, float right)
+						return target.GetPathObject(start).GetPathObject(end);
+					}
+					
+				}
+				catch (Exception e)
+				{
+					throw new Exception("路径出错：" + path, e);
+				}
+			}
+			else
+			{
+				var memebers = QInspectorType.Get(target.GetType()).Members;
+				if (memebers.ContainsKey(path))
+				{
+					return memebers[path]?.Get(target);
+				}
+				else
+				{
+					throw new Exception(" 找不到 key " + path);
+				}
+			}
+		}
+		public static bool GetPathBool(this object target, string key)
+		{
+			var info = target.GetPathObject(key);
+			if (info == null)
+			{
+				return true;
+			}
+			else
+			{
+				return (bool)info;
+			}
+		}
+		public static Rect HorizontalRect(this Rect rect, float left, float right)
         {
             var leftOffset = left * rect.width;
             var width = (right - left) * rect.width;
@@ -232,15 +286,15 @@ namespace QTool.Inspector
             rect.width = width;
             return rect;
         }
-        public static bool HasAttribute<T>(this SerializedProperty prop, string parentKey)
-        {
-            object[] attributes = GetAttributes<T>(prop, parentKey);
-            if (attributes != null)
-            {
-                return attributes.Length > 0;
-            }
-            return false;
-        }
+        //public static bool HasAttribute<T>(this SerializedProperty prop, string parentKey)
+        //{
+        //    object[] attributes = GetAttributes<T>(prop, parentKey);
+        //    if (attributes != null)
+        //    {
+        //        return attributes.Length > 0;
+        //    }
+        //    return false;
+        //}
 
         public static object[] GetAttributes<T>(this SerializedProperty prop, string parentKey)
         {
@@ -292,6 +346,10 @@ namespace QTool.Inspector
         {
             return Call(property, funcName) as T;
         }
+		public static object GetObject(this SerializedProperty property)
+		{
+			return property?.serializedObject.targetObject.GetPathObject(property.propertyPath);
+		}
         public static object Call(this SerializedProperty property, string funcName, object[] paramsList = null)
         {
             if (string.IsNullOrEmpty(funcName))
@@ -824,23 +882,8 @@ namespace QTool.Inspector
             return bounds;
         }
         // static QDictionary<object, QDictionary<string, bool>> tempBoolList = new QDictionary<object, QDictionary<string, bool>>();
-        public static bool GetBool(this object target, string key)
-        {
-            var info = GetMember(target, key);
-            if (info == null)
-            {
-                return true;
-            }
-            else
-            {
-                return (bool)info.Get(target);
-            }
-        }
-        public static QMemeberInfo GetMember(this object target, string key)
-        {
-            var memeberInfo = QInspectorType.Get(target.GetType()).Members[key];
-            return memeberInfo;
-        }
+ 
+   
         public static bool Active(this ViewNameAttribute att, object target)
         {
             if (string.IsNullOrWhiteSpace(att.control))
@@ -849,7 +892,7 @@ namespace QTool.Inspector
             }
             else
             {
-                return (bool)target.GetBool(att.control);
+                return (bool)target.GetPathBool(att.control);
             }
         }
         public static bool IsShow(this SerializedProperty property)
@@ -1123,13 +1166,12 @@ namespace QTool.Inspector
                 {
                     return true;
                 }
-                var listMember = target.GetMember(toolbar.listMember);
 
                 var GuiList = new List<GUIContent>();
                 IList list = null;
                 try
                 {
-                    var obj = listMember.Get(target);
+                    var obj = target.GetPathObject(toolbar.listMember);
                     list = obj as IList;
                     if (list == null) throw new Exception();
                 }
@@ -1232,15 +1274,11 @@ namespace QTool.Inspector
                 {
                     return true;
                 }
-                var listFunc = target.GetMember(att.scriptList);
-
-             //   var info = target.GetMember(property.name);
 
                 var GuiList = new List<GUIContent>();
-
-                if (listFunc != null)
+				var list= target.GetPathObject(att.scriptList) as IList;
+				if (list != null)
                 {
-                    var list = (listFunc.Get(target) as IList);
                     GUILayout.BeginHorizontal();
                     for (int i = 0; i < list.Count; i++)
                     {

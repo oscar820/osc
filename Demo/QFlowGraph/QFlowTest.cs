@@ -10,11 +10,19 @@ using QTool.Test;
 
 public class QFlowTest : MonoBehaviour
 {
+	[System.Serializable]
+	public class Test1111
+	{
+		public QFlowGraph testGraph;
+		public List<QFlowGraph> qFlows;
+	}
 	static QFlowTest()
 	{
 		QTool.Command.QCommand.FreshCommands(typeof(QFlowNodeTest));
 	}
 	public QFlowGraphAsset graphAsset;
+	public QFlowGraph graph;
+	public Test1111 test1111;
     void Start()
     {
         graphAsset?.Graph.Run(nameof(QFlowNodeTest.Start));

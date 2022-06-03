@@ -279,6 +279,29 @@ namespace QTool
 				return str;
 			}
 		}
+		public static string GetBlockValue(this string value,char startChar,char endChar)
+		{
+			var start = value.IndexOf(startChar);
+			var end = value.IndexOf(endChar);
+			return value.Substring(start + 1, end - start - 1);
+		}
+		public static bool SplitTowString(this string str, string splitStart,out string start,out string end)
+		{
+			
+			if (str.Contains(splitStart))
+			{
+				var startIndex = str.IndexOf(splitStart);
+				start = str.Substring(0, startIndex);
+				end = str.Substring(startIndex + 1);
+				return true;
+			}
+			else
+			{
+				start = splitStart;
+				end = "";
+				return false;
+			}
+		}
 		public static string ToSizeString(this string array)
         {
             return array.Length.ToSizeString();

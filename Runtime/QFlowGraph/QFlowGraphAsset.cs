@@ -7,35 +7,19 @@ namespace QTool.FlowGraph
     public class QFlowGraphAsset : ScriptableObject
     {
         public List<QObjectReference> ObjList;
-		[TextArea(1,30)]
-        public string stringValue;
-        public QFlowGraph Graph =>_graph??=
-            Load();
-        QFlowGraph _graph;
+		[SerializeField]
+		public QFlowGraph Graph;
         public void Init(string qsmStr)
         {
-            this.stringValue = qsmStr;
-        }
-        public QFlowGraph Load()
-        {
-            try
-            {
-                return stringValue.ParseQData<QFlowGraph>().Init();
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError(name + " 读取出错 " + e);
-                return null;
-            }
+			Graph= qsmStr.ParseQData(Graph);
+			Graph.SerializeString = qsmStr;
         }
         public void Save()
         {
-            if (Graph == null) return;
             try
             {
-                this.stringValue = Graph.ToQData();
 #if UNITY_EDITOR
-                FileManager.Save(UnityEditor.AssetDatabase.GetAssetPath(this), this.stringValue);
+                FileManager.Save(UnityEditor.AssetDatabase.GetAssetPath(this), Graph.SerializeString);
 				if (!Application.isPlaying)
 				{
 					UnityEditor.AssetDatabase.Refresh();

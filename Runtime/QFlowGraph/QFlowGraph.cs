@@ -37,8 +37,21 @@ namespace QTool.FlowGraph
 		}
 	
 	}
-    public class QFlowGraph
+	[System.Serializable]
+    public class QFlowGraph:ISerializationCallbackReceiver
     {
+		[TextArea(1, 30)]
+		[QIgnore]
+		public string SerializeString;
+		public void OnBeforeSerialize()
+		{
+			SerializeString = this.ToQData();
+		}
+
+		public void OnAfterDeserialize()
+		{
+			SerializeString.ParseQData(this)?.Init();
+		}
 		public QFlowGraph CreateInstance()
 		{
 			return this.ToQData().ParseQData<QFlowGraph>().Init();
@@ -51,8 +64,8 @@ namespace QTool.FlowGraph
         {
             return this.ToQData();
         }
-        
-        public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
+		public string Name { internal set; get; }
+		public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
         [QIgnore]
         public Action<IEnumerator> StartCoroutineOverride;
         public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
@@ -204,7 +217,9 @@ namespace QTool.FlowGraph
             }
             return this;
         }
-    }
+
+	
+	}
     public enum PortType
     {
         Output,

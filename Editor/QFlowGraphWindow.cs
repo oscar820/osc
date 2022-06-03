@@ -14,37 +14,36 @@ namespace QTool.FlowGraph
         const float dotSize = 16;
 
 
-        public QFlowGraphAsset GraphAsset = null;
-        public QFlowGraph Graph => GraphAsset?.Graph;
+		QFlowGraph Graph;
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line)
         {
             var asset = EditorUtility.InstanceIDToObject(instanceID) as QFlowGraphAsset;
             if (asset != null)
             {
-                Open(asset);
+                Open(asset.Graph, asset.Save);
                 return true;
             }
             return false;
         }
+	
 
         public static QFlowGraphWindow Instance { get; private set; }
-        public static void OpenPath(string path)
-        {
-            Open(AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path));
-        }
-        public static void Open(QFlowGraphAsset asset)
+		public event Action OnSave;
+        public static void Open(QFlowGraph graph,Action OnSave=null)
         {
             if (Instance == null)
             {
                 Instance = GetWindow<QFlowGraphWindow>();
                 Instance.minSize = new Vector2(400, 300);
             }
-            Instance.titleContent = new GUIContent((asset==null?"":asset.name + " - ") + nameof(QFlowGraph));
-            Instance.GraphAsset = asset;
+            Instance.titleContent = new GUIContent((graph?.Name== null?"":graph.Name + " - ") + nameof(QFlowGraph));
+            Instance.Graph = graph;
             Instance.ViewRange = new Rect(Vector2.zero, Instance.position.size);
             Instance.Repaint();
-        }
+			Instance.OnSave = OnSave;
+
+		}
         [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
         public static void CreateNewFile()
         {
@@ -56,7 +55,8 @@ namespace QTool.FlowGraph
             var path = EditorUtility.SaveFilePanel("保存QFG文件", selectPath, nameof(QFlowGraphAsset), "qfg");
             FileManager.Save(path, (new QFlowGraph()).ToQData());
             AssetDatabase.Refresh();
-            OpenPath(path.ToAssetPath());
+			var asset = AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path);
+			Open(asset.Graph,asset.Save);
         }
         [MenuItem("QTool/窗口/流程图")]
         public static void OpenWindow()
@@ -69,17 +69,16 @@ namespace QTool.FlowGraph
         }
         private void OnLostFocus()
         {
-            if (GraphAsset != null)
-            {
-                GraphAsset.Save();
-            }
+			if (Graph != null)
+			{
+				Graph.OnBeforeSerialize();
+				OnSave?.Invoke();
+			}
         }
 
         private Rect ViewRange;
         void CreateMenu(PortId fromPortId)
         {
-
-
             GenericMenu menu = new GenericMenu();
             var fromPort = Graph[fromPortId];
             foreach (var info in QTool.Command.QCommand.KeyDictionary)
@@ -88,7 +87,7 @@ namespace QTool.FlowGraph
                 {
                     menu.AddItem(new GUIContent(info.fullName), false, () =>
                     {
-                        var node = GraphAsset.Graph.Add(info.Key);
+                        var node =Graph.Add(info.Key);
                         node.rect = new Rect(mousePos, new Vector2(300, 80));
                         fromPort.Connect( node.Ports[portKey]);
                     });
@@ -105,7 +104,7 @@ namespace QTool.FlowGraph
                 {
                     menu.AddItem(new GUIContent(kv.fullName), false, () =>
                    {
-                       var state = GraphAsset.Graph.Add(kv.Key);
+                       var state =Graph.Add(kv.Key);
                        state.rect = new Rect(mousePos, new Vector2(300, 80));
                    });
                 }
@@ -124,7 +123,7 @@ namespace QTool.FlowGraph
                 if (curPortId != null)
                 {
 
-                    menu.AddItem(new GUIContent("清空" + curPortId + "端口连接"), false, ()=> GraphAsset.Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.index));
+                    menu.AddItem(new GUIContent("清空" + curPortId + "端口连接"), false, ()=> Graph[ curPortId.Value].ClearAllConnect(curPortId.Value.index));
                 }
                 else
                 {
@@ -140,7 +139,7 @@ namespace QTool.FlowGraph
                     {
                         menu.AddItem(new GUIContent("运行节点"), false, () =>
                         {
-                            QToolManager.Instance.StartCoroutine(GraphAsset.Graph.RunIEnumerator(curNode.Key));
+                            QToolManager.Instance.StartCoroutine(Graph.RunIEnumerator(curNode.Key));
                         });
                     }
                     else
@@ -166,7 +165,7 @@ namespace QTool.FlowGraph
             try
             {
                 var nodeList = GUIUtility.systemCopyBuffer.ParseQData<List<QFlowNode>>();
-                GraphAsset.Graph.Parse(nodeList, mousePos);
+				Graph.Parse(nodeList, mousePos);
             }
             catch (Exception e)
             {
@@ -179,7 +178,7 @@ namespace QTool.FlowGraph
         }
         void DeleteSelectNodes()
         {
-            ForeachSelectNodes((node) => GraphAsset.Graph.Remove(node));
+            ForeachSelectNodes((node) => Graph.Remove(node));
 			Repaint();
 		}
         void ForeachSelectNodes(System.Action<QFlowNode> action)
@@ -242,7 +241,7 @@ namespace QTool.FlowGraph
         protected void UpdateCurrentData()
         {
             curNode = null;
-            foreach (var state in GraphAsset.Graph.NodeList)
+            foreach (var state in Graph.NodeList)
             {
                 if (state.rect.Contains(mousePos))
                 {
@@ -279,7 +278,7 @@ namespace QTool.FlowGraph
             ViewRange.size = position.size;
             mousePos = Event.current.mousePosition + ViewRange.position;
             DrawBackground();
-            if (GraphAsset == null||GraphAsset.Graph==null)
+            if (Graph==null)
             {
                 if (GUILayout.Button("创建新的QFlowGraph"))
                 {
@@ -289,12 +288,12 @@ namespace QTool.FlowGraph
             }
             Controls();
             BeginWindows();
-            for (int i = 0; i < GraphAsset.Graph.NodeList.Count; i++)
+            for (int i = 0; i <Graph.NodeList.Count; i++)
             {
-                var node = GraphAsset.Graph.NodeList[i];
+                var node = Graph.NodeList[i];
                 if (node == null)
                 {
-                    Debug.LogError(i + "/" + GraphAsset.Graph.NodeList.Count);
+                    Debug.LogError(i + "/" +Graph.NodeList.Count);
                     continue;
                 }
                 if (ViewRange.Overlaps(node.rect))
@@ -422,7 +421,7 @@ namespace QTool.FlowGraph
                             case EditorState.BoxSelect:
                                 {
                                     SelectNodes.Clear();
-                                    foreach (var node in GraphAsset.Graph.NodeList)
+                                    foreach (var node in Graph.NodeList)
                                     {
                                         var rect = node.rect;
                                         if (SelectBox.Overlaps(rect))
@@ -512,7 +511,7 @@ namespace QTool.FlowGraph
         Rect windowRect;
         void DrawNode(int id)
         {
-            var node = GraphAsset.Graph.NodeList[id];
+            var node = Graph.NodeList[id];
 			if (node == null) return;
             windowRect = node.rect;
             EditorGUILayout.BeginHorizontal();
@@ -565,7 +564,7 @@ namespace QTool.FlowGraph
                     DrawDot(Graph.GetConnectInfo(nearPortId).rect.center - ViewRange.position, dotSize * 0.4f, color);
                 }
             }
-            foreach (var name in GraphAsset.Graph.NodeList)
+            foreach (var name in Graph.NodeList)
             {
                 foreach (var port in name.Ports)
                 {
@@ -705,5 +704,25 @@ namespace QTool.FlowGraph
     
       
     }
-
+	[CustomPropertyDrawer(typeof(QFlowGraph))]
+	public class QFlowGraphDrawer : PropertyDrawer
+	{
+	
+	
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+		{
+			var leftRect = position;
+			leftRect.width /= 2;
+			EditorGUI.LabelField(leftRect, label.text);
+			leftRect.x += leftRect.width;
+			if (GUI.Button(leftRect, "编辑"))
+			{
+				QFlowGraphWindow.Open(property.GetObject() as QFlowGraph, property.serializedObject.targetObject.SetDirty);
+			}
+		}
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		{
+			return base.GetPropertyHeight(property, label);
+		}
+	}
 }

@@ -10,10 +10,10 @@ namespace QTool.FlowGraph
     {
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            var qsm= ScriptableObject.CreateInstance<QFlowGraphAsset>();
-            qsm.Init(File.ReadAllText(ctx.assetPath));
-            ctx.AddObjectToAsset(nameof(qsm), qsm); 
-            ctx.SetMainObject(qsm);
+            var qfg= ScriptableObject.CreateInstance<QFlowGraphAsset>();
+			qfg.Init(File.ReadAllText(ctx.assetPath));
+            ctx.AddObjectToAsset(nameof(qfg), qfg); 
+            ctx.SetMainObject(qfg);
         }
     }
 }
