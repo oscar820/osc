@@ -258,7 +258,16 @@ namespace QTool.Inspector
 				var memebers = QInspectorType.Get(target.GetType()).Members;
 				if (memebers.ContainsKey(path))
 				{
-					return memebers[path]?.Get(target);
+					var Get = memebers[path].Get;
+					if (Get.Method.IsStatic)
+					{
+						return Get(null);
+					}
+					else
+					{
+						return Get(target);
+					}
+					
 				}
 				else
 				{
