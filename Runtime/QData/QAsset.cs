@@ -293,7 +293,7 @@ namespace QTool.Asset
                 UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<IList<TObj>> loader = default;
                 try
                 {
-                    loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
+					loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
                 }
                 catch (Exception e)
                 {

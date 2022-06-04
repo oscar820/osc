@@ -716,8 +716,9 @@ namespace QTool.FlowGraph
 			EditorGUI.LabelField(leftRect, label.text);
 			leftRect.x += leftRect.width;
 			if (GUI.Button(leftRect, "编辑"))
-			{
-				QFlowGraphWindow.Open(property.GetObject() as QFlowGraph, property.serializedObject.targetObject.SetDirty);
+			{ 
+				var graph = property.GetObject() as QFlowGraph;
+				QFlowGraphWindow.Open(graph, ()=> { graph.Name = property.propertyPath; property.serializedObject.targetObject.SetDirty(); });
 			}
 		}
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

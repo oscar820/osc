@@ -67,26 +67,4 @@ namespace QTool
         }
     }
 
-    public abstract class InstanceBehaviour<T,ResourceLabel> : InstanceBehaviour<T> where ResourceLabel : PrefabAssetList<ResourceLabel> where T : InstanceBehaviour<T,ResourceLabel>
-    {
-        public new static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<T>(true);
-                    if (_instance == null && Application.isPlaying)
-                    {
-                        GetNewInstance();
-                    }
-                }
-                return _instance;
-            }
-        }
-        public static async void GetNewInstance()
-        {
-            _instance=(await PrefabAssetList<ResourceLabel>.GetInstance(typeof(T).Name))?.GetComponent<T>();
-        }
-    }
 }

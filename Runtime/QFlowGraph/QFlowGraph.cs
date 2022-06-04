@@ -64,7 +64,7 @@ namespace QTool.FlowGraph
         {
             return this.ToQData();
         }
-		public string Name { internal set; get; }
+		public string Name {  set; get; }
 		public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
         [QIgnore]
         public Action<IEnumerator> StartCoroutineOverride;
