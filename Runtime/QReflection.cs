@@ -369,21 +369,21 @@ namespace QTool.Reflection
         }
         public static void ForeachMemeber(this Type type, Action<FieldInfo> fieldInfo, Action<PropertyInfo> propertyInfo = null, BindingFlags bindingFlags= BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
-            FieldInfo[] fields = type.GetFields(bindingFlags);
-            foreach (var item in fields)
-            {
-                if (item.Name.EndsWith("k__BackingField"))
-                {
-                    continue;
-                }
-                fieldInfo?.Invoke(item);
-            }
             var infos = type.GetProperties(bindingFlags);
             foreach (var item in infos)
             {
                 propertyInfo?.Invoke(item);
             }
-        }
+			FieldInfo[] fields = type.GetFields(bindingFlags);
+			foreach (var item in fields)
+			{
+				if (item.Name.EndsWith("k__BackingField"))
+				{
+					continue;
+				}
+				fieldInfo?.Invoke(item);
+			}
+		}
         public static void ForeachFunction(this Type type, Action<MethodInfo> methodeInfo, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {
             var methods= type.GetMethods(bindingFlags);
