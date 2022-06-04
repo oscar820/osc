@@ -439,7 +439,7 @@ namespace QTool
 				{
 					foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
 					{
-						var key = eventData.eventKey + "/" + memeberInfo.Name;
+						var key = eventData.eventKey + "/" + memeberInfo.Key;
 						CheckTitle(key, eventData.eventValue==null?null:memeberInfo.Get(eventData.eventValue));
 						Instance.DataKeyList.AddCheckExist(key);
 					}

@@ -140,26 +140,92 @@ namespace QTool
                 }
             }
         }
-        public static bool ExistsFile(string path)
-        {
-            return File.Exists(path);
+		public const string ResourcesRoot = "Assets\\Resources\\";
+
+		public static bool Exists(string path,bool checkDirectory=false)
+		{
+			if (Application.isPlaying&&path.StartsWith(ResourcesRoot))
+			{
+				
+#if UNITY_EDITOR
+				return File.Exists(path)||(checkDirectory&&Directory.Exists(path.SplitStartString(".")));
+#else
+				return true;
+#endif
+			}
+			else
+			{
+				return File.Exists(path) || (checkDirectory && Directory.Exists(path.SplitStartString(".")));
+			}
         }
         public static string Load(string path,string defaultValue="")
         {
-            if (!ExistsFile(path))
+            if (!Exists(path))
             {
                 Debug.LogError("不存在文件：" + path);
                 return defaultValue;
             }
-            using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
-            {
-                using (var sw = new System.IO.StreamReader(file))
-                {
-					var data = sw.ReadToEnd();
-					return data;
+			if (path.StartsWith(ResourcesRoot))
+			{
+
+				var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesRoot).SplitStartString("."));
+				if (text == null)
+				{
+					return defaultValue;
 				}
-            }
+				else
+				{
+					return text.text;
+				}
+			}
+			else
+			{
+				using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
+				{
+					using (var sw = new System.IO.StreamReader(file))
+					{
+						var data = sw.ReadToEnd();
+						return data;
+					}
+				}
+			}
+           
         }
+
+		public static void LoadAll(string path,Action<string> action, string defaultValue = "")
+		{
+			if (path.StartsWith(ResourcesRoot))
+			{
+				try
+				{
+					var loadPath = path.SplitEndString(ResourcesRoot).SplitStartString(".");
+					action(Load(loadPath, defaultValue));
+					var texts= Resources.LoadAll<TextAsset>(loadPath);
+					foreach (var text in texts)
+					{
+						action(text.text);
+					}
+				}
+				catch (Exception e)
+				{
+					Debug.LogWarning(e);
+				}
+			}
+			else
+			{
+				if (File.Exists(path))
+				{
+					action(Load(path, defaultValue));
+				}
+				else
+				{
+					path.ForeachDirectoryFiles((filePath) =>
+					{
+						action(Load(filePath, defaultValue));
+					});
+				}
+			}
+		}
         public static byte[] LoadBytes(string path)
         {
             if (!System.IO.File.Exists(path))

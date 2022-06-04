@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +9,7 @@ namespace QTool
 {
     public class QTranslate : MonoBehaviour
     {
-        public static QDataList LanguageData => QDataList.GetData(QDataList.StreamingPathRoot + "LanguageData.txt", (data) => {
+        public static QDataList LanguageData => QDataList.GetResourcesData("LanguageData", (data) => {
             data.SetTitles("Key", "中文", "English");
             data["文本语言"].SetValue("中文", "文本语言").SetValue("English", "Language");
         }); 

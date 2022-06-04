@@ -92,7 +92,7 @@ namespace QTool
 											{
 												var memberInfo = typeInfo.Members[i];
 												var member = memberInfo.Get(obj);
-												WriteCheckString(writer, memberInfo.Name);
+												WriteCheckString(writer, memberInfo.Key);
 												writer.Write(':');
 												WriteType(writer, member, memberInfo.Type, hasName);
 												if (i < typeInfo.Members.Count - 1)
@@ -248,7 +248,7 @@ namespace QTool
 														}
 														catch (Exception e)
 														{
-															Debug.LogError("读取成员【" +name+":"+ type.Name + "." + memeberInfo.Name + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+															Debug.LogError("读取成员【" +name+":"+ type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
 															throw e;
 														}
 													}

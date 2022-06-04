@@ -22,74 +22,83 @@ namespace QTool{
 		static QDataList(){ 
 			var type = typeof(T);
 			var typeInfo = QSerializeType.Get(type);
-			var path = "QDataListAssets\\" + type.Name;
-			var text= Resources.Load<TextAsset>(path);
-			if (text != null&&!string.IsNullOrWhiteSpace(text.text))
-			{
-				list.Clear();
-				var qdataList = new QDataList(text.text);
-				var titleRow = qdataList.TitleRow;
-				var memeberList = new List<QMemeberInfo>();
-				foreach (var title in titleRow)
-				{
-					var member = typeInfo.Members[title];
-					if (member == null)
-					{
-						member = typeInfo.Members.Get(title, (obj) => obj.MemeberInfo.ViewName());
-					}
-					if (member == null)
-					{
-						Debug.LogError("读取 "+type.Name+"出错 不存在属性 " + title);
-					}
-					memeberList.Add(member);
-				}
-				foreach (var row in qdataList)
-				{
-					if (row == titleRow) continue;
-					var obj= type.CreateInstance();
-					var t = (obj as T);
-					for (int i = 0; i < titleRow.Count; i++)
-					{
-						var member = memeberList[i];
-						if (member!=null)
-						{
-							try
-							{
-								member.Set(t, row[i].ParseQDataType(member.Type, false));
-							}
-							catch (System.Exception e)
-							{
 
-								Debug.LogError("读取 " + type.Name + "出错 设置["+row.Key+"]属性 "+member.Name+"("+member.Type+")异常：\n"+e);
-							}
-							
-						}
-					}
-					t.Key = row.Key; 
-					list.Add(t);
+			var qdataList = QDataList.GetResourcesData(type.Name,(data)=> {
+				var defaultRow = type.CreateInstance();
+				foreach (var member in typeInfo.Members)
+				{
+					data.TitleRow.Add(member.ViewName);
+					data["默认"].Add(member.Get(defaultRow).ToQData(false));
 				}
-				Debug.Log("读取 Resources\\" + path + "]完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList); 
-			}
-			else
+			});
+			list.Clear();
+			var titleRow = qdataList.TitleRow;
+			var memeberList = new List<QMemeberInfo>();
+			foreach (var title in titleRow)
 			{
-				Debug.LogError("读取 Resources\\" + path + "]出错");
+				var member = typeInfo.Members[title];
+				if (member == null)
+				{
+					member = typeInfo.Members.Get(title, (obj) => obj.ViewName);
+				}
+				if (member == null)
+				{
+					Debug.LogError("读取 " + type.Name + "出错 不存在属性 " + title);
+				}
+				memeberList.Add(member);
 			}
+			foreach (var row in qdataList)
+			{
+				if (row == titleRow) continue;
+				var obj = type.CreateInstance();
+				var t = (obj as T);
+				for (int i = 0; i < titleRow.Count; i++)
+				{
+					var member = memeberList[i];
+					if (member != null)
+					{
+						try
+						{
+							member.Set(t, row[i].ParseQDataType(member.Type, false));
+						}
+						catch (System.Exception e)
+						{
+
+							Debug.LogError("读取 " + type.Name + "出错 设置[" + row.Key + "]属性 " + member.Key + "(" + member.Type + ")异常：\n" + e);
+						}
+
+					}
+				}
+				t.Key = row.Key;
+				list.Add(t);
+			}
+			Debug.Log("读取 " + type.Name + " 完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList);
 		}
 		public static QList<string, T> list = new QList<string, T>();
     }
     public class QDataList: QAutoList<string, QDataRow>
-    {
-        public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
-        public static QDataList GetData(string path,System.Action<QDataList> autoCreate=null)
+	{
+		public static string ResourcesPathRoot => FileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '\\';
+		//public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
+		public static QDataList GetResourcesData(string name, System.Action<QDataList> autoCreate = null)
+		{
+			return GetData(ResourcesPathRoot + name+".txt", autoCreate);
+		}
+
+		public static QDataList GetData(string path,System.Action<QDataList> autoCreate=null)
         {
             if (!dataList.ContainsKey(path))
             {
-                if (FileManager.ExistsFile(path))
+                if (FileManager.Exists(path,true))
                 {
                     try
-                    {
-                        dataList[path] = new QDataList(FileManager.Load(path));
-                        dataList[path].LoadPath = path;
+					{
+						dataList[path] = new QDataList();
+						dataList[path].LoadPath = path;
+						FileManager.LoadAll(path, (fileValue) =>
+						{
+							dataList[path].Parse(fileValue);
+						},"{}");
                     }
                     catch (System.Exception e)
                     {
@@ -105,8 +114,11 @@ namespace QTool{
                         dataList[path] = qdataList;
                         autoCreate(qdataList);
                         qdataList.Save();
-                        Debug.LogWarning("不存在QDataList自动创建[" + path + "]");
-                    }
+						Debug.LogWarning("不存在QDataList自动创建[" + path + "]");
+#if UNITY_EDITOR
+						UnityEditor.AssetDatabase.Refresh();
+#endif
+					}
                 }
             }
             return dataList[path];
@@ -159,9 +171,12 @@ namespace QTool{
                 return base[index];
             }
         }
-       public void Parse(string dataStr)
+       public void Parse(string dataStr,bool clear=true)
         {
-            Clear();
+			if (clear)
+			{
+				Clear();
+			}
             using (var reader = new StringReader(dataStr))
             {
                 int index = 0;

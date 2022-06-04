@@ -11,8 +11,8 @@ namespace QTool.Reflection
 
     public class QMemeberInfo : IKey<string>
     {
-        public string Key { get => Name; set => Name=value; }
-        public string Name { get; private set; }
+        public string Key { get ; set; }
+		public string ViewName { get; set; }
         public Type Type { get; private set; }
         public Action<object, object> Set { get; private set; }
         public Func<object, object> Get { get; private set; }
@@ -21,7 +21,8 @@ namespace QTool.Reflection
         public QMemeberInfo(FieldInfo info)
         {
             MemeberInfo = info;
-            Name = info.Name;
+			ViewName = info.ViewName();
+            Key = info.Name;
             Type = info.FieldType;
             Set = info.SetValue;
             Get = info.GetValue;
@@ -29,7 +30,8 @@ namespace QTool.Reflection
         public QMemeberInfo(PropertyInfo info)
         {
             MemeberInfo = info;
-            Name = info.Name;
+			ViewName = info.ViewName();
+			Key = info.Name;
             Type = info.PropertyType;
             if (info.SetMethod != null)
 			{
@@ -42,7 +44,7 @@ namespace QTool.Reflection
         }
         public override string ToString()
         {
-            return   "var " + Name+" \t\t("+ Type+")"  ;
+            return   "var " + Key+" \t\t("+ Type+")"  ;
         }
     }
     public class QFunctionInfo : IKey<string>

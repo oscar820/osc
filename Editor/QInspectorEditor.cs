@@ -597,16 +597,16 @@ namespace QTool.Inspector
 														{
 															if (member.Type.IsValueType)
 															{
-																member.Set(obj, member.Get(obj).Draw(member.Name, member.Type));
+																member.Set(obj, member.Get(obj).Draw(member.Key, member.Type));
 															}
 															else
 															{
-																member.Set(obj, member.Get(obj).Draw(member.Name, member.Type, (value) => member.Set(obj, value)));
+																member.Set(obj, member.Get(obj).Draw(member.Key, member.Type, (value) => member.Set(obj, value)));
 															}
 														}
 														catch (Exception e)
 														{
-															Debug.LogError("序列化【" + member.Name + "】出错\n"+e);
+															Debug.LogError("序列化【" + member.Key + "】出错\n"+e);
 														}
 
                                                     }
