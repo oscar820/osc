@@ -297,7 +297,7 @@ namespace QTool
 			}
 			else
 			{
-				start = splitStart;
+				start = str;
 				end = "";
 				return false;
 			}

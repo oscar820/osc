@@ -29,6 +29,32 @@ namespace QTool
             }
             return KeyColor[colorKey];
         }
+		public static Transform GetChild(this Transform transform,string childPath)
+		{
+			if (childPath.SplitTowString(".", out var start, out var end))
+			{
+				try
+				{
+					return transform.GetChild(start).GetChild(end);
+				}
+				catch (Exception e)
+				{
+					throw new Exception("路径出错 [" + childPath+"]", e);
+				}
+			}
+			else
+			{
+				var child = transform.Find(start);
+				if (child!=null)
+				{
+					return child;
+				}
+				else
+				{
+					throw new Exception(" 找不到 key [" + start+"]"+childPath);
+				}
+			}
+		}
 		public static float ToComputeFloat(this object value)
 		{
 			if (value == null) return 0;
