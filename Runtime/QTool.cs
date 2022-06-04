@@ -112,16 +112,17 @@ namespace QTool
             }
             return list;
         }
-        public static async Task<bool> DelayGameTime(float second, bool ignoreTimeScale = false)
+        public static async Task<bool> WaitGameTime(float second, bool ignoreTimeScale = false)
         {
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
-            return await Tool.Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
+            return await Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
         }
 		public static string ToQTimeString(this DateTime time)
 		{
 			return time.ToString("yyyy-MM-dd HH:mm:ss zzz");
 		}
 		public static Action StopAllWait;
+
 		public static async Task<bool> Wait(Func<bool> flagFunc)
 		{
 			var WaitStop = false;
