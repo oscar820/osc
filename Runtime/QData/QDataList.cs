@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using QTool.Asset;
 using QTool.Reflection;
+using System;
 
 namespace QTool{
 	public class QDataList<T>  where T : QDataList<T>, IKey<string>
@@ -28,7 +29,7 @@ namespace QTool{
 				foreach (var member in typeInfo.Members)
 				{
 					data.TitleRow.Add(member.ViewName);
-					data[1].SetValue (member.ViewName, member.Get(defaultRow).ToQDataType(member.Type, false));
+					data[1].SetValueType(member.ViewName, member.Get(defaultRow), member.Type);
 				}
 			});
 			list.Clear();
@@ -244,17 +245,21 @@ namespace QTool{
 				return base[index].ParseQData<T>(default, false);
 			}
         }
-        public void SetValue<T>(T value, int index=1)
-        {
-			if (typeof(T) == typeof(string))
+		public void SetValueType(object value,Type type,int index=1)
+		{
+			if (type == typeof(string))
 			{
-				base[index] = (string)(object)value;
+				base[index] = (string)value;
 			}
 			else
 			{
 
-				base[index] = value.ToQData(false);
+				base[index] = value.ToQDataType(type, false);
 			}
+		}
+        public void SetValue<T>(T value, int index=1)
+        {
+			SetValueType(value, typeof(T), index);
         }
         public T GetValue<T>(string title)
 		{
@@ -267,18 +272,23 @@ namespace QTool{
                 throw new System.Exception("不存在的列名[" + title + "]");
             }
         }
-        public QDataRow SetValue<T>(string title,T value)
+		public QDataRow SetValueType(string title, object value,Type type)
+		{
+			if (OwnerData.TryGetTitleIndex(title, out var index))
+			{
+				SetValueType(value,type, index);
+			}
+			else
+			{
+				Debug.LogWarning("不存在的列名[" + title + "]自动创建");
+				OwnerData[0].Add(title);
+				SetValueType(title, value, type);
+			}
+			return this;
+		}
+		public QDataRow SetValue<T>(string title,T value)
         {
-            if (OwnerData.TryGetTitleIndex(title, out var index))
-            {
-                SetValue(value, index);
-            }
-            else
-            {
-                Debug.LogWarning("不存在的列名[" + title + "]自动创建");
-                OwnerData[0].Add(title);
-                SetValue(title, value);
-            }
+			SetValueType(title, value, typeof(T));
             return this;
         }
       
