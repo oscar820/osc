@@ -143,6 +143,7 @@ namespace QTool
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
             return await Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
         }
+
 		public static string ToQTimeString(this DateTime time)
 		{
 			return time.ToString("yyyy-MM-dd HH:mm:ss zzz");
@@ -231,6 +232,15 @@ namespace QTool
             }
             return flag;
         }
+		//public static GameObject CreateInstance(this GameObject prefab)
+		//{
+		//	var obj = GameObject.Instantiate(prefab);
+		//	if (obj.transform is RectTransform)
+		//	{
+		//		(obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
+		//	}
+		//	return obj;
+		//}
     }
     public class SecondsAverageList
     {
