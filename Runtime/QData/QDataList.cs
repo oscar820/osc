@@ -28,7 +28,7 @@ namespace QTool{
 				foreach (var member in typeInfo.Members)
 				{
 					data.TitleRow.Add(member.ViewName);
-					data["默认"].Add(member.Get(defaultRow).ToQDataType(type, false));
+					data["默认"].Add(member.Get(defaultRow).ToQDataType(member.Type, false));
 				}
 			});
 			list.Clear();
