@@ -324,7 +324,7 @@ namespace QTool
 									}
 									else
 									{
-										throw new Exception("读取List出错[" + type + "][" + reader.ToString() + "]");
+										throw new Exception("读取List出错[" + type + "][" + reader.ReadToEnd() + "]");
 									}
 									return list;
 								}
