@@ -50,11 +50,13 @@ namespace QTool.FlowGraph
 
 		public void OnAfterDeserialize()
 		{
-			SerializeString.ParseQData(this)?.Init();
+			SerializeString.ParseQData(this);
+			InitOver = false;
+			InitCheck();
 		}
 		public QFlowGraph CreateInstance()
 		{
-			return this.ToQData().ParseQData<QFlowGraph>().Init();
+			return this.ToQData().ParseQData<QFlowGraph>().InitCheck();
 		}
 		static QFlowGraph()
 		{
@@ -66,9 +68,8 @@ namespace QTool.FlowGraph
         }
 		public string Name {  set; get; }
 		public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
-        [QIgnore]
-        public Action<IEnumerator> StartCoroutineOverride;
         public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
+		public bool IsRunning => CoroutineList.Count > 0;
         public T GetValue<T>(string key)
         {
             var type = typeof(T);
@@ -166,54 +167,108 @@ namespace QTool.FlowGraph
             NodeList.Add(node);
             node.Init(this);
             return node;
-        }
-        internal void StartCoroutine(IEnumerator coroutine)
+		}
+		[QIgnore]
+		public Func<IEnumerator,object> StartCoroutineOverride;
+		[QIgnore]
+		public Action<object> StopCoroutineOverride;
+		[QIgnore]
+		public QDictionary<string, object> CoroutineList { private set; get; } = new QDictionary<string, object>();
+		internal void StartCoroutine(string key,IEnumerator coroutine)
         {
             if (StartCoroutineOverride == null)
             {
-                QToolManager.Instance.StartCoroutine(coroutine);
+				CoroutineList[key] = QToolManager.Instance.StartCoroutine(coroutine);
             }
             else
             {
-                StartCoroutineOverride(coroutine);
+				CoroutineList[key] = StartCoroutineOverride(coroutine);
             }
         }
-        public void Run(string startNode, Action<IEnumerator> StartCoroutineOverride = null)
+		public void Stop()
+		{
+			if (StopCoroutineOverride == null)
+			{
+				foreach (var kv in CoroutineList)
+				{
+					if(kv.Value is Coroutine cor)
+					{
+						QToolManager.Instance.StopCoroutine(cor);
+					}
+				}
+			}
+			else
+			{
+				foreach (var kv in CoroutineList)
+				{
+					StopCoroutineOverride(kv.Value);
+				}
+			}
+			CoroutineList.Clear();
+		}
+		public void Run(string startNode)
+		{
+			StartCoroutine(startNode, RunIEnumerator(startNode));
+		}
+        public void Run(string startNode, Func<IEnumerator, object> StartCoroutineOverride , Action<object> StopCoroutineOverride)
         {
             this.StartCoroutineOverride = StartCoroutineOverride;
-            StartCoroutine(RunIEnumerator(startNode));
+			this.StopCoroutineOverride = StopCoroutineOverride;
+            StartCoroutine(startNode,RunIEnumerator(startNode));
         }
         public IEnumerator RunIEnumerator(string startNode)
         {
-            var curNode = this[startNode];
-            while (curNode!=null)
-            {
-                yield return curNode.RunIEnumerator();
-                var port= curNode.NextNodePort;
-                if (port != null)
-                {
-                    if (port.Value.port == QFlowKey.FromPort)
-                    {
-                        curNode =this[port.Value.node];
-                    }
-                    else
-                    {
-                        this[port.Value.node].TriggerPort(port.Value);
-                        curNode = null; ;
-                    }
-                  
-                }
-                else
-                {
-                    curNode = null;
-                }
-            }
+			if (!Application.isPlaying)
+			{
+				Debug.LogError("运行流程图[" + Name + "]出错 不能在非运行时运行流程图");
+				yield break;
+			}
+			InitCheck();
+			var curNode = this[startNode]; 
+			if (curNode != null)
+			{
+				Debug.Log("以[" + startNode + "]为起点 运行流程图 [" + Name + "]");
+				while (curNode != null)
+				{
+					yield return curNode.RunIEnumerator();
+					var port = curNode.NextNodePort;
+					if (port != null)
+					{
+						if (port.Value.port == QFlowKey.FromPort)
+						{
+							curNode = this[port.Value.node];
+						}
+						else
+						{
+							this[port.Value.node].TriggerPort(port.Value);
+							curNode = null; ;
+						}
+
+					}
+					else
+					{
+						curNode = null;
+					}
+				}
+			}
+			else
+			{
+				Debug.LogError("不存在开始节点 [" + startNode + "]");
+			}
+			CoroutineList.RemoveKey(startNode);
         }
-        public QFlowGraph Init()
+		[QIgnore]
+		public bool InitOver { set; get; }
+        internal QFlowGraph InitCheck() 
         {
-            foreach (var state in NodeList)
+			if (InitOver) return this;
+			InitOver = true;
+			foreach (var state in NodeList)
             {
-                state.Init(this);
+				if (!state.Init(this))
+				{
+					InitOver = false;
+				}
             }
             return this;
         }
@@ -587,7 +642,8 @@ namespace QTool.FlowGraph
             TaskDelayVoid,
             TaskDelayValue
         }
-
+		[QIgnore]
+		public bool IsRunning { private set; get; }
         [QIgnore]
         public QFlowGraph Graph { private set; get; }
         [QIgnore]
@@ -674,9 +730,10 @@ namespace QTool.FlowGraph
             port.Init(this);
             return port;
         }
-        public void Init(QFlowGraph graph)
+        public bool Init(QFlowGraph graph)
         {
             this.Graph = graph;
+			if (command != null) return true;
             command = QCommand.GetCommand(commandKey);
             if (command == null)
             {
@@ -685,9 +742,10 @@ namespace QTool.FlowGraph
                     port.Init(this);
                 }
                 Debug.LogError("不存在命令【" + commandKey + "】");
-                return;
+                return false; 
             }
-            this.name = command.name.SplitEndString("/");
+
+			this.name = command.name.SplitEndString("/");
             if (command.method.GetAttribute<QStartNodeAttribute>() == null)
             {
                 AddPort(QFlowKey.FromPort);
@@ -707,10 +765,11 @@ namespace QTool.FlowGraph
                 var port = AddPort(paramInfo.Name, outputAtt, paramInfo.ViewName(), paramInfo.ParameterType.GetTrueType(), paramInfo.GetAttribute<QFlowPortAttribute>());
                 port.paramIndex = i;
                 port.KeyNameAttribute = paramInfo.GetAttribute<QNodeKeyNameAttribute>();
+				
                 if (paramInfo.HasDefaultValue&&port.Value==null)
                 {
                     port.Value = paramInfo.DefaultValue;
-                }
+                } 
                 if (port.isOutput)
                 {
                     if (port.OutputPort.autoRunNode)
@@ -730,9 +789,17 @@ namespace QTool.FlowGraph
                         }
                     }
                 }
-             
+				if (port.KeyNameAttribute != null)
+				{
+					if (port.Value != null)
+					{
+						Key = port.Value.ToString();
+						name = Key;
+					}
+				}
 
-            }
+
+			}
             if (command.method.ReturnType == typeof(void))
             {
                 returnType = ReturnType.Void;
@@ -760,6 +827,7 @@ namespace QTool.FlowGraph
                 returnType = ReturnType.ReturnValue;
             }
             Ports.RemoveAll((port) => port.Node == null);
+			return true;
         }
         internal PortId? NextNodePort
         {
@@ -843,7 +911,7 @@ namespace QTool.FlowGraph
         }
         public void RunPort(string portKey)
         {
-            Graph.StartCoroutine(RunPortIEnumerator(portKey));
+            Graph.StartCoroutine(Key,RunPortIEnumerator(portKey));
         }
         public IEnumerator RunPortIEnumerator(string portKey)
         {
@@ -865,7 +933,8 @@ namespace QTool.FlowGraph
 				Debug.LogError("不存在命令【" + commandKey + "】");
 				yield break;
 			}
-            var returnObj = InvokeCommand();
+			IsRunning = true;
+			var returnObj = InvokeCommand();
             switch (returnType)
             {
                 case ReturnType.ReturnValue:
@@ -889,7 +958,9 @@ namespace QTool.FlowGraph
                 default:
                     break;
             }
-            foreach (var port in OutParamPorts)
+			IsRunning = false;
+
+			foreach (var port in OutParamPorts)
             {
                 port.Value = commandParams[port.paramIndex];
             }

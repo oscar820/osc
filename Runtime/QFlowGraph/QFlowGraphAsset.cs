@@ -13,9 +13,9 @@ namespace QTool.FlowGraph
         {
 			Graph= qsmStr.ParseQData(Graph);
 			Graph.SerializeString = qsmStr;
-        }
+		}
         public void Save()
-        {
+        { 
             try
             {
 #if UNITY_EDITOR

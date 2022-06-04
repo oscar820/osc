@@ -45,7 +45,12 @@ public class QFlowTest : MonoBehaviour
         graph.Run(logNode.Key);
      
     }
-    // Update is called once per frame
+	// Update is called once per frame
+	[ContextMenu("停止【测试事件】")]
+	public void Stop()
+	{
+		graphAsset?.Graph.Stop();
+	}
     void Update()
     {
         
