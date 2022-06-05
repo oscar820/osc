@@ -227,48 +227,47 @@ namespace QTool.Reflection
 		public static object OperaterSubtract(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Subtract(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(object))).Compile()();
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Subtract(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
 		}
 		public static object OperaterMultiply(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Multiply(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(object))).Compile()();
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Multiply(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
 
 		}
 		public static object OperaterDivide(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Divide(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(object))).Compile()();
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Divide(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
 		}
 
 		public static bool OperaterGreaterThan(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.GreaterThan(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(bool))).Compile()();
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.GreaterThan(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
 		}
 		public static bool OperaterLessThan(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.LessThan(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(bool))).Compile()();
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.LessThan(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
 		}
 		public static bool OperaterGreaterThanOrEqual(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.GreaterThanOrEqual(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(bool))).Compile()();
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.GreaterThanOrEqual(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
 		}
 		public static bool OperaterLessThanOrEqual(this object a, object b)
 		{
 			var type = GetOperaterType(a, b);
-			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.LessThanOrEqual(Expression.Constant(a.ConvertToType(type)), Expression.Constant(b.ConvertToType(type))), typeof(bool))).Compile()();
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.LessThanOrEqual(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
 		}
 		public static T ConvertTo<T>(this object obj)
 		{
-			
 			return (T)Convert.ChangeType(obj, typeof(T));
 		}
 		public static object ConvertToType(this object obj,Type type)
 		{
-			return Convert.ChangeType(obj, type);
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Constant(obj), type)).Compile()();
 		}
 		public static bool OperaterEqual(this object a, object b)
 		{
