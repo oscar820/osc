@@ -63,6 +63,55 @@ namespace QTool.FlowGraph
 			return QReflection.OperaterDivide(a, b);
 		}
 
+
+		[ViewName("运算/大于")]
+		[return: QOutputPort(true)]
+		public static bool GreaterThan(object a, object b)
+		{
+			return QReflection.OperaterGreaterThan(a, b);
+		}
+		[ViewName("运算/大于等于")]
+		[return: QOutputPort(true)]
+		public static bool GreaterThanOrEqual(object a, object b)
+		{
+			return QReflection.OperaterGreaterThanOrEqual(a, b);
+		}
+		[ViewName("运算/小于")]
+		[return: QOutputPort(true)]
+		public static bool LessThan(object a, object b)
+		{
+			return QReflection.OperaterLessThan(a, b);
+		}
+		[ViewName("运算/小于等于")]
+		[return: QOutputPort(true)]
+		public static bool LessThanOrEqual(object a, object b)
+		{
+			return QReflection.OperaterLessThanOrEqual(a, b);
+		}
+		[ViewName("运算/等于")]
+		[return: QOutputPort(true)]
+		public static bool Equal(object a, object b)
+		{
+			return QReflection.OperaterEqual(a, b);
+		}
+		[ViewName("逻辑运算/与")]
+		[return: QOutputPort(true)]
+		public static bool And(bool a, bool b)
+		{
+			return a && b;
+		}
+		[ViewName("逻辑运算/或")]
+		[return: QOutputPort(true)]
+		public static bool Or(bool a, bool b)
+		{
+			return a || b;
+		}
+		[ViewName("逻辑运算/非")]
+		[return: QOutputPort(true)]
+		public static bool Not(bool a)
+		{
+			return !a;
+		}
 	}
 	[System.Serializable]
     public class QFlowGraph:ISerializationCallbackReceiver

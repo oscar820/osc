@@ -241,6 +241,30 @@ namespace QTool.Reflection
 			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Divide(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
 		}
 
+		public static bool OperaterGreaterThan(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.GreaterThan(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
+		}
+		public static bool OperaterLessThan(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.LessThan(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
+		}
+		public static bool OperaterGreaterThanOrEqual(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.GreaterThanOrEqual(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
+		}
+		public static bool OperaterLessThanOrEqual(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<bool>>(Expression.Convert(Expression.LessThanOrEqual(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(bool))).Compile()();
+		}
+		public static bool OperaterEqual(this object a, object b)
+		{
+			return Equals(a, b);
+		}
 		public static T GetAttribute<T>(this ICustomAttributeProvider info) where T :Attribute
         {
             var type = typeof(T);

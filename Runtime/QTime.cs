@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using QTool.Reflection;
 namespace QTool
 {
     public static class QTime
@@ -42,13 +43,19 @@ namespace QTool
             UpdateTimeScale();
         }
     }
-    public abstract class WaitTimeBase<T>
+	public class WaitTime : WaitTime<float>
+	{
+	}
+	public class WaitTime<T>
     {
         public T Time { get; protected set; }
         public T CurTime { get; protected set; }
 
 
-        public abstract void Clear();
+        public void Clear()
+		{
+			CurTime = (T)(object)0;
+		}
         public void Over()
         {
             CurTime = Time;
@@ -63,12 +70,14 @@ namespace QTool
             Clear();
             if (startOver) Over();
         }
-
-        protected abstract void AddTime(T addValue);
-        protected abstract bool IsOver(out T timeOffset);
+		bool IsOver(out T timeOffset)
+		{
+			timeOffset =(T) CurTime.OperaterSubtract( Time);
+			return timeOffset.OperaterGreaterThan(0);
+		}
         public bool Check(T deltaTime, bool autoClear = true)
         {
-            AddTime(deltaTime);
+			CurTime = (T)CurTime.OperaterAdd(deltaTime);
             if (IsOver(out var timeOffset))
             {
                 if (autoClear) { CurTime = timeOffset; }
@@ -78,27 +87,6 @@ namespace QTool
             {
                 return false;
             }
-        }
-    }
-    public class WaitTime : WaitTimeBase<float>
-    {
-        public WaitTime(float time, bool startOver = false)
-        {
-            Reset(time, startOver);
-        }
-        public override void Clear()
-        {
-            CurTime = 0;
-        }
-        protected override void AddTime(float addValue)
-        {
-            CurTime += addValue;
-        }
-
-        protected override bool IsOver(out float timeOffset)
-        {
-            timeOffset = CurTime - Time;
-            return timeOffset > 0;
         }
     }
 }
