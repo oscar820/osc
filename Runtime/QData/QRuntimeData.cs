@@ -18,6 +18,10 @@ namespace QTool
 				return Values[key].Value;
 			}
 		}
+		public void Clear()
+		{
+			Values.Clear();
+		}
 	}
 	public class QRuntimeValue<T> : IKey<string> 
 	{
