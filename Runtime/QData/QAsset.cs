@@ -402,7 +402,103 @@ namespace QTool.Asset
     }
     public abstract class PrefabAssetList<TLabel>: AssetList<TLabel,GameObject> where TLabel:PrefabAssetList<TLabel>
     {
-    
+        static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
+        static async Task<ObjectPool<GameObject>> GetPool(string key)
+        {
+            var poolkey = key + "_AssetList";
+            if (!PoolDic.ContainsKey(poolkey))
+            {
+                var prefab =await GetAsync(key) as GameObject;
+                if (!PoolDic.ContainsKey(poolkey))
+                {
+                    if (prefab == null)
+                    {
+                        Debug.LogError(Label + "找不到预制体资源" + key);
+                        PoolDic.Add(poolkey, null);
+                    }
+                    else
+                    {
+                        var pool = QPoolManager.GetPool(poolkey, prefab);
+                        if (!PoolDic.ContainsKey(poolkey))
+                        {
+                            PoolDic.Add(poolkey, pool);
+                        }
+                    }
+                }
+            }
+            return PoolDic[poolkey];
+        }
+      
+        public static async Task<GameObject> GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
+        {
+            var obj =await GetInstance(key, parent);
+            obj.transform.position = position;
+            obj.transform.localRotation = rotation;
+            return obj;
+        }
+        public static async void Push(string key,GameObject obj)
+        {
+            if (key.Contains(" "))
+            {
+                key = key.Substring(0, key.IndexOf(" "));
+            }
+            (await GetPool(key))?.Push(obj);
+        }
+        public static void Push(GameObject obj)
+        {
+            Push(obj.name, obj);
+        }
+        public static void Push(List<GameObject> objList)
+        {
+            foreach (var obj in objList)
+            {
+                Push(obj);
+            }
+            objList.Clear();
+        }
+        public static async Task<GameObject> GetInstance(string key, Transform parent = null)
+        {
+            var pool = await GetPool(key);
+            if (pool == null)
+            {
+                Debug.LogError("无法实例化预制体[" + key + "]");
+                return null;
+            }
+            var obj = pool.Get();
+            if (obj == null)
+            {
+                return null;
+            }
+            if (parent != null)
+            {
+                obj.transform.SetParent(parent,false);
+            }
+            if (obj.transform is RectTransform)
+            {
+                var prefab = await GetAsync(key);
+                (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
+            }
+            obj.name = key;
+            return obj;
+        }
+        public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
+        {
+            var obj =await GetInstance(key, parent);
+            if (obj == null)
+            {
+                return null;
+            }
+            return obj.GetComponent<CT>();
+        }
+        public async static Task<CT> GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
+        {
+            var obj =await GetInstance(key, pos, rotation, parent);
+            if (obj == null)
+            {
+                return null;
+            }
+            return obj.GetComponent<CT>();
+        }
     }
 }
 
