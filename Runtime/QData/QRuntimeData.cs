@@ -29,8 +29,8 @@ namespace QTool
 		{
 			baseValue = value;
 		}
-		public T baseValue = (T)(object)0;
-		public T percentValue = (T)(object)1;
+		public T baseValue = 0.ConvertTo<T>();
+		public T percentValue = 1.ConvertTo<T>();
 		public T Value
 		{
 			get

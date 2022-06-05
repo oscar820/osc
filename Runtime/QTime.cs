@@ -54,7 +54,7 @@ namespace QTool
 
         public void Clear()
 		{
-			CurTime = (T)(object)0;
+			CurTime = 0.ConvertTo<T>();
 		}
         public void Over()
         {
