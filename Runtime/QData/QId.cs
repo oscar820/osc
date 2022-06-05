@@ -7,7 +7,7 @@ using QTool.Inspector;
 using QTool.Asset;
 namespace QTool
 {
-    public class QIdPrefab : PrefabAssetList<QIdPrefab>
+    public class QIdPrefabs : PrefabAssetList<QIdPrefabs>
     {
 
     }
@@ -98,7 +98,7 @@ namespace QTool
                     }
                     else if(createFunc!=null)
                     {
-                        var prefab = QIdPrefab.Get(prefabId);
+                        var prefab = QIdPrefabs.Get(prefabId);
                         if (prefab != null)
                         {
                             var id = createFunc.Invoke(prefab);
