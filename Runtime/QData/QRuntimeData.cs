@@ -27,15 +27,15 @@ namespace QTool
 		}
 		public QRuntimeValue(T value)
 		{
-			baseValue = value;
+			BaseValue = value;
 		}
-		public T baseValue = 0.ConvertTo<T>();
-		public T percentValue = 1.ConvertTo<T>();
+		public T BaseValue { get; set; } = 0.ConvertTo<T>();
+		public T MultiplyValue { get; set; } = 1.ConvertTo<T>();
 		public T Value
 		{
 			get
 			{
-				return (T)baseValue.OperaterMultiply(percentValue);
+				return (T)BaseValue.OperaterMultiply(MultiplyValue);
 			}
 		}
 	}
