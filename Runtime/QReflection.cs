@@ -263,7 +263,7 @@ namespace QTool.Reflection
 		}
 		public static T ConvertTo<T>(this object obj)
 		{
-			return (T)Convert.ChangeType(obj, typeof(T));
+			return (T)ConvertToType(obj, typeof(T));
 		}
 		public static object ConvertToType(this object obj,Type type)
 		{
