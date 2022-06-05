@@ -267,7 +267,7 @@ namespace QTool.Reflection
 		}
 		public static object ConvertToType(this object obj,Type type)
 		{
-			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Constant(obj), type)).Compile()();
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Convert(Expression.Constant(obj), type),typeof(object))).Compile()();
 		}
 		public static bool OperaterEqual(this object a, object b)
 		{
