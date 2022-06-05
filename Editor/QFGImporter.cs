@@ -12,8 +12,9 @@ namespace QTool.FlowGraph
         {
             var qfg= ScriptableObject.CreateInstance<QFlowGraphAsset>();
 			qfg.Init(File.ReadAllText(ctx.assetPath));
-            ctx.AddObjectToAsset(nameof(qfg), qfg); 
+			ctx.AddObjectToAsset(nameof(qfg), qfg); 
             ctx.SetMainObject(qfg);
-        }
+			qfg.Graph.Name = Path.GetFileName(ctx.assetPath);
+		}
     }
 }

@@ -53,10 +53,13 @@ namespace QTool.FlowGraph
                 selectPath= AssetDatabase.GetAssetPath(Selection.activeObject);
             }
             var path = EditorUtility.SaveFilePanel("保存QFG文件", selectPath, nameof(QFlowGraphAsset), "qfg");
-            FileManager.Save(path, (new QFlowGraph()).ToQData());
-            AssetDatabase.Refresh();
-			var asset = AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path);
-			Open(asset.Graph,asset.Save);
+			if (!string.IsNullOrWhiteSpace(path))
+			{
+				FileManager.Save(path, (new QFlowGraph()).ToQData());
+				AssetDatabase.Refresh();
+				var asset = AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path.ToAssetPath());
+				Open(asset.Graph, asset.Save);
+			}
         }
         [MenuItem("QTool/窗口/流程图")]
         public static void OpenWindow()
