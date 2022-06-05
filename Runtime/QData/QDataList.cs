@@ -79,7 +79,7 @@ namespace QTool{
     }
     public class QDataList: QAutoList<string, QDataRow>
 	{
-		public static string ResourcesPathRoot => FileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '\\';
+		public static string ResourcesPathRoot => FileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
 		//public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
 		public static QDataList GetResourcesData(string name, System.Action<QDataList> autoCreate = null)
 		{

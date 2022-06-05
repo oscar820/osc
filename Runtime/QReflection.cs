@@ -406,7 +406,7 @@ namespace QTool.Reflection
                     if (type != null)
                     {
                         TypeBuffer.Add(typeString, type);
-                        return type;
+                        return type; 
                     }
                     
                 }
@@ -433,9 +433,8 @@ namespace QTool.Reflection
             {
                 return null;
             }
-            Debug.LogError("类型[" + typeString + "]未解析成功");
-            return null;
-
+			Debug.LogError("类型[" + typeString + "]未解析成功");
+			return null;
         }
         public static void ForeachMemeber(this Type type, Action<FieldInfo> fieldInfo, Action<PropertyInfo> propertyInfo = null, BindingFlags bindingFlags= BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
         {

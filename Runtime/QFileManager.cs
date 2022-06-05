@@ -140,7 +140,7 @@ namespace QTool
                 }
             }
         }
-		public const string ResourcesRoot = "Assets\\Resources\\";
+		public const string ResourcesRoot = "Assets/Resources/";
 
 		public static bool Exists(string path,bool checkDirectory=false)
 		{
