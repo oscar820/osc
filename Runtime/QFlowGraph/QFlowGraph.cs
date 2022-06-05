@@ -11,6 +11,7 @@ namespace QTool.FlowGraph
 	public static class QFlowGraphNode
 	{
 		[ViewName("数值/获取变量")]
+		[return: QOutputPort(true)]
 		public static object GetValue(QFlowNode This, string key)
 		{
 			return This.Graph.Values[key];
@@ -35,7 +36,33 @@ namespace QTool.FlowGraph
 		{
 			yield return new WaitForSeconds(time);
 		}
-	
+
+		
+		[ViewName("运算/加")]
+		[return: QOutputPort(true)]
+		public static object Add( object a, object b)
+		{
+			return QReflection.OperaterAdd(a, b);
+		}
+		[ViewName("运算/减")]
+		[return: QOutputPort(true)]
+		public static object Subtract(object a, object b)
+		{
+			return QReflection.OperaterSubtract(a, b);
+		}
+		[ViewName("运算/乘")]
+		[return: QOutputPort(true)]
+		public static object Multiply(object a, object b)
+		{
+			return QReflection.OperaterMultiply(a, b);
+		}
+		[ViewName("运算/除")]
+		[return: QOutputPort(true)]
+		public static object Divide(object a, object b)
+		{
+			return QReflection.OperaterDivide(a, b);
+		}
+
 	}
 	[System.Serializable]
     public class QFlowGraph:ISerializationCallbackReceiver
@@ -299,14 +326,15 @@ namespace QTool.FlowGraph
     /// <summary>
     ///  指定参数端口为输出端口
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Parameter| AttributeTargets.ReturnValue, AllowMultiple = false)]
     public class QOutputPortAttribute : Attribute
     {
         public static QOutputPortAttribute Normal = new QOutputPortAttribute();
 
         public bool autoRunNode=false;
-        public QOutputPortAttribute()
+        public QOutputPortAttribute(bool autoRunNode=false)
         {
+			this.autoRunNode = autoRunNode;
         }
     }
     /// <summary>
@@ -823,7 +851,13 @@ namespace QTool.FlowGraph
             }
             else
             {
-                AddPort(QFlowKey.ResultPort, QOutputPortAttribute.Normal, "结果", command.method.ReturnType.GetTrueType());
+				var outputAtt = command.method.ReturnTypeCustomAttributes.GetAttribute<QOutputPortAttribute>() ??  QOutputPortAttribute.Normal;
+				if (outputAtt.autoRunNode)
+				{
+					Ports.RemoveKey(QFlowKey.FromPort);
+					Ports.RemoveKey(QFlowKey.NextPort);
+				}
+				AddPort(QFlowKey.ResultPort, outputAtt, "结果", command.method.ReturnType.GetTrueType());
                 returnType = ReturnType.ReturnValue;
             }
             Ports.RemoveAll((port) => port.Node == null);

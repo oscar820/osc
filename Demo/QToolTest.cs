@@ -75,6 +75,16 @@ namespace QTool.Test
         {
             QId.InstanceIdList.LoadAllInstance(scenebytes);
         }
+		[ContextMenu("运算符测试")]
+		public void OperarterTest()
+		{
+			var a = UnityEngine.Random.Range(1,100);
+			var b = UnityEngine.Random.Range(1, 100);
+			Debug.Log(a + " + " + b + " = " + a.OperaterAdd(b) + " " + (a + b));
+			Vector2 v2A = new Vector2(UnityEngine.Random.Range(1, 100), UnityEngine.Random.Range(1, 100));
+			Vector2 v2B = new Vector2(UnityEngine.Random.Range(1, 100), UnityEngine.Random.Range(1, 100));
+			Debug.Log(v2A + " + " + v2B + " = " + v2A.OperaterAdd(v2B) + " " + (v2A + v2B));
+		}
 		public int testTimes = 1;
         [ContextMenu("序列化测试")]
         public void TestFunc()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -196,14 +197,51 @@ namespace QTool.Reflection
     #endregion
     public static class QReflection
 	{
-	
-		public static T GetAttribute<T>(this MethodInfo info) where T : Attribute
-        {
-            var type = typeof(T);
-            var array = info.GetCustomAttributes(typeof(T), true);
-            return array.QueuePeek() as T;
-        }
-        public static T GetAttribute<T>(this ParameterInfo info) where T :Attribute
+		static Type GetOperaterType(object a,object b)
+		{
+			if (a == null)
+			{
+				return b?.GetType();
+			}
+			else if(b==null)
+			{
+				return a?.GetType();
+			}
+			else
+			{
+				return a.GetType();
+			}
+		}
+		public static object OperaterAdd(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			if (type == typeof(string))
+			{
+				return a?.ToString() + b;
+			}
+			else
+			{
+				return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Add(Expression.Convert( Expression.Constant(a),type), Expression.Convert( Expression.Constant(b),type)), typeof(object))).Compile()();
+			}
+		}
+		public static object OperaterSubtract(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Subtract(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
+		}
+		public static object OperaterMultiply(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Multiply(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
+
+		}
+		public static object OperaterDivide(this object a, object b)
+		{
+			var type = GetOperaterType(a, b);
+			return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Divide(Expression.Convert(Expression.Constant(a), type), Expression.Convert(Expression.Constant(b), type)), typeof(object))).Compile()();
+		}
+
+		public static T GetAttribute<T>(this ICustomAttributeProvider info) where T :Attribute
         {
             var type = typeof(T);
             var array= info.GetCustomAttributes(typeof(T), true);
