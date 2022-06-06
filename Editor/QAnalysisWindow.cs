@@ -25,6 +25,7 @@ namespace QTool
 		private void OnEnable()
 		{
 			Instance = this;
+			updateTime.Reset(10);
 		}
 		public async void FreshData()
 		{
@@ -33,6 +34,9 @@ namespace QTool
 		}
 		public string ViewInfo = "玩家Id";
 		Vector2 viewPos;
+
+
+		WaitTime updateTime = new WaitTime();
 		private void OnGUI()
 		{
 			
@@ -89,6 +93,18 @@ namespace QTool
 				{
 					GUI.enabled = true;
 					GUILayout.Label( "加载中..", QGUITool.BackStyle);
+				}
+				else
+				{
+					if (updateTime.Check(Tool.EditorDeltaTime))
+					{
+						FreshData();
+					}
+					else
+					{
+						Debug.LogError(updateTime.CurTime + "/" + updateTime.Time);
+					}
+					
 				}
 			}
 		
