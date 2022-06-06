@@ -40,7 +40,7 @@ namespace QTool.FlowGraph
             Instance.titleContent = new GUIContent((graph?.Name== null?"":graph.Name + " - ") + nameof(QFlowGraph));
             Instance.Graph = graph;
             Instance.ViewRange = new Rect(Vector2.zero, Instance.position.size);
-            Instance.Repaint();
+			Instance.Show();
 			Instance.OnSave = OnSave;
 
 		}
@@ -721,7 +721,9 @@ namespace QTool.FlowGraph
 			if (GUI.Button(leftRect, "编辑"))
 			{ 
 				var graph = property.GetObject() as QFlowGraph;
-				QFlowGraphWindow.Open(graph, ()=> { graph.Name = property.propertyPath; property.serializedObject.targetObject.SetDirty(); });
+				var path = property.propertyPath;
+				var targetObject = property.serializedObject.targetObject;
+				QFlowGraphWindow.Open(graph, ()=> { graph.Name =path; targetObject.SetDirty(); });
 			}
 		}
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
