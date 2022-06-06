@@ -621,6 +621,11 @@ namespace QTool
 					nextEnd = false;
 					return LastPauseEvent.eventTime - startData.eventTime;
 				}
+				else
+				{
+					nextEnd = false;
+					return TimeSpan.Zero;
+				}
 			}
 			else
 			{
@@ -631,10 +636,18 @@ namespace QTool
 						nextEnd = true;
 						return endData.eventTime - startData.eventTime;
 					}
+					else
+					{
+						nextEnd = false;
+						return TimeSpan.Zero;
+					}
+				}
+				else
+				{
+					nextEnd = true;
+					return TimeSpan.Zero;
 				}
 			}
-			nextEnd = true;
-			return TimeSpan.Zero;
 		}
 		
 		public void FreshMode()
