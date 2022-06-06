@@ -186,8 +186,13 @@ namespace QTool.FlowGraph
             this.StartCoroutineOverride = StartCoroutineOverride;
 			this.StopCoroutineOverride = StopCoroutineOverride;
             StartCoroutine(startNode,RunIEnumerator(startNode));
-        }
-        public IEnumerator RunIEnumerator(string startNode)
+		}
+		public void Run(string startNode, Func<IEnumerator, IEnumerator> StartCoroutineOverride, Action<IEnumerator> StopCoroutineOverride)
+		{
+			Run(startNode, (obj) => StartCoroutineOverride(obj), (obj) => StopCoroutineOverride(obj));
+		}
+
+		public IEnumerator RunIEnumerator(string startNode)
         {
 			if (!Application.isPlaying)
 			{
