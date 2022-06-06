@@ -592,7 +592,14 @@ namespace QTool
 		{
 			return QAnalysisData.Instance.PlayerDataList[QAnalysisData.GetEvent(EventList.StackPeek()).playerId];
 		}
-		static TimeSpan GetTimeSpan(string startId, string endId,out bool nextEnd, string nextId = null)
+		enum TimeState
+		{
+			起止时长,
+			暂离时长,
+			更新结束时间,
+			更新起始时间
+		}
+		static TimeSpan GetTimeSpan(string startId, string endId,out TimeState state, string nextId = null)
 		{
 			QAnalysisEvent startData = QAnalysisData.GetEvent(startId);
 			QAnalysisEvent endData = QAnalysisData.GetEvent(endId);
@@ -618,12 +625,12 @@ namespace QTool
 				}
 				if (LastPauseEvent != null)
 				{
-					nextEnd = false;
+					state = TimeState.暂离时长;
 					return LastPauseEvent.eventTime - startData.eventTime;
 				}
 				else
 				{
-					nextEnd = false;
+					state = TimeState.更新起始时间;
 					return TimeSpan.Zero;
 				}
 			}
@@ -633,18 +640,18 @@ namespace QTool
 				{
 					if (nextData == null || endData.eventTime < nextData.eventTime)
 					{
-						nextEnd = true;
+						state = TimeState.起止时长;
 						return endData.eventTime - startData.eventTime;
 					}
 					else
 					{
-						nextEnd = false;
+						state = TimeState.更新结束时间;
 						return TimeSpan.Zero;
 					}
 				}
 				else
 				{
-					nextEnd = true;
+					state = TimeState.更新起始时间;
 					return TimeSpan.Zero;
 				}
 			}
@@ -711,11 +718,25 @@ namespace QTool
 						TimeSpan allTime = default;
 						while (starIndex<startInfo.EventList.Count)
 						{
-							allTime+= GetTimeSpan(startInfo.EventList[starIndex], endInfo.EventList[endIndex], out var hasEnd, startInfo.EventList[starIndex + 1]);
-							starIndex++;
-							if (hasEnd)
+							allTime+= GetTimeSpan(startInfo.EventList[starIndex], endInfo.EventList[endIndex], out var state, startInfo.EventList[starIndex + 1]);
+						
+							switch (state)
 							{
-								endIndex++;
+								case TimeState.更新结束时间:
+									endIndex++;
+									//if (endIndex > endInfo.EventList.Count)
+									//{
+									//	break;
+									//}
+									break;
+								case TimeState.更新起始时间:
+									starIndex++;
+									
+									break;
+								default:
+									starIndex++;
+									endIndex++;
+									break;
 							}
 						}
 						value = allTime;
