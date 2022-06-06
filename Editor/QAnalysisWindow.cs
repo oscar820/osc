@@ -31,6 +31,7 @@ namespace QTool
 			Repaint();
 		}
 		public string ViewInfo = "玩家Id";
+		public string ViewPlayer = "";
 		Vector2 viewPos;
 		private void OnGUI()
 		{
@@ -98,14 +99,15 @@ namespace QTool
 
 					using (new GUILayout.HorizontalScope())
 					{
-						var rect= DrawCell(ViewInfo, 250, true, true);
-						if (ViewInfo != "玩家Id")
+						var rect= DrawCell(ViewInfo+" "+ViewPlayer, 250, true, true);
+						if (ViewInfo != "玩家Id"||!string.IsNullOrWhiteSpace( ViewPlayer))
 						{
 							rect.xMax *= 0.2f;
 							rect.height *= 0.8f;
 							if (GUI.Button(rect,"返回"))
 							{
 								ViewInfo = "玩家Id";
+								ViewPlayer = "";
 							}
 						}
 						QAnalysisData.ForeachTitle((title) =>
@@ -172,22 +174,48 @@ namespace QTool
 						{
 							foreach (var data in QAnalysisData.Instance.PlayerDataList)
 							{
-								DrawCell("<size=8>"+data.Key+"</size>", 250, true,false);
+								DrawCell("<size=8>"+data.Key+"</size>", 250, true,false,null,()=>
+								{
+									if (ViewInfo != "玩家Id")
+									{
+										ViewPlayer = data.Key;
+									}
+								});
 							}
 						}
-						using (new GUILayout.VerticalScope())
+						if(string.IsNullOrWhiteSpace(ViewPlayer))
 						{
-							foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
+							using (new GUILayout.VerticalScope())
 							{
-								using (new GUILayout.HorizontalScope())
+								foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
 								{
-									QAnalysisData.ForeachTitle((title) =>
+									using (new GUILayout.HorizontalScope())
 									{
-										DrawCell(playerData.AnalysisData[title.Key].value, title.width);
-									});
-									GUILayout.FlexibleSpace();
+										QAnalysisData.ForeachTitle((title) =>
+										{
+											DrawCell(playerData.AnalysisData[title.Key].value, title.width);
+										});
+										GUILayout.FlexibleSpace();
+									}
 								}
 							}
+						}
+						else
+						{
+							using (new GUILayout.HorizontalScope())
+							{
+								var playerData = QAnalysisData.Instance.PlayerDataList[ViewPlayer];
+								var title = QAnalysisData.Instance.TitleList[ViewInfo];
+								using (new GUILayout.VerticalScope())
+								{
+									foreach (var eventData in playerData.EventList)
+									{
+										DrawCell(playerData.AnalysisData[title.Key].value, title.width);
+									}
+								}
+								GUILayout.FlexibleSpace();
+							}
+							
 						}
 						viewPos = playerDataScroll.scrollPosition;
 					}
@@ -220,7 +248,7 @@ namespace QTool
 			{
 				Handles.color = lastColor;
 			}
-			if (menu != null)
+			if (menu != null||cilck!=null)
 			{
 				lastRect.MouseMenuClick(menu, cilck);
 			}
