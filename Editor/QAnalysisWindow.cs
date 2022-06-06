@@ -35,12 +35,13 @@ namespace QTool
 		Vector2 viewPos;
 		private void OnGUI()
 		{
-			if (QAnalysisData.IsLoading)
-			{
-				GUI.enabled = false;
-			}
+			
 			using (var toolBarHor = new GUILayout.HorizontalScope())
 			{
+				if (QAnalysisData.IsLoading)
+				{
+					GUI.enabled = false;
+				}
 				if (DrawButton("刷新数据"))
 				{
 					FreshData();
@@ -84,7 +85,13 @@ namespace QTool
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();
 				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
+				if (QAnalysisData.IsLoading)
+				{
+					GUI.enabled = true;
+					GUILayout.Label( "加载中..", QGUITool.BackStyle);
+				}
 			}
+		
 			using (var playerDataScroll = new GUILayout.ScrollViewScope(viewPos))
 			{
 				using (new GUILayout.VerticalScope())
@@ -187,11 +194,7 @@ namespace QTool
 					}
 				}
 			}
-			if (QAnalysisData.IsLoading)
-			{
-				GUI.enabled = true;
-				GUI.Label(new Rect(Vector2.zero,position.size), "加载中..",QGUITool.BackStyle);
-			}
+		
 			
 		}
 
