@@ -121,7 +121,7 @@ namespace QTool
         T CheckGet(T obj)
         {
 
-            if (isMonobehaviour || isGameObject)
+            if (isCom || isGameObject)
             {
                 if ((obj as T).Equals(null))
                 {
@@ -215,9 +215,9 @@ namespace QTool
             {
                 return obj as GameObject;
             }
-            else if (isMonobehaviour)
+            else if (isCom)
             {
-                return (obj as MonoBehaviour)?.gameObject;
+                return (obj as Component)?.gameObject;
             }
             return null;
         }
@@ -256,13 +256,13 @@ namespace QTool
 
         public Func<T> newFunc;
         public bool isPoolObj = false;
-        public bool isMonobehaviour = false;
+        public bool isCom = false;
         public bool isGameObject = false;
         public ObjectPool(string poolName,Func<T> newFunc=null)
         {
             var type = typeof(T);
             isPoolObj = typeof(IPoolObject).IsAssignableFrom(type);
-            isMonobehaviour = type.IsSubclassOf(typeof(MonoBehaviour));
+            isCom = type.IsSubclassOf(typeof(Component));
             isGameObject = type == typeof(GameObject);
             this.newFunc = newFunc;
             this.Key = poolName;

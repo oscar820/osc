@@ -13,7 +13,7 @@ namespace QTool
     }
     public static class QIdExtends
     {
-        public static QId GetQId(this MonoBehaviour mono)
+        public static QId GetQId(this Component mono)
         {
             if (mono == null)
             {

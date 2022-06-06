@@ -51,7 +51,7 @@ namespace QTool
                 {
                     obj = gObj;
                 }
-                else if (obj is MonoBehaviour monoObj)
+                else if (obj is Component monoObj)
                 {
                     obj = monoObj.gameObject;
                 }
@@ -105,7 +105,7 @@ namespace QTool
         }
         public static Object GetObject(string id,System.Type type)
         {
-			if (typeof(MonoBehaviour).IsAssignableFrom(type))
+			if (typeof(Component).IsAssignableFrom(type))
 			{
 				return Get<GameObject>(id)?.GetComponent(type);
 			}
