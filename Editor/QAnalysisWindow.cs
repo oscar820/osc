@@ -16,16 +16,14 @@ namespace QTool
 			if (Instance == null)
 			{
 				Instance = GetWindow<QAnalysisWindow>();
-				Instance.minSize = new Vector2(400, 300);
+				Instance.minSize = new Vector2(400, 300); 
 			}
 			Instance.titleContent = new GUIContent(nameof(QAnalysis) + " - " + Application.productName);
-			Instance.FreshData();
 			Instance.Show();
 		}
 		private void OnEnable()
 		{
 			Instance = this;
-			updateTime.Reset(10);
 		}
 		public async void FreshData()
 		{
@@ -34,9 +32,6 @@ namespace QTool
 		}
 		public string ViewInfo = "玩家Id";
 		Vector2 viewPos;
-
-
-		WaitTime updateTime = new WaitTime();
 		private void OnGUI()
 		{
 			
@@ -93,18 +88,6 @@ namespace QTool
 				{
 					GUI.enabled = true;
 					GUILayout.Label( "加载中..", QGUITool.BackStyle);
-				}
-				else
-				{
-					if (updateTime.Check(Tool.EditorDeltaTime))
-					{
-						FreshData();
-					}
-					else
-					{
-						Debug.LogError(updateTime.CurTime + "/" + updateTime.Time);
-					}
-					
 				}
 			}
 		
@@ -357,6 +340,7 @@ namespace QTool
 		static QAnalysisData()
 		{
 			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
+			_=AutoFreshData();
 		}
 		public static void ForeachTitle(Action<QTitleInfo> action, string viewInfo=null)
 		{
@@ -391,6 +375,15 @@ namespace QTool
 			}
 		}
 		static List<QAnalysisEvent> newList = new List<QAnalysisEvent>();
+		public static float AutoFreshTime { get; set; } = 120f;
+		static async Task AutoFreshData()
+		{
+			while (Application.isEditor&& AutoFreshTime>0)
+			{
+				await FreshData();
+				await Task.Delay((int)(AutoFreshTime * 1000));
+			}
+		}
 		public static async Task FreshData() 
 		{
 			if (IsLoading) return;
