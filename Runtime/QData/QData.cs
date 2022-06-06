@@ -306,14 +306,22 @@ namespace QTool
 									var list = QReflection.CreateInstance(type, target) as IList;
 									if (reader.NextIs('['))
 									{
-										list.Clear();
+										var count = 0;
 										for (var i = 0; !reader.IsEnd() && !reader.NextIs(']'); i++)
 										{
-											list.Add(reader.ReadType(typeInfo.ElementType, hasName));
-											if(!( reader.NextIs(';') || reader.NextIs(','))){
+											if (i < list.Count)
+											{
+												list[i] = reader.ReadType(typeInfo.ElementType, hasName, list[i]);
+											}
+											else
+											{
+												list.Add(reader.ReadType(typeInfo.ElementType, hasName));
+											}
+											count++;
+											if (!( reader.NextIs(';') || reader.NextIs(','))){
 												if (reader.NextIs(']'))
 												{
-													break;
+													break; 
 												}
 												else
 												{
@@ -321,11 +329,16 @@ namespace QTool
 												}
 											}
 										}
+										for (int i = count; i < list.Count; i++)
+										{
+											list.RemoveAt(i);
+										}
 									}
 									else
 									{
 										throw new Exception("读取List出错[" + type + "][" + reader.ReadToEnd() + "]");
 									}
+									
 									return list;
 								}
 							case QObjectType.Array:
@@ -657,7 +670,7 @@ namespace QTool
 				{
 					objType = QObjectType.List;
 				}
-				else if(type==typeof(TimeSpan))
+				else if (type == typeof(TimeSpan))
 				{
 					objType = QObjectType.TimeSpan;
 				}

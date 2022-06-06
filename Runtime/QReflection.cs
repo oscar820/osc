@@ -388,6 +388,25 @@ namespace QTool.Reflection
                 throw new Exception("通过" + type + "(" + param.ToOneString(",") + ")创建对象" + type + "出错", e);
             }
         }
+		public static bool TypeIs(this Type type,Type checkType)
+		{
+			if (type == checkType)
+			{
+				return true;
+			}
+			else if (type.BaseType.IsAbstract || type.BaseType == null)
+			{
+				return false;
+			}
+			else if (type.IsGenericType&&!type.IsGenericTypeDefinition)
+			{
+				return type.GetGenericTypeDefinition().TypeIs(checkType);
+			}
+			else
+			{ 
+				return type.BaseType.TypeIs(checkType);
+			}
+		}
         static Dictionary<string, Type> TypeBuffer = new Dictionary<string, Type>();
         public static Type ParseType(string typeString)
         {

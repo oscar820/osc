@@ -139,18 +139,10 @@ namespace QTool
 											}
 										}
 									}
-									var count = (mailCount - startIndex + 1);
-									if (count > 0)
-									{
-										Debug.Log("读取 " + startIndex + "->" + mailCount + " 共 " + count + " 封新邮件");
-									}
-									else
-									{
-										Debug.Log("无新邮件");
-									}
 								}
 								for (long i = startIndex; i <= mailCount; i++)
 								{
+									Debug.Log("读取邮件 " + i + "/" + mailCount );
 									var mail = await ReceiveEmail(writer, reader, i, i == mailCount);
 									try
 									{

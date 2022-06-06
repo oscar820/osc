@@ -95,7 +95,12 @@ namespace QTool
         [NonSerialized]
         [XmlIgnore]
         protected Dictionary<TKey, T> dicBuffer = new Dictionary<TKey, T>();
-        public new void Add(T value)
+		public void ClearBuffer()
+		{
+			dicBuffer.Clear();
+		}
+
+		public new void Add(T value)
         {
             if (value != null)
             {
