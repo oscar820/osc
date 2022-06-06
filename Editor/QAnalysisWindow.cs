@@ -592,7 +592,7 @@ namespace QTool
 		{
 			return QAnalysisData.Instance.PlayerDataList[QAnalysisData.GetEvent(EventList.StackPeek()).playerId];
 		}
-		static TimeSpan GetTimeSpan(string startId, string endId, out bool hasEnd, string nextId = null)
+		static TimeSpan GetTimeSpan(string startId, string endId,out bool nextEnd, string nextId = null)
 		{
 			QAnalysisEvent startData = QAnalysisData.GetEvent(startId);
 			QAnalysisEvent endData = QAnalysisData.GetEvent(endId);
@@ -618,7 +618,7 @@ namespace QTool
 				}
 				if (LastPauseEvent != null)
 				{
-					hasEnd = false;
+					nextEnd = false;
 					return LastPauseEvent.eventTime - startData.eventTime;
 				}
 			}
@@ -628,12 +628,12 @@ namespace QTool
 				{
 					if (nextData == null || endData.eventTime < nextData.eventTime)
 					{
-						hasEnd = true;
+						nextEnd = true;
 						return endData.eventTime - startData.eventTime;
 					}
 				}
 			}
-			hasEnd = false;
+			nextEnd = true;
 			return TimeSpan.Zero;
 		}
 		
