@@ -74,15 +74,15 @@ namespace QTool
 				throw new Exception(checkFlag+"读取出错 " +info);
 			}
 		}
-		static async Task<QMailInfo> ReceiveEmail(StreamWriter writer,StreamReader reader, long index,bool getId=false)
+		static async Task<QMailInfo> ReceiveEmail(StreamWriter writer, StreamReader reader, long index, long countIndex = -1)
 		{
-			string Id ="";
-			if (getId)
+			string Id = "";
+			if (index == countIndex)
 			{
 				Id = (await writer.CommondCheckReadLine("UIDL " + index, reader))[2];
 			}
 			await writer.WriteLineAsync("RETR " + index);
-			Debug.Log("读取第 " + index + " 封邮件 大小：" + int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString());
+			Debug.Log("读取第 " + index + "/" + countIndex + " 封邮件 大小：" + int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString());
 			var info = "";
 			string result = null;
 			while (( result = await reader.ReadLineAsync()) != ".")
@@ -142,8 +142,7 @@ namespace QTool
 								}
 								for (long i = startIndex; i <= mailCount; i++)
 								{
-									Debug.Log("读取邮件 " + i + "/" + mailCount );
-									var mail = await ReceiveEmail(writer, reader, i, i == mailCount);
+									var mail = await ReceiveEmail(writer, reader, i, mailCount);
 									try
 									{
 										callBack(mail);

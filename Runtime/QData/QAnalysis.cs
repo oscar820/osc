@@ -28,7 +28,7 @@ namespace QTool
 				return true;
 			}
 		}
-		public static int SendCount { get; set; } =30;
+		public static int AutoSendCount { get; set; } =50;
 		public static void Start(string playerId)
 		{
 			SendEventList();
@@ -116,7 +116,7 @@ namespace QTool
 					triggerEventList.Add(eventData);
 					Debug.Log(StartKey + " 触发事件 " + eventData);
 					PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
-					if (SendCount >= 1 && triggerEventList.Count >= SendCount)
+					if (AutoSendCount >= 1 && triggerEventList.Count >= AutoSendCount)
 					{
 						SendEventList();
 					}
