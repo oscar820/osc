@@ -137,169 +137,213 @@ namespace QTool
 				}
 			}
 
-			using (var playerDataScroll = new GUILayout.ScrollViewScope(viewPos))
 			{
 				using (new GUILayout.VerticalScope())
 				{
 
 					using (new GUILayout.HorizontalScope())
 					{
-						var rect= DrawCell(ViewEvent+" "+ViewPlayer, 250, true, true);
-						if (ViewInfoStack.Count>0)
+						var rect = DrawCell(ViewEvent + " " + ViewPlayer, KeyWidth);
+						if (ViewInfoStack.Count > 0)
 						{
-							rect.xMax *= 0.2f;
-							rect.height *= 0.8f;
-							if (GUI.Button(rect,"返回"))
+							var btnRect = rect;
+							btnRect.xMax *= 0.2f;
+							btnRect.height *= 0.8f;
+							if (GUI.Button(btnRect, "返回"))
 							{
 								ViewBack();
 							}
 						}
-						
-						QAnalysisData.ForeachTitle((title) =>
+
+						Handles.DrawLine(new Vector3(0, rect.yMax), new Vector3(position.width, rect.yMax));
+						Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax,position.height));
+
+						using ( new GUILayout.ScrollViewScope(new Vector2(viewPos.x, 0),GUIStyle.none,GUIStyle.none,GUILayout.Height(CellHeight)))
 						{
-							var viewKey = title.Key;
-							DrawCell(title.ViewKey, title.width, false, true, (menu) => {
-
-								foreach (var eventKey in QAnalysisData.Instance.DataKeyList)
+							using (new GUILayout.HorizontalScope())
+							{
+								QAnalysisData.ForeachTitle((title) =>
 								{
-									menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
+									var viewKey = title.Key;
+									DrawCell(title.ViewKey, title.width, (menu) =>
 									{
-										title.ChangeEvent(eventKey);
+
+										foreach (var eventKey in QAnalysisData.Instance.DataKeyList)
+										{
+											menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
+											{
+												title.ChangeEvent(eventKey);
+											});
+										}
+										var modes = Enum.GetNames(typeof(QAnalysisMode));
+
+										foreach (var mode in modes)
+										{
+											menu.AddItem(new GUIContent("计算方式/" + mode), mode == title.DataSetting.mode.ToString(), () =>
+											{
+												title.ChangeMode(mode);
+											});
+										}
+										menu.AddSeparator("");
+										menu.AddItem(new GUIContent("新建数据列"), false, () =>
+										{
+											if (QTitleWindow.GetNewTitle(out var newTitle))
+											{
+												QAnalysisData.Instance.AddTitle(newTitle);
+												QAnalysisData.Instance.FreshKey(newTitle.Key, true);
+											}
+										});
+
+										menu.AddItem(new GUIContent("设置数据列"), false, () =>
+										{
+											if (QTitleWindow.ChangeTitle(title))
+											{
+												QAnalysisData.Instance.FreshKey(title.Key, true);
+											}
+										});
+										menu.AddItem(new GUIContent("删除数据列"), false, () =>
+										{
+											if (EditorUtility.DisplayDialog("删除确认", "删除数据列 " + title.Key, "确认", "取消"))
+											{
+												QAnalysisData.Instance.RemveTitle(title);
+											}
+										});
+									}
+									, () =>
+									{
+										if (QAnalysisData.Instance.EventKeyList.Contains(title.DataSetting.EventKey))
+										{
+											ViewChange(title.Key, ViewPlayer);
+										}
 									});
-								}
-								var modes = Enum.GetNames(typeof(QAnalysisMode));
-
-								foreach (var mode in modes)
-								{
-									menu.AddItem(new GUIContent("计算方式/" + mode), mode == title.DataSetting.mode.ToString(), () =>
-									{
-										title.ChangeMode(mode);
-									});
-								}
-								menu.AddSeparator("");
-								menu.AddItem(new GUIContent("新建数据列"), false, () =>
-								{
-									if (QTitleWindow.GetNewTitle(out var newTitle))
-									{
-										QAnalysisData.Instance.AddTitle(newTitle);
-										QAnalysisData.Instance.FreshKey(newTitle.Key, true);
-									}
 								});
-
-								menu.AddItem(new GUIContent("设置数据列"), false, () => {
-									if (QTitleWindow.ChangeTitle(title))
-									{
-										QAnalysisData.Instance.FreshKey(title.Key, true);
-									}
-								});
-								menu.AddItem(new GUIContent("删除数据列"), false, () => {
-									if (EditorUtility.DisplayDialog("删除确认", "删除数据列 " + title.Key, "确认", "取消"))
-									{
-										QAnalysisData.Instance.RemveTitle(title);
-									}
-								});
+								GUILayout.FlexibleSpace();
 							}
-							, () => {
-								if (QAnalysisData.Instance.EventKeyList.Contains(title.DataSetting.EventKey))
-								{
-									ViewChange(title.Key, ViewPlayer);
-								}
-							});
-						});
+							
+						}
 						GUILayout.FlexibleSpace();
+						GUILayout.Space(13);
 					}
+					
+
+					
 				
 					using (new GUILayout.HorizontalScope())
 					{
-					
-						if (string.IsNullOrWhiteSpace(ViewPlayer))
+
+						using (new GUILayout.ScrollViewScope(new Vector2(0, viewPos.y), GUIStyle.none, GUIStyle.none, GUILayout.Width(KeyWidth)))
 						{
-							using (new GUILayout.VerticalScope())
-							{
-								for (int i = 0; i < QAnalysisData.Instance.PlayerDataList.Count; i++)
-								{
-									
-									var data = QAnalysisData.Instance.PlayerDataList[i];
-									DrawCell("<size=8>" + data.Key + "</size>", 250, true, false, null, () =>
-									{
-										if (ViewPlayer != data.Key)
-										{
-											ViewChange(ViewEvent, data.Key);
-										}
-										
-									},i);
-									
-								}
-							}
-							if(endIndex>startIndex)
+							if (string.IsNullOrWhiteSpace(ViewPlayer))
 							{
 								using (new GUILayout.VerticalScope())
 								{
-									for (int i = 0; i < startIndex; i++)
+									for (int i = 0; i < QAnalysisData.Instance.PlayerDataList.Count; i++)
 									{
-										DrawCell(null, 100);
-									}
-									for (int i = startIndex; i < endIndex&&i< QAnalysisData.Instance.PlayerDataList.Count; i++)
-									{
-										var playerData = QAnalysisData.Instance.PlayerDataList[i];
-										using (new GUILayout.HorizontalScope())
+
+										var data = QAnalysisData.Instance.PlayerDataList[i];
+										DrawCell("<size=8>" + data.Key + "</size>", KeyWidth, null, () =>
 										{
-											QAnalysisData.ForeachTitle((title) =>
+											if (ViewPlayer != data.Key)
 											{
-												DrawCell(playerData.AnalysisData[title.Key].value, title.width);
-											});
-											GUILayout.FlexibleSpace();
-										}
+												ViewChange(ViewEvent, data.Key);
+											}
+
+										}, i);
+
 									}
 								}
-							}
-						}
-						else
-						{
 
-							var playerData = QAnalysisData.Instance.PlayerDataList[ViewPlayer];
-							using (new GUILayout.VerticalScope())
-							{
-								for (int i = 0; i < viewEventList.Count; i++)
-								{
-									var eventData = QAnalysisData.GetEvent(viewEventList[i]);
-									DrawCell(eventData.eventTime.ToString(), 250, true, false,null,null,i);
-								}
-							}
 
-							if (endIndex > startIndex)
+							}
+							else
 							{
+
+								var playerData = QAnalysisData.Instance.PlayerDataList[ViewPlayer];
 								using (new GUILayout.VerticalScope())
 								{
-									for (int i = 0; i < startIndex; i++)
-									{
-										DrawCell(null, 100);
-									}
-									for (int i = startIndex; i < endIndex&& i<viewEventList.Count; i++)
+									for (int i = 0; i < viewEventList.Count; i++)
 									{
 										var eventData = QAnalysisData.GetEvent(viewEventList[i]);
-										using (new GUILayout.HorizontalScope())
-										{
-											QAnalysisData.ForeachTitle((title) =>
-											{
-												if (eventData.eventKey == title.DataSetting.EventKey)
-												{
-													DrawCell(playerData.AnalysisData[title.Key].GetFreshValue(eventData.eventTime), title.width);
-												}
-												else if (viewEventList.Contains(eventData.Key))
-												{
-													DrawCell(null, title.width);
-												}
-											});
-											GUILayout.FlexibleSpace();
-										}
+										DrawCell(eventData.eventTime.ToString(), KeyWidth, null, null, i);
 									}
 								}
-							
 							}
-							
+							GUILayout.Space(13);
 						}
-						viewPos = playerDataScroll.scrollPosition;
+						GUILayout.Space(6);
+						using (var playerDataScroll = new GUILayout.ScrollViewScope(viewPos))
+						{
+							if (string.IsNullOrWhiteSpace(ViewPlayer))
+							{
+								if (endIndex > startIndex)
+								{
+									using (new GUILayout.VerticalScope())
+									{
+									
+										for (int i = 0;i < QAnalysisData.Instance.PlayerDataList.Count; i++)
+										{
+											if (i >= startIndex && i < endIndex)
+											{
+												var playerData = QAnalysisData.Instance.PlayerDataList[i];
+												using (new GUILayout.HorizontalScope())
+												{
+													QAnalysisData.ForeachTitle((title) =>
+													{
+														DrawCell(playerData.AnalysisData[title.Key].value, title.width);
+													});
+													GUILayout.FlexibleSpace();
+												}
+											}
+											else
+											{
+												DrawCell(null, 100);
+											}
+										}
+
+									}
+								}
+							}
+							else
+							{
+								if (endIndex > startIndex)
+								{
+									var playerData = QAnalysisData.Instance.PlayerDataList[ViewPlayer];
+									using (new GUILayout.VerticalScope())
+									{
+										for (int i = 0; i < viewEventList.Count; i++)
+										{
+											if (i >= startIndex && i < endIndex)
+											{
+												var eventData = QAnalysisData.GetEvent(viewEventList[i]);
+												using (new GUILayout.HorizontalScope())
+												{
+													QAnalysisData.ForeachTitle((title) =>
+													{
+														if (eventData.eventKey == title.DataSetting.EventKey)
+														{
+															DrawCell(playerData.AnalysisData[title.Key].GetFreshValue(eventData.eventTime), title.width);
+														}
+														else if (viewEventList.Contains(eventData.Key))
+														{
+															DrawCell(null, title.width);
+														}
+													});
+													GUILayout.FlexibleSpace();
+												}
+											}
+											else
+											{
+												DrawCell(null, 100);
+
+											}
+											
+										}
+									}
+
+								}
+							}
+							viewPos = playerDataScroll.scrollPosition;
+						}
 					}
 				}
 			}
@@ -313,33 +357,13 @@ namespace QTool
 		}
 
 
-		public Rect DrawCell(string value,float width,bool drawXLine,bool drawYLine,Action<GenericMenu> menu=null,Action cilck=null,int index=-1)
+		public Rect DrawCell(string value,float width,Action<GenericMenu> menu ,Action cilck,int index=-1)
 		{
-			DrawCell(value,width);
-			var lastRect = GUILayoutUtility.GetLastRect();
-
-			var lastColor = Handles.color;
-			if (!drawXLine || !drawYLine)
-			{
-				Handles.color = Color.grey;
-			}
-			if (drawXLine)
-			{
-				Handles.DrawLine(new Vector3(viewPos.x, lastRect.yMax), new Vector3(viewPos.x+position.width, lastRect.yMax));
-			}
-			if (drawYLine)
-			{
-				Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.height)); 
-			}
-			if (!drawXLine || !drawYLine)
-			{
-				Handles.color = lastColor;
-			}
+			var lastRect = DrawCell(value, width);
 			if (menu != null||cilck!=null)
 			{
 				lastRect.MouseMenuClick(menu, cilck);
 			}
-
 			if (index >= 0)
 			{
 				if (Event.current.type == EventType.Repaint)
@@ -367,11 +391,20 @@ namespace QTool
 			}
 			return lastRect;
 		}
-		public void DrawCell(object value,float width)
+		public Rect DrawCell(object value,float width,bool drawLine=true)
 		{
 			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(CellHeight));
+			if (drawLine)
+			{
+				var lastRect = GUILayoutUtility.GetLastRect();
+				Handles.DrawLine(new Vector3(lastRect.xMin, lastRect.yMax), new Vector3(lastRect.xMax, lastRect.yMax));
+				Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
+				return lastRect;
+			}
+			return default;
 		}
 		const float CellHeight=36;
+		const float KeyWidth = 260;
 		public bool DrawButton(string name)
 		{
 			return GUILayout.Button(name, GUILayout.Width(100));
@@ -556,7 +589,6 @@ namespace QTool
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-
 			SaveData();
 			IsLoading = false;
 		}
@@ -743,6 +775,11 @@ namespace QTool
 		}
 		static TimeSpan GetTimeSpan(QAnalysisEvent startData, QAnalysisEvent endData,DateTime endTime, out TimeState state, QAnalysisEvent nextData = null)
 		{
+			if (startData == null)
+			{
+				state = TimeState.更新起始时间;
+				return TimeSpan.Zero;
+			}
 			if (endData == null|| endData.eventTime <= startData.eventTime)
 			{
 				var playerData = QAnalysisData.Instance.PlayerDataList[startData.playerId];
@@ -823,7 +860,7 @@ namespace QTool
 			}
 			var setting = QAnalysisData.TitleList[Key].DataSetting;
 			object freshValue = null;
-			if (EventList.Count != 0)
+			if (EventList.Count > 0)
 			{
 				switch (setting.mode)
 				{
@@ -894,7 +931,7 @@ namespace QTool
 							var starIndex = 0;
 							var endIndex = 0;
 							TimeSpan allTime = default;
-							while (starIndex < startInfo.EventList.Count)
+							while (starIndex < startInfo.EventList.Count) 
 							{
 								var startData = QAnalysisData.GetEvent(startInfo.EventList[starIndex]);
 								if (startData.eventTime > endTime)
