@@ -129,7 +129,7 @@ namespace QTool
 					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功：\n "+GUIUtility.systemCopyBuffer, "确认");
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();
-				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.xMax, lastRect.yMax));
+				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.width, lastRect.yMax));
 				if (QAnalysisData.IsLoading)
 				{
 					GUI.enabled = true;
@@ -325,11 +325,11 @@ namespace QTool
 			}
 			if (drawXLine)
 			{
-				Handles.DrawLine(new Vector3(viewPos.x, lastRect.yMax), new Vector3(viewPos.x+position.xMax, lastRect.yMax));
+				Handles.DrawLine(new Vector3(viewPos.x, lastRect.yMax), new Vector3(viewPos.x+position.width, lastRect.yMax));
 			}
 			if (drawYLine)
 			{
-				Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.yMax)); 
+				Handles.DrawLine(new Vector3(lastRect.xMax, viewPos.y + lastRect.yMin), new Vector3(lastRect.xMax, viewPos.y + position.height)); 
 			}
 			if (!drawXLine || !drawYLine)
 			{
@@ -353,7 +353,7 @@ namespace QTool
 					{
 						if (viewRect.Contains(elementRect[index].center - offset))
 						{
-							startIndex = Math.Max(index - 1, 0);
+							startIndex = Math.Max(index - 2, 0);
 						}
 					}
 					else
