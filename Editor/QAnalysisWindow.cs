@@ -741,19 +741,14 @@ namespace QTool
 			更新结束时间,
 			更新起始时间
 		}
-		static TimeSpan GetTimeSpan(string startId, string endId, out TimeState state, string nextId = null)
+		static TimeSpan GetTimeSpan(QAnalysisEvent startData, QAnalysisEvent endData,DateTime endTime, out TimeState state, QAnalysisEvent nextData = null)
 		{
-			QAnalysisEvent startData = QAnalysisData.GetEvent(startId);
-			QAnalysisEvent endData = QAnalysisData.GetEvent(endId);
-			QAnalysisEvent nextData = QAnalysisData.GetEvent(nextId);
-
 			if (endData == null|| endData.eventTime <= startData.eventTime)
 			{
 				var playerData = QAnalysisData.Instance.PlayerDataList[startData.playerId];
 				QAnalysisEvent LastPauseEvent = null;
-				foreach (var pauseEventId in playerData.AnalysisData[nameof(QAnalysis.QAnalysisEventName.游戏暂离)].EventList)
+				playerData.AnalysisData[nameof(QAnalysis.QAnalysisEventName.游戏暂离)].ForeachEvent(endTime, (pauseEvent) =>
 				{
-					var pauseEvent = QAnalysisData.GetEvent(pauseEventId);
 					if (pauseEvent.eventTime > startData.eventTime)
 					{
 						if (nextData == null || pauseEvent.eventTime < nextData.eventTime)
@@ -762,10 +757,10 @@ namespace QTool
 						}
 						else
 						{
-							break;
+							return;
 						}
 					}
-				}
+				});
 				if (LastPauseEvent != null)
 				{
 					state = TimeState.暂离时长;
@@ -797,7 +792,6 @@ namespace QTool
 			foreach (var eventId in EventList)
 			{
 				var eventData = QAnalysisData.GetEvent(eventId);
-				
 				if (eventData != null&&eventData.eventTime<=dateTime)
 				{
 					action(eventData);
@@ -807,7 +801,19 @@ namespace QTool
 		public void FreshMode()
 		{
 			if (EventList.Count == 0) {value=null ; return; }
-			value =GetFreshValue(QAnalysisData.GetEvent(EventList.StackPeek()).eventTime);
+			value =GetFreshValue(GetPlayerData().UpdateTime);
+		}
+		public QAnalysisEvent GetEndEvent(DateTime endTime)
+		{
+			for (int i = EventList.Count-1; i >=0; i--)
+			{
+				var eventData = QAnalysisData.GetEvent(EventList[i]);
+				if (eventData.eventTime <= endTime)
+				{
+					return eventData;
+				}
+			}
+			return null;
 		}
 		public object GetFreshValue(DateTime endTime)
 		{
@@ -854,14 +860,15 @@ namespace QTool
 							var targetData = GetPlayerData().AnalysisData[setting.TargetKey];
 							if (setting.EventKey.EndsWith("开始"))
 							{
-								freshValue = GetTimeSpan(EventList.StackPeek(), targetData.EventList.StackPeek(), out var hasend);
+								freshValue = GetTimeSpan(GetEndEvent(endTime), targetData.GetEndEvent(endTime),endTime, out var hasend);
 							}
 							else if (setting.EventKey.EndsWith("结束"))
 							{
-								freshValue = GetTimeSpan(targetData.EventList.StackPeek(), EventList.StackPeek(), out var hasend);
+								freshValue = GetTimeSpan(targetData.GetEndEvent(endTime), GetEndEvent(endTime),endTime, out var hasend);
 							}
 							else
 							{
+								EventList.StackPeek();
 								freshValue = TimeSpan.Zero;
 							}
 						}
@@ -889,7 +896,12 @@ namespace QTool
 							TimeSpan allTime = default;
 							while (starIndex < startInfo.EventList.Count)
 							{
-								allTime += GetTimeSpan(startInfo.EventList[starIndex], endInfo.EventList[endIndex], out var state, startInfo.EventList[starIndex + 1]);
+								var startData = QAnalysisData.GetEvent(startInfo.EventList[starIndex]);
+								if (startData.eventTime > endTime)
+								{
+									break;
+								}
+								allTime += GetTimeSpan(startData, QAnalysisData.GetEvent( endInfo.EventList[endIndex]),endTime, out var state, QAnalysisData.GetEvent(startInfo.EventList[starIndex + 1]));
 
 								switch (state)
 								{
@@ -911,7 +923,7 @@ namespace QTool
 						break;
 					case QAnalysisMode.最大值:
 						{
-							freshValue = QAnalysisData.GetEvent(EventList.StackPeek()).eventValue;
+							freshValue = GetEndEvent(endTime).eventValue; 
 							ForeachEvent(endTime, (eventData) =>
 							{
 								if (eventData.eventValue.ToComputeFloat() > freshValue.ToComputeFloat())
@@ -923,7 +935,7 @@ namespace QTool
 						break;
 					case QAnalysisMode.最小值:
 						{
-							freshValue = QAnalysisData.GetEvent(EventList.StackPeek()).eventValue;
+							freshValue = GetEndEvent(endTime).eventValue;
 							ForeachEvent(endTime, (eventData) =>
 							{
 								if (eventData.eventValue.ToComputeFloat() < freshValue.ToComputeFloat())
