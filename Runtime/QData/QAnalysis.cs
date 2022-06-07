@@ -52,7 +52,10 @@ namespace QTool
 			if (!focus)
 			{
 				Trigger(nameof(QAnalysisEventName.游戏暂离));
-				SendEventList();
+				if (!Application.isEditor)
+				{
+					SendEventList();
+				}
 			}
 		}
 		static void OnQuit()
