@@ -6,13 +6,14 @@ using UnityEngine;
 namespace QTool
 {
 	public class QAnalysisTest : MonoBehaviour
-	{		
-	
-	
+	{
+
+		[Range(1,10)]
+		public int idRange=1;
 		[ViewButton("开始")]
 		public void Login()
 		{
-			QAnalysis.Start("TestAccount"+ "_" + Random.Range(1, 10)); 
+			QAnalysis.Start("TestAccount"+ "_" + Random.Range(1, idRange)); 
 		}
 
 		[ViewButton("战斗模拟")]
