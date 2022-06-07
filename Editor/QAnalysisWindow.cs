@@ -33,6 +33,11 @@ namespace QTool
 		public string ViewInfo = "玩家Id";
 		public string ViewPlayer = "";
 		Vector2 viewPos;
+
+		List<string> viewEventList = new List<string>();
+		int viewStart = -1;
+		int viewEnd = - 1;
+		Rect viewRect;
 		private void OnGUI()
 		{
 			
@@ -92,7 +97,6 @@ namespace QTool
 				}
 			}
 
-			List<string> viewEventList = new List<string>();
 			using (var playerDataScroll = new GUILayout.ScrollViewScope(viewPos))
 			{
 				using (new GUILayout.VerticalScope())
@@ -171,28 +175,57 @@ namespace QTool
 					}
 					using (new GUILayout.HorizontalScope())
 					{
+						if(Event.current.type== EventType.Repaint)
+						{
+							viewStart = -1;
+							viewEnd = -1;
+						}
 					
-						if(string.IsNullOrWhiteSpace(ViewPlayer))
+						if (string.IsNullOrWhiteSpace(ViewPlayer))
 						{
 							using (new GUILayout.VerticalScope())
 							{
-								foreach (var data in QAnalysisData.Instance.PlayerDataList)
+								for (int i = 0; i < QAnalysisData.Instance.PlayerDataList.Count; i++)
 								{
+									var data = QAnalysisData.Instance.PlayerDataList[i];
 									DrawCell("<size=8>" + data.Key + "</size>", 250, true, false, null, () =>
 									{
 										ViewPlayer = data.Key;
 									});
+									
+									if (viewStart<0)
+									{
+										var rect = GUILayoutUtility.GetLastRect();
+										if (viewRect.Contains(rect.position-playerDataScroll.scrollPosition))
+										{
+											viewStart = i;
+										}
+									}
+									else 
+									{
+										var rect = GUILayoutUtility.GetLastRect();
+										if (viewRect.Contains(rect.position - playerDataScroll.scrollPosition))
+										{
+											viewEnd = i;
+										}
+									}
 								}
+								Debug.LogError(viewStart + " => " + viewEnd);
 							}
 							using (new GUILayout.VerticalScope())
 							{
-								foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
+								for (int i = 0; i < viewStart; i++)
 								{
+									DrawCell("",100);
+								}
+								for (int i = viewStart; i <= viewEnd; i++)
+								{
+									var playerData = QAnalysisData.Instance.PlayerDataList[i];
 									using (new GUILayout.HorizontalScope())
 									{
 										QAnalysisData.ForeachTitle((title) =>
 										{
-											DrawCell(playerData.AnalysisData[title.Key].value, title.width);
+											DrawCell(playerData.AnalysisData[title.Key].value + " [" + (i < viewEnd && i >= viewStart) + "]", title.width);
 										});
 										GUILayout.FlexibleSpace();
 									}
@@ -248,8 +281,10 @@ namespace QTool
 					}
 				}
 			}
-		
-			
+			if(Event.current.type== EventType.Repaint)
+			{
+				viewRect = GUILayoutUtility.GetLastRect();
+			}
 		}
 
 	
@@ -283,8 +318,9 @@ namespace QTool
 		}
 		public void DrawCell(object value,float width)
 		{
-			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(36));
+			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(cellHeight));
 		}
+		const float cellHeight=36;
 		public bool DrawButton(string name)
 		{
 			return GUILayout.Button(name, GUILayout.Width(100));
