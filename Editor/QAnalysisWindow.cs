@@ -441,7 +441,7 @@ namespace QTool
 							EditorUtility.DisplayDialog("错误的列名", "不能为空", "确认");
 							return;
 						}
-						if (Instance.create&&QAnalysisData.Instance.TitleList.ContainsKey(titleInfo.Key))
+						if (Instance.create&&QAnalysisData.TitleList.ContainsKey(titleInfo.Key))
 						{
 							EditorUtility.DisplayDialog("错误的列名", "已存在列名" + titleInfo.Key, "确认");
 							return;
@@ -468,16 +468,16 @@ namespace QTool
 	public class QAnalysisData
 	{
 		public static QAnalysisData Instance { get; private set; } = Activator.CreateInstance<QAnalysisData>();
-		public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
+		static public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
 		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
-		public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
+		static public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
 		public List<string> EventKeyList = new List<string>();
 		public List<string> DataKeyList = new List<string>();
 		public QMailInfo LastMail=null;
 		public static QAnalysisEvent GetEvent(string eventId)
 		{
 			if (string.IsNullOrEmpty(eventId)) return null;
-			return Instance.EventList[eventId];
+			return EventList[eventId];
 		}
 		static QAnalysisData()
 		{
@@ -487,12 +487,14 @@ namespace QTool
 		public static void Load()
 		{
 			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
+			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList)).ParseQData(EventList);
+			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList)).ParseQData(TitleList);
 		}
 		public static void SaveData()
 		{
 			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey+	"_"	+ nameof(EventList),Instance.EventList.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList), Instance.TitleList.ToQData());
+			FileManager.Save("QTool/" + QAnalysis.StartKey+	"_"	+ nameof(EventList),EventList.ToQData());
+			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList),TitleList.ToQData());
 		}
 		public static void ForeachTitle(Action<QTitleInfo> action, string viewInfo=null)
 		{
@@ -500,7 +502,7 @@ namespace QTool
 			{
 				viewInfo = QAnalysisWindow.Instance.ViewEvent;
 			}
-			foreach (var title in Instance.TitleList)
+			foreach (var title in TitleList)
 			{
 				if (title.CheckView(viewInfo)||title.DataSetting.TargetKey==viewInfo)
 				{
@@ -568,19 +570,18 @@ namespace QTool
 			}
 			SaveData();
 		}
-		public static void Clear(bool clearTitleSetting=false)
+		public static void Clear(bool clearAll=false)
 		{
-			if (clearTitleSetting)
+			if (clearAll)
 			{
+				TitleList.Clear();
 				Instance = Activator.CreateInstance<QAnalysisData>();
 			}
 			else
 			{
-				var titleInfo = Instance.TitleList;
 				var eventKeyList = Instance.EventKeyList;
 				Instance = Activator.CreateInstance<QAnalysisData>();
 				Instance.EventKeyList = eventKeyList;
-				Instance.TitleList = titleInfo;
 			}
 		
 		}
@@ -605,15 +606,15 @@ namespace QTool
 						Instance.DataKeyList.AddCheckExist(key);
 					}
 				}
-				Instance.EventList.Add(eventData);
+				EventList.Add(eventData);
 				Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			}
 		}
 		static void CheckTitle(string key,object value)
 		{
-			if (!Instance.TitleList.ContainsKey(key))
+			if (!TitleList.ContainsKey(key))
 			{
-				var title = Instance.TitleList[key];
+				var title =TitleList[key];
 				title.DataSetting.dataKey = key;
 				if (value != null && Type.GetTypeCode(value.GetType()) != TypeCode.Object)
 				{
@@ -740,12 +741,13 @@ namespace QTool
 			更新结束时间,
 			更新起始时间
 		}
-		static TimeSpan GetTimeSpan(string startId, string endId,out TimeState state, string nextId = null)
+		static TimeSpan GetTimeSpan(string startId, string endId, out TimeState state, string nextId = null)
 		{
 			QAnalysisEvent startData = QAnalysisData.GetEvent(startId);
 			QAnalysisEvent endData = QAnalysisData.GetEvent(endId);
 			QAnalysisEvent nextData = QAnalysisData.GetEvent(nextId);
-			if (endData == null)
+
+			if (endData == null|| endData.eventTime <= startData.eventTime)
 			{
 				var playerData = QAnalysisData.Instance.PlayerDataList[startData.playerId];
 				QAnalysisEvent LastPauseEvent = null;
@@ -777,18 +779,10 @@ namespace QTool
 			}
 			else
 			{
-				if (endData.eventTime > startData.eventTime)
+				if (nextData == null || endData.eventTime < nextData.eventTime)
 				{
-					if (nextData == null || endData.eventTime < nextData.eventTime)
-					{
-						state = TimeState.起止时长;
-						return endData.eventTime - startData.eventTime;
-					}
-					else
-					{
-						state = TimeState.更新结束时间;
-						return TimeSpan.Zero;
-					}
+					state = TimeState.起止时长;
+					return endData.eventTime - startData.eventTime;
 				}
 				else
 				{
@@ -821,7 +815,7 @@ namespace QTool
 			{
 				return TimeData[endTime];
 			}
-			var setting = QAnalysisData.Instance.TitleList[Key].DataSetting;
+			var setting = QAnalysisData.TitleList[Key].DataSetting;
 			object freshValue = null;
 			if (EventList.Count != 0)
 			{
@@ -834,7 +828,7 @@ namespace QTool
 						});
 						break;
 					case QAnalysisMode.起始数据:
-						freshValue = QAnalysisData.Instance.EventList[EventList.QueuePeek()].GetValue(setting.dataKey);
+						freshValue = QAnalysisData.EventList[EventList.QueuePeek()].GetValue(setting.dataKey);
 						break;
 					case QAnalysisMode.最新时间:
 						ForeachEvent(endTime, (eventData) =>
@@ -843,7 +837,7 @@ namespace QTool
 						});
 						break;
 					case QAnalysisMode.起始时间:
-						freshValue = QAnalysisData.Instance.EventList[EventList.QueuePeek()].eventTime;
+						freshValue = QAnalysisData.EventList[EventList.QueuePeek()].eventTime;
 						break;
 					case QAnalysisMode.次数:
 						{
@@ -901,14 +895,9 @@ namespace QTool
 								{
 									case TimeState.更新结束时间:
 										endIndex++;
-										//if (endIndex > endInfo.EventList.Count)
-										//{
-										//	break;
-										//}
 										break;
 									case TimeState.更新起始时间:
 										starIndex++;
-
 										break;
 									default:
 										starIndex++;
@@ -990,7 +979,7 @@ namespace QTool
 		{
 			UpdateTime = eventData.eventTime;
 			EventList.AddCheckExist(eventData.eventId);
-			foreach (var title in QAnalysisData.Instance.TitleList)
+			foreach (var title in QAnalysisData.TitleList)
 			{
 				if (title.DataSetting.EventKey == eventData.eventKey)
 				{
@@ -1023,10 +1012,10 @@ namespace QTool
 			if (freshEventList)
 			{
 				info.EventList.Clear();
-				var setting = QAnalysisData.Instance.TitleList[titleKey].DataSetting;
+				var setting = QAnalysisData.TitleList[titleKey].DataSetting;
 				foreach (var eventId in EventList)
 				{
-					var eventData = QAnalysisData.Instance.EventList[eventId];
+					var eventData = QAnalysisData.EventList[eventId];
 					if (eventData.eventKey == setting.EventKey)
 					{
 						info.EventList.AddCheckExist(eventData.eventId);
