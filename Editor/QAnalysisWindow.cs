@@ -725,7 +725,8 @@ namespace QTool
 		}
 		public void FreshMode()
 		{
-			 value=GetFreshValue(QAnalysisData.GetEvent(EventList.StackPeek()).eventTime);
+			if (EventList.Count == 0) {value=null ; return; }
+			value =GetFreshValue(QAnalysisData.GetEvent(EventList.StackPeek()).eventTime);
 		}
 		public object GetFreshValue(DateTime endTime)
 		{
