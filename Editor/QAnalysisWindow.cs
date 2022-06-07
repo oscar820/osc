@@ -415,7 +415,7 @@ namespace QTool
 			}
 			foreach (var title in Instance.TitleList)
 			{
-				if (title.CheckView(viewInfo))
+				if (title.CheckView(viewInfo)||title.DataSetting.TargetKey==viewInfo)
 				{
 					action(title);
 				}
@@ -566,9 +566,9 @@ namespace QTool
 			{
 				if (Key.Contains("/")) return false;
 			}
-			else
+			else if (!Key.StartsWith(viewInfo))
 			{
-				if (!Key.StartsWith(viewInfo)) return false;
+				return false;
 			}
 			return true;
 		}
@@ -610,27 +610,18 @@ namespace QTool
 		{
 			get
 			{
-				switch (mode)
+				if (EventKey.EndsWith("结束"))
 				{
-					case QAnalysisMode.最新时长:
-					case QAnalysisMode.总时长:
-						if (EventKey.EndsWith("结束"))
-						{
-							return EventKey.Replace("结束", "开始");
-						}
-						else if(EventKey.EndsWith("开始"))
-						{
-							return EventKey.Replace("开始", "结束");
-						}
-						else
-						{
-							return EventKey;
-						}
-					default:
-						return EventKey;
+					return EventKey.Replace("结束", "开始");
 				}
-			
-
+				else if (EventKey.EndsWith("开始"))
+				{
+					return EventKey.Replace("开始", "结束");
+				}
+				else
+				{
+					return EventKey;
+				}
 			}
 		}
 		public override string ToString()
