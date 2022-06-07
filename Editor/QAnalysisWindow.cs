@@ -705,7 +705,7 @@ namespace QTool
 				}
 				else
 				{
-					state = TimeState.更新起始时间;
+					state = TimeState.更新结束时间;
 					return TimeSpan.Zero;
 				}
 			}
