@@ -82,6 +82,7 @@ namespace QTool
 			if (index == countIndex)
 			{
 				Id = (await writer.CommondCheckReadLine("UIDL " + index, reader))[2];
+				Debug.Log("LastID:"+index+"[" + Id+"]");
 			}
 			await writer.WriteLineAsync("RETR " + index);
 			var size = int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString();
@@ -94,9 +95,10 @@ namespace QTool
 			var mail = new QMailInfo(info,index,Id);
 			return mail;
 		}
+		
 		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
 		{
-			
+			QList<QMailInfo> mailList = new QList<QMailInfo>();
 			if (startIndex >endIndex) {
 				Debug.Log("无新邮件");
 				return;
@@ -105,39 +107,45 @@ namespace QTool
 			{
 				threadCount = 1;
 			}
-			List<Task<IList<QMailInfo>>> taskList = new List<Task<IList<QMailInfo>>>();
+			List<Task> taskList = new List<Task>();
 			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex);
 			for (int i = 0; i < threadCount; i++)
 			{
-				taskList.Add(ReceiveRemail(account, startIndex + i, endIndex,threadCount));
+				taskList.Add(ReceiveRemail(account, startIndex + i, endIndex,mailList,threadCount));
 			}
-			var readIndex = startIndex;
 			foreach (var task in taskList)
 			{
-				foreach (var mail in await task)
+				await task;
+			}
+			var readIndex = startIndex;
+			for (int i = 1; i < mailList.Count; i++)
+			{
+				var mail = mailList[i];
+				try
 				{
-					try
+					if (mail == null)
 					{
-						callBack(mail);
+						throw new Exception("邮件为空");
 					}
-					catch (Exception e)
-					{
-						Debug.LogError("读取邮件出错" + readIndex + "/" + endIndex+"：\n"+e);
-					}
-					finally
-					{
-						readIndex++;
-					}
+					callBack(mail);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("读取邮件出错" + readIndex + "/" + endIndex + "：\n" + e);
+				}
+				finally
+				{
+					readIndex++;
 				}
 			}
-			Debug.Log("读取完成：" + readIndex + " -> " + endIndex);
+			Debug.Log("读取完成：" + startIndex + " -> " + endIndex);
 
 		}
-		static async Task<IList<QMailInfo>> ReceiveRemail(QMailAccount account, long startIndex,long endIndex,long threadCount=1)
+		static async Task ReceiveRemail(QMailAccount account, long startIndex,long endIndex, QList<QMailInfo> mailList, long threadCount=1)
 		{
 			if (startIndex >endIndex)
 			{
-				return new QMailInfo[0];
+				return;
 			}
 			using (TcpClient clientSocket = new TcpClient())
 			{
@@ -152,7 +160,6 @@ namespace QTool
 						using (StreamWriter writer = new StreamWriter(stream))
 						{
 							writer.AutoFlush = true;
-							List<QMailInfo> mailList = new List<QMailInfo>();
 							try
 							{
 								await reader.CheckReadLine("SSL连接");
@@ -160,7 +167,11 @@ namespace QTool
 								await writer.CommondCheckReadLine("PASS " + account.password, reader);
 								for (long i = startIndex; i <= endIndex; i+=threadCount)
 								{
-									mailList.Add( await ReceiveEmail(writer, reader, i, endIndex));
+									var mail = await ReceiveEmail(writer, reader, i, endIndex);
+									lock (mailList)
+									{
+										mailList[(int)i] = mail;
+									}
 									Debug.Log("接收 "+i+"/"+endIndex+" 邮件 \t"+startIndex+" 线程");
 								}
 								Debug.Log("接收结束 "+startIndex+" 线程");
@@ -170,7 +181,6 @@ namespace QTool
 								throw new Exception("邮件接收出错：", e);
 							}
 							clientSocket.Close();
-							return mailList;
 						}
 					}
 				}
@@ -193,7 +203,7 @@ namespace QTool
 							writer.AutoFlush = true;
 
 							try
-							{
+							{ 
 								await reader.CheckReadLine("SSL连接");
 								await writer.CommondCheckReadLine("USER " + account.account, reader);
 								await writer.CommondCheckReadLine("PASS " + account.password, reader);
@@ -201,9 +211,9 @@ namespace QTool
 								var endIndex = long.Parse(infos[1]);
 								Debug.Log("邮件总数：" + endIndex + " 总大小：" + long.Parse(infos[2]).ToSizeString());
 								long startIndex = 1;
-								if (!string.IsNullOrWhiteSpace(lastMail?.Id))
+								if (!string.IsNullOrWhiteSpace(lastMail?.Id)) 
 								{
-									Debug.Log("上一封邮件：" +lastMail?.Index+" "+ lastMail.Date);
+									Debug.Log("上一封邮件：" +lastMail.Index+"["+lastMail.Id+"] "+ lastMail.Date);
 									if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
 									{
 										startIndex = lastMail.Index + 1;
@@ -212,9 +222,9 @@ namespace QTool
 									{
 										for (long i = lastMail.Index - 1; i >= 1; i--)
 										{
-											if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
+											if (await writer.IdCheck(i, lastMail.Id, reader))
 											{
-												startIndex = lastMail.Index + 1;
+												startIndex = i+ 1;
 												break;
 											}
 										}

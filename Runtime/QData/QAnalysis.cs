@@ -119,7 +119,6 @@ namespace QTool
 				var data = PlayerPrefs.GetString(EventListKey);
 				if( await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data))
 				{
-					errorInfoList.Clear();
 					triggerEventList.Clear();
 					PlayerPrefs.DeleteKey(EventListKey);
 				}
