@@ -33,6 +33,7 @@ namespace QTool
 		public void Logout()
 		{
 			QAnalysis.Stop();
+			Debug.LogError("游戏结束后");
 		}
 	}
 
