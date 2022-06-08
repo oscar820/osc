@@ -506,6 +506,13 @@ namespace QTool
 			if (string.IsNullOrEmpty(eventId)) return null;
 			return EventList[eventId];
 		}
+		void FreshChangedList()
+		{
+			foreach (var player in PlayerDataList)
+			{
+				player.FreshChangedList();
+			}
+		}
 		static QAnalysisData()
 		{
 			Load();
@@ -542,13 +549,6 @@ namespace QTool
 			TitleList.Add(newTitle);
 			FreshKey(newTitle.Key);
 		}
-		public void FreshAllAnalysis(bool clearEvent=false)
-		{
-			foreach (var title in TitleList)
-			{
-				FreshKey(title.Key, clearEvent);
-			}
-		}
 		public void RemveTitle(QTitleInfo title)
 		{
 			if (TitleList.ContainsKey(title.Key))
@@ -581,7 +581,7 @@ namespace QTool
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-			Instance.FreshAllAnalysis();
+			Instance.FreshChangedList();
 			SaveData();
 			IsLoading = false;
 		}
@@ -1016,6 +1016,15 @@ namespace QTool
 		public string Key { get; set; }
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
+		[QIgnore]
+		public List<string> FreshKeyList = new List<string>();
+		public void FreshChangedList()
+		{
+			foreach (var key in FreshKeyList)
+			{
+				AnalysisData[key].FreshMode();
+			}
+		}
 		public void Add(QAnalysisEvent eventData)
 		{
 			UpdateTime = eventData.eventTime;
@@ -1025,12 +1034,32 @@ namespace QTool
 				if (title.DataSetting.EventKey == eventData.eventKey)
 				{
 					AnalysisData[title.Key].AddEvent(eventData);
+					FreshKeyList.AddCheckExist(title.Key);
+				}
+				else if(title.DataSetting.TargetKey == eventData.eventKey)
+				{
+					FreshKeyList.AddCheckExist(title.Key);
+				}
+				else if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏暂离))
+				{
+					switch (title.DataSetting.mode)
+					{
+						case QAnalysisMode.总时长:
+						case QAnalysisMode.最新时长:
+							{
+								FreshKeyList.AddCheckExist(title.Key);
+							}
+							break;
+						default:
+							break;
+					}
 				}
 			}
 		}
 		public void FreshKey(string titleKey,bool freshEventList)
 		{
 			var info = AnalysisData[titleKey];
+			info.TimeData.Clear();
 			if (freshEventList)
 			{
 				info.EventList.Clear();
