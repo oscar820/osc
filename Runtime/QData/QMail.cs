@@ -225,6 +225,7 @@ namespace QTool
 											if (await writer.IdCheck(i, lastMail.Id, reader))
 											{
 												startIndex = i+ 1;
+												lastMail.Index = i;
 												break;
 											}
 										}
@@ -245,7 +246,15 @@ namespace QTool
 		}
 		public static async Task<bool> IdCheck(this StreamWriter writer ,long index,string Id, StreamReader reader)
 		{
-			return (await writer.CommondCheckReadLine("UIDL " + index, reader))[2] == Id;
+			var task = writer.CommondCheckReadLine("UIDL " + index, reader);
+			try
+			{
+				return (await task)[2] == Id;
+			}
+			catch (Exception e)
+			{
+				return false;
+			}
 		}
 	}
 	
