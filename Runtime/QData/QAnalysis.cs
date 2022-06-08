@@ -46,9 +46,8 @@ namespace QTool
 			Trigger(nameof(QAnalysisEventName.游戏开始),new StartInfo());
 
 			Application.focusChanged += OnFocus;
-			Application.wantsToQuit += OnWantsQuit;
-
 			Application.logMessageReceived += LogCallback;
+			Application.wantsToQuit += OnWantsQuit;
 		}
 		static void LogCallback(string condition, string stackTrace, LogType type)
 		{
@@ -76,12 +75,17 @@ namespace QTool
 		}
 		static bool OnWantsQuit()
 		{
-			Stop().GetAwaiter().OnCompleted(() =>
+			if (stopTask==null)
 			{
-				Application.Quit();
-			});
+				stopTask = Stop();
+				stopTask.GetAwaiter().OnCompleted(() =>
+				{
+					Application.Quit();
+				});
+			}
 			return false;
 		}
+		static Task stopTask = null;
 		public static async Task Stop()
 		{
 			if (!InitOver)
@@ -90,10 +94,11 @@ namespace QTool
 			}
 			Trigger(nameof(QAnalysisEventName.游戏结束));
 			Application.focusChanged -= OnFocus;
-			Application.wantsToQuit -= OnWantsQuit;
 			Application.logMessageReceived -= LogCallback;
 			PlayerId = null;
 			await SendEventListAsync();
+			Application.wantsToQuit -= OnWantsQuit;
+			stopTask = null;
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
 		public static string EventListKey => StartKey + "_" + nameof(triggerEventList);
