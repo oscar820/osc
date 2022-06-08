@@ -82,7 +82,7 @@ namespace QTool
 				Id = (await writer.CommondCheckReadLine("UIDL " + index, reader))[2];
 			}
 			await writer.WriteLineAsync("RETR " + index);
-			Debug.Log("读取第 " + index + "/" + countIndex + " 封邮件 大小：" + int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString());
+			var size = int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString();
 			var info = "";
 			string result = null;
 			while (( result = await reader.ReadLineAsync()) != ".")
@@ -90,8 +90,88 @@ namespace QTool
 				info += result + "\n"; 
 			}
 			var mail = new QMailInfo(info,index,Id);
-			Debug.Log("邮件 " +mail);
 			return mail;
+		}
+		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
+		{
+			var size = (endIndex - startIndex) / threadCount;
+			List<Task<QMailInfo[]>> taskList = new List<Task<QMailInfo[]>>();
+			if (threadCount>1&&size >= 1)
+			{
+				for (long i = startIndex; i < endIndex; i += size)
+				{
+					taskList.Add( ReceiveRemail(account, i, Math.Min(endIndex, i + size-1),endIndex));
+				}
+			}
+			else
+			{
+				taskList.Add( ReceiveRemail(account, startIndex, endIndex, endIndex));
+			}
+			var readIndex = startIndex;
+			foreach (var task in taskList)
+			{
+				foreach (var mail in await task)
+				{
+					try
+					{
+						callBack(mail);
+						Debug.Log("读取邮件" + readIndex + "/" + endIndex);
+					}
+					catch (Exception e)
+					{
+						Debug.LogError("读取邮件出错" + readIndex + "/" + endIndex+"：\n"+e);
+					}
+					finally
+					{
+						readIndex++;
+					}
+				}
+			}
+				
+		}
+		public static async Task<QMailInfo[]> ReceiveRemail(QMailAccount account, long startIndex,long endIndex, long countIndex=-1)
+		{
+			if (endIndex <startIndex)
+			{
+				return new QMailInfo[0];
+			}
+			using (TcpClient clientSocket = new TcpClient())
+			{
+				clientSocket.Connect(account.popServer, 995);
+				//建立SSL连接
+				using (SslStream stream = new SslStream(clientSocket.GetStream(), false, (object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors errors) => { return true; }))
+				{
+
+					stream.AuthenticateAsClient(account.popServer);
+					using (StreamReader reader = new StreamReader(stream, Encoding.Default, true))
+					{
+						using (StreamWriter writer = new StreamWriter(stream))
+						{
+							writer.AutoFlush = true;
+							QMailInfo[] mails = new QMailInfo[endIndex - startIndex+1];
+							try
+							{
+								await reader.CheckReadLine("SSL连接");
+								await writer.CommondCheckReadLine("USER " + account.account, reader);
+								await writer.CommondCheckReadLine("PASS " + account.password, reader);
+								var count = endIndex - startIndex;
+								for (long i = startIndex; i <= endIndex; i++)
+								{
+									mails[i-startIndex] = await ReceiveEmail(writer, reader, i, countIndex);
+									Debug.Log("接收"+startIndex+"=>"+endIndex+"邮件进度" + (int)((i-startIndex)*1f/count*1f*100 )+ "%");
+								}
+								Debug.Log("接收邮件"+startIndex+"=>"+endIndex+"完成");
+							}
+							catch (Exception e)
+							{
+								Debug.LogError("邮件读取出错：" + e);
+							}
+							clientSocket.Close();
+							return mails;
+						}
+					}
+				}
+			}
 		}
 		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo> callBack, QMailInfo lastMail)
 		{
@@ -115,11 +195,8 @@ namespace QTool
 								await writer.CommondCheckReadLine("USER " + account.account, reader);
 								await writer.CommondCheckReadLine("PASS " + account.password, reader);
 								var infos = await writer.CommondCheckReadLine("STAT", reader);
-								var mailCount = long.Parse(infos[1]);
-								Debug.Log("邮件总数：" + mailCount + " 总大小：" + long.Parse(infos[2]).ToSizeString());
-
-
-
+								var endIndex = long.Parse(infos[1]);
+								Debug.Log("邮件总数：" + endIndex + " 总大小：" + long.Parse(infos[2]).ToSizeString());
 								long startIndex = 1;
 								if (!string.IsNullOrWhiteSpace(lastMail?.Id))
 								{
@@ -140,19 +217,7 @@ namespace QTool
 										}
 									}
 								}
-								for (long i = startIndex; i <= mailCount; i++)
-								{
-									var mail = await ReceiveEmail(writer, reader, i, mailCount);
-									try
-									{
-										callBack(mail);
-									}
-									catch (Exception e)
-									{
-										Debug.LogError("读取邮件出错：" + mail.Subject + "\n" + e);
-									}
-								}
-								Debug.Log("接收邮件完成");
+								await ReceiveRemailAsync(account, startIndex, endIndex, callBack,20);
 							}
 							catch (Exception e)
 							{
