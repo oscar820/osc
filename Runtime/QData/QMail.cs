@@ -94,8 +94,13 @@ namespace QTool
 		}
 		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
 		{
+			if (startIndex >endIndex) {
+				Debug.Log("无新邮件");
+				return;
+			}
 			var size = (endIndex - startIndex) / threadCount;
 			List<Task<QMailInfo[]>> taskList = new List<Task<QMailInfo[]>>();
+			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex);
 			if (threadCount>1&&size >= 1)
 			{
 				for (long i = startIndex; i < endIndex; i += size)
@@ -115,7 +120,6 @@ namespace QTool
 					try
 					{
 						callBack(mail);
-						Debug.Log("读取邮件" + readIndex + "/" + endIndex);
 					}
 					catch (Exception e)
 					{
@@ -131,7 +135,7 @@ namespace QTool
 		}
 		public static async Task<QMailInfo[]> ReceiveRemail(QMailAccount account, long startIndex,long endIndex, long countIndex=-1)
 		{
-			if (endIndex <startIndex)
+			if (startIndex >endIndex)
 			{
 				return new QMailInfo[0];
 			}
@@ -158,7 +162,7 @@ namespace QTool
 								for (long i = startIndex; i <= endIndex; i++)
 								{
 									mails[i-startIndex] = await ReceiveEmail(writer, reader, i, countIndex);
-									Debug.Log("接收"+startIndex+"=>"+endIndex+"邮件进度" + (int)((i-startIndex)*1f/count*1f*100 )+ "%");
+									Debug.Log("接收"+startIndex+"=>"+endIndex+"邮件进度" + (int)(count==0?100 :(i-startIndex)*1f/count*1f*100)+ "%");
 								}
 								Debug.Log("接收邮件"+startIndex+"=>"+endIndex+"完成");
 							}

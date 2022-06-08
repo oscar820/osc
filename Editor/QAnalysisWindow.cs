@@ -356,14 +356,20 @@ namespace QTool
 
 		}
 
-
-		public Rect DrawCell(string value,float width,Action<GenericMenu> menu ,Action cilck,int index=-1)
+		public Rect DrawCell(object value,float width,Action<GenericMenu> menu=null ,Action cilck=null,int index=-1)
 		{
-			var lastRect = DrawCell(value, width);
-			if (menu != null||cilck!=null)
+			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(CellHeight));
+			var lastRect = GUILayoutUtility.GetLastRect();
+			Handles.DrawLine(new Vector3(lastRect.xMin, lastRect.yMax), new Vector3(lastRect.xMax, lastRect.yMax));
+			Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
+			if (menu == null)
 			{
-				lastRect.MouseMenuClick(menu, cilck);
+				menu = (m) => m.AddItem(new GUIContent("复制"), false, () =>
+				{
+					GUIUtility.systemCopyBuffer = value?.ToString();
+				});
 			}
+			lastRect.MouseMenuClick(menu, cilck);
 			if (index >= 0)
 			{
 				if (Event.current.type == EventType.Repaint)
@@ -390,18 +396,6 @@ namespace QTool
 				}
 			}
 			return lastRect;
-		}
-		public Rect DrawCell(object value,float width,bool drawLine=true)
-		{
-			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(CellHeight));
-			if (drawLine)
-			{
-				var lastRect = GUILayoutUtility.GetLastRect();
-				Handles.DrawLine(new Vector3(lastRect.xMin, lastRect.yMax), new Vector3(lastRect.xMax, lastRect.yMax));
-				Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
-				return lastRect;
-			}
-			return default;
 		}
 		const float CellHeight=36;
 		const float KeyWidth = 260;

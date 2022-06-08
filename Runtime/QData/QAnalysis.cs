@@ -76,7 +76,10 @@ namespace QTool
 		}
 		static bool OnWantsQuit()
 		{
-		 	Stop();
+			Stop().GetAwaiter().OnCompleted(() =>
+			{
+				Application.Quit();
+			});
 			return false;
 		}
 		public static async Task Stop()
