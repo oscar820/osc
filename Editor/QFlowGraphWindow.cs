@@ -626,7 +626,7 @@ namespace QTool.FlowGraph
                 {
                     if (typeof(UnityEngine.Object).IsAssignableFrom(port.ValueType))
                     {
-                        port.stringValue = QObjectReferenceDrawer.Draw(port.name, port.stringValue, port.ValueType);
+                        port.stringValue = QObjectReferenceDrawer.Draw(port.ViewName, port.stringValue, port.ValueType);
                     }
                     else
                     {

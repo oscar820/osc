@@ -393,7 +393,7 @@ namespace QTool.FlowGraph
 				{
 					return name;
 				}
-				else if(InputPort.HasValue)
+				else if(InputPort.HasValue&&!HasConnect)
 				{
 					return name + " = [" + InputPort.autoGetValue + "]";
 				}

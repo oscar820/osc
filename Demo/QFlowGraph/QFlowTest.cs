@@ -82,7 +82,7 @@ public static class QFlowNodeTest
         await Task.Delay(time*1000);
         return strValue;
     }
-    public static void LogErrorTest([QInputPort( autoGetValue ="自己")]object value)
+    public static void LogErrorTest([QInputPort("自己")]object value)
     {
         Debug.LogError(value);
     }
