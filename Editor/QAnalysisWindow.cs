@@ -509,7 +509,6 @@ namespace QTool
 		static QAnalysisData()
 		{
 			Load();
-			_ =AutoFreshData();
 		}
 		public static void Load()
 		{
@@ -543,6 +542,13 @@ namespace QTool
 			TitleList.Add(newTitle);
 			FreshKey(newTitle.Key);
 		}
+		public void FreshAllAnalysis(bool clearEvent=false)
+		{
+			foreach (var title in TitleList)
+			{
+				FreshKey(title.Key, clearEvent);
+			}
+		}
 		public void RemveTitle(QTitleInfo title)
 		{
 			if (TitleList.ContainsKey(title.Key))
@@ -557,14 +563,6 @@ namespace QTool
 		}
 		static List<QAnalysisEvent> newList = new List<QAnalysisEvent>();
 		public static float AutoFreshTime { get; set; } = 120f;
-		static async Task AutoFreshData()
-		{
-			while (Application.isEditor&& AutoFreshTime>0)
-			{
-				await FreshData();
-				await Task.Delay((int)(AutoFreshTime * 1000));
-			}
-		}
 		public static async Task FreshData() 
 		{
 			if (IsLoading) return;
@@ -583,6 +581,7 @@ namespace QTool
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
+			Instance.FreshAllAnalysis();
 			SaveData();
 			IsLoading = false;
 		}
@@ -754,7 +753,6 @@ namespace QTool
 		{
 			UpdateTime = eventData.eventTime;
 			EventList.AddCheckExist(eventData.Key);
-			FreshMode();
 		}
 		QPlayerData GetPlayerData()
 		{
@@ -1028,30 +1026,11 @@ namespace QTool
 				{
 					AnalysisData[title.Key].AddEvent(eventData);
 				}
-				else if(title.DataSetting.TargetKey == eventData.eventKey)
-				{
-					AnalysisData[title.Key].FreshMode();
-				}
-				else if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏暂离))
-				{
-					switch (title.DataSetting.mode)
-					{
-						case QAnalysisMode.总时长:
-						case QAnalysisMode.最新时长:
-							{
-								AnalysisData[title.Key].FreshMode();
-							}
-							break;
-						default:
-							break;
-					}
-				}
 			}
 		}
 		public void FreshKey(string titleKey,bool freshEventList)
 		{
 			var info = AnalysisData[titleKey];
-			info.TimeData.Clear();
 			if (freshEventList)
 			{
 				info.EventList.Clear();
