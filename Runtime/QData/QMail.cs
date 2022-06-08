@@ -49,7 +49,7 @@ namespace QTool
             }
             else
             {
-                Debug.Log("发送邮件成功 "+message.Subject+" \n"+message.Body);
+                Debug.Log("发送邮件成功 "+message.Subject+" "+ message .Body.ToSizeString()+ " \n"+message.Body);
 				return true;
             }
         }

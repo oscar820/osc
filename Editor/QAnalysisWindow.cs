@@ -268,21 +268,26 @@ namespace QTool
 									}
 								}
 							}
+
+							
 							GUILayout.Space(13);
+						}
+						if (Event.current.type == EventType.Repaint)
+						{
+							viewRect = GUILayoutUtility.GetLastRect();
 						}
 						GUILayout.Space(6);
 						using (var playerDataScroll = new GUILayout.ScrollViewScope(viewPos))
 						{
 							if (string.IsNullOrWhiteSpace(ViewPlayer))
 							{
-								if (endIndex > startIndex)
 								{
 									using (new GUILayout.VerticalScope())
 									{
 									
 										for (int i = 0;i < QAnalysisData.Instance.PlayerDataList.Count; i++)
 										{
-											if (i >= startIndex && i < endIndex)
+											if (i >= startIndex && i <= endIndex)
 											{
 												var playerData = QAnalysisData.Instance.PlayerDataList[i];
 												using (new GUILayout.HorizontalScope())
@@ -305,14 +310,13 @@ namespace QTool
 							}
 							else
 							{
-								if (endIndex > startIndex)
 								{
 									var playerData = QAnalysisData.Instance.PlayerDataList[ViewPlayer];
 									using (new GUILayout.VerticalScope())
 									{
 										for (int i = 0; i < viewEventList.Count; i++)
 										{
-											if (i >= startIndex && i < endIndex)
+											if (i >= startIndex && i <= endIndex)
 											{
 												var eventData = QAnalysisData.GetEvent(viewEventList[i]);
 												using (new GUILayout.HorizontalScope())
@@ -349,7 +353,6 @@ namespace QTool
 			}
 			if (Event.current.type == EventType.Repaint)
 			{
-				viewRect = GUILayoutUtility.GetLastRect();
 				startIndex = -1;
 				endIndex = -1;
 			}
@@ -378,16 +381,18 @@ namespace QTool
 				}
 				else
 				{
-					var offset = new Vector2(0,viewPos.y);
+					var offset = new Vector2(0,viewPos.y- viewRect.y);
 					if (startIndex < 0)
 					{
 						if (viewRect.Contains(elementRect[index].center - offset))
 						{
 							startIndex = Math.Max(index - 2, 0);
+							endIndex = startIndex;
 						}
 					}
 					else
 					{
+						
 						if (viewRect.Contains(elementRect[index].center - offset))
 						{
 							endIndex = Math.Max(endIndex, index + 1);
@@ -529,12 +534,9 @@ namespace QTool
 			FileManager.Save("QTool/" + QAnalysis.StartKey+	"_"	+ nameof(EventList),EventList.ToQData());
 			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList),TitleList.ToQData());
 		}
-		public static void ForeachTitle(Action<QTitleInfo> action, string viewInfo=null)
+		public static void ForeachTitle(Action<QTitleInfo> action)
 		{
-			if (string.IsNullOrEmpty(viewInfo))
-			{
-				viewInfo = QAnalysisWindow.Instance.ViewEvent;
-			}
+			var viewInfo = QAnalysisWindow.Instance.ViewEvent;
 			foreach (var title in TitleList)
 			{
 				if (title.CheckView(viewInfo)||title.DataSetting.TargetKey==viewInfo)
@@ -597,6 +599,7 @@ namespace QTool
 		}
 		public static void Clear(bool clearAll=false)
 		{
+			EventList.Clear();
 			if (clearAll)
 			{
 				TitleList.Clear();
@@ -1022,8 +1025,10 @@ namespace QTool
 		{
 			foreach (var key in FreshKeyList)
 			{
+				AnalysisData[key].TimeData.Clear();
 				AnalysisData[key].FreshMode();
 			}
+			FreshKeyList.Clear();
 		}
 		public void Add(QAnalysisEvent eventData)
 		{
