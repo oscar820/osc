@@ -287,7 +287,6 @@ namespace QTool.FlowGraph
         PortId? nearPortId;
         private void OnGUI()
         {
-			Debug.LogError(Graph?.GetHashCode());
             ViewRange.size = position.size;
             mousePos = Event.current.mousePosition + ViewRange.position;
             DrawBackground();
@@ -633,18 +632,17 @@ namespace QTool.FlowGraph
                     {
                         if(port.FlowPort == null)
                         {
-                            port.Value = port.Value.Draw(port.name, port.ValueType, (obj) => {  port.Value = obj; });
+                            port.Value = port.Value.Draw(port.ViewName, port.ValueType, (obj) => {  port.Value = obj; });
                         }
                         else
                         {
-                            port.Value = port.Value.Draw(port.name, port.ValueType,(obj)=> { port.Value = obj; },  DrawFlowListDot,port.IndexChange);
+                            port.Value = port.Value.Draw(port.ViewName, port.ValueType,(obj)=> { port.Value = obj; },  DrawFlowListDot,port.IndexChange);
                         }
-                            
                     }
                 }
                 else
                 {
-                    EditorGUILayout.LabelField(port.name, port.isOutput ? QGUITool.RightLabel : QGUITool.LeftLable);
+                    EditorGUILayout.LabelField(port.ViewName, port.isOutput ? QGUITool.RightLabel : QGUITool.LeftLable);
                 }
                 lastRect = GUILayoutUtility.GetLastRect();
             }
