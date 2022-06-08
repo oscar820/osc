@@ -77,7 +77,7 @@ public static class QFlowNodeTest
     {
         yield return new WaitForSeconds(time);
     }
-    public static async Task<string> TaskWaitReturnTest(int time,string strValue="wkejw")
+    public static async Task<string> TaskWaitReturnTest(int time=1,string strValue="wkejw")
     {
         await Task.Delay(time*1000);
         return strValue;

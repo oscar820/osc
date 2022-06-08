@@ -800,9 +800,12 @@ namespace QTool.FlowGraph
                 port.paramIndex = i;
                 port.KeyNameAttribute = paramInfo.GetAttribute<QNodeKeyNameAttribute>();
 				
-                if (paramInfo.HasDefaultValue&&port.Value==null)
+                if (paramInfo.HasDefaultValue)
                 {
-                    port.Value = paramInfo.DefaultValue;
+					if(string.IsNullOrEmpty( port.stringValue ))
+					{
+						port.Value = paramInfo.DefaultValue;
+					}
                 } 
                 if (port.isOutput)
                 {
