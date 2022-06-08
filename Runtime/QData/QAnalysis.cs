@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
-using System.Threading;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace QTool
 {
@@ -43,12 +41,14 @@ namespace QTool
 			{
 				return;
 			}
-			Trigger(nameof(QAnalysisEventName.游戏开始),new StartInfo());
 
+			Trigger(nameof(QAnalysisEventName.游戏开始),new StartInfo());
+			errorInfoList.Clear();
 			Application.focusChanged += OnFocus;
 			Application.logMessageReceived += LogCallback;
 			Application.wantsToQuit += OnWantsQuit;
 		}
+		static List<string> errorInfoList = new List<string>();
 		static void LogCallback(string condition, string stackTrace, LogType type)
 		{
 			switch (type)
@@ -58,7 +58,11 @@ namespace QTool
 				case LogType.Log:
 					break;
 				default:
-					Trigger(nameof(QAnalysisEventName.错误日志), condition + '\n' + stackTrace);
+					if (!errorInfoList.Contains(condition))
+					{
+						errorInfoList.Add(condition);
+						Trigger(nameof(QAnalysisEventName.错误日志), condition + '\n' + stackTrace);
+					}
 					break;
 			}
 		}
@@ -113,9 +117,12 @@ namespace QTool
 			if (PlayerPrefs.HasKey(EventListKey))
 			{
 				var data = PlayerPrefs.GetString(EventListKey);
-				await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data);
-				triggerEventList.Clear();
-				PlayerPrefs.DeleteKey(EventListKey);
+				if( await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data))
+				{
+					errorInfoList.Clear();
+					triggerEventList.Clear();
+					PlayerPrefs.DeleteKey(EventListKey);
+				}
 			}
 		}
 		public static async Task SendEventListAsync()

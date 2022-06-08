@@ -19,7 +19,7 @@ namespace QTool
 			_=SendAsync(account, toAddres, title, messageInfo, files);
 		}
 		
-		public static async Task SendAsync(QMailAccount account, string toAddres, string title, string messageInfo ,params string[] files)
+		public static async Task<bool> SendAsync(QMailAccount account, string toAddres, string title, string messageInfo ,params string[] files)
         {
             SmtpClient client = null;
 			client = new SmtpClient(account.smtpServer);
@@ -36,19 +36,21 @@ namespace QTool
 			{
 				message.Attachments.Add(new Attachment(filePath));
 			}
-			await Send(client, message);
+			return await Send(client, message);
         }
-        private static async Task Send(SmtpClient stmpClient, MailMessage message)
+        private static async Task<bool> Send(SmtpClient stmpClient, MailMessage message)
         {
             var task= stmpClient.SendMailAsync(message);
             await task;
             if (task.Exception != null)
             {
                 Debug.LogError("发送邮件失败【"+message.Subject+"】:"+task.Exception);
+				return false;
             }
             else
             {
                 Debug.Log("发送邮件成功 "+message.Subject+" \n"+message.Body);
+				return true;
             }
         }
 		static async Task<string[]> CommondCheckReadLine(this StreamWriter writer,string command,StreamReader reader)
@@ -94,23 +96,20 @@ namespace QTool
 		}
 		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
 		{
+			
 			if (startIndex >endIndex) {
 				Debug.Log("无新邮件");
 				return;
 			}
-			var size = (endIndex - startIndex) / threadCount;
-			List<Task<QMailInfo[]>> taskList = new List<Task<QMailInfo[]>>();
-			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex);
-			if (threadCount>1&&size >= 1)
+			if (threadCount <= 0)
 			{
-				for (long i = startIndex; i < endIndex; i += size)
-				{
-					taskList.Add( ReceiveRemail(account, i, Math.Min(endIndex, i + size-1),endIndex));
-				}
+				threadCount = 1;
 			}
-			else
+			List<Task<IList<QMailInfo>>> taskList = new List<Task<IList<QMailInfo>>>();
+			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex);
+			for (int i = 0; i < threadCount; i++)
 			{
-				taskList.Add( ReceiveRemail(account, startIndex, endIndex, endIndex));
+				taskList.Add(ReceiveRemail(account, startIndex + i, endIndex,threadCount));
 			}
 			var readIndex = startIndex;
 			foreach (var task in taskList)
@@ -131,9 +130,10 @@ namespace QTool
 					}
 				}
 			}
-				
+			Debug.Log("读取完成：" + readIndex + " -> " + endIndex);
+
 		}
-		public static async Task<QMailInfo[]> ReceiveRemail(QMailAccount account, long startIndex,long endIndex, long countIndex=-1)
+		static async Task<IList<QMailInfo>> ReceiveRemail(QMailAccount account, long startIndex,long endIndex,long threadCount=1)
 		{
 			if (startIndex >endIndex)
 			{
@@ -152,26 +152,25 @@ namespace QTool
 						using (StreamWriter writer = new StreamWriter(stream))
 						{
 							writer.AutoFlush = true;
-							QMailInfo[] mails = new QMailInfo[endIndex - startIndex+1];
+							List<QMailInfo> mailList = new List<QMailInfo>();
 							try
 							{
 								await reader.CheckReadLine("SSL连接");
 								await writer.CommondCheckReadLine("USER " + account.account, reader);
 								await writer.CommondCheckReadLine("PASS " + account.password, reader);
-								var count = endIndex - startIndex;
-								for (long i = startIndex; i <= endIndex; i++)
+								for (long i = startIndex; i <= endIndex; i+=threadCount)
 								{
-									mails[i-startIndex] = await ReceiveEmail(writer, reader, i, countIndex);
-									Debug.Log("接收"+startIndex+"=>"+endIndex+"邮件进度" + (int)(count==0?100 :(i-startIndex)*1f/count*1f*100)+ "%");
+									mailList.Add( await ReceiveEmail(writer, reader, i, endIndex));
+									Debug.Log("接收 "+i+"/"+endIndex+" 邮件 \t"+startIndex+" 线程");
 								}
-								Debug.Log("接收邮件"+startIndex+"=>"+endIndex+"完成");
+								Debug.Log("接收结束 "+startIndex+" 线程");
 							}
 							catch (Exception e)
 							{
-								Debug.LogError("邮件读取出错：" + e);
+								throw new Exception("邮件接收出错：", e);
 							}
 							clientSocket.Close();
-							return mails;
+							return mailList;
 						}
 					}
 				}
@@ -204,7 +203,7 @@ namespace QTool
 								long startIndex = 1;
 								if (!string.IsNullOrWhiteSpace(lastMail?.Id))
 								{
-									Debug.Log("上一封邮件：" + lastMail.Date);
+									Debug.Log("上一封邮件：" +lastMail?.Index+" "+ lastMail.Date);
 									if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
 									{
 										startIndex = lastMail.Index + 1;
