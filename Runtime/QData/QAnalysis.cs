@@ -14,6 +14,7 @@ namespace QTool
 			游戏开始,
 			游戏结束,
 			游戏暂离,
+			错误日志,
 		}
 		public static string PlayerId { private set; get; }
 		public static bool InitOver
@@ -31,7 +32,7 @@ namespace QTool
 		public static int AutoSendCount { get; set; } =50;
 		public static void Start(string playerId)
 		{
-			SendEventList();
+			SendEventListAsync();
 			if (playerId == PlayerId)
 			{
 				Debug.LogError(StartKey+" 已登录" + playerId);
@@ -45,7 +46,22 @@ namespace QTool
 			Trigger(nameof(QAnalysisEventName.游戏开始),new StartInfo());
 
 			Application.focusChanged += OnFocus;
-			Application.quitting += OnQuit;
+			Application.wantsToQuit += OnWantsQuit;
+
+			Application.logMessageReceived += LogCallback;
+		}
+		static void LogCallback(string condition, string stackTrace, LogType type)
+		{
+			switch (type)
+			{
+				case LogType.Warning:
+					break;
+				case LogType.Log:
+					break;
+				default:
+					Trigger(nameof(QAnalysisEventName.错误日志), condition + '\n' + stackTrace);
+					break;
+			}
 		}
 		static void OnFocus(bool focus)
 		{
@@ -54,47 +70,55 @@ namespace QTool
 				Trigger(nameof(QAnalysisEventName.游戏暂离));
 				if (!Application.isEditor)
 				{
-					SendEventList();
+					SendEventListAsync();
 				}
 			}
 		}
-		static void OnQuit()
+		static bool OnWantsQuit()
 		{
-			if (!InitOver) return;
-			Trigger(nameof(QAnalysisEventName.游戏结束));
-			SendEventList(false);
+		 	Stop();
+			return false;
 		}
-		public static void Stop()
+		public static async Task Stop()
 		{
 			if (!InitOver)
 			{
 				return;
 			}
 			Trigger(nameof(QAnalysisEventName.游戏结束));
-			SendEventList();
+			await SendEventListAsync();
 			Application.focusChanged -= OnFocus;
-			Application.quitting -= OnQuit;
+			Application.wantsToQuit -= OnWantsQuit;
+			Application.logMessageReceived -= LogCallback;
 			PlayerId = null;
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
 		public static string EventListKey => StartKey + "_" + nameof(triggerEventList);
-		public static void SendEventList(bool clearEventList=true)
+		static Task sendingTask =null;
+		static async Task SendAndClear()
 		{
 			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
 			{
 				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
-				return; 
+				return;
 			}
 			if (PlayerPrefs.HasKey(EventListKey))
 			{
-				var data =PlayerPrefs.GetString( EventListKey);
-				QMailTool.Send(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data);
-				if (clearEventList)
-				{
-					triggerEventList.Clear();
-					PlayerPrefs.DeleteKey(EventListKey);
-				}
+				var data = PlayerPrefs.GetString(EventListKey);
+				await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data);
+				triggerEventList.Clear();
+				PlayerPrefs.DeleteKey(EventListKey);
 			}
+		}
+		public static async Task SendEventListAsync()
+		{
+			if (sendingTask != null)
+			{
+				await sendingTask;
+			}
+			sendingTask = SendAndClear();
+			await sendingTask;
+			sendingTask = null;
 		}
 		static List<QAnalysisEvent> triggerEventList = new List<QAnalysisEvent>();
 		public static void Trigger(string eventKey,object value=null)
@@ -118,7 +142,7 @@ namespace QTool
 					PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
 					if (AutoSendCount >= 1 && triggerEventList.Count >= AutoSendCount)
 					{
-						SendEventList();
+						SendEventListAsync();
 					}
 
 				}
