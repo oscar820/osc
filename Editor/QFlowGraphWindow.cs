@@ -12,33 +12,41 @@ namespace QTool.FlowGraph
     public class QFlowGraphWindow : EditorWindow
     {
         const float dotSize = 16;
-
-
-		QFlowGraph Graph;
+		static QFlowGraph Graph = null;
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line)
         {
             var asset = EditorUtility.InstanceIDToObject(instanceID) as QFlowGraphAsset;
             if (asset != null)
             {
-                Open(asset.Graph, asset.Save);
+				PlayerPrefs.SetString(nameof(QFlowGraphWindow) + "_" + nameof(Graph) + "Path", AssetDatabase.GetAssetPath(asset));
+				Open(asset.Graph, asset.Save);
                 return true;
-            }
+			}
             return false;
         }
-	
+		
 
         public static QFlowGraphWindow Instance { get; private set; }
 		public event Action OnSave;
+		public static void AutoLoadPath()
+		{
+			if (Graph != null) return;
+			Graph= AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(PlayerPrefs.GetString(nameof(QFlowGraphWindow) + "_" + nameof(Graph)+"Path"))?.Graph;
+			if (Graph == null)
+			{
+				PlayerPrefs.SetString(nameof(QFlowGraphWindow) + "_" + nameof(Graph) + "Path", "");
+			}
+		}
         public static void Open(QFlowGraph graph,Action OnSave=null)
         {
             if (Instance == null)
             {
-                Instance = GetWindow<QFlowGraphWindow>();
+                Instance = GetWindow<QFlowGraphWindow>(); 
                 Instance.minSize = new Vector2(400, 300);
             }
             Instance.titleContent = new GUIContent((graph?.Name== null?"":graph.Name + " - ") + nameof(QFlowGraph));
-            Instance.Graph = graph;
+			Graph = graph;
             Instance.ViewRange = new Rect(Vector2.zero, Instance.position.size);
 			Instance.Show();
 			Instance.OnSave = OnSave;
@@ -64,14 +72,15 @@ namespace QTool.FlowGraph
         [MenuItem("QTool/窗口/流程图")]
         public static void OpenWindow()
         {
-            Open(null);
+            Open(null); 
         }
 
         private void OnFocus()
         {
-        }
+			AutoLoadPath();
+		}
         private void OnLostFocus()
-        {
+        { 
 			if (Graph != null)
 			{
 				Graph.OnBeforeSerialize();
@@ -278,6 +287,7 @@ namespace QTool.FlowGraph
         PortId? nearPortId;
         private void OnGUI()
         {
+			Debug.LogError(Graph?.GetHashCode());
             ViewRange.size = position.size;
             mousePos = Event.current.mousePosition + ViewRange.position;
             DrawBackground();
