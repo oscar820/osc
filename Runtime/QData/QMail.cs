@@ -121,6 +121,7 @@ namespace QTool
 			Debug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
 			Debug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
 			startTime = DateTime.Now;
+			await Task.Delay(100);
 			for (long i = startIndex; i <= endIndex; i++)
 			{
 				var mail = mailList[i];
@@ -137,6 +138,7 @@ namespace QTool
 					Debug.LogError("读取邮件出错" + i + "/" + endIndex + "：\n" + e);
 				}
 			}
+			await Task.Delay(100);
 			Debug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
 
 		}
