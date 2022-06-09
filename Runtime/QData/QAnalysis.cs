@@ -250,7 +250,7 @@ namespace QTool
 
 		public static int SortMethod(QAnalysisEvent a, QAnalysisEvent b)
 		{
-			return (int)(a.eventTime - b.eventTime).Ticks;
+			return (int)(a.eventTime.Ticks - b.eventTime.Ticks);
 		}
 	}
 
