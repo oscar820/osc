@@ -363,8 +363,11 @@ namespace QTool
 		{
 			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(CellHeight));
 			var lastRect = GUILayoutUtility.GetLastRect();
+			var lastColor = Handles.color;
+			Handles.color = Color.gray;
 			Handles.DrawLine(new Vector3(lastRect.xMin, lastRect.yMax), new Vector3(lastRect.xMax, lastRect.yMax));
 			Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
+			Handles.color = lastColor;
 			if (menu == null)
 			{
 				menu = (m) => m.AddItem(new GUIContent("复制"), false, () =>
@@ -574,15 +577,21 @@ namespace QTool
 				return;
 			}
 			IsLoading = true;
+
+			newList.Clear();
 			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail, (mailInfo) =>
 			{ 
 				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 				{
-					newList.Clear();
-					AddEvent(mailInfo.Body.ParseQData(newList));
+					newList.AddRange(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
+			newList.Sort();
+			foreach (var eventData in newList)
+			{
+				AddEvent(eventData);
+			}
 			Instance.FreshChangedList();
 			SaveData();
 			IsLoading = false;
@@ -614,29 +623,26 @@ namespace QTool
 		
 		}
 	
-		public static void AddEvent(List<QAnalysisEvent> newEventList)
+		public static void AddEvent(QAnalysisEvent eventData)
 		{
-			foreach (var eventData in newEventList)
+			if (eventData.eventKey.Contains("_"))
 			{
-				if (eventData.eventKey.Contains("_"))
-				{
-					eventData.eventKey = eventData.eventKey.Replace("_", "/");
-				}
-				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
-				CheckTitle(eventData.eventKey, eventData.eventValue);
-				Instance.DataKeyList.AddCheckExist(eventData.eventKey);
-				if (eventData.eventValue != null)
-				{
-					foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
-					{
-						var key = eventData.eventKey + "/" + memeberInfo.Key;
-						CheckTitle(key, eventData.eventValue==null?null:memeberInfo.Get(eventData.eventValue));
-						Instance.DataKeyList.AddCheckExist(key);
-					}
-				}
-				EventList.Add(eventData);
-				Instance.PlayerDataList[eventData.playerId].Add(eventData);
+				eventData.eventKey = eventData.eventKey.Replace("_", "/");
 			}
+			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
+			CheckTitle(eventData.eventKey, eventData.eventValue);
+			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
+			if (eventData.eventValue != null)
+			{
+				foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
+				{
+					var key = eventData.eventKey + "/" + memeberInfo.Key;
+					CheckTitle(key, eventData.eventValue == null ? null : memeberInfo.Get(eventData.eventValue));
+					Instance.DataKeyList.AddCheckExist(key);
+				}
+			}
+			EventList.Add(eventData);
+			Instance.PlayerDataList[eventData.playerId].Add(eventData);
 		}
 		static void CheckTitle(string key,object value)
 		{
@@ -779,8 +785,10 @@ namespace QTool
 			{
 				var playerData = QAnalysisData.Instance.PlayerDataList[startData.playerId];
 				QAnalysisEvent LastPauseEvent = null;
+				var pauseCount = 0;
 				playerData.AnalysisData[nameof(QAnalysis.QAnalysisEventName.游戏暂离)].ForeachEvent(endTime, (pauseEvent) =>
 				{
+					pauseCount++;
 					if (pauseEvent.eventTime > startData.eventTime)
 					{
 						if (nextData == null || pauseEvent.eventTime < nextData.eventTime)
@@ -797,6 +805,11 @@ namespace QTool
 				{
 					state = TimeState.暂离时长;
 					return LastPauseEvent.eventTime - startData.eventTime;
+				}
+				else if (pauseCount == 0)
+				{
+					state = TimeState.暂离时长;
+					return endTime - startData.eventTime;
 				}
 				else
 				{
