@@ -587,7 +587,7 @@ namespace QTool
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-			newList.Sort();
+			newList.Sort(QAnalysisEvent.SortMethod);
 			foreach (var eventData in newList)
 			{
 				AddEvent(eventData);
@@ -912,7 +912,6 @@ namespace QTool
 						break;
 					case QAnalysisMode.总时长:
 						{
-							
 							QAnalysisInfo startInfo = null;
 							QAnalysisInfo endInfo = null;
 							if (setting.EventKey.EndsWith("开始"))

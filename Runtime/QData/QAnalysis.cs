@@ -203,7 +203,7 @@ namespace QTool
 		public int gpuMemorySize = SystemInfo.graphicsMemorySize;
 	}
 
-	public class QAnalysisEvent:IKey<string>,IComparable<QAnalysisEvent>
+	public class QAnalysisEvent:IKey<string>
 	{
 		public string eventKey;
 		public object eventValue;
@@ -248,9 +248,9 @@ namespace QTool
 			}
 		}
 
-		public int CompareTo(QAnalysisEvent other)
+		public static int SortMethod(QAnalysisEvent a, QAnalysisEvent b)
 		{
-			return (int)(eventTime - other.eventTime).Ticks;
+			return (int)(a.eventTime - b.eventTime).Ticks;
 		}
 	}
 
