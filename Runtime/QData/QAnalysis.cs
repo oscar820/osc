@@ -231,9 +231,17 @@ namespace QTool
 			{
 				try
 				{
+					if (eventValue == null)
+					{
+						return null;
+					}
 					var memeberKey = dataKey.SplitEndString("/");
 					var typeInfo = QSerializeType.Get(eventValue.GetType());
-					var value= typeInfo.Members[memeberKey].Get(eventValue);
+					if (typeInfo == null)
+					{
+						Debug.LogError("不存在类型：[" +eventValue+ "]");
+					}
+					var value= typeInfo.Members[memeberKey]?.Get(eventValue);
 					return value;
 				}
 				catch (Exception e)
