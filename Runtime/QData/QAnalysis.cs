@@ -116,7 +116,6 @@ namespace QTool
 			Trigger(nameof(QAnalysisEventName.游戏结束));
 			Application.focusChanged -= OnFocus;
 			Application.logMessageReceived -= LogCallback;
-			PlayerId = null;
 			await SendAndClear();
 			Application.wantsToQuit -= OnWantsQuit;
 			PlayerId = null;
