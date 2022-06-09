@@ -27,7 +27,7 @@ namespace QTool
 				return true;
 			}
 		}
-		public static int AutoSendCount { get; set; } =60;
+		public static int AutoSendCount { get; set; } =100;
 		public static void Start(string playerId)
 		{
 			try
