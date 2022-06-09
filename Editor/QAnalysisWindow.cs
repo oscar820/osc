@@ -608,19 +608,12 @@ namespace QTool
 		}
 		public static void Clear(bool clearAll=false)
 		{
-			EventList.Clear();
 			if (clearAll)
 			{
-				TitleList.Clear();
-				Instance = Activator.CreateInstance<QAnalysisData>();
+				TitleList.Clear(); 
 			}
-			else
-			{
-				var eventKeyList = Instance.EventKeyList;
-				Instance = Activator.CreateInstance<QAnalysisData>();
-				Instance.EventKeyList = eventKeyList;
-			}
-		
+			EventList.Clear();
+			Instance = Activator.CreateInstance<QAnalysisData>();
 		}
 	
 		public static void AddEvent(QAnalysisEvent eventData)
@@ -919,6 +912,7 @@ namespace QTool
 						break;
 					case QAnalysisMode.总时长:
 						{
+							
 							QAnalysisInfo startInfo = null;
 							QAnalysisInfo endInfo = null;
 							if (setting.EventKey.EndsWith("开始"))
