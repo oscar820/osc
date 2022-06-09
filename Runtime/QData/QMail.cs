@@ -99,6 +99,7 @@ namespace QTool
 		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
 		{
 			QDictionary<long, QMailInfo> mailList = new QDictionary<long, QMailInfo>();
+			var startTime = DateTime.Now;
 			if (startIndex >endIndex) {
 				Debug.Log("无新邮件");
 				return;
@@ -108,7 +109,7 @@ namespace QTool
 				threadCount = 1;
 			}
 			List<Task> taskList = new List<Task>();
-			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex);
+			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex+" ...");
 			for (int i = 0; i < threadCount; i++)
 			{
 				taskList.Add(ReceiveRemail(account, startIndex + i, endIndex,mailList,threadCount));
@@ -117,6 +118,9 @@ namespace QTool
 			{
 				await task;
 			}
+			Debug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
+			Debug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
+			startTime = DateTime.Now;
 			for (long i = startIndex; i <= endIndex; i++)
 			{
 				var mail = mailList[i];
@@ -133,7 +137,7 @@ namespace QTool
 					Debug.LogError("读取邮件出错" + i + "/" + endIndex + "：\n" + e);
 				}
 			}
-			Debug.Log("读取完成：" + startIndex + " -> " + endIndex);
+			Debug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
 
 		}
 		static async Task ReceiveRemail(QMailAccount account, long startIndex,long endIndex, QDictionary<long, QMailInfo> mailList, long threadCount=1)
