@@ -21,37 +21,35 @@ namespace QTool
 		
 		public static async Task<bool> SendAsync(QMailAccount account, string toAddres, string title, string messageInfo ,params string[] files)
         {
-            SmtpClient client = null;
-			client = new SmtpClient(account.smtpServer);
-			client.Credentials = new System.Net.NetworkCredential(account.account, account.password);
-            client.EnableSsl = true;
-			var message = new MailMessage();
-			message.From = new MailAddress(account.account);
-			message.To.Add(toAddres);
-			message.IsBodyHtml = true;
-			message.BodyEncoding = System.Text.Encoding.UTF8;
-			message.Subject = title;
-			message.Body = messageInfo;
-			foreach (var filePath in files)
+			try
 			{
-				message.Attachments.Add(new Attachment(filePath));
+				using (var client = new SmtpClient(account.smtpServer))
+				{
+					client.Credentials = new System.Net.NetworkCredential(account.account, account.password);
+					client.EnableSsl = true;
+					using (var message = new MailMessage())
+					{
+						message.From = new MailAddress(account.account);
+						message.To.Add(toAddres);
+						message.IsBodyHtml = true;
+						message.BodyEncoding = System.Text.Encoding.UTF8;
+						message.Subject = title;
+						message.Body = messageInfo;
+						foreach (var filePath in files)
+						{
+							message.Attachments.Add(new Attachment(filePath));
+						}
+						await client.SendMailAsync(message);
+						Debug.Log("发送邮件成功 " + message.Subject + " " + message.Body.ToSizeString() + " \n" + message.Body);
+						return true;
+					}
+				}
 			}
-			return await Send(client, message);
-        }
-        private static async Task<bool> Send(SmtpClient stmpClient, MailMessage message)
-        {
-            var task= stmpClient.SendMailAsync(message);
-            await task;
-            if (task.Exception != null)
-            {
-                Debug.LogError("发送邮件失败【"+message.Subject+"】:"+task.Exception);
+			catch (Exception e)
+			{
+				Debug.LogError("发送邮件出错：\n"+e+"\n"+title+"\n"+messageInfo);
 				return false;
-            }
-            else
-            {
-                Debug.Log("发送邮件成功 "+message.Subject+" "+ message .Body.ToSizeString()+ " \n"+message.Body);
-				return true;
-            }
+			}
         }
 		static async Task<string[]> CommondCheckReadLine(this StreamWriter writer,string command,StreamReader reader)
 		{

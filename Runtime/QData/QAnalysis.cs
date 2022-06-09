@@ -27,10 +27,21 @@ namespace QTool
 				return true;
 			}
 		}
-		public static int AutoSendCount { get; set; } =50;
+		public static int AutoSendCount { get; set; } =60;
 		public static void Start(string playerId)
 		{
-			sendTask=SendAndClear();
+			try
+			{
+				if (PlayerPrefs.HasKey(EventListKey))
+				{
+					PlayerPrefs.GetString(EventListKey).ParseQData(EventList);
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("读取记录信息出错：\n" + e);
+			}
+			sendTask =SendAndClear();
 			if (playerId == PlayerId)
 			{
 				Debug.LogError(StartKey+" 已登录" + playerId);
@@ -55,6 +66,8 @@ namespace QTool
 				case LogType.Warning:
 					break;
 				case LogType.Log:
+					break;
+				case LogType.Error:
 					break;
 				default:
 					if (!errorInfoList.Contains(condition))
@@ -109,7 +122,7 @@ namespace QTool
 			stopTask = null;
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
-		public static string EventListKey => StartKey + "_" + nameof(triggerEventList);
+		public static string EventListKey => StartKey + "_" + nameof(EventList);
 	
 		static async Task SendAndClear()
 		{
@@ -124,24 +137,26 @@ namespace QTool
 			}
 			if (PlayerPrefs.HasKey(EventListKey))
 			{
-				var data = PlayerPrefs.GetString(EventListKey);
-				var count = triggerEventList.Count;
+				var count = EventList.Count;
 				if (count > 0)
 				{
-					if (await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data))
+					List<QAnalysisEvent> tempList = new List<QAnalysisEvent>();
+					var data = "";
+					lock (EventList)
 					{
-						lock (triggerEventList)
+						tempList.AddRange(EventList);
+						data = PlayerPrefs.GetString(EventListKey);
+						EventList.Clear();
+						PlayerPrefs.DeleteKey(EventListKey);
+					}
+					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data))
+					{
+						lock (EventList)
 						{
-							triggerEventList.RemoveRange(0, Math.Min(triggerEventList.Count, count));
-							if (triggerEventList.Count == 0)
-							{
-								PlayerPrefs.DeleteKey(EventListKey);
-							}
-							else
-							{
-								PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
-							}
-						}
+							EventList.AddRange(tempList);
+							PlayerPrefs.SetString(EventListKey, EventList.ToQData());
+							Debug.LogWarning("还原信息：\n" + EventList.ToQData());
+						}	
 					}
 				}
 			
@@ -149,7 +164,7 @@ namespace QTool
 			sendTask = null;
 		}
 		
-		static List<QAnalysisEvent> triggerEventList = new List<QAnalysisEvent>();
+		static List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
 		public static void Trigger(string eventKey,object value=null)
 		{
 			if (InitOver)
@@ -166,10 +181,12 @@ namespace QTool
 						eventKey = eventKey, 
 						eventValue = value, 
 					};
-					triggerEventList.Add(eventData); 
+					lock(EventList){
+						EventList.Add(eventData);
+						PlayerPrefs.SetString(EventListKey, EventList.ToQData());
+					}
 					Debug.Log(StartKey + " 触发事件 " + eventData);
-					PlayerPrefs.SetString(EventListKey, triggerEventList.ToQData());
-					if (AutoSendCount >= 1 && triggerEventList.Count >= AutoSendCount)
+					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
 					{
 						sendTask=SendAndClear();
 					}

@@ -618,6 +618,7 @@ namespace QTool
 	
 		public static void AddEvent(QAnalysisEvent eventData)
 		{
+			if (EventList.ContainsKey(eventData.Key)) return;
 			if (eventData.eventKey.Contains("_"))
 			{
 				eventData.eventKey = eventData.eventKey.Replace("_", "/");
