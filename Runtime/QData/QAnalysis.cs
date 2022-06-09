@@ -105,13 +105,13 @@ namespace QTool
 		static Task sendTask = null;
 		public static async Task Stop()
 		{
-			if (!InitOver)
-			{
-				return;
-			}
 			if (sendTask != null)
 			{
 				await sendTask;
+			}
+			if (!InitOver)
+			{
+				return;
 			}
 			Trigger(nameof(QAnalysisEventName.游戏结束));
 			Application.focusChanged -= OnFocus;
@@ -119,6 +119,7 @@ namespace QTool
 			PlayerId = null;
 			await SendAndClear();
 			Application.wantsToQuit -= OnWantsQuit;
+			PlayerId = null;
 			stopTask = null;
 		}
 		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
