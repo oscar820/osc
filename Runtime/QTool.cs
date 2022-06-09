@@ -146,7 +146,7 @@ namespace QTool
 
 		public static string ToQTimeString(this DateTime time)
 		{
-			return time.ToString("yyyy-MM-dd HH:mm:ss zzz");
+			return time.ToString("yyyy-MM-dd HH:mm:ss:ms zzz");
 		}
 		public static Action StopAllWait;
 

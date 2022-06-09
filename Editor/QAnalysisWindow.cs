@@ -843,10 +843,9 @@ namespace QTool
 				}
 			}
 		}
-		public void FreshMode()
+		public void FreshMode(DateTime endTime)
 		{
-			if (EventList.Count == 0) {value=null ; return; }
-			value =GetFreshValue(GetPlayerData().UpdateTime);
+			value =GetFreshValue(endTime);
 		}
 		public QAnalysisEvent GetEndEvent(DateTime endTime)
 		{
@@ -1039,7 +1038,7 @@ namespace QTool
 			foreach (var key in FreshKeyList)
 			{
 				AnalysisData[key].TimeData.Clear();
-				AnalysisData[key].FreshMode();
+				AnalysisData[key].FreshMode(UpdateTime);
 			}
 			FreshKeyList.Clear();
 		}
@@ -1091,7 +1090,7 @@ namespace QTool
 					}
 				}
 			}
-			info.FreshMode();
+			info.FreshMode(UpdateTime);
 		}
 	}
 	public static class QGUITool
