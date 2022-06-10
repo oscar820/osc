@@ -85,7 +85,19 @@ namespace QTool
 				Trigger(nameof(QAnalysisEventName.游戏暂离));
 				if (!Application.isEditor)
 				{
-					sendTask=SendAndClear();
+					bool sendEvent = false;
+					foreach (var eventData in EventList)
+					{
+						if(eventData.eventKey!= nameof(QAnalysisEventName.游戏暂离))
+						{
+							sendEvent = true;
+							break;
+						}
+					}
+					if (sendEvent)
+					{
+						sendTask = SendAndClear();
+					}
 				}
 			}
 		}
