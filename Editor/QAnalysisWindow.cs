@@ -361,7 +361,12 @@ namespace QTool
 
 		public Rect DrawCell(object value,float width,Action<GenericMenu> menu=null ,Action cilck=null,int index=-1)
 		{
-			GUILayout.Label(value?.ToString(), QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(CellHeight));
+			var showStr = value?.ToString();
+			if(value!=null&&value is TimeSpan timeSpan)
+			{
+				showStr = timeSpan.ToString("hh\\:mm\\:ss");
+			}
+			GUILayout.Label(showStr, QGUITool.CenterLable, GUILayout.Width(width), GUILayout.Height(CellHeight));
 			var lastRect = GUILayoutUtility.GetLastRect();
 			var lastColor = Handles.color;
 			Handles.color = Color.gray;
@@ -626,11 +631,14 @@ namespace QTool
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 			CheckTitle(eventData.eventKey, eventData.eventValue);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
+	
 			if (eventData.eventValue != null)
 			{
+				Debug.LogError("event " + eventData.eventKey);
 				foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
 				{
 					var key = eventData.eventKey + "/" + memeberInfo.Key;
+					Debug.LogError("添加变量[" + key+"]");
 					CheckTitle(key, eventData.eventValue == null ? null : memeberInfo.Get(eventData.eventValue));
 					Instance.DataKeyList.AddCheckExist(key);
 				}

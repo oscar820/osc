@@ -475,8 +475,8 @@ namespace QTool.Inspector
 		public static QDictionary<Type, Func<object, string, object>> DrawOverride = new QDictionary<Type, Func<object, string, object>>();
         static Color BackColor = new Color(0, 0, 0, 0.6f);
 
-        public static List<string> TypeMenuList = new List<string>();
-        public static List<Type> TypeList = new List<Type>();
+		public static List<string> TypeMenuList = new List<string>() { typeof(UnityEngine.Object).FullName.Replace('.', '/') };
+		public static List<Type> TypeList = new List<Type>() { typeof(UnityEngine.Object) };
         public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null,params GUILayoutOption[] layoutOption)
 		{
 			var hasName = !string.IsNullOrWhiteSpace(name);
