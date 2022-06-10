@@ -170,12 +170,12 @@ namespace QTool
         {
             if (Application.IsPlaying(gameObject)) return;
             FreshInstanceId();
-            if (IsPrefabAssets)
+            if (gameObject.IsPrefabAsset())
             {
                 SetPrefabId(UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(gameObject)));
            
             }
-            else if (IsPrefabInstance)
+            else if (gameObject.IsPrefabInstance() || Application.IsPlaying(gameObject))
             {
                 var prefab = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
                 if (prefab == null)
@@ -192,31 +192,8 @@ namespace QTool
 
 
 #endif
-        private bool IsPrefabInstance
-        {
-            get
-            {
-#if UNITY_EDITOR
-                return (UnityEditor.PrefabUtility.IsAnyPrefabInstanceRoot(gameObject) && !IsPrefabAssets)|| Application.IsPlaying(gameObject);
-                
-#else
-                return false;
-#endif
-
-            }
-        }
-       
-        private bool IsPrefabAssets
-        {
-            get
-            {
-#if UNITY_EDITOR
-                return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject);
-#else
-                return false;
-#endif
-            }
-        }
+     
+     
         public static QList<string, QId> InstanceIdList = new QList<string, QId>();
     
         public static string GetNewId(string key = "")

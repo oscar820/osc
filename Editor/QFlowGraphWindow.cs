@@ -718,20 +718,28 @@ namespace QTool.FlowGraph
 	[CustomPropertyDrawer(typeof(QFlowGraph))]
 	public class QFlowGraphDrawer : PropertyDrawer
 	{
-	
-	
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
 			var leftRect = position;
 			leftRect.width /= 2;
 			EditorGUI.LabelField(leftRect, label.text);
 			leftRect.x += leftRect.width;
-			if (GUI.Button(leftRect, "编辑"))
-			{ 
-				var graph = property.GetObject() as QFlowGraph;
-				var path = property.propertyPath;
-				var targetObject = property.serializedObject.targetObject;
-				QFlowGraphWindow.Open(graph, ()=> { graph.Name =path; targetObject.SetDirty(); });
+			if (property.serializedObject.targetObject.IsPrefabInstance())
+			{
+				if (GUI.Button(leftRect, "进入预制体编辑"))
+				{
+					UnityEditor.AssetDatabase.OpenAsset(property.serializedObject.targetObject.GetPrefab());
+				}
+			}
+			else
+			{
+				if (GUI.Button(leftRect, "编辑"))
+				{
+					var graph = property.GetObject() as QFlowGraph;
+					var path = property.propertyPath;
+					var targetObject = property.serializedObject.targetObject;
+					QFlowGraphWindow.Open(graph, () => { graph.Name = path; targetObject.SetDirty(); });
+				}
 			}
 		}
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

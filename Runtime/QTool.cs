@@ -232,6 +232,62 @@ namespace QTool
             }
             return flag;
         }
+		public static bool IsPrefabAsset(this UnityEngine.Object obj)
+		{
+#if UNITY_EDITOR
+			return UnityEditor.PrefabUtility.IsPartOfPrefabAsset(obj);
+#else
+			return false;
+#endif
+		}
+
+		public static bool IsPrefabInstance(this UnityEngine.Object obj)
+		{
+#if UNITY_EDITOR
+			var gameObj = obj.GetGameObject();
+			return gameObj!=null&&UnityEditor.PrefabUtility.IsAnyPrefabInstanceRoot(gameObj) && !obj.IsPrefabAsset();
+#else
+            return false;
+#endif
+		}
+		public static bool IsSceneInstance(this UnityEngine.Object obj)
+		{
+#if UNITY_EDITOR
+			if (obj == null)
+			{
+				return false;
+			}
+			if (UnityEditor.EditorUtility.IsPersistent(obj))
+			{
+				return false;
+			}
+#endif
+			return true;
+		}
+		public static GameObject GetGameObject(this UnityEngine.Object obj)
+		{
+			if (obj is Component com)
+			{
+				return com.gameObject;
+			}
+			if (obj is GameObject gameObject)
+			{
+				return gameObject;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		public static GameObject GetPrefab(this UnityEngine.Object obj)
+		{
+#if UNITY_EDITOR
+			var gameObj= obj.GetGameObject();
+			return gameObj == null ? null : UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(UnityEditor.PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObj));
+#else
+            return null;
+#endif
+		}
 		//public static GameObject CreateInstance(this GameObject prefab)
 		//{
 		//	var obj = GameObject.Instantiate(prefab);
@@ -241,7 +297,7 @@ namespace QTool
 		//	}
 		//	return obj;
 		//}
-    }
+	}
     public class SecondsAverageList
     {
         public float Value
