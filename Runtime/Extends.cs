@@ -76,7 +76,7 @@ namespace QTool
         public static void SetDirty(this Object obj)
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
+            if (!Application.isPlaying&& obj!=null)
             {
                 UnityEditor.EditorUtility.SetDirty(obj);
             }

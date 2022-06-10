@@ -1075,7 +1075,7 @@ namespace QTool.Inspector
             DrawScriptToggleList();
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(target);
+				target?.SetDirty();
                 serializedObject.ApplyModifiedProperties();
                 ChangeCallBack?.Invoke();
             }
