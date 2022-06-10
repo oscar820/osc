@@ -213,7 +213,7 @@ namespace QTool
 		}
 		public static void Trigger(string eventKey,string key, object value)
 		{
-			Trigger(eventKey, new KeyValuePair<string, object>(key, value));
+			Trigger(eventKey, new QKeyValue<string, object>(key, value));
 		}
 	}
 	public class StartInfo

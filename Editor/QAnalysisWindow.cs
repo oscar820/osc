@@ -126,7 +126,7 @@ namespace QTool
 							writer.Write("\n");
 						}
 					});
-					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功：\n "+GUIUtility.systemCopyBuffer, "确认");
+					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功", "确认");
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();
 				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.width, lastRect.yMax));
@@ -634,11 +634,9 @@ namespace QTool
 	
 			if (eventData.eventValue != null)
 			{
-				Debug.LogError("event " + eventData.eventKey);
 				foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
 				{
 					var key = eventData.eventKey + "/" + memeberInfo.Key;
-					Debug.LogError("添加变量[" + key+"]");
 					CheckTitle(key, eventData.eventValue == null ? null : memeberInfo.Get(eventData.eventValue));
 					Instance.DataKeyList.AddCheckExist(key);
 				}
