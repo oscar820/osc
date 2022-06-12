@@ -162,7 +162,14 @@ namespace QTool
         {
             if (!Exists(path))
             {
-                Debug.LogError("不存在文件：" + path);
+				if (string.IsNullOrWhiteSpace(defaultValue))
+				{
+					Debug.LogError("不存在文件：" + path);
+				}
+				else
+				{
+					Debug.LogWarning("不存在文件：" + path);
+				}
                 return defaultValue;
             }
 			if (path.StartsWith(ResourcesRoot))
