@@ -634,9 +634,10 @@ namespace QTool.Inspector
                                     }
                                     var color = GUI.backgroundColor;
                                     GUI.backgroundColor = BackColor;
-
+									
 									using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle, layoutOption))
                                     {
+										
                                         GUI.backgroundColor = color;
                                         var canHideChild = DrawElementCall==null;
 										if (hasName)
@@ -660,27 +661,30 @@ namespace QTool.Inspector
 												}
                                                 using (new EditorGUILayout.VerticalScope())
                                                 {
-                                                    for (int i = 0; i < list.Count; i++)
-                                                    {
-														using (new EditorGUILayout.HorizontalScope())
+													for (int i = 0; i < list.Count; i++)
+													{
+														using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle))
 														{
 															var key = name + "[" + i + "]";
 															var element = list[i].Draw(key, typeInfo.ElementType);
 															list[i] = element;
 															DrawElementCall?.Invoke(i);
-															if (GUILayout.Button( "+",GUILayout.Width(20)))
+															using (new EditorGUILayout.HorizontalScope())
 															{
-																obj = list.CreateAt(typeInfo, i);
-																IndexChange?.Invoke(-1, i + 1);
-															}
-															if (GUILayout.Button( "-", GUILayout.Width(20)))
-															{
-																obj = list.RemoveAt(typeInfo, i);
-																IndexChange?.Invoke(i, -1);
+																if (GUILayout.Button("+", GUILayout.Width(20)))
+																{
+																	obj = list.CreateAt(typeInfo, i);
+																	IndexChange?.Invoke(-1, i + 1);
+																}
+																if (GUILayout.Button("-", GUILayout.Width(20)))
+																{
+																	obj = list.RemoveAt(typeInfo, i);
+																	IndexChange?.Invoke(i, -1);
+																}
 															}
 														}
-                                                       
-                                                    }
+														
+													}
                                                 }
                                             }
 											if (list.Count == 0)
