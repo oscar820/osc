@@ -264,6 +264,7 @@ namespace QTool
 									for (int i = 0; i < viewEventList.Count; i++)
 									{
 										var eventData = QAnalysisData.GetEvent(viewEventList[i]);
+										if (eventData == null) continue;
 										DrawCell(eventData.eventTime.ToString(), KeyWidth, null, null, i);
 									}
 								}
@@ -319,6 +320,7 @@ namespace QTool
 											if (i >= startIndex && i <= endIndex)
 											{
 												var eventData = QAnalysisData.GetEvent(viewEventList[i]);
+												if (eventData == null) continue;
 												using (new GUILayout.HorizontalScope())
 												{
 													QAnalysisData.ForeachTitle((title) =>
@@ -774,7 +776,7 @@ namespace QTool
 			更新结束时间,
 			更新起始时间
 		}
-		static TimeSpan GetTimeSpan(QAnalysisEvent startData, QAnalysisEvent endData,DateTime endTime, out TimeState state, QAnalysisEvent nextData = null)
+		TimeSpan GetTimeSpan(QAnalysisEvent startData, QAnalysisEvent endData, out TimeState state, QAnalysisEvent nextData = null)
 		{
 			if (startData == null)
 			{
@@ -801,7 +803,7 @@ namespace QTool
 							return;
 						}
 					}
-				}, pauseData.GetEndEvent(endTime));
+				});
 				if (LastPauseEvent != null)
 				{
 					state = TimeState.暂离时长;
@@ -810,7 +812,7 @@ namespace QTool
 				else if (pauseCount == 0)
 				{
 					state = TimeState.暂离时长;
-					return endTime - startData.eventTime;
+					return GetPlayerData().UpdateTime - startData.eventTime;
 				}
 				else
 				{
@@ -854,7 +856,7 @@ namespace QTool
 		}
 		public void FreshMode(QAnalysisEvent endEvent=null)
 		{
-			value =GetFreshValue(endEvent==null ? QAnalysisData.GetEvent(EventList.StackPeek()) : endEvent);
+			value =GetFreshValue(endEvent);
 		}
 		public QAnalysisEvent GetEndEvent(DateTime endTime)
 		{
@@ -872,7 +874,11 @@ namespace QTool
 		{
 			if (endEvent == null)
 			{
-				return null;
+				endEvent = QAnalysisData.GetEvent(EventList.StackPeek());
+				if (endEvent == null)
+				{
+					return null;
+				}
 			}
 			if (BufferData.ContainsKey(endEvent.eventId))
 			{
@@ -911,11 +917,11 @@ namespace QTool
 							var targetData = GetPlayerData().AnalysisData[setting.TargetKey];
 							if (setting.EventKey.EndsWith("开始"))
 							{
-								freshValue = GetTimeSpan(endEvent, targetData.GetEndEvent(endEvent.eventTime), endEvent.eventTime, out var hasend);
+								freshValue = GetTimeSpan(endEvent, targetData.GetEndEvent(GetPlayerData().UpdateTime), out var hasend,QAnalysisData.GetEvent(EventList[EventList.IndexOf(endEvent.eventId)+1]));
 							}
 							else if (setting.EventKey.EndsWith("结束"))
 							{
-								freshValue = GetTimeSpan(targetData.GetEndEvent(endEvent.eventTime), endEvent, endEvent.eventTime, out var hasend);
+								freshValue = GetTimeSpan(targetData.GetEndEvent(endEvent.eventTime), endEvent, out var hasend);
 							}
 							else
 							{
@@ -948,11 +954,8 @@ namespace QTool
 							while (starIndex < startInfo.EventList.Count) 
 							{
 								var startData = QAnalysisData.GetEvent(startInfo.EventList[starIndex]);
-								if (startData.eventId == endEvent.eventId)
-								{
-									break;
-								}
-								allTime += GetTimeSpan(startData, QAnalysisData.GetEvent( endInfo.EventList[endIndex]), endEvent.eventTime, out var state, QAnalysisData.GetEvent(startInfo.EventList[starIndex + 1]));
+							
+								allTime += GetTimeSpan(startData, QAnalysisData.GetEvent( endInfo.EventList[endIndex]),  out var state, QAnalysisData.GetEvent(startInfo.EventList[starIndex + 1]));
 
 								switch (state)
 								{
@@ -965,7 +968,12 @@ namespace QTool
 									default:
 										starIndex++;
 										endIndex++;
+										
 										break;
+								}
+								if (startData.eventId == endEvent.eventId&&(state== TimeState.暂离时长||state== TimeState.起止时长))
+								{
+									break;
 								}
 							}
 							freshValue = allTime;
