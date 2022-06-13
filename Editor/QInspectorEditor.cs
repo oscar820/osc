@@ -662,44 +662,36 @@ namespace QTool.Inspector
                                                 {
                                                     for (int i = 0; i < list.Count; i++)
                                                     {
-                                                        var key = name + "[" + i + "]";
-                                                        var element = list[i].Draw(key, typeInfo.ElementType);
-                                                        list[i] = element;
-                                                        DrawElementCall?.Invoke(i);
-                                                        var elementRect = GUILayoutUtility.GetLastRect();
-                                                        if (elementRect.Contains(Event.current.mousePosition))
-                                                        {
-                                                            var btnRect = elementRect;
-                                                            btnRect.size = Vector3.one * 18;
-                                                            btnRect.position += new Vector2(elementRect.width*0.4f, 2);
-                                                            if (GUI.Button(btnRect,"+"))
-                                                            {
-                                                                obj = list.CreateAt(typeInfo,i);
-                                                                IndexChange?.Invoke(-1, i+1);
-                                                            }
-                                                            btnRect.position += new Vector2(20, 0);
-                                                            if (GUI.Button(btnRect, "-"))
-                                                            {
-                                                                obj= list.RemoveAt(typeInfo,i);
-                                                                IndexChange?.Invoke(i, -1);
-                                                            }
-                                                        }
-
-
-                                                   
+														using (new EditorGUILayout.HorizontalScope())
+														{
+															var key = name + "[" + i + "]";
+															var element = list[i].Draw(key, typeInfo.ElementType);
+															list[i] = element;
+															DrawElementCall?.Invoke(i);
+															if (GUILayout.Button( "+",GUILayout.Width(20)))
+															{
+																obj = list.CreateAt(typeInfo, i);
+																IndexChange?.Invoke(-1, i + 1);
+															}
+															if (GUILayout.Button( "-", GUILayout.Width(20)))
+															{
+																obj = list.RemoveAt(typeInfo, i);
+																IndexChange?.Invoke(i, -1);
+															}
+														}
+                                                       
                                                     }
+                                                }
+                                            }
+											if (list.Count == 0)
+											{
+												if (GUILayout.Button("添加新元素", GUILayout.Height(20)))
+												{
+													obj = list.CreateAt(typeInfo);
+												}
+											}
 
-                                                }
-                                            }
-                                            if (list.Count == 0)
-                                            {
-                                                if (GUILayout.Button("添加新元素", GUILayout.Height(20)))
-                                                {
-                                                    obj= list.CreateAt(typeInfo);
-                                                }
-                                            }
-                                           
-                                        }
+										}
                                     }
                                 }
                             }

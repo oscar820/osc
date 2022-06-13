@@ -107,7 +107,7 @@ public static class QFlowNodeTest
     {
 		image.color = Color.black;
     }
-    public static void ListTest(List<string> list, List<Vector3> v3List, [QFlowPort]List<Vector3> v3FlowList, [QFlowPort,QOutputPort] bool[] boolArray)
+    public static void ListTest([QFlowPort] List<int> list, List<Vector3> v3List, [QFlowPort]List<Vector3> v3FlowList, [QFlowPort,QOutputPort] bool[] boolArray)
     {
 
     }
