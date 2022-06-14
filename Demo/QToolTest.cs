@@ -202,6 +202,7 @@ namespace QTool.Test
 
 
 			Debug.LogError(QDataListTestType.list.ToOneString());
+			Debug.LogError(new List<TTestClass>() { new TTestClass { Key = "1" }, new TTestClass { Key = "2" } }.ToQDataList());
         }
 		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
 		{
@@ -225,8 +226,9 @@ namespace QTool.Test
     }
 
     [System.Serializable]
-    public class TTestClass
+    public class TTestClass:IKey<string>
     {
+		public string Key { get; set; }
         public Rect rect;
         public TestEnum testEnume = TestEnum.攻击 | TestEnum.死亡;
 

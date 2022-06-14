@@ -9,9 +9,11 @@ namespace QTool
 {
     public class QTranslate : MonoBehaviour
     {
-        public static QDataList LanguageData => QDataList.GetResourcesData("LanguageData", (data) => {
+        public static QDataList LanguageData => QDataList.GetResourcesData("LanguageData", () => {
+			var data = new QDataList();
             data.SetTitles("Key", "中文", "English");
             data["文本语言"].SetValue("中文", "文本语言").SetValue("English", "Language");
+			return data;
         }); 
         #region 基础数据
 

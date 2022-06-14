@@ -11,6 +11,7 @@ namespace QTool
 {
 	public static class QData
 	{
+	
 		public static string ToQData<T>(this T obj, bool hasName = true)
 		{
 			var type = typeof(T);
@@ -594,7 +595,68 @@ namespace QTool
 			}
 		}
 
+		public static QDataList ToQDataList<T>(this IList<T> list) where T : IKey<string>
+		{
+			var qdataList = new QDataList();
+			var type = typeof(T);
+			var typeInfo = QSerializeType.Get(type);
+			foreach (var member in typeInfo.Members)
+			{
+				qdataList.TitleRow.Add(member.ViewName);
+				for (int i = 0; i < list.Count; i++)
+				{
+					qdataList[i + 1].SetValueType(member.ViewName, member.Get(list[i]), member.Type);
+				}
+			}
+			return qdataList;
+		}
+		public static QList<T> ParseQdataList<T>(this QDataList qdataList, QList<T> list) where T : IKey<string>, new()
+		{
+			var type = typeof(T);
+			var typeInfo = QSerializeType.Get(type);
+			list.Clear();
+			var titleRow = qdataList.TitleRow;
+			var memeberList = new List<QMemeberInfo>();
+			foreach (var title in titleRow)
+			{
+				var member = typeInfo.Members[title];
+				if (member == null)
+				{
+					member = typeInfo.Members.Get(title, (obj) => obj.ViewName);
+				}
+				if (member == null)
+				{
+					Debug.LogError("读取 " + type.Name + "出错 不存在属性 " + title);
+				}
+				memeberList.Add(member);
+			}
+			foreach (var row in qdataList)
+			{
+				if (row == titleRow) continue;
+				var t = new T();
+				for (int i = 0; i < titleRow.Count; i++)
+				{
+					var member = memeberList[i];
+					if (member != null)
+					{
+						try
+						{
+							member.Set(t, row[i].ParseQDataType(member.Type, false));
+						}
+						catch (System.Exception e)
+						{
 
+							Debug.LogError("读取 " + type.Name + "出错 设置[" + row.Key + "]属性 " + member.Key + "(" + member.Type + ")异常：\n" + e);
+						}
+
+					}
+				}
+				t.Key = row.Key;
+				list.Add(t);
+			}
+			Debug.Log("读取 " + type.Name + " 完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList);
+			return list;
+		}
 	}
 	public interface IQData
 	{
