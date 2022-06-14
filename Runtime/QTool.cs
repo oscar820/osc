@@ -58,12 +58,16 @@ namespace QTool
 		}
 		public static string ToIdString(this string str, int length = -1)
 		{
-			string except_chars = "[" + ';' + '；' + ',' + "，" + '<' + '>' + '【' + '】' + '{' + '}' + '!' + '！' + '?' + '？'+'.' + '\'' + '‘' + '’' +'\"'+':'+'：'+"]";
 			if (length > 0)
 			{
 				str = str.Substring(0, Math.Min(str.Length, length));
 			}
-			return Regex.Replace(str, except_chars , "");
+			string except_chars = " " + ';' + '；' + '-' + ',' + ',' + '，' + '<' + '>' + '【' + '】'+'['+']' + '{' + '}' + '!' + '！' + '?' + '？' + '.' + '\'' + '‘' + '’' + '\"' + ':' + '：';
+			foreach (var c in except_chars)
+			{
+				str = str.Replace(c.ToString(), "");
+			}
+			return str;
 		}
 		public static float ToComputeFloat(this object value)
 		{
