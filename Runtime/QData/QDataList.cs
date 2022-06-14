@@ -35,6 +35,10 @@ namespace QTool{
 		{
 			return ResourcesPathRoot + name + ".txt";
 		}
+		public static string GetAssetDataPath(string name)
+		{
+			return Application.dataPath+"/" + nameof(QDataList) + "Assets/" + name + ".txt";
+		}
 		public static QDataList GetResourcesData(string name, System.Func<QDataList> autoCreate = null)
 		{
 			return GetData(GetResourcesDataPath(name),autoCreate);
