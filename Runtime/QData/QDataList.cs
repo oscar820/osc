@@ -31,9 +31,13 @@ namespace QTool{
 	{
 		public static string ResourcesPathRoot => FileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
 		//public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
+		public static string GetResourcesDataPath(string name)
+		{
+			return ResourcesPathRoot + name + ".txt";
+		}
 		public static QDataList GetResourcesData(string name, System.Func<QDataList> autoCreate = null)
 		{
-			return GetData(ResourcesPathRoot + name+".txt", autoCreate);
+			return GetData(GetResourcesDataPath(name),autoCreate);
 		}
 		public static QDataList GetData(string path,System.Func<QDataList> autoCreate=null)
         {
