@@ -610,7 +610,7 @@ namespace QTool
 			}
 			return qdataList;
 		}
-		public static QList<T> ParseQdataList<T>(this QDataList qdataList, QList<T> list) where T : IKey<string>, new()
+		public static List<T> ParseQdataList<T>(this QDataList qdataList, List<T> list) where T : IKey<string>, new()
 		{
 			var type = typeof(T);
 			var typeInfo = QSerializeType.Get(type);
