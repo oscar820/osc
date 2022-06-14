@@ -89,8 +89,10 @@ namespace QTool.Test
         [ContextMenu("序列化测试")]
         public void TestFunc()
         {
-           
-            Tool.RunTimeCheck("Xml写入", () =>
+
+			Debug.LogError(test1.ToQData().ToIdString());
+
+			Tool.RunTimeCheck("Xml写入", () =>
             {
                 for (int i = 0; i < testTimes; i++)
                 {

@@ -56,13 +56,14 @@ namespace QTool
 				}
 			}
 		}
-		public static string ToIdString(this string str,int length=-1)
+		public static string ToIdString(this string str, int length = -1)
 		{
+			string except_chars = "[" + ';' + '；' + ',' + "，" + '<' + '>' + '【' + '】' + '{' + '}' + '!' + '！' + '?' + '？'+'.' + '\'' + '‘' + '’' +'\"'+':'+'：'+"]";
 			if (length > 0)
 			{
 				str = str.Substring(0, Math.Min(str.Length, length));
 			}
-			return Regex.Replace(str, @"[^a-zA-Z0-9\u4e00-\u9fa5\s]", "");
+			return Regex.Replace(str, except_chars , "");
 		}
 		public static float ToComputeFloat(this object value)
 		{
