@@ -8,6 +8,7 @@ using QTool.Reflection;
 using System.Reflection;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace QTool
 {
@@ -54,6 +55,14 @@ namespace QTool
 					throw new Exception(" 找不到 key [" + start+"]"+childPath);
 				}
 			}
+		}
+		public static string ToIdString(this string str,int length=-1)
+		{
+			if (length > 0)
+			{
+				str = str.Substring(0, Math.Min(str.Length, length));
+			}
+			return Regex.Replace(str, @"[^a-zA-Z0-9\u4e00-\u9fa5\s]", "");
 		}
 		public static float ToComputeFloat(this object value)
 		{
