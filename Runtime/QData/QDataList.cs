@@ -143,7 +143,7 @@ namespace QTool{
                     var value = reader.ReadElement(out var newLine);
                     row[index] = value;
                     index++;
-                    if (newLine)
+                    if (newLine||reader.IsEnd())
                     {
                         if (row.Count > 0)
                         {
