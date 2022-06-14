@@ -595,7 +595,7 @@ namespace QTool
 			}
 		}
 
-		public static QDataList ToQDataList<T>(this IList<T> list) where T : IKey<string>
+		public static QDataList ToQDataList<T>(this IList<T> list) 
 		{
 			var qdataList = new QDataList();
 			var type = typeof(T);
@@ -610,7 +610,7 @@ namespace QTool
 			}
 			return qdataList;
 		}
-		public static List<T> ParseQdataList<T>(this QDataList qdataList, List<T> list) where T : IKey<string>, new()
+		public static List<T> ParseQdataList<T>(this QDataList qdataList, List<T> list) where T : new()
 		{
 			var type = typeof(T);
 			var typeInfo = QSerializeType.Get(type);
@@ -651,7 +651,6 @@ namespace QTool
 
 					}
 				}
-				t.Key = row.Key;
 				list.Add(t);
 			}
 			Debug.Log("读取 " + type.Name + " 完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList);
