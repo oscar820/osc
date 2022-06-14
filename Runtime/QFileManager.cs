@@ -203,15 +203,14 @@ namespace QTool
 		{
 			if (path.StartsWith(ResourcesRoot))
 			{
-				try
-				{
+				try 
+				{ 
 					var loadPath = path.SplitEndString(ResourcesRoot).SplitStartString(".");
-					action(Load(loadPath, defaultValue));
 					var texts= Resources.LoadAll<TextAsset>(loadPath);
 					foreach (var text in texts)
 					{
-						action(text.text);
-					}
+						action(text.text); 
+					} 
 				}
 				catch (Exception e)
 				{
