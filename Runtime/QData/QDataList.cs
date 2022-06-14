@@ -143,7 +143,7 @@ namespace QTool{
                     var value = reader.ReadElement(out var newLine);
                     row[index] = value;
                     index++;
-                    if (newLine||reader.IsEnd())
+                    if (newLine)
                     {
                         if (row.Count > 0)
                         {
@@ -331,7 +331,10 @@ namespace QTool{
 							if (reader.NextIs('\n')) break;
 							if (reader.NextIs('\t'))
 							{
-								newLine = false;
+								if (!reader.IsEnd())
+								{
+									newLine = false;
+								}
 								break;
 							}
 						}
@@ -346,7 +349,10 @@ namespace QTool{
 					{
 						if (reader.NextIs('\t'))
 						{
-							newLine = false;
+							if(!reader.IsEnd())
+							{
+								newLine = false;
+							}
 							break;
 						}
 						var c = (char)reader.Read();
