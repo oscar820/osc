@@ -82,7 +82,7 @@ namespace QTool
         {
             get
             {
-                return string.IsNullOrWhiteSpace(language) ? globalLanguage : language;
+                return string.IsNullOrWhiteSpace(language) ? GlobalLanguage : language;
             }
         }
         public string Value
@@ -103,17 +103,17 @@ namespace QTool
         }
         #endregion
         #region 全局翻译
-        public static string globalLanguage = "schinese";
+        public static string GlobalLanguage { get; private set; } = "schinese";
         public static void ChangeGlobalLanguage(string value)
         {
 			value = value.ToLower();
-			if (globalLanguage == value)
+			if (GlobalLanguage == value)
             {
                 OnLanguageChange?.Invoke();
             }
             else
             {
-                globalLanguage = value;
+                GlobalLanguage = value;
                 OnLanguageChange?.Invoke();
             }
             Debug.Log("文本语言：" + value);
@@ -162,7 +162,7 @@ namespace QTool
         {
             if (LanguageData.ContainsKey(value))
             {
-                var translate = LanguageData[value].GetValue<string>(globalLanguage); ;
+                var translate = LanguageData[value].GetValue<string>(GlobalLanguage); ;
                 if (!string.IsNullOrEmpty(translate))
                 {
                     return translate;
