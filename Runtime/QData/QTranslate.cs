@@ -49,9 +49,17 @@ namespace QTool
 				WebAPI="ko",
 			},
 		};
-		public static QDataList LanguageData => GetQDataList("LanguageData");
-		public static QDataList GetQDataList(string name)
+		public static QDataList LanguageData => GetQDataList();
+		public static QDataList GetQDataList(string name=null)
 		{
+			if (string.IsNullOrEmpty(name))
+			{
+				name = nameof(LanguageData);
+			}
+			else
+			{
+				name = nameof(LanguageData) + "/" + name;
+			}
 			return QDataList.GetResourcesData(name, () => {
 				var data = new QDataList();
 				List<string> titleList = new List<string>();
@@ -61,7 +69,7 @@ namespace QTool
 					titleList.Add(translateKey.Key);
 				}
 				data.SetTitles(titleList.ToArray());
-				if(name== "LanguageData")
+				if (name == nameof(LanguageData))
 				{
 					data["测试文本"].SetValue(GlobalLanguage, @"测试文
 本123");

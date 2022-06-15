@@ -72,9 +72,6 @@ namespace QTool{
                         dataList[path] = qdataList;
                         qdataList.Save();
 						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n"+qdataList);
-#if UNITY_EDITOR
-						UnityEditor.AssetDatabase.Refresh();
-#endif
 					}
                 }
             }
