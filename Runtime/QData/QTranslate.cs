@@ -174,14 +174,11 @@ namespace QTool
         public static QDictionary<string, System.Func<string>> KeyReplace = new QDictionary<string, System.Func<string>>();
         static string TranslateKey(string value)
         {
-            if (LanguageData.ContainsKey(value))
+            if (LanguageData.ContainsKey(value)&& LanguageData[value].HasValue(GlobalLanguage))
             {
-                var translate = LanguageData[value].GetValue<string>(GlobalLanguage); ;
-                if (!string.IsNullOrEmpty(translate))
-                {
-                    return translate;
-                }
-            }
+                var translate = LanguageData[value].GetValue<string>(GlobalLanguage);
+				return translate;
+			}
             else if(KeyReplace.ContainsKey(value))
             {
                 return KeyReplace[value]?.Invoke();

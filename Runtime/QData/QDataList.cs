@@ -238,6 +238,17 @@ namespace QTool{
                 throw new System.Exception("不存在的列名[" + title + "]");
             }
         }
+		public bool HasValue(string title)
+		{
+			if (OwnerData.TryGetTitleIndex(title, out var index))
+			{
+				return Count > index;
+			}
+			else
+			{
+				throw new System.Exception("不存在的列名[" + title + "]");
+			}
+		}
 		public QDataRow SetValueType(string title, object value,Type type)
 		{
 			if (OwnerData.TryGetTitleIndex(title, out var index))
