@@ -89,14 +89,12 @@ namespace QTool.Inspector
     }
 
     /// <summary>
-    /// 将数组显示为toolbar工具栏通过indexName来设置int值；
+    /// 将脚本名List 显示未开关按钮 来添加删除脚本
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class ScriptToggleAttribute : QHeightAttribute
     {
         public string scriptList="";
-        //public string valueGetFunc;
-        //public string valueSetFunc;
         public ScriptToggleAttribute( string scriptList, float height = 30, string showControl = "") : base("", height, showControl)
         {
             this.scriptList = scriptList;
@@ -118,13 +116,6 @@ namespace QTool.Inspector
         {
             this.eventType = eventType;
             this.keyCode = keyCode;
-        }
-    }
-    [AttributeUsage(AttributeTargets.Method)]
-    public class EditorChangeAttribute : Attribute
-    {
-        public EditorChangeAttribute()
-        {
         }
     }
     /// <summary>
@@ -200,32 +191,6 @@ namespace QTool.Inspector
         }
 
     }
-    /// <summary>
-    /// 显示按钮 调用函数CallFunc 无参数
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = true)]
-    public class HorizontalGroupAttribute : GroupAttribute
-    {
-
-        public HorizontalGroupAttribute(string name, string showControl = "") : base(name, showControl)
-        {
-
-        }
-    }
-
-    /// <summary>
-    /// 显示按钮 调用函数CallFunc 无参数
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field| AttributeTargets.Method, AllowMultiple = true)]
-    public abstract class GroupAttribute : ViewNameAttribute
-    {
-        public GroupAttribute(string name, string showControl = "")
-        {
-            this.name = name;
-            this.control = showControl;
-        }
-    }
-
     public abstract class QHeightAttribute : ViewNameAttribute
     {
         public float height = 30;
