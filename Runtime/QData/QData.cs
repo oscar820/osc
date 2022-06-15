@@ -595,10 +595,25 @@ namespace QTool
 			}
 		}
 
-		public static QDataList ToQDataList<T>(this IList<T> list) 
+		public static QDataList ToQDataList<T>(this IList<T> list,QDataList qdataList=null, Type type=null) 
 		{
-			var qdataList = new QDataList();
-			var type = typeof(T);
+			if (type == null)
+			{
+				type = typeof(T);
+				if (type == typeof(object))
+				{
+					throw new Exception(nameof(QDataList)+ "类型出错 " + type);
+				}
+			}
+			if (qdataList == null)
+			{
+				qdataList = new QDataList();
+			}
+			else
+			{
+				qdataList.Clear();
+			}
+			
 			var typeInfo = QSerializeType.Get(type);
 			foreach (var member in typeInfo.Members)
 			{
@@ -610,20 +625,23 @@ namespace QTool
 			}
 			return qdataList;
 		}
-		public static List<T> ParseQdataList<T>(this QDataList qdataList, List<T> list) where T : new()
+		public static List<T> ParseQdataList<T>(this QDataList qdataList, List<T> list,Type type=null) where T:class
 		{
-			var type = typeof(T);
+			if (type == null)
+			{
+				type = typeof(T);
+				if (type == typeof(object))
+				{
+					throw new Exception(nameof(QDataList) + "类型出错 " + type);
+				}
+			}
 			var typeInfo = QSerializeType.Get(type);
 			list.Clear();
 			var titleRow = qdataList.TitleRow;
 			var memeberList = new List<QMemeberInfo>();
 			foreach (var title in titleRow)
 			{
-				var member = typeInfo.Members[title];
-				if (member == null)
-				{
-					member = typeInfo.Members.Get(title, (obj) => obj.ViewName);
-				}
+				var member = typeInfo.GetMemberInfo(title);
 				if (member == null)
 				{
 					Debug.LogError("读取 " + type.Name + "出错 不存在属性 " + title);
@@ -633,7 +651,7 @@ namespace QTool
 			foreach (var row in qdataList)
 			{
 				if (row == titleRow) continue;
-				var t = new T();
+				var t = type.CreateInstance();
 				for (int i = 0; i < titleRow.Count; i++)
 				{
 					var member = memeberList[i];
@@ -651,7 +669,7 @@ namespace QTool
 
 					}
 				}
-				list.Add(t);
+				list.Add(t as T);
 			}
 			Debug.Log("读取 " + type.Name + " 完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList);
 			return list;

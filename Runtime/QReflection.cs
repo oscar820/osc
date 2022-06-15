@@ -89,6 +89,16 @@ namespace QTool.Reflection
         public TypeCode Code { get; private set; }
         public BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public;
         public BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public ;
+		public QMemeberInfo GetMemberInfo(string keyOrViewName)
+		{
+			var info = Members[keyOrViewName];
+			if (info == null)
+			{
+				info= Members.Get(keyOrViewName, (obj) => obj.ViewName);
+			}
+			return info;
+			
+		}
         public bool IsArray {
             get
             {
