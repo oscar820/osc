@@ -63,11 +63,10 @@ namespace QTool.Test
         public void ChangeLangua()
         {
             QTranslate.ChangeGlobalLanguage(QTranslate.GlobalLanguage == "schinese" ? "english" : "schinese");
-		//	QTranslate.LanguageData["测试2"].SetValue(QTranslate.GlobalLanguage, "测试2222");
-			QTranslate.LanguageData.Save();
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < 10; i++)
 			{
 				var testData = QTranslate.GetQDataList("测试翻译"+i);
+				testData["测试翻译" + i].SetValue(QTranslate.GlobalLanguage, "【翻译结果" + i + "】");
 				testData.Save();
 			}
 			

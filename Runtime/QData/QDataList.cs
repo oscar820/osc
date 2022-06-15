@@ -55,7 +55,7 @@ namespace QTool{
 						dataList[path].LoadPath = path;
 						FileManager.LoadAll(path, (fileValue) =>
 						{
-							dataList[path].Parse(fileValue);
+							dataList[path].Parse(fileValue,false);
 						},"{}");
                     }
                     catch (System.Exception e)

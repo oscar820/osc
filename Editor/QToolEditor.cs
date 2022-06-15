@@ -14,8 +14,29 @@ namespace QTool
 {
     public static class QToolEditor
     {
-     
-        [MenuItem("QTool/清空缓存/清空全部缓存")]
+		[MenuItem("QTool/工具/翻译语言测试", priority = 0)]
+		public static void LanguageTest()
+		{
+			Debug.LogError(QTool.QTranslate.LanguageData.ToString());
+			GUIUtility.systemCopyBuffer = QTool.QTranslate.LanguageData.ToString();
+		}
+		[MenuItem("QTool/工具/查找资源", priority = 0)]
+		public static void FindAsset()
+		{
+			try
+			{
+				var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(GUIUtility.systemCopyBuffer), typeof(UnityEngine.Object));
+
+				Debug.LogError("找到 " + obj);
+				Selection.activeObject = obj;
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError("查找出错：" + e);
+				throw;
+			}
+		}
+		[MenuItem("QTool/清空缓存/清空全部缓存")]
         public static void ClearMemery()
         {
             ClearPlayerPrefs();
