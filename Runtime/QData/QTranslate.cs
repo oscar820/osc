@@ -13,8 +13,8 @@ namespace QTool
 		public string Name { get; set; }
 		public string WebAPI { get; set; }
 	}
-    public class QTranslate : MonoBehaviour
-    {
+	public class QTranslate : MonoBehaviour
+	{
 
 		public static QList<string, QTranslateKey> TranslateKeys = new QList<string, QTranslateKey>
 		{
@@ -61,6 +61,12 @@ namespace QTool
 					titleList.Add(translateKey.Key);
 				}
 				data.SetTitles(titleList.ToArray());
+				if(name== "LanguageData")
+				{
+					data["测试文本"].SetValue(GlobalLanguage, @"测试文
+本123");
+					data["测试文本"].SetValue("english", "test123");
+				}
 				return data;
 			});
 		}
