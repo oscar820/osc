@@ -1062,12 +1062,12 @@ namespace QTool.Inspector
                 base.OnInspectorGUI();
                 return;
             }
-            GroupList.Clear();
+          //  GroupList.Clear();
             EditorGUI.BeginChangeCheck();
             DrawAllProperties(serializedObject);
 
             DrawButton();
-            DrawGroup();
+          //  DrawGroup();
             DrawScriptToggleList();
             if (EditorGUI.EndChangeCheck())
             {
@@ -1077,30 +1077,30 @@ namespace QTool.Inspector
             }
 
         }
-        public void DrawGroup()
-        {
-            foreach (var kv in GroupList)
-            {
-                if (kv.Value.group is HorizontalGroupAttribute)
-                {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        if (kv.Value.group.Active(target))
-                        {
-                            kv.Value.func?.Invoke();
-                        }
-                    }
-                }
-            }
-        }
+        //public void DrawGroup()
+        //{
+        //    foreach (var kv in GroupList)
+        //    {
+        //        if (kv.Value.group is HorizontalGroupAttribute)
+        //        {
+        //            using (new EditorGUILayout.HorizontalScope())
+        //            {
+        //                if (kv.Value.group.Active(target))
+        //                {
+        //                    kv.Value.func?.Invoke();
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
 
         public void DrawButton()
         {
             foreach (var kv in typeInfo.buttonFunc)
             {
-                CheckGroup(kv.Value.MethodInfo.GetCustomAttribute<GroupAttribute>(), () =>
-                {
+                //CheckGroup(kv.Value.MethodInfo.GetCustomAttribute<GroupAttribute>(), () =>
+                //{
                     var att = kv.Key;
                     if (att.Active(target))
                     {
@@ -1133,7 +1133,7 @@ namespace QTool.Inspector
                         }
 
                     }
-                });
+                //});
 
             }
         }
@@ -1322,34 +1322,34 @@ namespace QTool.Inspector
         #endregion
         Action ChangeCallBack;
         public int pickId = -1;
-        public void CheckGroup(GroupAttribute group, Action func)
-        {
-            if (group == null)
-            {
-                func();
-            }
-            else
-            {
-                if (GroupList[group.name] == null)
-                {
-                    GroupList[group.name] = new GroupInfo()
-                    {
-                        group = group
-                    };
-                }
-                GroupList[group.name].func += func;
-            }
-        }
-        public class GroupInfo
-        {
-            public GroupAttribute group;
-            public Action func;
-        }
-        public QDictionary<string, GroupInfo> GroupList = new QDictionary<string, GroupInfo>();
+        //public void CheckGroup(GroupAttribute group, Action func)
+        //{
+        //    if (group == null)
+        //    {
+        //        func();
+        //    }
+        //    else
+        //    {
+        //        if (GroupList[group.name] == null)
+        //        {
+        //            GroupList[group.name] = new GroupInfo()
+        //            {
+        //                group = group
+        //            };
+        //        }
+        //        GroupList[group.name].func += func;
+        //    }
+        //}
+        //public class GroupInfo
+        //{
+        //    public GroupAttribute group;
+        //    public Action func;
+        //}
+       // public QDictionary<string, GroupInfo> GroupList = new QDictionary<string, GroupInfo>();
         public void DrawProperty(SerializedProperty property)
         {
-            CheckGroup(property.GetAttribute<GroupAttribute>(), () =>
-            {
+            //CheckGroup(property.GetAttribute<GroupAttribute>(), () =>
+            //{
                 if (property.name.Equals("m_Script"))
                 {
                     GUI.enabled = false;
@@ -1369,7 +1369,7 @@ namespace QTool.Inspector
                     }
 
                 }
-            });
+           // });
         }
     }
 }
