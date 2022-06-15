@@ -459,8 +459,8 @@ namespace QTool
 		}
 
 
-		const string BlockStart = "{[\"";
-		const string BlockEnd = "}]\",;=:";
+		const string BlockStart = "<{[\"";
+		const string BlockEnd = ">}]\",;=:";
 		static Stack<char> BlockStack = new Stack<char>();
 		public static string ReadValueString(this StringReader reader)
 		{
