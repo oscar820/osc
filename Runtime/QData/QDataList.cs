@@ -45,17 +45,17 @@ namespace QTool{
 		}
 		public static QDataList GetData(string path,System.Func<QDataList> autoCreate=null)
         {
-            if (!dataList.ContainsKey(path))
+            if (!DataCatchList.ContainsKey(path))
             {
                 if (FileManager.Exists(path,true))
                 {
                     try
 					{
-						dataList[path] = new QDataList();
-						dataList[path].LoadPath = path;
+						DataCatchList[path] = new QDataList();
+						DataCatchList[path].LoadPath = path;
 						FileManager.LoadAll(path, (fileValue) =>
 						{
-							dataList[path].Parse(fileValue, false);
+							DataCatchList[path].Parse(fileValue, false);
 						},"{}");
                     }
                     catch (System.Exception e)
@@ -69,16 +69,20 @@ namespace QTool{
                     {
 						var qdataList = autoCreate();
 						qdataList.LoadPath = path;
-                        dataList[path] = qdataList;
+                        DataCatchList[path] = qdataList;
                         qdataList.Save();
 						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n"+qdataList);
 					}
                 }
             }
-            return dataList[path];
+            return DataCatchList[path];
         }
 
-        static QDictionary<string, QDataList> dataList = new QDictionary<string, QDataList>();
+        static QDictionary<string, QDataList> DataCatchList = new QDictionary<string, QDataList>();
+		public static void ClearCatch()
+		{
+			DataCatchList.Clear();
+		}
         public override void OnCreate(QDataRow obj)
         {
             obj.OwnerData = this;
