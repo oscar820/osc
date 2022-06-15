@@ -33,19 +33,7 @@ namespace QTool
         {
         }
     }
-    /// <summary>
-    /// 显示一个标题
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    public class TitleAttribute : PropertyAttribute
-    {
-        public string title;
-        public float height = 20;
-        public TitleAttribute(string title)
-        {
-            this.title = title;
-        }
-    }
+  
 
 }
 namespace QTool.Inspector

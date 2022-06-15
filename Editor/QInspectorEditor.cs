@@ -197,28 +197,28 @@ namespace QTool.Inspector
             return property.GetHeight();
         }
     }
-    [CustomPropertyDrawer(typeof(TitleAttribute))]
-    public class TitleAttributeDrawer : DecoratorDrawBase<TitleAttribute>
-    {
+    //[CustomPropertyDrawer(typeof(TitleAttribute))]
+    //public class TitleAttributeDrawer : DecoratorDrawBase<TitleAttribute>
+    //{
     
-        public override void OnGUI(Rect position)
-        {
-            var falg = GUI.enabled;
-            GUI.enabled = true;
-            var titleRect = position;
-            titleRect.y += 10;
-            titleRect.height = att.height;
-            GUI.Label(titleRect, att.title, QGUITool.TitleLable);
-            titleRect.y += 4;
-            titleRect.height -= 4;
-            GUI.Label(titleRect, "__________________________________", QGUITool.TitleLable);
-            GUI.enabled = falg;
-        }
-        public override float GetHeight()
-        {
-            return att.height + 10;
-        }
-    }
+    //    public override void OnGUI(Rect position)
+    //    {
+    //        var falg = GUI.enabled;
+    //        GUI.enabled = true;
+    //        var titleRect = position;
+    //        titleRect.y += 10;
+    //        titleRect.height = att.height;
+    //        GUI.Label(titleRect, att.title, QGUITool.TitleLable);
+    //        titleRect.y += 4;
+    //        titleRect.height -= 4;
+    //        GUI.Label(titleRect, "__________________________________", QGUITool.TitleLable);
+    //        GUI.enabled = falg;
+    //    }
+    //    public override float GetHeight()
+    //    {
+    //        return att.height + 10;
+    //    }
+    //}
 
     #endregion
     public static class QEditorTool
