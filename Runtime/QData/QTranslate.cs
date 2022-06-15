@@ -7,17 +7,66 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 namespace QTool
 {
+	public class QTranslateKey:IKey<string>
+	{
+		public string Key { get; set; }
+		public string Name { get; set; }
+		public string WebAPI { get; set; }
+	}
     public class QTranslate : MonoBehaviour
     {
-        public static QDataList LanguageData => QDataList.GetResourcesData("LanguageData", () => {
-			var data = new QDataList();
-            data.SetTitles("Key", "中文", "English");
-            data["文本语言"].SetValue("中文", "文本语言").SetValue("English", "Language");
-			return data;
-        }); 
-        #region 基础数据
 
-        [HideInInspector]
+		public static QList<string, QTranslateKey> TranslateKeys = new QList<string, QTranslateKey>
+		{
+			new QTranslateKey
+			{
+				Key="schinese",
+				Name="简体中文",
+				WebAPI="zh-CN",
+			},
+			new QTranslateKey
+			{
+				Key="tchinese",
+				Name="繁體中文",
+				WebAPI="zh-TW",
+			},
+			new QTranslateKey
+			{
+				Key="english",
+				Name="English",
+				WebAPI="en",
+			},
+			new QTranslateKey
+			{
+				Key="japanese",
+				Name="日本語",
+				WebAPI="ja",
+			},
+			new QTranslateKey
+			{
+				Key="koreana",
+				Name="한국어",
+				WebAPI="ko",
+			},
+		};
+		public static QDataList LanguageData => GetQDataList("LanguageData");
+		public static QDataList GetQDataList(string name)
+		{
+			return QDataList.GetResourcesData(name, () => {
+				var data = new QDataList();
+				List<string> titleList = new List<string>();
+				titleList.Add("Key");
+				foreach (var translateKey in TranslateKeys)
+				{
+					titleList.Add(translateKey.Key);
+				}
+				data.SetTitles(titleList.ToArray());
+				return data;
+			});
+		}
+		#region 基础数据
+
+		[HideInInspector]
         public string curValue;
         [ViewName("文本")]
         [SerializeField]
@@ -54,10 +103,11 @@ namespace QTool
         }
         #endregion
         #region 全局翻译
-        public static string globalLanguage = "中文";
+        public static string globalLanguage = "schinese";
         public static void ChangeGlobalLanguage(string value)
         {
-            if (globalLanguage == value)
+			value = value.ToLower();
+			if (globalLanguage == value)
             {
                 OnLanguageChange?.Invoke();
             }
