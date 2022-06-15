@@ -671,16 +671,21 @@ namespace QTool.Inspector
 															DrawElementCall?.Invoke(i);
 															using (new EditorGUILayout.HorizontalScope())
 															{
-																if (GUILayout.Button("+", GUILayout.Width(20)))
+																GUILayout.FlexibleSpace();
+																QGUITool.SetColor(Color.blue.LerpTo(Color.white,0.5f));
+																if (GUILayout.Button(new GUIContent("","新增当前数据"), GUILayout.Width(10), GUILayout.Height(10)))
 																{
 																	obj = list.CreateAt(typeInfo, i);
 																	IndexChange?.Invoke(-1, i + 1);
 																}
-																if (GUILayout.Button("-", GUILayout.Width(20)))
+																QGUITool.RevertColor();
+																QGUITool.SetColor(Color.red.LerpTo(Color.white, 0.5f));
+																if (GUILayout.Button(new GUIContent("", "删除当前数据"), GUILayout.Width(10), GUILayout.Height(10)))
 																{
 																	obj = list.RemoveAt(typeInfo, i);
 																	IndexChange?.Invoke(i, -1);
 																}
+																QGUITool.RevertColor();
 															}
 														}
 														
