@@ -529,7 +529,14 @@ namespace QTool.Inspector
                 case TypeCode.Double:
                         obj= EditorGUILayout.DoubleField(name, (double)obj, layoutOption);break;
                 case TypeCode.String:
-                        obj= EditorGUILayout.TextField(name, obj?.ToString(), layoutOption);break;
+					if (string.IsNullOrWhiteSpace(name))
+					{
+						obj = EditorGUILayout.TextArea(obj?.ToString(), layoutOption);break;
+					}
+					else
+					{
+						obj = EditorGUILayout.TextField(name, obj?.ToString(), layoutOption); break;
+					}
                 case TypeCode.Object:
                     switch (typeInfo.objType)
                     {

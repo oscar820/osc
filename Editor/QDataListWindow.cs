@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using QTool.Reflection;
+using QTool;
 namespace QTool.FlowGraph
 {
 
@@ -70,19 +71,21 @@ namespace QTool.FlowGraph
 		}
 		public Rect DrawCell(int x,int y,Vector2 size) 
 		{
+			var width = GUILayout.Width(size.x);
+			var height = GUILayout.Height(size.y);
 			if (y == 0)
 			{
-				GUILayout.Label(qdataList[y][x],GUILayout.Width(size.x),GUILayout.Height(size.y));
+				GUILayout.Label(qdataList[y][x], QGUITool.CenterLable, width, height);
 			}
 			else if(typeInfo==null)
 			{
-				qdataList[y].SetValueType( qdataList[y][x].Draw("", typeof(string)),typeof(string),x);
+				qdataList[y].SetValueType( qdataList[y][x].Draw("", typeof(string),null,null,null, width,height),typeof(string),x);
 			}
 			else
 			{
 				var member = Members[x];
 				var obj = objList[y - 1];
-				member.Set(obj, member.Get(obj).Draw("", member.Type));
+				member.Set(obj, member.Get(obj).Draw("", member.Type,null,null,null,width,height));
 			}
 			var rect= GUILayoutUtility.GetLastRect();
 			return rect;

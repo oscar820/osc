@@ -12,6 +12,7 @@ namespace QTool
 		public Func<int, int, Vector2, Rect> DrawCell;
 		public Func<Vector2Int> GetSize;
 		public Vector2Int GridSize { private set; get; }
+		public Vector2 ViewDataSize { private set; get; }
 		public Vector2 ViewSize { private set; get; }
 		public Vector2 ViewScrollPos { private set; get; }
 		public QGridView(Func<int, int,Vector2, Rect> DrawCell, Func<Vector2Int> GetSize)
@@ -24,9 +25,40 @@ namespace QTool
 		{
 			return CellSize.x;
 		}
+		public RectInt GetViewRange()
+		{
+			var range = new RectInt();
+			var viewRect = new Rect(ViewScrollPos, ViewDataSize);
+			range.x= (int)(viewRect.xMin / (CellSize.x))+1;
+			range.y = (int)(viewRect.yMin / (CellSize.y))+1;
+			range.width= Mathf.CeilToInt((viewRect.width /( CellSize.x)))+1; 
+			range.height = Mathf.CeilToInt( (viewRect.height / (CellSize.y)))+1;
+			if (range.yMax > GridSize.y) 
+			{
+				range.height -= range.yMax - GridSize.y;
+			}
+			if (range.xMax > GridSize.x)
+			{
+				range.width -= range.xMax - GridSize.x;
+			}
+			return range;
+		}
+		void DrawLine(Rect lastRect)
+		{
+			var lastColor = Handles.color;
+			Handles.color = Color.gray;
+			Handles.DrawLine(new Vector3(lastRect.xMin, lastRect.yMax), new Vector3(lastRect.xMax, lastRect.yMax));
+			Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
+			Handles.color = lastColor;
+		}
+		RectInt ViewRange;
 		public void DoLayout()
 		{
-			GridSize = GetSize();
+			if(Event.current.type != EventType.Repaint)
+			{
+				GridSize = GetSize();
+				ViewRange = GetViewRange();
+			}
 			using (new GUILayout.VerticalScope())
 			{
 				using (new GUILayout.HorizontalScope())
@@ -38,55 +70,75 @@ namespace QTool
 					{
 						using (new GUILayout.HorizontalScope())
 						{
-							for (int x = 1; x < GridSize.x; x++)
+
+							GUILayout.Space((ViewRange.x - 1) * (CellSize.x ));
+							for (int x = ViewRange.x; x < ViewRange.xMax; x++)
 							{
-								DrawCell(x,0, CellSize);
+								DrawLine(DrawCell(x,0, CellSize));
+							}
+							if (ViewRange.xMax < GridSize.x)
+							{
+								GUILayout.Space((GridSize.x - ViewRange.xMax) * (CellSize.x ));
 							}
 							GUILayout.FlexibleSpace();
 						}
 
 					}
-					GUILayout.FlexibleSpace();
 					GUILayout.Space(13);
 				}
+				GUILayout.Space(5);
 				using (new GUILayout.HorizontalScope())
 				{
-
 					using (new GUILayout.ScrollViewScope(new Vector2(0, ViewScrollPos.y), GUIStyle.none, GUIStyle.none, GUILayout.Width(GetWidth())))
 					{
 						using (new GUILayout.VerticalScope())
 						{
-							for (int y = 1; y < GridSize.y; y++)
+							GUILayout.Space((ViewRange.y-1) * (CellSize.y));
+							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
 							{
-								DrawCell(0, y, CellSize);
+								DrawLine( DrawCell(0, y, CellSize));
+							}
+							if (ViewRange.yMax < GridSize.y)
+							{
+								GUILayout.Space((GridSize.y-ViewRange.yMax ) *( CellSize.y));
 							}
 							GUILayout.Space(13);
 						}
 					}
-					//if (Event.current.type == EventType.Repaint)
-					//{
-					//	viewRect = GUILayoutUtility.GetLastRect();
-					//}
 					GUILayout.Space(6);
 					using (var dataView = new GUILayout.ScrollViewScope(ViewScrollPos))
 					{
 						using (new GUILayout.VerticalScope())
 						{
-							for (int y = 1; y < GridSize.y; y++)
+							GUILayout.Space((ViewRange.y - 1) * (CellSize.y ));
+							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
 							{
 								using (new GUILayout.HorizontalScope())
 								{
-									for (int x = 1; x < GridSize.x; x++)
+
+									GUILayout.Space((ViewRange.x - 1) * (CellSize.x ));
+									for (int x = ViewRange.x; x < ViewRange.xMax; x++)
 									{
-										DrawCell(x, y, CellSize);
+										DrawLine(DrawCell(x, y, CellSize));
+									}
+									if (ViewRange.xMax < GridSize.x)
+									{
+										GUILayout.Space((GridSize.x - ViewRange.xMax) * (CellSize.x ));
 									}
 									GUILayout.FlexibleSpace();
-								}
+								} 
+							}
+							if (ViewRange.yMax < GridSize.y)
+							{
+								GUILayout.Space((GridSize.y - ViewRange.yMax) * (CellSize.y ));
 							}
 						}
 						ViewScrollPos = dataView.scrollPosition;
 					}
-					
+					if (Event.current.type == EventType.Repaint)
+					{
+						ViewDataSize = GUILayoutUtility.GetLastRect().size;
+					}
 				}
 			}
 			if (Event.current.type == EventType.Repaint)
