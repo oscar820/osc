@@ -133,21 +133,34 @@ namespace QTool{
 			}
             using (var reader = new StringReader(dataStr))
             {
-                int index = 0;
+				int rowIndex = 0;
+                int valueIndex = 0;
                 var row = new QDataRow(this);
                 while (!reader.IsEnd())
                 {
                     var value = reader.ReadElement(out var newLine);
-                    row[index] = value;
-                    index++;
+                    row[valueIndex] = value;
+                    valueIndex++;
                     if (newLine)
                     {
                         if (row.Count > 0)
                         {
-                            Add(row);
+							if(!clear&&rowIndex == 0 && Count > 0)
+							{
+								for (int i = 0; i < row.Count; i++)
+								{
+									TitleRow[i] = row[i];
+								}
+							}
+							else
+							{
+								Add(row);
+							}
+							
                         }
-                        index = 0;
-                        row = new QDataRow(this);
+                        valueIndex = 0;
+						rowIndex++;
+						row = new QDataRow(this);
                     }
                    
                 }
