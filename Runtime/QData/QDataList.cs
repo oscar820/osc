@@ -42,7 +42,7 @@ namespace QTool
 		}
 		public static QDataList GetData(string path,System.Func<QDataList> autoCreate=null)
         {
-			return Catch.Get(path, (key) =>
+			return QDataListCache.Get(path, (key) =>
 			{
 				if (FileManager.Exists(path, true))
 				{
@@ -76,10 +76,7 @@ namespace QTool
 			});
 
 		}
-	
-
-       // static QDictionary<string, QDataList> DataCatchList = new QDictionary<string, QDataList>();
-		public static QKeyCatch<QDataList, DateTime> Catch = new QKeyCatch<QDataList, DateTime>((key)=> {
+		public static QKeyCache<string,QDataList, DateTime> QDataListCache = new QKeyCache<string,QDataList, DateTime>((key)=> {
 			return FileManager.GetLastWriteTime(key);
 		});
         public override void OnCreate(QDataRow obj)
