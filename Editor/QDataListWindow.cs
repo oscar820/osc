@@ -67,12 +67,12 @@ namespace QTool.FlowGraph
 			{
 				objList.ToQDataList(qdataList,typeInfo.Type);
 			}
-			qdataList.Save();
+			qdataList?.Save();
 		}
-		public Rect DrawCell(int x,int y,Vector2 size) 
+		public Rect DrawCell(int x,int y,float widthSize,float heightSize) 
 		{
-			var width = GUILayout.Width(size.x);
-			var height = GUILayout.Height(size.y);
+			var width = GUILayout.Width(widthSize);
+			var height = GUILayout.Height(heightSize);
 			if (y == 0)
 			{
 				GUILayout.Label(qdataList[y][x], QGUITool.CenterLable, width, height);
@@ -100,7 +100,7 @@ namespace QTool.FlowGraph
 		private void OnGUI()
 		{
 			if (qdataList==null ) return;
-			gridView.DoLayout();
+			gridView.DoLayout(Repaint);
 		}
 	}
 	

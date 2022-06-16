@@ -40,7 +40,7 @@ namespace QTool
 		int startIndex = -1; 
 		int endIndex = - 1;
 		Rect viewRect;
-		QList<Rect> elementRect = new QList<Rect>(); 
+		QList<Rect> elementRect = new QList<Rect>();
 		public void ViewChange(string newEvent,string newPlayer)
 		{
 			if (newEvent != ViewEvent || newPlayer != ViewPlayer)
@@ -81,7 +81,7 @@ namespace QTool
 		}
 		private void OnGUI()
 		{
-			using (var toolBarHor = new GUILayout.HorizontalScope())
+			using (new GUILayout.HorizontalScope())
 			{
 				if (QAnalysisData.IsLoading)
 				{
@@ -360,7 +360,7 @@ namespace QTool
 			}
 
 		}
-
+		
 		public Rect DrawCell(object value,float width,Action<GenericMenu> menu=null ,Action cilck=null,int index=-1)
 		{
 			var showStr = value?.ToString();

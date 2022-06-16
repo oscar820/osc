@@ -3,36 +3,92 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEditor;
-
+using QTool.Inspector;
 namespace QTool
 {
 
 	public class QGridView
 	{
-		public Func<int, int, Vector2, Rect> DrawCell;
+		public Func<int, int, float,float, Rect> DrawCell;
 		public Func<Vector2Int> GetSize;
 		public Vector2Int GridSize { private set; get; }
 		public Vector2 ViewDataSize { private set; get; }
 		public Vector2 ViewSize { private set; get; }
 		public Vector2 ViewScrollPos { private set; get; }
-		public QGridView(Func<int, int,Vector2, Rect> DrawCell, Func<Vector2Int> GetSize)
+		QList<float> CellWidth = new QList<float>();
+		public QGridView(Func<int, int,float,float, Rect> DrawCell, Func<Vector2Int> GetSize)
 		{
 			this.DrawCell = DrawCell;
 			this.GetSize = GetSize;
 		}
-	 	readonly static Vector2 CellSize = new Vector2(100,30);
+	 	readonly static Vector2 DefualtCellSize = new Vector2(100,30);
 		public float GetWidth(int x=0)
 		{
-			return CellSize.x;
+			return Mathf.Max(CellWidth[x],100);
+		}
+		public float GetHeight(int x = 0)
+		{
+			return 30;
+		}
+		public void Space(int start,int end,bool width = true)
+		{
+			Func<int, float> GetValue = null;
+			if (width)
+			{
+				GetValue = GetWidth;
+			}
+			else
+			{
+				GetValue = GetHeight;
+			}
+			var sum = 0f;
+			for (int i = start; i < end; i++)
+			{
+				sum += GetValue(i);
+			}
+			GUILayout.Space(sum);
 		}
 		public RectInt GetViewRange()
 		{
 			var range = new RectInt();
 			var viewRect = new Rect(ViewScrollPos, ViewDataSize);
-			range.x= (int)(viewRect.xMin / (CellSize.x))+1;
-			range.y = (int)(viewRect.yMin / (CellSize.y))+1;
-			range.width= Mathf.CeilToInt((viewRect.width /( CellSize.x)))+1; 
-			range.height = Mathf.CeilToInt( (viewRect.height / (CellSize.y)))+1;
+			var sum = 0f;
+			for (range.x = 1; range.x < GridSize.x; range.x++)
+			{
+				sum += GetWidth(range.x);
+				if (sum >= viewRect.xMin)
+				{
+					break;
+				}
+			}
+			for (range.width =1; range.xMax < GridSize.x; range.width++)
+			{
+				sum += GetWidth(range.xMax);
+				if (sum >= viewRect.xMax)
+				{
+					range.width++;
+					break;
+				}
+			}
+
+			sum = 0;
+			for (range.y = 1; range.y < GridSize.y; range.y++)
+			{
+				sum += GetHeight(range.y);
+				if (sum >= viewRect.yMin)
+				{
+					break;
+				}
+			}
+			for (range.height = 1; range.yMax < GridSize.y; range.height++)
+			{
+				sum += GetHeight(range.yMax);
+				if (sum >= viewRect.yMax)
+				{
+					range.height++;
+					break;
+				}
+			}
 			if (range.yMax > GridSize.y) 
 			{
 				range.height -= range.yMax - GridSize.y;
@@ -52,34 +108,47 @@ namespace QTool
 			Handles.color = lastColor;
 		}
 		RectInt ViewRange;
-		public void DoLayout()
+		int DragXIndex = -1;
+		float startPos=0;
+		public void DoLayout(Action Repaint)
 		{
 			if(Event.current.type != EventType.Repaint)
 			{
 				GridSize = GetSize();
+
 				ViewRange = GetViewRange();
+
 			}
 			using (new GUILayout.VerticalScope())
 			{
 				using (new GUILayout.HorizontalScope())
 				{
-					var rect = DrawCell(0, 0, CellSize);
+					var rect = DrawCell(0, 0, GetWidth(),GetHeight());
 					Handles.DrawLine(new Vector3(0, rect.yMax), new Vector3(ViewSize.x, rect.yMax));
 					Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, ViewSize.y));
-					using (new GUILayout.ScrollViewScope(new Vector2(ViewScrollPos.x, 0), GUIStyle.none, GUIStyle.none, GUILayout.Height(CellSize.y)))
+					using (new GUILayout.ScrollViewScope(new Vector2(ViewScrollPos.x, 0), GUIStyle.none, GUIStyle.none, GUILayout.Height(GetHeight())))
 					{
 						using (new GUILayout.HorizontalScope())
 						{
-
-							GUILayout.Space((ViewRange.x - 1) * (CellSize.x ));
+							Space(1, ViewRange.x);
 							for (int x = ViewRange.x; x < ViewRange.xMax; x++)
 							{
-								DrawLine(DrawCell(x,0, CellSize));
+								var drawRect = DrawCell(x, 0, GetWidth(x), GetHeight());
+								DrawLine(drawRect);
+								var pos = drawRect.xMin;
+								drawRect.x += drawRect.width - 5;
+								drawRect.width = 10;
+								if (drawRect.Contains(Event.current.mousePosition))
+								{
+									if (Event.current.type == EventType.MouseDown)
+									{
+										startPos = pos+rect.xMax-ViewScrollPos.x;
+										DragXIndex = x;
+									}
+								}
+								
 							}
-							if (ViewRange.xMax < GridSize.x)
-							{
-								GUILayout.Space((GridSize.x - ViewRange.xMax) * (CellSize.x ));
-							}
+							Space(ViewRange.xMax, GridSize.x);
 							GUILayout.FlexibleSpace();
 						}
 
@@ -93,15 +162,12 @@ namespace QTool
 					{
 						using (new GUILayout.VerticalScope())
 						{
-							GUILayout.Space((ViewRange.y-1) * (CellSize.y));
+							Space(1, ViewRange.y, false);
 							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
 							{
-								DrawLine( DrawCell(0, y, CellSize));
+								DrawLine( DrawCell(0, y, GetWidth(),GetHeight(y)));
 							}
-							if (ViewRange.yMax < GridSize.y)
-							{
-								GUILayout.Space((GridSize.y-ViewRange.yMax ) *( CellSize.y));
-							}
+							Space(ViewRange.yMax, GridSize.y, false);
 							GUILayout.Space(13);
 						}
 					}
@@ -110,28 +176,21 @@ namespace QTool
 					{
 						using (new GUILayout.VerticalScope())
 						{
-							GUILayout.Space((ViewRange.y - 1) * (CellSize.y ));
+							Space(1, ViewRange.y, false);
 							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
 							{
 								using (new GUILayout.HorizontalScope())
 								{
-
-									GUILayout.Space((ViewRange.x - 1) * (CellSize.x ));
+									Space(1, ViewRange.x);
 									for (int x = ViewRange.x; x < ViewRange.xMax; x++)
 									{
-										DrawLine(DrawCell(x, y, CellSize));
+										DrawLine(DrawCell(x, y, GetWidth(x),GetHeight(y)));
 									}
-									if (ViewRange.xMax < GridSize.x)
-									{
-										GUILayout.Space((GridSize.x - ViewRange.xMax) * (CellSize.x ));
-									}
+									Space(ViewRange.xMax, GridSize.x);
 									GUILayout.FlexibleSpace();
 								} 
 							}
-							if (ViewRange.yMax < GridSize.y)
-							{
-								GUILayout.Space((GridSize.y - ViewRange.yMax) * (CellSize.y ));
-							}
+							Space(ViewRange.yMax, GridSize.y, false);
 						}
 						ViewScrollPos = dataView.scrollPosition;
 					}
@@ -144,6 +203,16 @@ namespace QTool
 			if (Event.current.type == EventType.Repaint)
 			{
 				ViewSize = GUILayoutUtility.GetLastRect().size;
+			}
+			if (DragXIndex > 0)
+			{
+
+				CellWidth[DragXIndex] = Event.current.mousePosition.x - startPos;
+				if (Event.current.type == EventType.MouseUp)
+				{
+					DragXIndex = -1;
+				}
+				Repaint();
 			}
 		}
 	}
