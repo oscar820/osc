@@ -319,7 +319,7 @@ namespace QTool
             try
             {
                 CheckFolder(path);
-				if (!checkUpdate|| Load(path).GetHashCode() != data?.GetHashCode())
+				if (!checkUpdate||(Exists(path)&& Load(path).GetHashCode() != data?.GetHashCode()))
 				{
 					using (var file = System.IO.File.Create(path))
 					{
@@ -328,6 +328,9 @@ namespace QTool
 							sw.Write(data);
 						}
 					}
+#if UNITY_EDITOR
+					UnityEditor.AssetDatabase.Refresh();
+#endif
 					return true;
 				}
             }

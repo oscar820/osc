@@ -139,6 +139,7 @@ namespace QTool
         public virtual void Set(TKey key, T value)
         {
             this.Set<T, TKey>(key, value);
+			ListCache.Set(key, value);
         }
         public void Remove(TKey key)
         {
