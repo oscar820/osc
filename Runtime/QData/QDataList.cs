@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
-using System.Text;
-using QTool.Asset;
-using QTool.Reflection;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
-namespace QTool{
+namespace QTool
+{
 	public class QDataList<T>  where T : QDataList<T>, IKey<string>,new()
 	{
 		public static T Get(string key)
@@ -45,44 +42,46 @@ namespace QTool{
 		}
 		public static QDataList GetData(string path,System.Func<QDataList> autoCreate=null)
         {
-            if (!DataCatchList.ContainsKey(path))
-            {
-                if (FileManager.Exists(path,true))
-                {
-                    try
+			return Catch.Get(path, (key) =>
+			{
+				if (FileManager.Exists(path, true))
+				{
+					try
 					{
-						DataCatchList[path] = new QDataList();
-						DataCatchList[path].LoadPath = path;
+						var data = new QDataList();
+						data.LoadPath = path;
 						FileManager.LoadAll(path, (fileValue) =>
 						{
-							DataCatchList[path].Parse(fileValue, false);
-						},"{}");
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
-                    }
-                }
-                else
-                {
-                    if (autoCreate!=null)
-                    {
+							data.Parse(fileValue, false);
+						}, "{}");
+						return data;
+					}
+					catch (System.Exception e)
+					{
+						Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
+					}
+				}
+				else
+				{
+					if (autoCreate != null)
+					{
 						var qdataList = autoCreate();
 						qdataList.LoadPath = path;
-                        DataCatchList[path] = qdataList;
-                        qdataList.Save();
-						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n"+qdataList);
+						qdataList.Save();
+						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + qdataList);
+						return qdataList;
 					}
-                }
-            }
-            return DataCatchList[path];
-        }
+				}
+				return null;
+			});
 
-        static QDictionary<string, QDataList> DataCatchList = new QDictionary<string, QDataList>();
-		public static void ClearCatch()
-		{
-			DataCatchList.Clear();
 		}
+	
+
+       // static QDictionary<string, QDataList> DataCatchList = new QDictionary<string, QDataList>();
+		public static QKeyCatch<QDataList, DateTime> Catch = new QKeyCatch<QDataList, DateTime>((key)=> {
+			return FileManager.GetLastWriteTime(key);
+		});
         public override void OnCreate(QDataRow obj)
         {
             obj.OwnerData = this;
@@ -95,7 +94,7 @@ namespace QTool{
             {
                 path = LoadPath;
             }
-            FileManager.Save(path, ToString());
+            FileManager.Save(path, ToString(),true);
         }
         public bool TryGetTitleIndex(string title,out int index)
         {

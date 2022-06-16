@@ -141,7 +141,25 @@ namespace QTool
             }
         }
 		public const string ResourcesRoot = "Assets/Resources/";
-
+		public static DateTime GetLastWriteTime(string path)
+		{
+			if (!File.Exists(path))
+			{
+				return DateTime.MinValue;
+			}
+			if (Application.isPlaying && path.StartsWith(ResourcesRoot))
+			{
+#if UNITY_EDITOR
+				return File.GetLastWriteTime(path);
+#else
+				return true;
+#endif
+			}
+			else
+			{
+				return File.GetLastWriteTime(path);
+			}
+		}
 		public static bool Exists(string path,bool checkDirectory=false)
 		{
 			if (Application.isPlaying&&path.StartsWith(ResourcesRoot))
@@ -296,18 +314,22 @@ namespace QTool
         {
             return XmlDeserialize<T>(Load(path));
         }
-        public static string Save(string path, string data)
+        public static bool Save(string path, string data,bool checkUpdate=false)
         {
             try
             {
                 CheckFolder(path);
-                using (var file = System.IO.File.Create(path))
-                {
-                    using (var sw = new System.IO.StreamWriter(file))
-                    {
-                        sw.Write(data);
-                    }
-                }
+				if (!checkUpdate|| Load(path).GetHashCode() != data?.GetHashCode())
+				{
+					using (var file = System.IO.File.Create(path))
+					{
+						using (var sw = new System.IO.StreamWriter(file))
+						{
+							sw.Write(data);
+						}
+					}
+					return true;
+				}
             }
             catch (Exception e)
             {
@@ -315,7 +337,7 @@ namespace QTool
                 Debug.LogError("保存失败【" + path + "】" + e);
             }
 
-            return path;
+            return false;
         }
 
  
