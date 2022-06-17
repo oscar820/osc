@@ -19,33 +19,29 @@ namespace QTool
 			this.GetValue = GetValue;
 			this.GetCheckInfo = GetCheckInfo;
 		}
-		public bool ContainsKey(KeyT key)
-		{
-			if (key == null)
-			{
-				Debug.LogError("key is null");
-				return false;
-			}
-			if (Cache.ContainsKey(key))
-			{
-				var newInfo = GetCheckInfo(key);
-				if (CheckInfo[key] == null || !CheckInfo[key].Equals(newInfo))
-				{
-					Cache.Remove(key);
-				}
-			}
-			else
-			{
-				GetValue(key);
-			}
-			return Cache.ContainsKey(key);
-		}
+		//public bool ContainsKey(KeyT key)
+		//{
+		//	if (key == null)
+		//	{
+		//		Debug.LogError("key is null");
+		//		return false;
+		//	}
+		//	if (Cache.ContainsKey(key))
+		//	{
+		//		Get(key);
+		//	}
+		//	else
+		//	{
+		//		GetValue(key);
+		//	}
+		//	return Cache.ContainsKey(key);
+		//}
 		public void Set(KeyT key,T value) {
 			var checkInfo = GetCheckInfo(key);
 			Cache.CheckSet(key, value);
 			CheckInfo.CheckSet(key, checkInfo);
 		}
-		public T Get(KeyT key, Func<KeyT, T> GetValue)
+		public T Get(KeyT key, Func<KeyT, T> GetValueFunc)
 		{
 			if (key == null)
 			{
@@ -55,15 +51,15 @@ namespace QTool
 			if (Cache.ContainsKey(key))
 			{
 				var newInfo = GetCheckInfo(key);
-				if (CheckInfo[key]==null||!CheckInfo[key].Equals(newInfo))
+				if (!CheckInfo[key].Equals(newInfo))
 				{
-					Cache.CheckSet(key, GetValue(key));
+					Cache.CheckSet(key, GetValueFunc(key));
 					CheckInfo.CheckSet(key, newInfo);
 				}
 			}
 			else
 			{
-				Cache.CheckSet(key, GetValue(key));
+				Cache.CheckSet(key, GetValueFunc(key));
 				CheckInfo.CheckSet(key, GetCheckInfo(key));
 			}
 			return Cache[key];
