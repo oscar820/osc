@@ -42,16 +42,8 @@ namespace QTool
 		}
 		public void Set(KeyT key,T value) {
 			var checkInfo = GetCheckInfo(key);
-			if (Cache.ContainsKey(key))
-			{
-				Cache[key] = value;
-				CheckInfo[key] = checkInfo;
-			}
-			else
-			{
-				Cache.Add(key, value);
-				CheckInfo.Add(key, checkInfo);
-			}
+			Cache.CheckSet(key, value);
+			CheckInfo.CheckSet(key, checkInfo);
 		}
 		public T Get(KeyT key, Func<KeyT, T> GetValue)
 		{
@@ -65,14 +57,14 @@ namespace QTool
 				var newInfo = GetCheckInfo(key);
 				if (CheckInfo[key]==null||!CheckInfo[key].Equals(newInfo))
 				{
-					Cache[key] = GetValue(key);
-					CheckInfo[key] = newInfo;
+					Cache.CheckSet(key, GetValue(key));
+					CheckInfo.CheckSet(key, newInfo);
 				}
 			}
 			else
 			{
-				Cache.Add(key, GetValue(key));
-				CheckInfo.Add(key, GetCheckInfo(key));
+				Cache.CheckSet(key, GetValue(key));
+				CheckInfo.CheckSet(key, GetCheckInfo(key));
 			}
 			return Cache[key];
 		}

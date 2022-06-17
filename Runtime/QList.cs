@@ -526,8 +526,19 @@ namespace QTool
             value.Key = key;
             array.Add(value);
         }
+		public static void CheckSet<TKey,TValue >(this IDictionary<TKey, TValue> dic, TKey key, TValue value) 
+		{
+			if (dic.ContainsKey(key))
+			{
+				dic[key] = value;
+			}
+			else
+			{
+				dic.Add(key, value);
+			}
+		}
 
-        public static T GetAndCreate<T, KeyType>(this ICollection<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
+		public static T GetAndCreate<T, KeyType>(this ICollection<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
         {
             var value = array.Get(key);
             if (value != null)
