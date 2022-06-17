@@ -91,16 +91,14 @@ namespace QTool
     }
     public class QList<TKey, T> : QList<T> where T : IKey<TKey>
     {
-
-		[NonSerialized]
-		[XmlIgnore]
-		[QIgnore]
-		protected QKeyCache<TKey,T, int> ListCache;
-		public QList()
+        
+        [NonSerialized]
+        [XmlIgnore]
+        protected Dictionary<TKey, T> dicBuffer = new Dictionary<TKey, T>();
+		public void ClearBuffer()
 		{
-			ListCache = new QKeyCache<TKey,T, int>((Key)=> this.Get<T, TKey>(Key),(Key) =>Count);
+			dicBuffer.Clear();
 		}
-	
 
 		public new void Add(T value)
         {
@@ -111,17 +109,17 @@ namespace QTool
         }
         public new void Sort(Comparison<T> comparison)
         {
-			ListCache.Clear();
+            dicBuffer.Clear();
             base.Sort(comparison);
         }
         public new void Sort(int index, int count, IComparer<T> comparer)
         {
-			ListCache.Clear();
+            dicBuffer.Clear();
             base.Sort(index, count, comparer);
         }
         public new void Sort()
         {
-			ListCache.Clear();
+            dicBuffer.Clear();
             base.Sort();
         }
         public new bool Contains(T value)
@@ -130,16 +128,56 @@ namespace QTool
         }
         public bool ContainsKey(TKey key)
         {
-			return ListCache.ContainsKey(key);
-		}
+            if (key == null)
+            {
+                Debug.LogError("key is null");
+                return false;
+            }
+            if (dicBuffer.ContainsKey(key) && dicBuffer[key] != null)
+            {
+                return true;
+            }
+            else
+            {
+                return this.ContainsKey<T, TKey>(key);
+            }
+        }
         public virtual T Get(TKey key)
         {
-			return ListCache.Get(key);
+            if (key == null)
+            {
+                Debug.LogError("key is null");
+                return default;
+            }
+            if (!dicBuffer.ContainsKey(key))
+            {
+                var value = this.Get<T, TKey>(key);
+                if (value != null)
+                {
+                    dicBuffer[key] = value;
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            return dicBuffer[key];
         }
         public virtual void Set(TKey key, T value)
         {
+            if (key == null)
+            {
+                Debug.LogError("key is null");
+            }
+            if (dicBuffer.ContainsKey(key))
+            {
+                dicBuffer[key] = value;
+            }
+            else
+            {
+                dicBuffer.Add(key, value);
+            }
             this.Set<T, TKey>(key, value);
-			ListCache.Set(key, value);
         }
         public void Remove(TKey key)
         {
@@ -176,21 +214,44 @@ namespace QTool
                 Set(key, value);
             }
         }
+        public new void Remove(T obj)
+        {
+            if (obj != null)
+            {
+                base.Remove(obj);
+                dicBuffer.Remove(obj.Key);
+            }
+        }
         public void RemoveKey(TKey key)
         {
             Remove(this[key]);
         }
-
+        public new void Clear()
+        {
+            dicBuffer.Clear();
+            base.Clear();
+        }
+        public new void Reverse(int index, int count)
+        {
+            dicBuffer.Clear();
+            base.Reverse(index, count);
+        }
+        public new void Reverse()
+        {
+            dicBuffer.Clear();
+            base.Reverse();
+        }
     }
     public class QAutoList<TKey, T> : QList<TKey, T> where T : IKey<TKey>, new()
     {
 
         public override T Get(TKey key)
         {
-			return ListCache.Get(key, (key) =>
-			{
-				return this.GetAndCreate<T, TKey>(key, OnCreate);
-			});
+            if (!dicBuffer.ContainsKey(key))
+            {
+                dicBuffer[key] = this.GetAndCreate<T, TKey>(key, OnCreate);
+            }
+            return dicBuffer[key];
         }
         public virtual void OnCreate(T obj)
         {
@@ -397,7 +458,18 @@ namespace QTool
         {
             return array.ContainsKey(key, (item) => item.Key);
         }
-        public static bool ContainsKey<T, KeyType>(this ICollection<T> array, KeyType key, Func<T, KeyType> keyGetter)
+		public static void CheckSet<TKey,TValue>(this IDictionary<TKey,TValue> dic, TKey key,TValue value) 
+		{
+			if (dic.ContainsKey(key))
+			{
+				dic[key] = value;
+			}
+			else
+			{
+				dic.Add(key, value);
+			}
+		}
+		public static bool ContainsKey<T, KeyType>(this ICollection<T> array, KeyType key, Func<T, KeyType> keyGetter)
         {
             if (key == null)
             {
@@ -526,19 +598,8 @@ namespace QTool
             value.Key = key;
             array.Add(value);
         }
-		public static void CheckSet<TKey,TValue >(this IDictionary<TKey, TValue> dic, TKey key, TValue value) 
-		{
-			if (dic.ContainsKey(key))
-			{
-				dic[key] = value;
-			}
-			else
-			{
-				dic.Add(key, value);
-			}
-		}
 
-		public static T GetAndCreate<T, KeyType>(this ICollection<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
+        public static T GetAndCreate<T, KeyType>(this ICollection<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
         {
             var value = array.Get(key);
             if (value != null)
