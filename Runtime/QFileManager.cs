@@ -143,7 +143,7 @@ namespace QTool
 		public const string ResourcesRoot = "Assets/Resources/";
 		public static DateTime GetLastWriteTime(string path)
 		{
-			if (!File.Exists(path))
+			if (!Exists(path))
 			{
 				return DateTime.MinValue;
 			}
@@ -316,29 +316,37 @@ namespace QTool
         }
         public static bool Save(string path, string data,bool checkUpdate=false)
         {
-            try
-            {
-                CheckFolder(path);
-				if (!checkUpdate||(Exists(path)&& Load(path).GetHashCode() != data?.GetHashCode()))
-				{
-					using (var file = System.IO.File.Create(path))
-					{
-						using (var sw = new System.IO.StreamWriter(file))
-						{
-							sw.Write(data);
-						}
-					}
-#if UNITY_EDITOR
-					UnityEditor.AssetDatabase.Refresh();
-#endif
-					return true;
-				}
-            }
-            catch (Exception e)
-            {
+			try
+			{
+				CheckFolder(path);
 
-                Debug.LogError("保存失败【" + path + "】" + e);
-            }
+				if (checkUpdate&&Exists(path) )
+				{
+					var oldData = Load(path);
+					if (!string.IsNullOrWhiteSpace(oldData)&&oldData.GetHashCode()==data.GetHashCode())
+					{
+						return false;
+					}
+				}
+
+				using (var file = System.IO.File.Create(path))
+				{
+					using (var sw = new System.IO.StreamWriter(file))
+					{
+						sw.Write(data);
+					}
+				}
+#if UNITY_EDITOR
+				UnityEditor.AssetDatabase.Refresh();
+#endif
+				return true;
+
+			}
+			catch (Exception e)
+			{
+
+				Debug.LogError("保存失败【" + path + "】" + e);
+			}
 
             return false;
         }
