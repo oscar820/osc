@@ -152,7 +152,7 @@ namespace QTool
 #if UNITY_EDITOR
 				return File.GetLastWriteTime(path);
 #else
-				return true;
+				return DateTime.MinValue;
 #endif
 			}
 			else
