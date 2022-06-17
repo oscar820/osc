@@ -19,23 +19,6 @@ namespace QTool
 			this.GetValue = GetValue;
 			this.GetCheckInfo = GetCheckInfo;
 		}
-		//public bool ContainsKey(KeyT key)
-		//{
-		//	if (key == null)
-		//	{
-		//		Debug.LogError("key is null");
-		//		return false;
-		//	}
-		//	if (Cache.ContainsKey(key))
-		//	{
-		//		Get(key);
-		//	}
-		//	else
-		//	{
-		//		GetValue(key);
-		//	}
-		//	return Cache.ContainsKey(key);
-		//}
 		public void Set(KeyT key,T value) {
 			var checkInfo = GetCheckInfo(key);
 			Cache.CheckSet(key, value);
@@ -48,7 +31,7 @@ namespace QTool
 				Debug.LogError("key is null");
 				return default;
 			}
-			if (Cache.ContainsKey(key))
+			if (Cache.ContainsKey(key)&&Cache[key]!=null)
 			{
 				var newInfo = GetCheckInfo(key);
 				if (!CheckInfo[key].Equals(newInfo))
