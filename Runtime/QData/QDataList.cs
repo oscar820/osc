@@ -7,6 +7,10 @@ namespace QTool
 {
 	public class QDataList<T>  where T : QDataList<T>, IKey<string>,new()
 	{
+		public static bool ContainsKey(string key)
+		{
+			return list.ContainsKey(key);
+		}
 		public static T Get(string key)
 		{
 			key = key.Trim();
