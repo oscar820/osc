@@ -407,49 +407,49 @@ namespace QTool
 				case TypeCode.Int16:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return short.Parse(ReadValueString(reader));
 				case TypeCode.Int32:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return int.Parse(ReadValueString(reader));
 				case TypeCode.Int64:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return long.Parse(ReadValueString(reader));
 				case TypeCode.SByte:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return sbyte.Parse(ReadValueString(reader));
 				case TypeCode.Byte:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return byte.Parse(ReadValueString(reader));
 				case TypeCode.UInt16:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return ushort.Parse(ReadValueString(reader));
 				case TypeCode.UInt32:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return uint.Parse(ReadValueString(reader));
 				case TypeCode.UInt64:
 					if (type.IsEnum)
 					{
-						return Enum.Parse(type, ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader));
 					}
 					return ulong.Parse(ReadValueString(reader));
 				default:

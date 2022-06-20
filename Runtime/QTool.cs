@@ -155,6 +155,17 @@ namespace QTool
             }
             return list;
         }
+		public static object ParseEnum(this Type type,string str)
+		{
+			if (int.TryParse(str,out var intValue))
+			{
+				return Enum.ToObject(type, intValue);
+			}
+			else
+			{
+				return Enum.Parse(type, str);
+			}
+		}
         public static async Task<bool> WaitGameTime(float second, bool ignoreTimeScale = false)
         {
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
@@ -185,6 +196,7 @@ namespace QTool
 			StopAllWait -= OnWaitStop;
 			return true;
 		}
+
         internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
         {
             start?.Invoke();
