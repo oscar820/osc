@@ -254,6 +254,13 @@ namespace QTool
 	}
 	public class QEidtCellWindow : EditorWindow
 	{
+		public static bool IsShow
+		{
+			get
+			{
+				return Instance!=null;
+			}
+		}
 		static QEidtCellWindow Instance { set; get; }
 		public static object Show(string key,object value,Type type,out bool changed)
 		{

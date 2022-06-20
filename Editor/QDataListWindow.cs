@@ -77,7 +77,7 @@ namespace QTool.FlowGraph
 		}
 		private void OnLostFocus()
 		{
-			if (gridView.HasChanged)
+			if (gridView.HasChanged&&! QEidtCellWindow.IsShow)
 			{
 				if (typeInfo != null)
 				{
