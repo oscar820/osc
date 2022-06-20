@@ -252,7 +252,7 @@ namespace QTool
 	public class QEidtCellWindow : EditorWindow
 	{
 		static QEidtCellWindow Instance { set; get; }
-		public static object Show(object value,Type type)
+		public static object Show(string key,object value,Type type)
 		{
 			if (Instance == null)
 			{
@@ -260,7 +260,7 @@ namespace QTool
 				Instance.minSize = new Vector2(300, 100);
 				Instance.maxSize = new Vector2(300, 100);
 			}
-			Instance.titleContent = new GUIContent("编辑");
+			Instance.titleContent = new GUIContent( key);
 			Instance.type = type;
 			Instance.value = value;
 			Instance.ShowModal();

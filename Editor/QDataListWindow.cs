@@ -113,13 +113,13 @@ namespace QTool.FlowGraph
 			}
 			else if (typeInfo == null)
 			{
-				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y][x], typeof(string)),typeof(string),x);
+				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y].Key+"."+qdataList.TitleRow[x],qdataList[y][x], typeof(string)),typeof(string),x);
 			}
 			else
 			{
 				var member = Members[x];
 				var obj = objList[y - 1];
-				member.Set(obj,QEidtCellWindow.Show(member.Get(obj), member.Type));
+				member.Set(obj,QEidtCellWindow.Show((obj as IKey<string>).Key+"."+member.ViewName,member.Get(obj), member.Type));
 			}
 			return true;
 		}
