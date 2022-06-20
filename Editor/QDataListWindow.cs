@@ -145,8 +145,15 @@ namespace QTool.FlowGraph
 			}
 			catch (Exception e)
 			{
-				Debug.LogError("表格出错：" + e);
-				OpenNull();
+				if(e is UnityEngine.ExitGUIException)
+				{
+					Debug.LogWarning(e);
+				}
+				else
+				{
+					Debug.LogError("表格出错：" + e);
+					OpenNull();
+				}
 			}
 			
 		}
