@@ -272,8 +272,8 @@ namespace QTool
 			if (Instance == null)
 			{
 				Instance = GetWindow<QEidtCellWindow>();
-				Instance.minSize = new Vector2(300, 100);
-				Instance.maxSize = new Vector2(300, 100);
+				Instance.minSize = new Vector2(300, 200);
+				Instance.maxSize = new Vector2(600, 900);
 			}
 			Instance.titleContent = new GUIContent( key);
 			Instance.type = type;
