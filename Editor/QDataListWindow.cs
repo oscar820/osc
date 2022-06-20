@@ -42,6 +42,7 @@ namespace QTool.FlowGraph
 			}
 			return false;
 		}
+
 		public void Open(string path)
 		{
 			try
@@ -82,34 +83,45 @@ namespace QTool.FlowGraph
 			}
 			qdataList?.Save();
 		}
-		public Rect DrawCell(int x,int y,float widthSize,float heightSize) 
+
+		private void OnEnable()
 		{
-			var width = GUILayout.Width(widthSize);
-			var height = GUILayout.Height(heightSize);
-			if (y == 0)
+			gridView = new QGridView(GetValue, ()=>new Vector2Int { 
+				x=qdataList.TitleRow.Count,
+				y=qdataList.Count,
+			});
+			gridView.EditCell = EditCell;
+		}
+		public string GetValue(int x,int y)
+		{
+			if (y == 0||typeInfo==null)
 			{
-				GUILayout.Label(qdataList[y][x], QGUITool.CenterLable, width, height);
-			}
-			else if(typeInfo==null)
-			{
-				qdataList[y].SetValueType( qdataList[y][x].Draw("", typeof(string),null,null,null, width,height),typeof(string),x);
+				return qdataList[y][x];
 			}
 			else
 			{
 				var member = Members[x];
 				var obj = objList[y - 1];
-				member.Set(obj, member.Get(obj).Draw("", member.Type,null,null,null,width,height));
+				return member.Get(obj)?.ToQDataType(member.Type,false).Trim('\"');
 			}
-			var rect= GUILayoutUtility.GetLastRect();
-			return rect;
 		}
-		private void OnEnable()
+		public bool EditCell(int x,int y)
 		{
-			
-			gridView = new QGridView(DrawCell,()=>new Vector2Int { 
-				x=qdataList.TitleRow.Count,
-				y=qdataList.Count,
-			});
+			if (y == 0)
+			{
+				return false;
+			}
+			else if (typeInfo == null)
+			{
+				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y][x], typeof(string)),typeof(string),x);
+			}
+			else
+			{
+				var member = Members[x];
+				var obj = objList[y - 1];
+				member.Set(obj,QEidtCellWindow.Show(member.Get(obj), member.Type));
+			}
+			return true;
 		}
 		public void OpenNull()
 		{

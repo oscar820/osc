@@ -9,16 +9,15 @@ namespace QTool
 
 	public class QGridView
 	{
-		public Func<int, int, float,float, Rect> DrawCell;
 		public Func<Vector2Int> GetSize;
 		public Vector2Int GridSize { private set; get; }
 		public Vector2 ViewDataSize { private set; get; }
 		public Vector2 ViewSize { private set; get; }
 		public Vector2 ViewScrollPos { private set; get; }
 		QList<float> CellWidth = new QList<float>();
-		public QGridView(Func<int, int,float,float, Rect> DrawCell, Func<Vector2Int> GetSize)
+		public QGridView(Func<int, int, string> GetStringValue,Func<Vector2Int> GetSize)
 		{
-			this.DrawCell = DrawCell;
+			this.GetStringValue = GetStringValue;
 			this.GetSize = GetSize;
 		}
 	 	readonly static Vector2 DefualtCellSize = new Vector2(100,30);
@@ -107,6 +106,32 @@ namespace QTool
 			Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
 			Handles.color = lastColor;
 		}
+		public Func<int, int, string> GetStringValue=null;
+		public Func<int, int, bool> EditCell = null;
+		public Vector2Int editIndex = Vector2Int.one * -1;
+		public Rect DrawCell(int x, int y)
+		{
+			var width = GUILayout.Width(GetWidth(x));
+			var height = GUILayout.Height(GetHeight(y));
+			GUILayout.Label(GetStringValue(x,y), QGUITool.CenterLable, width, height);
+			var rect = GUILayoutUtility.GetLastRect();
+			if(Event.current.type!= EventType.Layout)
+			{
+				rect.MouseMenuClick(null, () =>
+				{
+					if (EditCell != null)
+					{
+						editIndex = new Vector2Int
+						{
+							x=x,
+							y=y
+						};
+					}
+				});
+			}
+		
+			return rect;
+		}
 		RectInt ViewRange;
 		int DragXIndex = -1;
 		float startPos=0;
@@ -123,7 +148,7 @@ namespace QTool
 			{
 				using (new GUILayout.HorizontalScope())
 				{
-					var rect = DrawCell(0, 0, GetWidth(),GetHeight());
+					var rect = DrawCell(0, 0);
 					Handles.DrawLine(new Vector3(0, rect.yMax), new Vector3(ViewSize.x, rect.yMax));
 					Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, ViewSize.y));
 					using (new GUILayout.ScrollViewScope(new Vector2(ViewScrollPos.x, 0), GUIStyle.none, GUIStyle.none, GUILayout.Height(GetHeight())))
@@ -133,7 +158,7 @@ namespace QTool
 							Space(1, ViewRange.x);
 							for (int x = ViewRange.x; x < ViewRange.xMax; x++)
 							{
-								var drawRect = DrawCell(x, 0, GetWidth(x), GetHeight());
+								var drawRect = DrawCell(x, 0);
 								DrawLine(drawRect);
 								var pos = drawRect.xMin;
 								drawRect.x += drawRect.width - 5;
@@ -165,7 +190,7 @@ namespace QTool
 							Space(1, ViewRange.y, false);
 							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
 							{
-								DrawLine( DrawCell(0, y, GetWidth(),GetHeight(y)));
+								DrawLine( DrawCell(0, y));
 							}
 							Space(ViewRange.yMax, GridSize.y, false);
 							GUILayout.Space(13);
@@ -184,7 +209,7 @@ namespace QTool
 									Space(1, ViewRange.x);
 									for (int x = ViewRange.x; x < ViewRange.xMax; x++)
 									{
-										DrawLine(DrawCell(x, y, GetWidth(x),GetHeight(y)));
+										DrawLine(DrawCell(x, y));
 									}
 									Space(ViewRange.xMax, GridSize.x);
 									GUILayout.FlexibleSpace();
@@ -214,7 +239,42 @@ namespace QTool
 				}
 				Repaint();
 			}
+			if (editIndex.x >= 0 && editIndex.y >= 0)
+			{
+				if(EditCell(editIndex.x, editIndex.y))
+				{
+					Repaint();
+				}
+				editIndex = Vector2Int.one * -1;
+			}
 		}
 	}
-
+	public class QEidtCellWindow : EditorWindow
+	{
+		static QEidtCellWindow Instance { set; get; }
+		public static object Show(object value,Type type)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<QEidtCellWindow>();
+				Instance.minSize = new Vector2(300, 100);
+				Instance.maxSize = new Vector2(300, 100);
+			}
+			Instance.titleContent = new GUIContent("编辑");
+			Instance.type = type;
+			Instance.value = value;
+			Instance.ShowModal();
+			return Instance.value;
+		}
+		public Type type;
+		public object value;
+		public Vector2 scrollPos;
+		private void OnGUI()
+		{
+			using (new GUILayout.ScrollViewScope(scrollPos))
+			{
+				value= value.Draw("", type);	
+			}
+		}
+	}
 }

@@ -218,6 +218,7 @@ namespace QTool.Test
 			public string Key { get ; set ; }
 			[ViewName("数值")] 
 			public string value="";
+			public Vector3 v3;
 			public override string ToString()
 			{
 				return Key + ":[" + value+"]";
