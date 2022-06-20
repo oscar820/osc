@@ -7,7 +7,7 @@ namespace QTool
     /// <summary>
     /// 更改显示的名字
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Parameter|AttributeTargets.Property)]
     public class ViewNameAttribute : PropertyAttribute
     {
         public string name;
