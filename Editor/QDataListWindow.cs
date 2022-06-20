@@ -77,11 +77,15 @@ namespace QTool.FlowGraph
 		}
 		private void OnLostFocus()
 		{
-			if (typeInfo != null)
+			if (gridView.HasChanged)
 			{
-				objList.ToQDataList(qdataList,typeInfo.Type);
+				if (typeInfo != null)
+				{
+					objList.ToQDataList(qdataList, typeInfo.Type);
+				}
+				qdataList?.Save();
+				gridView.HasChanged = false;
 			}
-			qdataList?.Save();
 		}
 
 		private void OnEnable()
@@ -113,21 +117,24 @@ namespace QTool.FlowGraph
 			}
 			else if (typeInfo == null)
 			{
-				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y].Key+"."+qdataList.TitleRow[x],qdataList[y][x], typeof(string)),typeof(string),x);
+				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y].Key+"."+qdataList.TitleRow[x],qdataList[y][x], typeof(string),out var changed),typeof(string),x);
+				return changed;
 			}
 			else
 			{
 				var member = Members[x];
 				var obj = objList[y - 1];
-				member.Set(obj,QEidtCellWindow.Show((obj as IKey<string>).Key+"."+member.ViewName,member.Get(obj), member.Type));
+				member.Set(obj,QEidtCellWindow.Show((obj as IKey<string>).Key+"."+member.ViewName,member.Get(obj), member.Type,out var changed));
+				return changed;
 			}
-			return true;
 		}
 		public void OpenNull()
 		{
 			typeInfo = null;
 			qdataList = null;
 			Repaint();
+		
+			
 		}
 		private void OnGUI()
 		{

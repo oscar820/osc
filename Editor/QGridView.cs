@@ -15,6 +15,8 @@ namespace QTool
 		public Vector2 ViewSize { private set; get; }
 		public Vector2 ViewScrollPos { private set; get; }
 		QList<float> CellWidth = new QList<float>();
+
+		public bool HasChanged { set; get; } = false;
 		public QGridView(Func<int, int, string> GetStringValue,Func<Vector2Int> GetSize)
 		{
 			this.GetStringValue = GetStringValue;
@@ -243,6 +245,7 @@ namespace QTool
 			{
 				if(EditCell(editIndex.x, editIndex.y))
 				{
+					HasChanged = true;
 					Repaint();
 				}
 				editIndex = Vector2Int.one * -1;
@@ -252,7 +255,7 @@ namespace QTool
 	public class QEidtCellWindow : EditorWindow
 	{
 		static QEidtCellWindow Instance { set; get; }
-		public static object Show(string key,object value,Type type)
+		public static object Show(string key,object value,Type type,out bool changed)
 		{
 			if (Instance == null)
 			{
@@ -263,7 +266,9 @@ namespace QTool
 			Instance.titleContent = new GUIContent( key);
 			Instance.type = type;
 			Instance.value = value;
+			var oldValue = Instance.value.ToQDataType(type, false)?.GetHashCode();
 			Instance.ShowModal();
+			changed = oldValue != Instance.value.ToQDataType(type, false)?.GetHashCode();
 			return Instance.value;
 		}
 		public Type type;
