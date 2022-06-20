@@ -23,7 +23,7 @@ namespace QTool
 		}
 		static QDataList(){ 
 
-			var qdataList=QDataList.GetResourcesData(typeof(T).Name, () => new List<T> { new T() }.ToQDataList());
+			var qdataList=QDataList.GetResourcesData(typeof(T).Name, () => new List<T> { new T{Key="测试Key" }, }.ToQDataList());
 			qdataList.ParseQdataList(list);
 		}
 		public static QList<string, T> list = new QList<string, T>();
