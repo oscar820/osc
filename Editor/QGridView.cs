@@ -276,8 +276,9 @@ namespace QTool
 		public Vector2 scrollPos;
 		private void OnGUI()
 		{
-			using (new GUILayout.ScrollViewScope(scrollPos))
+			using (var scroll= new GUILayout.ScrollViewScope(scrollPos))
 			{
+				scrollPos = scroll.scrollPosition;
 				value= value.Draw("", type);	
 			}
 		}

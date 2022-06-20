@@ -403,6 +403,10 @@ namespace QTool
         public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1)
         {
             var newObj = typeInfo.ElementType.CreateInstance(index<0 ? null : list[index]);
+			if (index < 0)
+			{
+				index = 0;
+			}
             if (list.IsFixedSize)
             {
                 if (typeInfo.ArrayRank == 1)
