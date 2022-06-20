@@ -311,7 +311,7 @@ namespace QTool
 				value = value.Replace("\t", " ");
 			}
 
-			if (value.Contains("\n"))
+			if (value.Contains("\n")||value.Contains("-"))
 			{
 				if (value.Contains("\""))
 				{
@@ -323,7 +323,7 @@ namespace QTool
 		}
 		public static string ParseElement(string value)
 		{
-			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n")))
+			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n")||value.Contains("-")))
 			{
 				value = value.Substring(1, value.Length - 2);
 				value = value.Replace("\"\"", "\"");
