@@ -70,8 +70,7 @@ namespace QTool.FlowGraph
 			catch (Exception e)
 			{
 				Debug.LogError("解析QDataList类型[" + typeInfo?.Type + "]出错：\n" + e);
-				typeInfo = null;
-				qdataList = null;
+				OpenNull();
 			}
 			
 		}
@@ -106,15 +105,31 @@ namespace QTool.FlowGraph
 		}
 		private void OnEnable()
 		{
+			
 			gridView = new QGridView(DrawCell,()=>new Vector2Int { 
 				x=qdataList.TitleRow.Count,
 				y=qdataList.Count,
 			});
 		}
+		public void OpenNull()
+		{
+			typeInfo = null;
+			qdataList = null;
+			Repaint();
+		}
 		private void OnGUI()
 		{
 			if (qdataList==null ) return;
-			gridView.DoLayout(Repaint);
+			try
+			{
+				gridView.DoLayout(Repaint);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("表格出错：" + e);
+				OpenNull();
+			}
+			
 		}
 	}
 	
