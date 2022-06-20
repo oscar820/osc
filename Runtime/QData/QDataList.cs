@@ -323,7 +323,7 @@ namespace QTool
 		}
 		public static string ParseElement(this string value)
 		{
-			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n")||true))
+			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n")||value.Contains("\"\"")))
 			{
 				value = value.Substring(1, value.Length - 2);
 				value = value.Replace("\"\"", "\"");
