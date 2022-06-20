@@ -666,7 +666,7 @@ namespace QTool
 					{
 						try
 						{
-							member.Set(t, row[i].ParseQDataType(member.Type, false));
+							member.Set(t, row[i].ParseElement().ParseQDataType(member.Type, false));
 						}
 						catch (System.Exception e)
 						{

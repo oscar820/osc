@@ -321,7 +321,7 @@ namespace QTool
 			}
 			return value;
 		}
-		public static string ParseElement(string value)
+		public static string ParseElement(this string value)
 		{
 			if (value.StartsWith("\"") && value.EndsWith("\"") && (value.Contains("\n")))
 			{
