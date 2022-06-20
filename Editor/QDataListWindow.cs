@@ -44,22 +44,36 @@ namespace QTool.FlowGraph
 		}
 		public void Open(string path)
 		{
-			var type = QReflection.ParseType(path.GetBlockValue(nameof(QDataList) + "Assets" + '/', ".txt").SplitStartString("/"));
-			if (type != null)
+			try
 			{
-				typeInfo = QSerializeType.Get(type);
-				qdataList = QDataList.GetData(path);
-				qdataList.ParseQdataList(objList, type);
-				for (int i = 0; i < qdataList.TitleRow.Count; i++)
+				var type = QReflection.ParseType(path.GetBlockValue(nameof(QDataList) + "Assets" + '/', ".txt").SplitStartString("/"));
+				if (type != null)
 				{
-					Members[i] = typeInfo.GetMemberInfo(qdataList.TitleRow[i]);
+					typeInfo = QSerializeType.Get(type);
+					qdataList = QDataList.GetData(path);
+					qdataList.ParseQdataList(objList, type);
+					for (int i = 0; i < qdataList.TitleRow.Count; i++)
+					{
+						Members[i] = typeInfo.GetMemberInfo(qdataList.TitleRow[i]);
+						if (Members[i]==null)
+						{
+							throw new Exception("错误列[" + qdataList.TitleRow[i] + "]");
+						}
+					}
+				}
+				else
+				{
+					qdataList = QDataList.GetData(path);
+					typeInfo = null;
 				}
 			}
-			else
+			catch (Exception e)
 			{
-				qdataList = QDataList.GetData(path);
+				Debug.LogError("解析QDataList类型[" + typeInfo?.Type + "]出错：\n" + e);
 				typeInfo = null;
+				qdataList = null;
 			}
+			
 		}
 		private void OnLostFocus()
 		{
