@@ -67,6 +67,7 @@ namespace QTool.FlowGraph
 					qdataList = QDataList.GetData(path);
 					typeInfo = null;
 				}
+				PlayerPrefs.SetString(nameof(QDataListWindow) + "_LastPath",path);
 			}
 			catch (Exception e)
 			{
@@ -82,9 +83,15 @@ namespace QTool.FlowGraph
 				if (typeInfo != null)
 				{
 					objList.ToQDataList(qdataList, typeInfo.Type);
-				}
+				} 
 				qdataList?.Save();
 				gridView.HasChanged = false;
+			}
+		}
+		private void OnFocus()
+		{
+			if( PlayerPrefs.HasKey(nameof(QDataListWindow) + "_LastPath")){
+				Open(PlayerPrefs.GetString(nameof(QDataListWindow) + "_LastPath"));
 			}
 		}
 
