@@ -600,8 +600,15 @@ namespace QTool.Inspector
                 case TypeCode.UInt32:
                     if (type.IsEnum)
                     {
-                       
-                            obj= EditorGUILayout.EnumPopup(name, (Enum)obj, layoutOption);
+						var flagsEnum = customAttribute?.GetAttribute<System.FlagsAttribute>();
+						if (flagsEnum != null)
+						{
+							obj = EditorGUILayout.EnumFlagsField(name, (Enum)obj, layoutOption);
+						}
+						else
+						{
+							obj = EditorGUILayout.EnumPopup(name, (Enum)obj, layoutOption);
+						}
                     }
                     else
                     {
