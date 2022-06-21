@@ -233,17 +233,31 @@ namespace QTool.Inspector
             if (!property.IsShow()) return;
             if (property.propertyType == SerializedPropertyType.String)
             {
-				var list = property.Call<IList<string>>(att.GetKeyListFunc);
-
+				var list = property.Call(att.GetKeyListFunc);
+				
 				enumList = new List<string>();
 				if (att.CanWriteString)
 				{
 					enumList.Add("【不存在】");
 				}
 
-				if (list != null)
+				if(list is IList<string> strList)
 				{
-					enumList.AddRange(list);
+					enumList.AddRange(strList);
+				}
+				else if( list is IList ItemList)
+				{
+					foreach (var item in ItemList)
+					{
+						if(item is IKey<string> key)
+						{
+							enumList.Add(key.Key);
+						}
+						else
+						{
+							enumList.AddCheckExist(item?.ToString());
+						}
+					}
 				}
 				UpdateList(property.stringValue);
 				EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), property.ViewName());
@@ -428,10 +442,10 @@ namespace QTool.Inspector
             }
         }
 
-        public static T Call<T>(this SerializedProperty property, string funcName) where T : class
-        {
-            return Call(property, funcName) as T;
-        }
+        //public static T Call<T>(this SerializedProperty property, string funcName) where T : class
+        //{
+        //    return Call(property, funcName) as T;
+        //}
 		public static object GetObject(this SerializedProperty property)
 		{
 			return property?.serializedObject.targetObject.GetPathObject(property.propertyPath);
@@ -447,12 +461,21 @@ namespace QTool.Inspector
             var method = objType.GetMethod(funcName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (method == null)
             {
-                method = objType.GetStaticMethod(funcName);
-                if (method == null)
-                {
-                    Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
-                    return null;
-                }
+				if(funcName.SplitTowString(".",out var start,out var end))
+				{
+					var staticType = QReflection.ParseType(start);
+					return staticType.InvokeStaticFunction(end,paramsList);
+				}
+				else
+				{
+					method = objType.GetStaticMethod(funcName);
+					if (method == null)
+					{
+						Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
+						return null;
+					}
+				}
+               
             }
             return method?.Invoke(method.IsStatic ? null : obj, paramsList);
         }
