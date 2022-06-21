@@ -90,8 +90,12 @@ namespace QTool.FlowGraph
 		}
 		private void OnFocus()
 		{
-			if( PlayerPrefs.HasKey(nameof(QDataListWindow) + "_LastPath")){
-				Open(PlayerPrefs.GetString(nameof(QDataListWindow) + "_LastPath"));
+			if (!QEidtCellWindow.IsShow)
+			{
+				if (PlayerPrefs.HasKey(nameof(QDataListWindow) + "_LastPath"))
+				{
+					Open(PlayerPrefs.GetString(nameof(QDataListWindow) + "_LastPath"));
+				}
 			}
 		}
 
