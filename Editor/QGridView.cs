@@ -128,14 +128,6 @@ namespace QTool
 			if(Event.current.type!= EventType.Layout)
 			{
 				rect.MouseMenuClick((menu)=> {
-					menu.AddItem(new GUIContent("编辑"), false, () =>
-					{
-						editIndex = new Vector2Int
-						{
-							x = x,
-							y = y
-						};
-					});
 					menu.AddItem(new GUIContent("复制"), false, () =>
 					{
 						GUIUtility.systemCopyBuffer = str;
