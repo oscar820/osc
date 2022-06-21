@@ -233,26 +233,23 @@ namespace QTool.Inspector
             if (!property.IsShow()) return;
             if (property.propertyType == SerializedPropertyType.String)
             {
-                if (enumList == null)
-                {
-                    var list = property.Call<IList<string>>(att.GetKeyListFunc);
+				var list = property.Call<IList<string>>(att.GetKeyListFunc);
 
-                    enumList = new List<string>();
-                    if (att.CanWriteString)
-                    {
-                        enumList.Add("【不存在】");
-                    }
+				enumList = new List<string>();
+				if (att.CanWriteString)
+				{
+					enumList.Add("【不存在】");
+				}
 
-                    if (list != null)
-                    {
-                        enumList.AddRange(list);
-                    }
-                    UpdateList(property.stringValue);
-                }
-                //ditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), att.name);
-                if (att.CanWriteString)
+				if (list != null)
+				{
+					enumList.AddRange(list);
+				}
+				UpdateList(property.stringValue);
+				EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), property.ViewName());
+				if (att.CanWriteString)
                 {
-                    property.stringValue = EditorGUI.TextField(position.HorizontalRect(0f, 0.7f), property.stringValue);
+                    property.stringValue = EditorGUI.TextField(position.HorizontalRect(0.4f, 0.7f), property.stringValue);
                 }
                 if (GUI.changed)
                 {
