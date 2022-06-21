@@ -1110,7 +1110,7 @@ namespace QTool.Inspector
             }
         }
         public QInspectorType typeInfo;
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             typeInfo = QInspectorType.Get(target.GetType());
 
@@ -1120,7 +1120,7 @@ namespace QTool.Inspector
             }
             EditorApplication.playModeStateChanged += EditorModeChanged;
         }
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             EditorApplication.playModeStateChanged -= EditorModeChanged;
         }
