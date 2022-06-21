@@ -400,9 +400,15 @@ namespace QTool
             array[indexB] = temp;
             return array;
         }
-        public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1)
+        public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1,string setKey=null)
         {
             var newObj = typeInfo.ElementType.CreateInstance(index<0 ? null : list[index]);
+			if (!string.IsNullOrEmpty(setKey))
+			{
+				if(newObj is IKey<string> keyObj){
+					keyObj.Key = setKey;
+				}
+			}
 			if (index < 0)
 			{
 				index = 0;
