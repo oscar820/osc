@@ -554,14 +554,23 @@ namespace QTool.FlowGraph
         void DrawCurve(Vector2 start, Vector2 end,Color color)
         {
             if (!ViewRange.Contains(start) &&!ViewRange.Contains(end)) return;
-            start -= ViewRange.position;
-            end -= ViewRange.position;
-            if (Vector3.Distance(start, end) < 0.1f)
-            {
-                return;
-            }
-            float size = Mathf.Abs(start.x - end.x) / 2;
-            Handles.DrawBezier(start, end , start + Vector2.right * size, end + Vector2.left * size, color, null, 3f);
+			start -= ViewRange.position;
+			end -= ViewRange.position;
+			if (Vector3.Distance(start, end) < 0.1f)
+			{
+				return;
+			}
+			if (end.x >= start.x)
+			{
+				float size = (end.x- start.x)/  2;
+				Handles.DrawBezier(start, end, start + Vector2.right * size, end + Vector2.left * size, color, null, 3f);
+			}
+			else
+			{
+				var yMax = Mathf.Min(end.y, start.y) - 100;
+				Handles.DrawBezier(start, end, new Vector2(start.x+100, yMax), new Vector2(end.x-100, yMax), color, null, 3f);
+			}
+         
         }
         public void DrawCurve()
         {
