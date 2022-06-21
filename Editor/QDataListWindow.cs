@@ -112,6 +112,24 @@ namespace QTool.FlowGraph
 				y=qdataList.Count,
 			});
 			gridView.EditCell = EditCell;
+			gridView.AddAt = AddAt;
+			gridView.RemoveAt = RemoveAt;
+		}
+		public void AddAt(int y)
+		{
+			qdataList.CreateAt(QSerializeType.Get(typeof(QDataList)), y);
+			if (objList != null)
+			{
+				objList?.CreateAt(QSerializeType.Get(typeof(List<object>)),y-1);
+			}
+		}
+		public void RemoveAt(int y)
+		{
+			qdataList.RemoveAt(y);
+			if (objList != null)
+			{
+				objList?.RemoveAt(y-1);
+			}
 		}
 		public string GetValue(int x,int y)
 		{

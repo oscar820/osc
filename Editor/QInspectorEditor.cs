@@ -843,7 +843,7 @@ namespace QTool.Inspector
         }
         public static void MouseMenuClick(this Rect rect, System.Action<GenericMenu> action,Action click=null)
         {
-            if (EventType.MouseDown.Equals(Event.current.type))
+            if (EventType.MouseUp.Equals(Event.current.type))
             {
 				if (rect.Contains(Event.current.mousePosition))
 				{

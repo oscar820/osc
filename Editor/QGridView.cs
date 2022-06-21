@@ -15,6 +15,8 @@ namespace QTool
 		public Vector2 ViewDataSize { private set; get; }
 		public Vector2 ViewSize { private set; get; }
 		public Vector2 ViewScrollPos { private set; get; }
+		public Action<int> AddAt = null;
+		public Action<int> RemoveAt=null;
 		QList<float> CellWidth = new QList<float>();
 
 		public bool HasChanged { set; get; } = false;
@@ -125,7 +127,37 @@ namespace QTool
 			var rect = GUILayoutUtility.GetLastRect();
 			if(Event.current.type!= EventType.Layout)
 			{
-				rect.MouseMenuClick(null, () =>
+				rect.MouseMenuClick((menu)=> {
+					menu.AddItem(new GUIContent("编辑"), false, () =>
+					{
+						editIndex = new Vector2Int
+						{
+							x = x,
+							y = y
+						};
+					});
+					menu.AddItem(new GUIContent("复制"), false, () =>
+					{
+						GUIUtility.systemCopyBuffer = str;
+					});
+					if (x == 0)
+					{
+						if (AddAt != null)
+						{
+							menu.AddItem(new GUIContent("添加行"), false, () =>
+							{
+								AddAt(y);
+							});
+						}
+						if (RemoveAt != null)
+						{
+							menu.AddItem(new GUIContent("删除行"), false, () =>
+							{
+								RemoveAt(y);
+							});
+						}
+					}
+				}, () =>
 				{
 					if (EditCell != null)
 					{
