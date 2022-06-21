@@ -114,6 +114,7 @@ namespace QTool.FlowGraph
 			gridView.EditCell = EditCell;
 			gridView.AddAt = AddAt;
 			gridView.RemoveAt = RemoveAt;
+			gridView.SetStringValue = SetValue;
 		}
 		public void AddAt(int y)
 		{
@@ -142,6 +143,19 @@ namespace QTool.FlowGraph
 				var member = Members[x];
 				var obj = objList[y - 1];
 				return member.Get(obj)?.ToQDataType(member.Type,false).Trim('\"');
+			}
+		}
+		public void SetValue(int x, int y,string value)
+		{
+			if (y == 0 || typeInfo == null)
+			{
+				qdataList[y][x] = value;
+			}
+			else
+			{
+				var member = Members[x];
+				var obj = objList[y - 1];
+				member.Set(obj, value.ParseQDataType(member.Type, false));
 			}
 		}
 		public bool EditCell(int x,int y)

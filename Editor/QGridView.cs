@@ -112,6 +112,7 @@ namespace QTool
 			Handles.color = lastColor;
 		}
 		public Func<int, int, string> GetStringValue=null;
+		public Action<int, int, string> SetStringValue = null;
 		public Func<int, int, bool> EditCell = null;
 		public Vector2Int editIndex = Vector2Int.one * -1;
 		public Rect DrawCell(int x, int y)
@@ -127,39 +128,76 @@ namespace QTool
 			var rect = GUILayoutUtility.GetLastRect();
 			if(Event.current.type!= EventType.Layout)
 			{
-				rect.MouseMenuClick((menu)=> {
-					menu.AddItem(new GUIContent("复制"), false, () =>
-					{
-						GUIUtility.systemCopyBuffer = str;
-					});
-					if (x == 0)
-					{
-						if (AddAt != null)
-						{
-							menu.AddItem(new GUIContent("添加行"), false, () =>
-							{
-								AddAt(y);
-							});
-						}
-						if (RemoveAt != null)
-						{
-							menu.AddItem(new GUIContent("删除行"), false, () =>
-							{
-								RemoveAt(y);
-							});
-						}
-					}
-				}, () =>
+				if (y > 0)
 				{
-					if (EditCell != null)
-					{
-						editIndex = new Vector2Int
+					rect.MouseMenuClick((menu) => {
+						menu.AddItem(new GUIContent("复制"), false, () =>
 						{
-							x=x,
-							y=y
-						};
-					}
-				});
+							GUIUtility.systemCopyBuffer = str;
+						});
+						if (SetStringValue != null)
+						{
+							menu.AddItem(new GUIContent("粘贴"), false, () =>
+							{
+								try
+								{
+									SetStringValue(x, y, GUIUtility.systemCopyBuffer);
+									HasChanged = true;
+								}
+								catch (Exception e)
+								{
+									Debug.LogError(e);
+								}
+							});
+						}
+						if (SetStringValue != null)
+						{
+							menu.AddItem(new GUIContent("清空"), false, () =>
+							{
+								try
+								{
+									SetStringValue(x, y,"");
+									HasChanged = true;
+								}
+								catch (Exception e)
+								{
+									Debug.LogError(e);
+								}
+							});
+						}
+
+						if (x == 0)
+						{
+							if (AddAt != null)
+							{
+								menu.AddItem(new GUIContent("添加行"), false, () =>
+								{
+									AddAt(y);
+									HasChanged = true;
+								});
+							}
+							if (RemoveAt != null)
+							{
+								menu.AddItem(new GUIContent("删除行"), false, () =>
+								{
+									RemoveAt(y);
+									HasChanged = true;
+								});
+							}
+						}
+					}, () =>
+					{
+						if (EditCell != null)
+						{
+							editIndex = new Vector2Int
+							{
+								x = x,
+								y = y
+							};
+						}
+					});
+				}
+				
 			}
 		
 			return rect;
