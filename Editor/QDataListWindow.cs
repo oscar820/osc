@@ -118,10 +118,10 @@ namespace QTool.FlowGraph
 		}
 		public void AddAt(int y)
 		{
-			qdataList.CreateAt(QSerializeType.Get(typeof(QDataList)), y, "Copy_"+y+"_"+qdataList.Count);
+			qdataList.CreateAt(QSerializeType.Get(typeof(QDataList)), y);
 			if (objList != null)
 			{
-				objList.CreateAt(QSerializeType.Get(typeof(List<object>)),, "Copy_" + (y-1 )+ "_" + objList.Count);
+				objList.CreateAt(QSerializeType.Get(typeof(List<object>)),y-1);
 			}
 		}
 		public void RemoveAt(int y)

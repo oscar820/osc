@@ -342,11 +342,6 @@ namespace QTool
 											list.RemoveAt(i);
 										}
 									}
-									else
-									{
-										throw new Exception("读取List出错[" + type + "][" + reader.ReadToEnd() + "]");
-									}
-									
 									return list;
 								}
 							case QObjectType.Array:
@@ -369,10 +364,6 @@ namespace QTool
 												}
 											}
 										}
-									}
-									else
-									{
-										throw new Exception("读取Array出错[" + type + "][" + reader.ToString() + "]");
 									}
 									var array = QReflection.CreateInstance(type, null, list.Count) as Array;
 									for (int i = 0; i < list.Count; i++)

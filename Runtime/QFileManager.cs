@@ -12,8 +12,8 @@ namespace QTool
     {
         public static T Copy<T>(this T target)
         {
-            return XmlDeserialize<T>(XmlSerialize(target));
-        }
+			return target.ToQData().ParseQData<T>();
+		}
         public static string ToAssetPath(this string path)
         {
             return "Assets" + path.SplitEndString(Application.dataPath);

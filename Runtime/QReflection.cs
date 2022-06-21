@@ -383,6 +383,10 @@ namespace QTool.Reflection
         {
             if (targetObj != null)
             {
+				if (type == typeof(object))
+				{
+					return targetObj.Copy();
+				}
                 return targetObj;
             }
             try
@@ -390,7 +394,7 @@ namespace QTool.Reflection
                 if (type == typeof(string))
                 {
                     return "";
-                }
+				}
                 return Activator.CreateInstance(type, param);
             }
             catch (Exception e)
