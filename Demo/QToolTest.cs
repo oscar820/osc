@@ -216,7 +216,8 @@ namespace QTool.Test
 		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
 		{
 			public string Key { get ; set ; }
-			[ViewName("数值")] 
+			[ViewName("数值")]
+			[ViewEnum(nameof(QDataListTestType)+".get_"+ nameof(QDataListTestType.list))]
 			public string value="";
 			public Vector3 v3;
 			public List<int> array;

@@ -126,13 +126,20 @@ namespace QTool.Inspector
     [CustomPropertyDrawer(typeof(ViewEnumAttribute))]
     public class ViewEnumAttributeDrawer : PropertyDrawBase<ViewEnumAttribute>
     {
-        public List<string> enumList = null;
+		public List<string> enumList = new List<string>();
         public int selectIndex =0;
-        public string selectValue
+        public string SelectValue
         {
             get
             {
-                return enumList[selectIndex];
+				if (selectIndex >= 0 && selectIndex < enumList.Count)
+				{
+					return enumList[selectIndex];
+				}
+				else
+				{
+					return "";
+				}
             }
         }
         public void UpdateList(string input)
@@ -140,6 +147,87 @@ namespace QTool.Inspector
             selectIndex = enumList.IndexOf(input);
          
         }
+		public static QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer> DrawerDic = new QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer>();
+		public static object Draw(object obj,ViewEnumAttribute att)
+		{
+			var str = obj?.ToString();
+			{
+				if(DrawerDic[att]==null)
+				{
+					DrawerDic[att] = new ViewEnumAttributeDrawer();
+				}
+
+				var drawer = DrawerDic[att];
+				using (new GUILayout.HorizontalScope())
+				{
+					if (att.GetKeyListFunc.SplitTowString(".", out var start, out var end))
+					{
+						var type = QReflection.ParseType(start);
+						var getObj = QReflection.InvokeStaticFunction(type, end);
+						if (getObj is IList<string> stringList)
+						{
+							drawer.enumList.Clear();
+							drawer.enumList.AddRange(stringList);
+						}
+						else if (getObj is IList itemList)
+						{
+							drawer.enumList.Clear();
+							foreach (var item in itemList)
+							{
+								if(item is IKey<string> key)
+								{
+									drawer.enumList.AddCheckExist(key.Key);
+								}
+								else 
+								{
+									drawer.enumList.AddCheckExist(item?.ToString());
+								}
+							}
+						}
+						else
+						{
+							EditorGUILayout.LabelField("错误函数" + start+"    "+end);
+						}
+					}
+					else
+					{
+						EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
+					}
+					if (att.CanWriteString)
+					{
+						drawer.enumList.AddCheckExist("【不存在】");
+					}
+
+					drawer.UpdateList(str);
+
+					if (att.CanWriteString)
+					{
+						str = EditorGUILayout.TextField("", str);
+					}
+					if (GUI.changed)
+					{
+						drawer.UpdateList(str);
+					}
+					if (drawer.selectIndex < 0)
+					{
+						drawer.selectIndex = 0;
+						str = drawer.SelectValue;
+					}
+					var newIndex = EditorGUILayout.Popup(drawer.selectIndex, drawer.enumList.ToArray());
+					if (newIndex != drawer.selectIndex)
+					{
+						drawer.selectIndex = newIndex;
+						if (drawer.selectIndex >= 0)
+						{
+							str = drawer.SelectValue;
+						}
+					}
+				}
+				return str;
+			}
+			
+			return obj;
+		}
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (!property.IsShow()) return;
@@ -161,10 +249,10 @@ namespace QTool.Inspector
                     }
                     UpdateList(property.stringValue);
                 }
-                EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), att.name);
+                //ditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), att.name);
                 if (att.CanWriteString)
                 {
-                    property.stringValue = EditorGUI.TextField(position.HorizontalRect(0.4f, 0.7f), property.stringValue);
+                    property.stringValue = EditorGUI.TextField(position.HorizontalRect(0f, 0.7f), property.stringValue);
                 }
                 if (GUI.changed)
                 {
@@ -173,14 +261,14 @@ namespace QTool.Inspector
                 if (selectIndex < 0)
                 {
                     selectIndex = 0;
-                    property.stringValue = selectValue;
+                    property.stringValue = SelectValue;
                 }
                 
                 var newIndex = EditorGUI.Popup(position.HorizontalRect(0.7f, 1), selectIndex, enumList.ToArray());
                 if (newIndex !=selectIndex)
                 {
                     selectIndex = newIndex;
-                    property.stringValue = selectValue;
+                    property.stringValue = SelectValue;
                 }
 
             }
@@ -477,7 +565,7 @@ namespace QTool.Inspector
 
 		public static List<string> TypeMenuList = new List<string>() { typeof(UnityEngine.Object).FullName.Replace('.', '/') };
 		public static List<Type> TypeList = new List<Type>() { typeof(UnityEngine.Object) };
-        public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null,params GUILayoutOption[] layoutOption)
+        public static object Draw(this object obj,string name,Type type,Action<object> changeValue=null,ICustomAttributeProvider customAttribute=null, Action<int> DrawElementCall=null,Action<int,int> IndexChange=null,params GUILayoutOption[] layoutOption)
 		{
 			var hasName = !string.IsNullOrWhiteSpace(name);
 			if (type == null)
@@ -529,7 +617,12 @@ namespace QTool.Inspector
                 case TypeCode.Double:
                         obj= EditorGUILayout.DoubleField(name, (double)obj, layoutOption);break;
                 case TypeCode.String:
-					if (string.IsNullOrWhiteSpace(name))
+					var enumView = customAttribute.GetAttribute<ViewEnumAttribute>();
+					if (enumView != null)
+					{
+						obj = ViewEnumAttributeDrawer.Draw(obj, enumView);break;
+					}
+					else if (string.IsNullOrWhiteSpace(name))
 					{
 						obj = EditorGUILayout.TextArea(obj?.ToString(), layoutOption);break;
 					}

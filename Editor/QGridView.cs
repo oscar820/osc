@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEditor;
+using System.Reflection;
 using QTool.Inspector;
 namespace QTool
 {
@@ -267,7 +268,7 @@ namespace QTool
 			}
 		}
 		static QEidtCellWindow Instance { set; get; }
-		public static object Show(string key,object value,Type type,out bool changed)
+		public static object Show(string key,object value,Type type,out bool changed,ICustomAttributeProvider customAttribute)
 		{
 			if (Instance == null)
 			{
@@ -279,6 +280,7 @@ namespace QTool
 			Instance.type = type;
 			Instance.value = value;
 			var oldValue = Instance.value.ToQDataType(type, false)?.GetHashCode();
+			Instance.customAttribute = customAttribute;
 			Instance.ShowModal();
 			changed = oldValue != Instance.value.ToQDataType(type, false)?.GetHashCode();
 			return Instance.value;
@@ -286,12 +288,13 @@ namespace QTool
 		public Type type;
 		public object value;
 		public Vector2 scrollPos;
+		public ICustomAttributeProvider customAttribute;
 		private void OnGUI()
 		{
 			using (var scroll= new GUILayout.ScrollViewScope(scrollPos))
 			{
 				scrollPos = scroll.scrollPosition;
-				value= value.Draw("", type);	
+				value= value.Draw("", type,null,customAttribute);	
 			}
 		}
 	}

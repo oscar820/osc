@@ -636,7 +636,7 @@ namespace QTool.FlowGraph
                         }
                         else
                         {
-                            port.Value = port.Value.Draw(port.ViewName, port.ValueType,(obj)=> { port.Value = obj; },  DrawFlowListDot,port.IndexChange);
+                            port.Value = port.Value.Draw(port.ViewName, port.ValueType,(obj)=> { port.Value = obj; },null,  DrawFlowListDot,port.IndexChange);
                         }
                     }
                 }

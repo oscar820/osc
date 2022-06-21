@@ -344,14 +344,14 @@ namespace QTool.Reflection
                 }
                 else
                 {
-                    type = type.BaseType;
+					type = type.BaseType;
                 }
             }
             return null;
         }
-        public static void InvokeStaticFunction(this Type type,string name,params object[] param)
+        public static object InvokeStaticFunction(this Type type,string name,params object[] param)
         {
-            GetStaticMethod(type, name)?.Invoke(null, param);
+			return GetStaticMethod(type, name)?.Invoke(null, param);
         }
         public static List<Type> GetAllTypes(this Type rootType)
         {
