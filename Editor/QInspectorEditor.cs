@@ -617,7 +617,7 @@ namespace QTool.Inspector
                 case TypeCode.Double:
                         obj= EditorGUILayout.DoubleField(name, (double)obj, layoutOption);break;
                 case TypeCode.String:
-					var enumView = customAttribute.GetAttribute<ViewEnumAttribute>();
+					var enumView = customAttribute?.GetAttribute<ViewEnumAttribute>();
 					if (enumView != null)
 					{
 						obj = ViewEnumAttributeDrawer.Draw(obj, enumView);break;
@@ -766,7 +766,7 @@ namespace QTool.Inspector
 														using (new EditorGUILayout.VerticalScope(QGUITool.BackStyle))
 														{
 															var key = name + "[" + i + "]";
-															var element = list[i].Draw(key, typeInfo.ElementType);
+															var element = list[i].Draw(key, typeInfo.ElementType,null,customAttribute);
 															list[i] = element;
 															DrawElementCall?.Invoke(i);
 															using (new EditorGUILayout.HorizontalScope())
