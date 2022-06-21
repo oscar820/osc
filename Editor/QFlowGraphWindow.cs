@@ -632,11 +632,11 @@ namespace QTool.FlowGraph
                     {
                         if(port.FlowPort == null)
                         {
-                            port.Value = port.Value.Draw(port.ViewName, port.ValueType, (obj) => {  port.Value = obj; });
+                            port.Value = port.Value.Draw(port.ViewName, port.ValueType, (obj) => {  port.Value = obj; },port.parameterInfo);
                         }
                         else
                         {
-                            port.Value = port.Value.Draw(port.ViewName, port.ValueType,(obj)=> { port.Value = obj; },null,  DrawFlowListDot,port.IndexChange);
+                            port.Value = port.Value.Draw(port.ViewName, port.ValueType,(obj)=> { port.Value = obj; },port.parameterInfo,  DrawFlowListDot,port.IndexChange);
                         }
                     }
                 }

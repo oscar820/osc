@@ -217,7 +217,7 @@ namespace QTool.Test
 		{
 			public string Key { get ; set ; }
 			[ViewName("数值")]
-			[ViewEnum(nameof(QDataListTestType)+".get_"+ nameof(QDataListTestType.list))]
+			[ViewEnum(nameof(QDataListTestType)+".get_list")]
 			public string value="";
 			public Vector3 v3;
 			public List<int> array;

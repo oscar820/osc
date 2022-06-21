@@ -58,7 +58,7 @@ namespace QTool.Inspector
     /// <summary>
     /// 将字符传显示为枚举下拉款通过GetKeyListFunc获取所有可选择的字符串
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field|AttributeTargets.Property|AttributeTargets.Parameter)]
     public class ViewEnumAttribute : PropertyAttribute
 	{
         public string GetKeyListFunc;

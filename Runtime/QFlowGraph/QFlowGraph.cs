@@ -460,6 +460,8 @@ namespace QTool.FlowGraph
                 }
             }
         }
+		[QIgnore]
+		public System.Reflection.ParameterInfo parameterInfo;
         [QIgnore]
         public QNodeKeyNameAttribute KeyNameAttribute;
         [QIgnore]
@@ -794,13 +796,13 @@ namespace QTool.FlowGraph
             for (int i = 0; i < command.paramInfos.Length; i++)
             {
                 var paramInfo = command.paramInfos[i];
-                if (paramInfo.Name.Equals(QFlowKey.This)) continue;
+				if (paramInfo.Name.Equals(QFlowKey.This)) continue;
                 var portAtt = paramInfo.GetAttribute<QPortAttribute>() ??( paramInfo.IsOut ? (QPortAttribute)QOutputPortAttribute.Normal : (QPortAttribute)QInputPortAttribute.Normal);
                 var port = AddPort(paramInfo.Name, portAtt, paramInfo.ViewName(), paramInfo.ParameterType.GetTrueType(), paramInfo.GetAttribute<QFlowPortAttribute>());
                 port.paramIndex = i;
                 port.KeyNameAttribute = paramInfo.GetAttribute<QNodeKeyNameAttribute>();
-				
-                if (paramInfo.HasDefaultValue)
+				port.parameterInfo = paramInfo;
+				if (paramInfo.HasDefaultValue)
                 {
 					if(string.IsNullOrEmpty( port.stringValue ))
 					{

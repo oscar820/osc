@@ -7,6 +7,8 @@ using QTool.FlowGraph;
 using QTool.Reflection;
 using System.Threading.Tasks;
 using QTool.Test;
+using QTool.Inspector;
+using static QTool.Test.QToolTest;
 
 public class QFlowTest : MonoBehaviour
 {
@@ -92,7 +94,7 @@ public static class QFlowNodeTest
         E2,
     }
   
-    public static void EnumTest(TestEnum testEnum, T1 testEnum2,  out string value, string defaultTest1 = "1239180")
+    public static void EnumTest(TestEnum testEnum, T1 testEnum2,  out string value, [ViewEnum(nameof(QDataListTestType) + ".get_list")] string defaultTest1 = "1239180")
     {
         value = testEnum2.ToString();
         Debug.LogError(value + "  " + defaultTest1);
