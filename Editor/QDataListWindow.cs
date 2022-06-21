@@ -28,6 +28,7 @@ namespace QTool.FlowGraph
 		public QGridView gridView;
 		public QList<object> objList = new QList<object>();
 		public QList<QMemeberInfo> Members = new QList<QMemeberInfo>();
+		DateTime lastTime = DateTime.MinValue;
 		public static bool Open(TextAsset textAsset)
 		{
 			if (textAsset == null) return false;
@@ -47,6 +48,7 @@ namespace QTool.FlowGraph
 		{
 			try
 			{
+				lastTime = FileManager.GetLastWriteTime(path);
 				var type = QReflection.ParseType(path.GetBlockValue(nameof(QDataList) + "Assets" + '/', ".txt").SplitStartString("/"));
 				if (type != null)
 				{
@@ -85,16 +87,20 @@ namespace QTool.FlowGraph
 					objList.ToQDataList(qdataList, typeInfo.Type);
 				} 
 				qdataList?.Save();
+				lastTime = DateTime.Now;
 				gridView.HasChanged = false;
 			}
 		}
+		internal bool AutoOpen = true;
 		private void OnFocus()
 		{
-			if (!QEidtCellWindow.IsShow)
+			var key = nameof(QDataListWindow) + "_LastPath";
+			if (PlayerPrefs.HasKey(key))
 			{
-				if (PlayerPrefs.HasKey(nameof(QDataListWindow) + "_LastPath"))
+				var path = PlayerPrefs.GetString(key);
+				if (FileManager.GetLastWriteTime(path) > lastTime)
 				{
-					Open(PlayerPrefs.GetString(nameof(QDataListWindow) + "_LastPath"));
+					Open(path);
 				}
 			}
 		}
