@@ -7,7 +7,7 @@ using QTool.Inspector;
 using QTool.Asset;
 namespace QTool
 {
-    public class QIdPrefabs : PrefabLoader<QIdPrefabs>
+    public class QIdPrefabs : QPrefabLoader<QIdPrefabs>
     {
 
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 using QTool.Asset;
 using UnityEngine.UI;
 using QTool;
-public class ResourceTest : PrefabLoader<ResourceTest>
+public class ResourceTest : QPrefabLoader<ResourceTest>
 {
 
 }

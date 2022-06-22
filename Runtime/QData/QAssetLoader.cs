@@ -123,7 +123,7 @@ namespace QTool.Asset
 #endif
 
 	#endregion
-	public abstract class AssetLoader<TPath, TObj> where TObj : UnityEngine.Object
+	public abstract class QAssetLoader<TPath, TObj> where TObj : UnityEngine.Object
 	{
 		public static string DirectoryPath
 		{
@@ -148,7 +148,6 @@ namespace QTool.Asset
 			}
 		}
 #endif
-		public static QDictionary<string, TObj> Cache = new QDictionary<string, TObj>();
 		public static async Task<IList<TObj>> LoadAllAsync()
 		{
 			List<TObj> objList = new List<TObj>();
@@ -197,7 +196,6 @@ namespace QTool.Asset
 		}
 		public static async Task<TObj> LoadAsync(string key)
 		{
-			if (Cache.ContainsKey(key)) return Cache[key];
 			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
 			#region Addressables
 
@@ -227,7 +225,6 @@ namespace QTool.Asset
 			}
 #endif
 			#endregion
-			Cache[key] = obj;
 			return obj;
 		}
 
@@ -235,7 +232,6 @@ namespace QTool.Asset
 		public static void Release<T>(T obj) where T : UnityEngine.Object
 		{
 			if (obj == null) return;
-			Cache.RemoveAll((tObj) =>obj.Equals(tObj));
 #if Addressables
 			Addressables.Release(obj);
 #endif
@@ -249,7 +245,7 @@ namespace QTool.Asset
 			}
 		}
 	}
-    public abstract class PrefabLoader<TPath>: AssetLoader<TPath,GameObject> where TPath:PrefabLoader<TPath>
+    public abstract class QPrefabLoader<TPath>: QAssetLoader<TPath,GameObject> where TPath:QPrefabLoader<TPath>
     {
         static async Task<ObjectPool<GameObject>> GetPool(string key)
         {
