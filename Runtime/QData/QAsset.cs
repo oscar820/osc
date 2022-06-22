@@ -267,32 +267,20 @@ namespace QTool.Asset
 	}
     public abstract class PrefabAssetList<TPath>: AssetList<TPath,GameObject> where TPath:PrefabAssetList<TPath>
     {
-        static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
         static async Task<ObjectPool<GameObject>> GetPool(string key)
         {
             var poolkey = key + "_AssetList";
-            if (!PoolDic.ContainsKey(poolkey))
-            {
-                var prefab =await GetAsync(key);
-                if (!PoolDic.ContainsKey(poolkey))
-                {
-                    if (prefab == null)
-                    {
-                        Debug.LogError(typeof(TPath).Name + "找不到预制体资源" + key);
-                        PoolDic.Add(poolkey, null);
-                    }
-                    else
-                    {
-                        var pool = QPoolManager.GetPool(poolkey, prefab);
-                        if (!PoolDic.ContainsKey(poolkey))
-                        {
-                            PoolDic.Add(poolkey, pool);
-                        }
-                    }
-                }
-            }
-            return PoolDic[poolkey];
-        }
+			var prefab = await GetAsync(key);
+			if (prefab != null)
+			{
+				return QPoolManager.GetPool(poolkey, prefab);
+
+			}
+			else
+			{
+				return null;
+			}
+		}
       
         public static async Task<GameObject> GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
         {
