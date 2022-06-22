@@ -138,8 +138,14 @@ namespace QTool
 				}
 				else
 				{
-
-					return playerData.AnalysisData[Titles[x].Key].GetFreshValue(eventData)?.ToString();
+					if (eventData.eventKey == Titles[x].DataSetting.EventKey)
+					{
+						return playerData.AnalysisData[Titles[x].Key].GetFreshValue(eventData)?.ToString();
+					}
+					else
+					{
+						return "";
+					}
 				}
 			}
 		}
