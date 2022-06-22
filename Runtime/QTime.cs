@@ -43,41 +43,38 @@ namespace QTool
             UpdateTimeScale();
         }
     }
-	public class WaitTime : WaitTime<float>
+	public class QWaitTime
 	{
-	}
-	public class WaitTime<T>
-    {
-        public T Time { get; protected set; }
-        public T CurTime { get; protected set; }
+        public float Time { get; protected set; }
+        public float CurTime { get; protected set; }
 
 
         public void Clear()
 		{
-			CurTime = 0.ConvertTo<T>();
+			CurTime = 0;
 		}
         public void Over()
         {
             CurTime = Time;
         }
-        public void SetCurTime(T curTime)
+        public void SetCurTime(float curTime)
         {
             CurTime = curTime;
         }
-        public void Reset(T time, bool startOver = false)
+        public void Reset(float time, bool startOver = false)
         {
             this.Time = time;
             Clear();
             if (startOver) Over();
         }
-		bool IsOver(out T timeOffset)
+		bool IsOver(out float timeOffset)
 		{
-			timeOffset =(T) CurTime.OperaterSubtract( Time);
-			return timeOffset.OperaterGreaterThan(0);
+			timeOffset =CurTime- Time;
+			return timeOffset>0;
 		}
-        public bool Check(T deltaTime, bool autoClear = true)
+        public bool Check(float deltaTime, bool autoClear = true)
         {
-			CurTime = (T)CurTime.OperaterAdd(deltaTime);
+			CurTime = CurTime+deltaTime;
             if (IsOver(out var timeOffset))
             {
                 if (autoClear) { CurTime = timeOffset; }
