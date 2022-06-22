@@ -307,7 +307,15 @@ namespace QTool.Asset
             {
                 key = key.Substring(0, key.IndexOf(" "));
             }
-            (await GetPool(key))?.Push(obj);
+			var pool = await GetPool(key);
+			if (pool == null)
+			{
+				GameObject.Destroy(obj);
+			}
+			else
+			{
+				pool.Push(obj);
+			}
         }
         public static void Push(GameObject obj)
         {
