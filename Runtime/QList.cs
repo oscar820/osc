@@ -384,7 +384,7 @@ namespace QTool
         }
         public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1)
         {
-			var newObj = typeInfo.ElementType.CreateInstance(index < 0 ? null : list[index]);
+			var newObj = typeInfo.ElementType.CreateInstance(index < 0 ? null : list[index],true);
 			if (index < 0)
 			{
 				index = 0;
@@ -393,7 +393,7 @@ namespace QTool
             {
                 if (typeInfo.ArrayRank == 1)
                 {
-                    var newList= typeInfo.Type.CreateInstance(null, list.Count + 1) as IList;
+                    var newList= typeInfo.Type.CreateInstance(null,false, list.Count + 1) as IList;
                  
                     for (int i = 0; i < index; i++)
                     {
@@ -420,7 +420,7 @@ namespace QTool
             {
                 if (typeInfo.ArrayRank == 1)
                 {
-                    var newList = typeInfo.Type.CreateInstance(null, list.Count -1) as IList;
+                    var newList = typeInfo.Type.CreateInstance(null,false, list.Count -1) as IList;
 
                     for (int i = 0; i < index; i++)
                     {

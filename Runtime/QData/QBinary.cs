@@ -151,7 +151,7 @@ namespace QTool.Binary
 						case QObjectType.Array:
 							{
                                 var count = reader.ReadInt32();
-								var obj = QReflection.CreateInstance(type, typeInfo.IsArray? null:target, count);
+								var obj = QReflection.CreateInstance(type, typeInfo.IsArray? null:target,false, count);
 								var list = obj as IList;
 								for (int i = 0; i < count; i++)
 								{

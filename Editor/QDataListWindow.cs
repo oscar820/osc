@@ -104,12 +104,12 @@ namespace QTool.FlowGraph
 				}
 			}
 		}
-
-		private void OnEnable()
+		private void Awake()
 		{
-			gridView = new QGridView(GetValue, ()=>new Vector2Int { 
-				x=qdataList.TitleRow.Count,
-				y=qdataList.Count,
+			gridView = new QGridView(GetValue, () => new Vector2Int
+			{
+				x = qdataList.TitleRow.Count,
+				y = qdataList.Count,
 			});
 			gridView.EditCell = EditCell;
 			gridView.AddAt = AddAt;
