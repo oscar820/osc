@@ -269,7 +269,7 @@ namespace QTool.Asset
     {
         static async Task<ObjectPool<GameObject>> GetPool(string key)
         {
-            var poolkey = key + "_AssetList";
+            var poolkey =DirectoryPath+"_" + key + "_AssetList";
 			var prefab = await GetAsync(key);
 			if (prefab != null)
 			{
