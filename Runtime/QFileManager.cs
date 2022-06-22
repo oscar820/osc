@@ -45,7 +45,7 @@ namespace QTool
             {
                 if (path.EndsWith(endsWith))
                 {
-                    action?.Invoke(path);
+                    action?.Invoke(path.Replace('\\', '/'));
                 }
                 else
                 {
@@ -53,18 +53,19 @@ namespace QTool
                 }
             });
         }
-        public static void ForeachDirectory(this string rootPath, Action<string> action)
+
+		public static void ForeachDirectory(this string rootPath, Action<string> action)
         {
             if (Directory.Exists(rootPath))
             {
                 var paths = Directory.GetDirectories(rootPath);
                 foreach (var path in paths)
                 {
-                    if (string.IsNullOrWhiteSpace(path))
+					if (string.IsNullOrWhiteSpace(path))
                     {
                         continue;
-                    }
-                    action?.Invoke(path);
+					}
+					action?.Invoke(path.Replace('\\', '/'));
                 }
             }
             else
@@ -83,7 +84,7 @@ namespace QTool
                     {
                         continue;
                     }
-                    action?.Invoke(path);
+                    action?.Invoke(path.Replace('\\', '/'));
                 }
             }
             else
