@@ -376,7 +376,6 @@ namespace QTool
 								{
 									return TimeSpan.FromTicks(reader.ReadQData<long>());
 								}
-								break;
 							default:
 								return null;
 						}

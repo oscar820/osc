@@ -250,7 +250,7 @@ namespace QTool
 			{
 				return (await task)[2] == Id;
 			}
-			catch (Exception e)
+			catch (Exception )
 			{
 				return false;
 			}

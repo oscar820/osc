@@ -358,7 +358,6 @@ namespace QTool
                 return _secondeSum ;
             }
         }
-        int maxCount = -1;
         static double CurTime
         {
             get

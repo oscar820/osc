@@ -41,9 +41,6 @@ namespace QTool.Binary
                                         writer.SerializeType(item, typeInfo.ElementType);
                                     }
                                     break;
-                                    var array = value as Array;
-									writer.Write(array.Length);
-                                    break;
                                 case QObjectType.Object:
 
                                     if (typeInfo.IsIQSerialize)

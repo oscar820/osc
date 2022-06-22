@@ -128,11 +128,18 @@ namespace QTool.Asset
     }
 	public abstract class AssetList<TPath, TObj> where TObj : UnityEngine.Object
 	{
+		public static string DirectoryPath
+		{
+			get
+			{
+				return typeof(TPath).Name;
+			}
+		}
 		public static string ResourcesPathStart
 		{
 			get
 			{
-				return nameof(Resources) + '/' + typeof(TPath).Name + '/';
+				return nameof(Resources) + '/' + DirectoryPath + '/';
 			}
 		}
 #if Addressables
@@ -140,7 +147,7 @@ namespace QTool.Asset
 		{
 			get
 			{
-				return "Addressable" + nameof(Resources) + '/' + typeof(TPath).Name + '/';
+				return "Addressable" + nameof(Resources) + '/' + DirectoryPath + '/';
 			}
 		}
 #endif
@@ -190,11 +197,11 @@ namespace QTool.Asset
 			{
 				try
 				{
-					return AddressableTool.GetLabelList<TObj>(typeof(TPath).Name);
+					return AddressableTool.GetLabelList<TObj>(DirectoryPath);
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("加载资源表[" + typeof(TPath) + "]出错\n" + e);
+					Debug.LogError("加载资源表[" + DirectoryPath + "]出错\n" + e);
 				}
 			}
 			else
@@ -202,7 +209,12 @@ namespace QTool.Asset
 			{
 				try
 				{
-					var loaderTask = Addressables.LoadAssetsAsync<TObj>(typeof(TPath).Name, null).Task;
+					var loader = Addressables.LoadAssetsAsync<TObj>(DirectoryPath, null); ;
+					if (loader.OperationException != null)
+					{
+						throw loader.OperationException;
+					}
+					var loaderTask = loader.Task;
 					var list = await loaderTask;
 					if (loaderTask.Exception != null)
 					{
@@ -212,7 +224,7 @@ namespace QTool.Asset
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("加载资源表[" + typeof(TPath) + "]出错\n" + e);
+					Debug.LogWarning("加载资源表[" + DirectoryPath + "]出错\n" + e);
 				}
 			}
 			return new TObj[0];
@@ -226,9 +238,11 @@ namespace QTool.Asset
 		{
 			return Resources.Load<TObj>(ResourcesPathStart + key);
 		}
-		public static TObj[] ResourceLoadAll()
+		public static IList<TObj> ResourceLoadAll()
 		{
-			return Resources.LoadAll<TObj>(ResourcesPathStart.TrimEnd('/'));
+			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath);
+			Debug.Log("加载 [" + DirectoryPath + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
+			return list;
 		}
 		#endregion
 	}
