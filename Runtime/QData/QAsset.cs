@@ -151,6 +151,7 @@ namespace QTool.Asset
 			}
 		}
 #endif
+	
 		public static async Task<IList<TObj>> LoadAllAsync()
 		{
 			List<TObj> objList = new List<TObj>();
@@ -169,7 +170,10 @@ namespace QTool.Asset
 		}
 #if Addressables
 		#region Addressable加载
-
+		public static void AddressablesRelease<T>(T obj) where T : UnityEngine.Object
+		{
+			Addressables.Release(obj);
+		}
 		public static async Task<TObj> AddressablesGetAsync(string key)
 		{
 			if (Application.isPlaying)
@@ -243,6 +247,17 @@ namespace QTool.Asset
 			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath);
 			Debug.Log("加载 [" + DirectoryPath + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
 			return list;
+		}
+		public static void ResourceRelease<T>(T obj) where T: UnityEngine.Object
+		{
+			if(obj is GameObject)
+			{
+				UnityEngine.Object.Destroy(obj);
+			}
+			else
+			{
+				Resources.UnloadAsset(obj);
+			}
 		}
 		#endregion
 	}
