@@ -176,6 +176,7 @@ namespace QTool.Asset
 		}
 		public static async Task<TObj> AddressablesGetAsync(string key)
 		{
+			key = key.Replace('\\', '/');
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
@@ -204,11 +205,11 @@ namespace QTool.Asset
 			{
 				try
 				{
-					return AddressableTool.GetLabelList<TObj>(DirectoryPath);
+					return AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/'));
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("加载资源表[" + DirectoryPath + "]出错\n" + e);
+					Debug.LogError("加载资源表[" + DirectoryPath.Replace('\\', '/') + "]出错\n" + e);
 				}
 			}
 			else
@@ -238,17 +239,17 @@ namespace QTool.Asset
 		}
 
 
-#endregion
+		#endregion
 #endif
-				#region Resource加载
-				public static TObj ResourceGet(string key)
+		#region Resource加载
+		public static TObj ResourceGet(string key)
 		{
-			return Resources.Load<TObj>(ResourcesPathStart + key);
+			return Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\','/'));
 		}
 		public static IList<TObj> ResourceLoadAll()
 		{
-			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath);
-			Debug.Log("加载 [" + DirectoryPath + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
+			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath.Replace('\\', '/'));
+			Debug.Log("加载 [" + DirectoryPath.Replace('\\', '/') + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
 			return list;
 		}
 		public static void ResourceRelease<T>(T obj) where T: UnityEngine.Object
