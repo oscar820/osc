@@ -147,7 +147,7 @@ namespace QTool.Asset
 		{
 			get
 			{
-				return "Addressable" + nameof(Resources) + '/' + DirectoryPath + '/';
+				return   DirectoryPath + '/';
 			}
 		}
 #endif
@@ -176,7 +176,14 @@ namespace QTool.Asset
 		}
 		public static async Task<TObj> AddressablesGetAsync(string key)
 		{
-			if (Application.isPlaying)
+#if UNITY_EDITOR
+			if (!Application.isPlaying)
+			{
+				return AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + AddressablePathStart + key);
+			}
+			else
+
+#endif
 			{
 				var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
 				var obj = await loader.Task;
@@ -188,10 +195,6 @@ namespace QTool.Asset
 					}
 				}
 				return obj;
-			}
-			else
-			{
-				return AssetDatabase.LoadAssetAtPath<TObj>(AddressablePathStart + key);
 			}
 		}
 		public static async Task<IList<TObj>> AddressableLoadAll()
@@ -235,10 +238,10 @@ namespace QTool.Asset
 		}
 
 
-		#endregion
+#endregion
 #endif
-		#region Resource加载
-		public static TObj ResourceGet(string key)
+				#region Resource加载
+				public static TObj ResourceGet(string key)
 		{
 			return Resources.Load<TObj>(ResourcesPathStart + key);
 		}
