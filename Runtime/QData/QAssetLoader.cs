@@ -230,7 +230,6 @@ namespace QTool.Asset
 #if Addressables
 		public static void ReleaseAddressables<T>(params T[] obj) where T : UnityEngine.Object
 		{
-			if (obj == null) continue; ;
 			Addressables.Release(obj);
 		}
 #endif
