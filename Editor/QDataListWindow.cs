@@ -104,17 +104,17 @@ namespace QTool.FlowGraph
 				}
 			}
 		}
-		private void Awake()
+		private void OnEnable()
 		{
-			gridView = new QGridView(GetValue, () => new Vector2Int
+			if (gridView == null)
 			{
-				x = qdataList.TitleRow.Count,
-				y = qdataList.Count,
-			});
-			gridView.EditCell = EditCell;
-			gridView.AddAt = AddAt;
-			gridView.RemoveAt = RemoveAt;
-			gridView.SetStringValue = SetValue;
+				gridView = new QGridView(GetValue, () => new Vector2Int
+				{
+					x = qdataList.TitleRow.Count,
+					y = qdataList.Count,
+				}, ClickCell);
+			}
+
 		}
 		public void AddAt(int y)
 		{
@@ -158,24 +158,81 @@ namespace QTool.FlowGraph
 				member.Set(obj, value.ParseQDataType(member.Type, false));
 			}
 		}
-		public bool EditCell(int x,int y)
+		public bool ClickCell(int x,int y,int buttonIndex)
 		{
-			if (y == 0)
+			var change = false;
+			if (buttonIndex == 0)
 			{
-				return false;
-			}
-			else if (typeInfo == null)
-			{
-				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y].Key+"."+qdataList.TitleRow[x],qdataList[y][x], typeof(string),out var changed,null ), typeof(string),x);
-				return changed;
+				if (y == 0)
+				{
+					return false;
+				}
+				else if (typeInfo == null)
+				{
+					qdataList[y].SetValueType(QEidtCellWindow.Show(qdataList[y].Key + "." + qdataList.TitleRow[x], qdataList[y][x], typeof(string), out change, null), typeof(string), x);
+				}
+				else
+				{
+					var member = Members[x];
+					var obj = objList[y - 1];
+					member.Set(obj, QEidtCellWindow.Show((obj as IKey<string>).Key + "." + member.ViewName, member.Get(obj), member.Type, out change, Members[x].MemeberInfo));
+				}
 			}
 			else
 			{
-				var member = Members[x];
-				var obj = objList[y - 1];
-				member.Set(obj,QEidtCellWindow.Show((obj as IKey<string>).Key+"."+member.ViewName,member.Get(obj), member.Type,out var changed, Members[x].MemeberInfo));
-				return changed;
+			
+				if (y > 0)
+				{
+					var menu = new GenericMenu();
+					menu.AddItem(new GUIContent("复制"), false, () =>
+					{
+						GUIUtility.systemCopyBuffer = GetValue(x, y);
+					});
+					menu.AddItem(new GUIContent("粘贴"), false, () =>
+					{
+						try
+						{
+							SetValue(x, y, GUIUtility.systemCopyBuffer);
+							change = true;
+						}
+						catch (Exception e)
+						{
+							Debug.LogError(e);
+						}
+					});
+					menu.AddItem(new GUIContent("清空"), false, () =>
+					{
+						try
+						{
+							SetValue(x, y, "");
+							change = true;
+						}
+						catch (Exception e)
+						{
+							Debug.LogError(e);
+						}
+					});
+					if (x == 0)
+					{
+						menu.AddItem(new GUIContent("添加行"), false, () =>
+						{
+							AddAt(y);
+							change = true;
+						});
+						menu.AddItem(new GUIContent("删除行"), false, () =>
+						{
+							RemoveAt(y);
+							change = true;
+						});
+					}
+
+					menu.ShowAsContext();
+				}
+			
 			}
+
+			return change;
+
 		}
 		public void OpenNull()
 		{
@@ -194,15 +251,9 @@ namespace QTool.FlowGraph
 			}
 			catch (Exception e)
 			{
-				if(e is UnityEngine.ExitGUIException)
-				{
-					Debug.LogWarning(e);
-				}
-				else
-				{
-					Debug.LogError("表格出错：" + e);
-					OpenNull();
-				}
+
+				Debug.LogError("表格出错：" + e);
+				OpenNull();
 			}
 			
 		}
