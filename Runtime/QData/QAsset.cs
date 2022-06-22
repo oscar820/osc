@@ -192,7 +192,7 @@ namespace QTool.Asset
 				{
 					if (loader.OperationException != null)
 					{
-						Debug.LogError("异步加载" + AddressablePathStart + "资源[" + key + "]出错" + loader.OperationException);
+						Debug.LogError("异步加载" + AddressablePathStart  + key + "出错" + loader.OperationException);
 					}
 				}
 				return obj;
@@ -248,8 +248,8 @@ namespace QTool.Asset
 		}
 		public static IList<TObj> ResourceLoadAll()
 		{
-			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath.Replace('\\', '/'));
-			Debug.Log("加载 [" + DirectoryPath.Replace('\\', '/') + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
+			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath);
+			Debug.Log("加载 [" + DirectoryPath + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
 			return list;
 		}
 		public static void ResourceRelease<T>(T obj) where T: UnityEngine.Object
