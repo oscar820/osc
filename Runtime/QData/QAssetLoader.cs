@@ -227,22 +227,29 @@ namespace QTool.Asset
 			#endregion
 			return obj;
 		}
-
-		
-		public static void Release<T>(T obj) where T : UnityEngine.Object
-		{
-			if (obj == null) return;
 #if Addressables
+		public static void ReleaseAddressables<T>(params T[] obj) where T : UnityEngine.Object
+		{
+			if (obj == null) continue; ;
 			Addressables.Release(obj);
+		}
 #endif
-			if (obj is GameObject)
+		
+		public static void ReleaseResources<T>(params T[] objs) where T : UnityEngine.Object
+		{
+			foreach (var obj in objs)
 			{
-				UnityEngine.Object.Destroy(obj);
+				if (obj == null) continue; ;
+				if (obj is GameObject)
+				{
+					UnityEngine.Object.Destroy(obj);
+				}
+				else
+				{
+					Resources.UnloadAsset(obj);
+				}
 			}
-			else
-			{
-				Resources.UnloadAsset(obj);
-			}
+			
 		}
 	}
     public abstract class QPrefabLoader<TPath>: QAssetLoader<TPath,GameObject> where TPath:QPrefabLoader<TPath>
