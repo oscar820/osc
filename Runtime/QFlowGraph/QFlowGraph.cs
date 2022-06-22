@@ -140,11 +140,11 @@ namespace QTool.FlowGraph
             return node;
 		}
 		[QIgnore]
-		public Func<IEnumerator,object> StartCoroutineOverride;
+		public Func<IEnumerator,Coroutine> StartCoroutineOverride;
 		[QIgnore]
-		public Action<object> StopCoroutineOverride;
+		public Action<Coroutine> StopCoroutineOverride;
 		[QIgnore]
-		public QDictionary<string, object> CoroutineList { private set; get; } = new QDictionary<string, object>();
+		public QDictionary<string, Coroutine> CoroutineList { private set; get; } = new QDictionary<string, Coroutine>();
 		internal void StartCoroutine(string key,IEnumerator coroutine)
         {
             if (StartCoroutineOverride == null)
@@ -181,16 +181,13 @@ namespace QTool.FlowGraph
 		{
 			StartCoroutine(startNode, RunIEnumerator(startNode));
 		}
-        public void Run(string startNode, Func<IEnumerator, object> StartCoroutineOverride , Action<object> StopCoroutineOverride)
+        public void Run(string startNode, Func<IEnumerator, Coroutine> StartCoroutineOverride , Action<Coroutine> StopCoroutineOverride)
         {
             this.StartCoroutineOverride = StartCoroutineOverride;
 			this.StopCoroutineOverride = StopCoroutineOverride;
             StartCoroutine(startNode,RunIEnumerator(startNode));
 		}
-		public void Run(string startNode, Func<IEnumerator, IEnumerator> StartCoroutineOverride, Action<IEnumerator> StopCoroutineOverride)
-		{
-			Run(startNode, (obj) => (object)StartCoroutineOverride(obj), (obj) => StopCoroutineOverride((IEnumerator)obj));
-		}
+	
 
 		public IEnumerator RunIEnumerator(string startNode)
         {

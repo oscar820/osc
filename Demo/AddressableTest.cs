@@ -24,7 +24,7 @@ public class AddressableTest : MonoBehaviour
     {
      //   Debug.LogError( await ResourceTest.GetAsync("test1"));
         await ResourceTest.LoadAllAsync();
-        text.text = "加载完成:" + ResourceTest.objDic.Count + ResourceTest.objDic.ToOneString();
+        //text.text = "加载完成:" + ResourceTest.objDic.Count + ResourceTest.objDic.ToOneString();
     }
 
     // Update is called once per frame

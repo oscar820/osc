@@ -98,7 +98,7 @@ namespace QTool
                     }
                     else if(createFunc!=null)
                     {
-                        var prefab = QIdPrefabs.Get(prefabId);
+                        var prefab = QIdPrefabs.ResourceGet(prefabId);
                         if (prefab != null)
                         {
                             var id = createFunc.Invoke(prefab);

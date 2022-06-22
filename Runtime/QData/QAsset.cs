@@ -6,8 +6,10 @@ using UnityEngine;
 
 namespace QTool.Asset
 {
+	#region AddressableTool
+
 #if Addressables
-    using UnityEngine.AddressableAssets;
+	using UnityEngine.AddressableAssets;
 #if UNITY_EDITOR
     using UnityEditor.AddressableAssets.Settings;
     using UnityEditor.AddressableAssets;
@@ -54,8 +56,6 @@ namespace QTool.Asset
             EditorUtility.SetDirty(AssetSetting);
             EditorUtility.SetDirty(group);
         }
-       
-
         public static AddressableAssetSettings AssetSetting
         {
             get
@@ -63,8 +63,8 @@ namespace QTool.Asset
                 return AddressableAssetSettingsDefaultObject.Settings;
             }
         }
-        public static List<AddressableAssetEntry> GetLabelList(string label)
-        {
+		public static List<T> GetLabelList<T>(string label) where T : UnityEngine.Object
+		{
             if (labelDic[label] == null)
             {
                 labelDic[label] = new List<AddressableAssetEntry>();
@@ -78,14 +78,22 @@ namespace QTool.Asset
                     if (group == null) continue;
                     foreach (var item in group.entries)
                     {
-                        if (item.labels.Contains(label))
-                        {
-                            labelDic[label].Add(item);
-                        }
+						if(item.TargetAsset is T)
+						{
+							if (item.labels.Contains(label))
+							{
+								labelDic[label].Add(item);
+							}
+						}
                     }
                 }
             }
-            return labelDic[label];
+			List<T> objList = new List<T>();
+			foreach (var entry in labelDic[label])
+			{
+				objList.Add(entry.TargetAsset as T);
+			}
+            return objList;
       
         }
         public static AddressableAssetGroup GetGroup(string groupName)
@@ -113,294 +121,118 @@ namespace QTool.Asset
 #endif
 
 #endif
-    public abstract class AssetList<TObj> : AssetList<TObj, TObj> where TObj: UnityEngine.Object  { 
+
+	#endregion
+	public abstract class AssetList<TObj> : AssetList<TObj, TObj> where TObj: UnityEngine.Object  { 
         
     }
-
-    public abstract class AssetList<TLabel,TObj> where TObj:UnityEngine.Object 
-    {
-        public static QDictionary<string, TObj> objDic = new QDictionary<string, TObj>();
-        public static string Label
-        {
-            get
-            {
-                return typeof(TLabel).Name;
-            }
-        }
-        public static void Clear()
-        {
-            _loadOver = false;
+	public abstract class AssetList<TPath, TObj> where TObj : UnityEngine.Object
+	{
+		public static string ResourcesPathStart
+		{
+			get
+			{
+				return nameof(Resources) + '/' + typeof(TPath).Name + '/';
+			}
+		}
 #if Addressables
-            loaderTask = null;
+		public static string AddressablePathStart
+		{
+			get
+			{
+				return "Addressable" + nameof(Resources) + '/' + typeof(TPath).Name + '/';
+			}
+		}
 #endif
-            objDic.Clear();
-        }
-       
-        public static bool ContainsKey(string key)
-        {
-            return objDic.ContainsKey(key);
-        }
-        public static void Set(TObj obj, string key = "", bool checkQid = true)
-        {
-            if (obj == null) return;
-            var setKey = key;
-            if (string.IsNullOrEmpty(setKey))
-            {
-                setKey = obj.name;
-            }
-            objDic[setKey] = obj;
-            if (checkQid)
-            {
-                if (obj is GameObject)
-                {
-                    var qid = (obj as GameObject).GetComponentInChildren<QId>();
-                    if (qid != null && !string.IsNullOrWhiteSpace(qid.PrefabId) && qid.PrefabId != key)
-                    {
-                        Set(obj, qid.PrefabId, false);
-                    }
-                }
-            }
-        }
-        public static TObj Get(string key)
-        {
-            if (!_loadOver)
-            {
-                _ = LoadAllAsync();
-            }
-            if (objDic.ContainsKey(key))
-            {
-                return objDic[key];
-            }
-            else if(_loadOver)
-            {
-                Debug.LogError("不存在资源" + Label + '\\' + key);
-            }
-            else
-            {
-                Debug.LogError("未初始化" + Label);
-            }
-            return null;
-        }
-        public static async Task<TObj> GetAsync(string key)
-        {
-            if (objDic.ContainsKey(key))
-            {
-                return objDic[key];
-            }
-            else
-            {
+		public static async Task<IList<TObj>> LoadAllAsync()
+		{
+			List<TObj> objList = new List<TObj>();
+			objList.AddRange(ResourceLoadAll());
+			objList.AddRange(await AddressableLoadAll());
+			return objList;
+		}
+		public static async Task<TObj> GetAsync(string key)
+		{
+			var obj = ResourceGet(key);
+			if (obj == null)
+			{
+				obj = await AddressablesGetAsync(key);
+			}
+			return obj;
+		}
 #if Addressables
-                return await AddressableGetAsync(key);
-#else
-                return ResourceGet(key);
-#endif
-            }
-        }
-        public static bool LoadOver => _loadOver;
-        static bool _loadOver = false;
-#if Addressables
-        static bool _loading = false;
-#endif
-        static DateTime startTime;
-        public static async Task LoadAllAsync()
-        {
-          
-            if (_loadOver) return;
-            startTime = DateTime.Now;
-            ResourceLoadAll();
-            await Task.Yield();
-#if Addressables
-           if (_loading)
-            {
-                await QTool.Tool.Wait(() => !_loading);
-            }
-            else
-            {
-                _loading = true;
-                await AddressableLoadAll();
-                _loading = false;
-            }
-#endif
-            _loadOver = true;
-            Debug.Log("[" + typeof(TLabel).Name + "]资源加载完成：" + (DateTime.Now - startTime).TotalMilliseconds+"ms\n"+objDic.ToOneString());
-        }
+		#region Addressable加载
 
-
-
-#if Addressables
-#region Addressable加载
-
-        static async Task<TObj> AddressableGetAsync(string key)
-        {
-            LoadAllAsync();
-            if (objDic.ContainsKey(key))
-            {
-                return objDic[key];
-            }
-            else
-            {
-                if (Application.isPlaying)
-                {
-                    var loader = Addressables.LoadAssetAsync<TObj>(key);
-                    var obj = await loader.Task;
-                    if(loader.Status== UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-                    {
-
-                        Set(obj, key);
-                    }
-                    else
-                    {
-                        if (loader.OperationException != null)
-                        {
-                            Debug.LogError("异步加载" + Label + "资源[" + key + "]出错" + loader.OperationException);
-                        }
-                    }
-                    return obj;
-
-                }
-                else
-                {
-                    await LoadAllAsync();
-                    if (objDic.ContainsKey(key))
-                    {
-                        return objDic[key];
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }
-        }
-        static Task loaderTask;
-        static async Task AddressableLoadAll()
-        {
-            if (loaderTask != null)
-            {
-                await loaderTask;
-                return;
-            }
-
-            if (Application.isPlaying)
-            {
+		public static async Task<TObj> AddressablesGetAsync(string key)
+		{
+			if (Application.isPlaying)
+			{
+				var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
+				var obj = await loader.Task;
+				if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+				{
+					if (loader.OperationException != null)
+					{
+						Debug.LogError("异步加载" + AddressablePathStart + "资源[" + key + "]出错" + loader.OperationException);
+					}
+				}
+				return obj;
+			}
+			else
+			{
+				return AssetDatabase.LoadAssetAtPath<TObj>(AddressablePathStart + key);
+			}
+		}
+		public static async Task<IList<TObj>> AddressableLoadAll()
+		{
 #if UNITY_EDITOR
-                if (AddressableTool.AssetSetting == null)
-                {
-                    Debug.LogError("未创建Addressable文件");
-                    return;
-                }
+			if (!Application.isPlaying)
+			{
+				try
+				{
+					return AddressableTool.GetLabelList<TObj>(typeof(TPath).Name);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("加载资源表[" + typeof(TPath) + "]出错\n" + e);
+				}
+			}
+			else
 #endif
-                UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<IList<TObj>> loader = default;
-                try
-                {
-					loader = Addressables.LoadAssetsAsync<TObj>(Label, null);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogWarning( "Addressables不存在Lable[" +Label+"]:"+e);
-                    return;
-                }
-                loaderTask = loader.Task;
-                var obj = await loader.Task;
-                loaderTask = null;
-                if (loader.OperationException != null)
-                {
-                    Debug.LogError( "加载资源表[" + Label + "]出错" + loader.OperationException);
-                }
-                else if(loader.Task.Exception!=null)
-                {
-                    Debug.LogError("加载资源表[" + Label + "]出错" + loader.Task.Exception);
-                }
-                else
-                {
-                    foreach (var result in loader.Result)
-                    {
-                        Set(result);
-                    }
-                }
-            }
-            else
-            {
-#if UNITY_EDITOR
-                try
-                {
+			{
+				try
+				{
+					var loaderTask = Addressables.LoadAssetsAsync<TObj>(typeof(TPath).Name, null).Task;
+					var list = await loaderTask;
+					if (loaderTask.Exception != null)
+					{
+						throw loaderTask.Exception;
+					}
+					return list;
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("加载资源表[" + typeof(TPath) + "]出错\n" + e);
+				}
+			}
+			return new TObj[0];
+		}
 
 
-                    var list = AddressableTool.GetLabelList(Label);
-                    foreach (var entry in list)
-                    {
-
-                        if (entry.TargetAsset is TObj)
-                        {
-                            Set(entry.TargetAsset as TObj, entry.address);
-                        }
-                        else if (typeof(TObj) == typeof(Sprite))
-                        {
-                            if (entry.TargetAsset is Texture2D)
-                            {
-                                Set(AssetDatabase.LoadAssetAtPath<Sprite>(entry.AssetPath) as TObj, entry.address);
-                            }
-                        }
-                    }
-                    Debug.Log("[" + Label + "]加载完成\n" + objDic.ToOneString());
-                    _loadOver = true;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("[" + Label + "]加载出错"+e);
-                }
+		#endregion
 #endif
-            }
-        }
-
-
-#endregion
-#endif
-#region Resource加载
-
-        static TObj ResourceGet(string key)
-        {
-            _ = LoadAllAsync();
-            if (objDic.ContainsKey(key)) {
-                return objDic[key];
-            }
-            else
-            {
-                Debug.LogError("不存在资源 Resources\\" + Label + '\\' + key);
-                return null;
-            }
-        }
-        static void ResourceLoadAll()
-        {
-            if (!Application.isPlaying)
-            {
-#if UNITY_EDITOR
-                Application.dataPath.ForeachAllDirectoryWith("\\Resources", (rootPath) =>
-                 {
-                    
-                     if (System.IO.Directory.Exists(rootPath + '\\' + Label))
-                     {
-                       
-                        (rootPath + '\\' + Label).ForeachDirectoryFiles((loadPath) =>
-                        {
-                            Set(UnityEditor.AssetDatabase.LoadAssetAtPath<TObj>(loadPath.Substring(loadPath.IndexOf("Assets"))));
-                        });
-                     }
-                 });
-#endif
-            }
-            else
-            {
-                foreach (var obj in Resources.LoadAll<TObj>(Label))
-                {
-                    Set(obj);
-                }
-            }
-            _loadOver = true;
-        }
-#endregion
-    }
-    public abstract class PrefabAssetList<TLabel>: AssetList<TLabel,GameObject> where TLabel:PrefabAssetList<TLabel>
+		#region Resource加载
+		public static TObj ResourceGet(string key)
+		{
+			return Resources.Load<TObj>(ResourcesPathStart + key);
+		}
+		public static TObj[] ResourceLoadAll()
+		{
+			return Resources.LoadAll<TObj>(ResourcesPathStart.TrimEnd('/'));
+		}
+		#endregion
+	}
+    public abstract class PrefabAssetList<TPath>: AssetList<TPath,GameObject> where TPath:PrefabAssetList<TPath>
     {
         static Dictionary<string, ObjectPool<GameObject>> PoolDic = new Dictionary<string, ObjectPool<GameObject>>();
         static async Task<ObjectPool<GameObject>> GetPool(string key)
@@ -408,12 +240,12 @@ namespace QTool.Asset
             var poolkey = key + "_AssetList";
             if (!PoolDic.ContainsKey(poolkey))
             {
-                var prefab =await GetAsync(key) as GameObject;
+                var prefab =await GetAsync(key);
                 if (!PoolDic.ContainsKey(poolkey))
                 {
                     if (prefab == null)
                     {
-                        Debug.LogError(Label + "找不到预制体资源" + key);
+                        Debug.LogError(typeof(TPath).Name + "找不到预制体资源" + key);
                         PoolDic.Add(poolkey, null);
                     }
                     else
