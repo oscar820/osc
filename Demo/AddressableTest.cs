@@ -4,7 +4,7 @@ using UnityEngine;
 using QTool.Asset;
 using UnityEngine.UI;
 using QTool;
-public class ResourceTest : PrefabAssetList<ResourceTest>
+public class ResourceTest : PrefabLoader<ResourceTest>
 {
 
 }
@@ -16,7 +16,7 @@ public class AddressableTest : MonoBehaviour
     async void LoadTest1()
     {
         //   Debug.LogError( await ResourceTest.GetAsync("test1"));
-         var obj=await ResourceTest.GetAsync("Test1");
+         var obj=await ResourceTest.LoadAsync("Test1");
         text.text = "加载完成:" + obj;
     }
     [ContextMenu("加载全部")]

@@ -123,10 +123,7 @@ namespace QTool.Asset
 #endif
 
 	#endregion
-	public abstract class AssetList<TObj> : AssetList<TObj, TObj> where TObj: UnityEngine.Object  { 
-        
-    }
-	public abstract class AssetList<TPath, TObj> where TObj : UnityEngine.Object
+	public abstract class AssetLoader<TPath, TObj> where TObj : UnityEngine.Object
 	{
 		public static string DirectoryPath
 		{
@@ -151,61 +148,19 @@ namespace QTool.Asset
 			}
 		}
 #endif
-	
+		public static QDictionary<string, TObj> Cache = new QDictionary<string, TObj>();
 		public static async Task<IList<TObj>> LoadAllAsync()
 		{
 			List<TObj> objList = new List<TObj>();
-			objList.AddRange(ResourceLoadAll());
-			objList.AddRange(await AddressableLoadAll());
-			return objList;
-		}
-		public static async Task<TObj> GetAsync(string key)
-		{
-			var obj = ResourceGet(key);
-			if (obj == null)
-			{
-				obj = await AddressablesGetAsync(key);
-			}
-			return obj;
-		}
+			objList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
+			#region Addressables
 #if Addressables
-		#region Addressable加载
-		public static void AddressablesRelease<T>(T obj) where T : UnityEngine.Object
-		{
-			Addressables.Release(obj);
-		}
-		public static async Task<TObj> AddressablesGetAsync(string key)
-		{
-			key = key.Replace('\\', '/');
-#if UNITY_EDITOR
-			if (!Application.isPlaying)
-			{
-				return AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + AddressablePathStart + key);
-			}
-			else
-
-#endif
-			{
-				var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
-				var obj = await loader.Task;
-				if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-				{
-					if (loader.OperationException != null)
-					{
-						Debug.LogError("异步加载" + AddressablePathStart  + key + "出错" + loader.OperationException);
-					}
-				}
-				return obj;
-			}
-		}
-		public static async Task<IList<TObj>> AddressableLoadAll()
-		{
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
 				try
 				{
-					return AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/'));
+					objList.AddRange(AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/')));
 				}
 				catch (Exception e)
 				{
@@ -228,33 +183,63 @@ namespace QTool.Asset
 					{
 						throw loaderTask.Exception;
 					}
-					return list;
+					objList.AddRange( list);
 				}
 				catch (Exception e)
 				{
 					Debug.LogWarning("加载资源表[" + DirectoryPath + "]出错\n" + e);
 				}
 			}
-			return new TObj[0];
-		}
-
-
-		#endregion
 #endif
-		#region Resource加载
-		public static TObj ResourceGet(string key)
-		{
-			return Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\','/'));
+			#endregion
+			Debug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + objList.ToOneString());
+			return objList;
 		}
-		public static IList<TObj> ResourceLoadAll()
+		public static async Task<TObj> LoadAsync(string key)
 		{
-			IList<TObj> list = Resources.LoadAll<TObj>(DirectoryPath);
-			Debug.Log("加载 [" + DirectoryPath + "]["+typeof(TObj)+"] 资源：\n" + list.ToOneString());
-			return list;
+			if (Cache.ContainsKey(key)) return Cache[key];
+			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
+			#region Addressables
+
+#if Addressables
+			if (obj == null)
+			{
+				key = key.Replace('\\', '/');
+#if UNITY_EDITOR
+				if (!Application.isPlaying)
+				{
+					obj = AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + AddressablePathStart + key);
+				}
+				else
+
+#endif
+				{
+					var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
+					obj = await loader.Task;
+					if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+					{
+						if (loader.OperationException != null)
+						{
+							Debug.LogError("异步加载" + AddressablePathStart + key + "出错" + loader.OperationException);
+						}
+					}
+				}
+			}
+#endif
+			#endregion
+			Cache[key] = obj;
+			return obj;
 		}
-		public static void ResourceRelease<T>(T obj) where T: UnityEngine.Object
+
+		
+		public static void Release<T>(T obj) where T : UnityEngine.Object
 		{
-			if(obj is GameObject)
+			if (obj == null) return;
+			Cache.RemoveAll((tObj) =>obj.Equals(tObj));
+#if Addressables
+			Addressables.Release(obj);
+#endif
+			if (obj is GameObject)
 			{
 				UnityEngine.Object.Destroy(obj);
 			}
@@ -263,14 +248,13 @@ namespace QTool.Asset
 				Resources.UnloadAsset(obj);
 			}
 		}
-		#endregion
 	}
-    public abstract class PrefabAssetList<TPath>: AssetList<TPath,GameObject> where TPath:PrefabAssetList<TPath>
+    public abstract class PrefabLoader<TPath>: AssetLoader<TPath,GameObject> where TPath:PrefabLoader<TPath>
     {
         static async Task<ObjectPool<GameObject>> GetPool(string key)
         {
             var poolkey =DirectoryPath+"_" + key + "_AssetList";
-			var prefab = await GetAsync(key);
+			var prefab = await LoadAsync(key);
 			if (prefab != null)
 			{
 				return QPoolManager.GetPool(poolkey, prefab);
@@ -336,7 +320,7 @@ namespace QTool.Asset
             }
             if (obj.transform is RectTransform)
             {
-                var prefab = await GetAsync(key);
+                var prefab = await LoadAsync(key);
                 (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
             }
             obj.name = key;

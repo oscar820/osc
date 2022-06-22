@@ -7,7 +7,7 @@ using QTool.Inspector;
 using QTool.Asset;
 namespace QTool
 {
-    public class QIdPrefabs : PrefabAssetList<QIdPrefabs>
+    public class QIdPrefabs : PrefabLoader<QIdPrefabs>
     {
 
     }
@@ -78,7 +78,7 @@ namespace QTool
                 GameObject.Destroy(qid.gameObject);
             });
         }
-        public static void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes,System.Func<GameObject, IDType> createFunc,System.Action<IDType> destoryFunc ) where IDType : QId
+        public static async void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes,System.Func<GameObject, IDType> createFunc,System.Action<IDType> destoryFunc ) where IDType : QId
         {
             using (QBinaryReader reader = new QBinaryReader(bytes))
             {
@@ -98,7 +98,7 @@ namespace QTool
                     }
                     else if(createFunc!=null)
                     {
-                        var prefab = QIdPrefabs.ResourceGet(prefabId);
+                        var prefab = await QIdPrefabs.LoadAsync(prefabId);
                         if (prefab != null)
                         {
                             var id = createFunc.Invoke(prefab);

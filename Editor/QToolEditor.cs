@@ -40,7 +40,6 @@ namespace QTool
         public static void ClearMemery()
         {
             ClearPlayerPrefs();
-            ClearResourcesList();
             ClearPersistentData();
         }
         [MenuItem("QTool/清空缓存/清空PlayerPrefs")]
@@ -52,15 +51,6 @@ namespace QTool
         public static void ClearPersistentData()
         {
             Application.persistentDataPath.ClearData();
-        }
-        [MenuItem("QTool/清空缓存/清空AssetList缓存")]
-        public static void ClearResourcesList()
-        {
-            foreach (var type in typeof(AssetList<,>).GetAllTypes())
-            {
-                type.InvokeStaticFunction("Clear");
-                Debug.LogError("清空" + type.Name);
-            };
         }
         public static string BasePath
         {
