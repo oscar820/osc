@@ -10,11 +10,7 @@ namespace QTool
 		public Dictionary<KeyT, CheckT> CheckInfo = new Dictionary<KeyT, CheckT>();
 		public Func<KeyT, CheckT> GetCheckInfo = null;
 		public Func<KeyT, T> GetValue = null;
-		public QKeyCache(Func<KeyT, CheckT> GetCheckInfo)
-		{
-			this.GetCheckInfo = GetCheckInfo;
-		}
-		public QKeyCache( Func<KeyT, T> GetValue,Func<KeyT, CheckT> GetCheckInfo)
+		public QKeyCache(Func<KeyT, CheckT> GetCheckInfo = null, Func<KeyT, T> GetValue=null)
 		{
 			this.GetValue = GetValue;
 			this.GetCheckInfo = GetCheckInfo;
