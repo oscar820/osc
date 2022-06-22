@@ -166,7 +166,8 @@ namespace QTool.FlowGraph
 			}
 			else if (typeInfo == null)
 			{
-				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y].Key+"."+qdataList.TitleRow[x],qdataList[y][x], typeof(string),out var changed, Members[x].MemeberInfo), typeof(string),x);
+				Debug.LogError(qdataList[y]);
+				qdataList[y].SetValueType( QEidtCellWindow.Show(qdataList[y].Key+"."+qdataList.TitleRow[x],qdataList[y][x], typeof(string),out var changed,null ), typeof(string),x);
 				return changed;
 			}
 			else
