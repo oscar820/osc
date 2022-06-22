@@ -383,12 +383,8 @@ namespace QTool.Reflection
         {
             if (targetObj != null)
             {
-				if (type == typeof(object))
-				{
-					return targetObj.Copy();
-				}
-                return targetObj;
-            }
+				return targetObj.Copy();
+			}
             try
             {
                 if (type == typeof(string))
