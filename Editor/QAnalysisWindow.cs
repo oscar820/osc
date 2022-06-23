@@ -125,7 +125,7 @@ namespace QTool
 				}
 				else
 				{
-					return playerData.AnalysisData[Titles[x].Key].value?.ToString();
+					return playerData.AnalysisData[Titles[x].Key].GetFreshValue()?.ToString();
 				}
 			}
 			else
@@ -275,7 +275,7 @@ namespace QTool
 							writer.Write(playerData.Key + "\t");
 							QAnalysisData.ForeachTitle((title) =>
 							{
-								writer.Write(playerData.AnalysisData[title.Key].value?.ToString().ToElement());
+								writer.Write(playerData.AnalysisData[title.Key].GetFreshValue()?.ToString().ToElement());
 								writer.Write("\t");
 							});
 							writer.Write("\n");
@@ -631,7 +631,6 @@ namespace QTool
 	public class QAnalysisInfo : IKey<string>
 	{
 		public string Key { get; set; }
-		public object value;
 		public DateTime UpdateTime;
 		public QList<string> EventList = new QList<string>();
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
@@ -730,10 +729,6 @@ namespace QTool
 				}
 			}
 		}
-		public void FreshMode(QAnalysisEvent endEvent=null)
-		{
-			value =GetFreshValue(endEvent);
-		}
 		public QAnalysisEvent GetEndEvent(DateTime endTime)
 		{
 			for (int i = EventList.Count-1; i >=0; i--)
@@ -746,14 +741,19 @@ namespace QTool
 			}
 			return null;
 		}
-		public object GetFreshValue(QAnalysisEvent endEvent)
+		public object GetFreshValue(QAnalysisEvent endEvent=null)
 		{
+
 			if (endEvent == null)
 			{
 				endEvent = QAnalysisData.GetEvent(EventList.StackPeek());
 				if (endEvent == null)
 				{
 					return null;
+				}
+				if (changed)
+				{
+					BufferData.RemoveKey(endEvent.eventId);
 				}
 			}
 			if (BufferData.ContainsKey(endEvent.eventId))
@@ -912,7 +912,7 @@ namespace QTool
 
 		public override string ToString()
 		{
-			return value?.ToString();
+			return GetFreshValue()?.ToString();
 		}
 
 	}
@@ -970,7 +970,7 @@ namespace QTool
 					}
 				}
 			}
-			info.FreshMode();
+
 		}
 	}
 	public static class QGUITool
