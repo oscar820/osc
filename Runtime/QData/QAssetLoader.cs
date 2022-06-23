@@ -225,6 +225,10 @@ namespace QTool.Asset
 			}
 #endif
 			#endregion
+			if (obj == null)
+			{
+				Debug.LogError("加载" + AddressablePathStart + key + "出错 结果为空" );
+			}
 			return obj;
 		}
 #if Addressables
