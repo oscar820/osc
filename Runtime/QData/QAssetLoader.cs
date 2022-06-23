@@ -213,12 +213,25 @@ namespace QTool.Asset
 #endif
 				{
 					var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
-					obj = await loader.Task;
-					if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+					bool loaderOver = false;
+					loader.Completed += (result) =>
 					{
-						if (loader.OperationException != null)
+						obj = result.Result;
+						if (result.OperationException != null || result.Task.Exception != null)
 						{
 							Debug.LogError("异步加载" + AddressablePathStart + key + "出错" + loader.OperationException);
+						}
+						loaderOver = true;
+					};
+					var count = 0;
+					while (!loaderOver)
+					{
+						await Task.Delay(100);
+						count++;
+						if (count > 50)
+						{
+							Debug.LogError("加载超时 "+key);
+							break;
 						}
 					}
 				}
