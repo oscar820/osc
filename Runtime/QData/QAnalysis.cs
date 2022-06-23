@@ -285,10 +285,10 @@ namespace QTool
 			}
 		}
 
-		//public static int SortMethod(QAnalysisEvent a, QAnalysisEvent b)
-		//{
-		//	return DateTime.Compare(a.eventTime, b.eventTime);
-		//}
+		public static int SortMethod(QAnalysisEvent a, QAnalysisEvent b)
+		{
+			return DateTime.Compare(a.eventTime, b.eventTime);
+		}
 	}
 
 }

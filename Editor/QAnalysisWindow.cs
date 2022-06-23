@@ -22,9 +22,15 @@ namespace QTool
 			Instance.Show();
 		}
 		QGridView GridView;
-		private void Awake()
+		
+		private void OnEnable()
 		{
-			  GridView = new QGridView(GetValue, GetSize, ClickCell);
+			Instance = this;
+			if (GridView == null)
+			{
+
+				GridView = new QGridView(GetValue, GetSize, ClickCell);
+			}
 		}
 		public bool ClickCell(int x,int y,int button)
 		{
@@ -168,10 +174,6 @@ namespace QTool
 				size.y= QAnalysisData.Instance.PlayerDataList[ViewPlayer].EventList.Count;
 			}
 			return size;
-		}
-		private void OnEnable()
-		{
-			Instance = this;
 		}
 		public async void FreshData()
 		{
@@ -449,7 +451,17 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static SortedList<DateTime, QAnalysisEvent> newList = new SortedList<DateTime, QAnalysisEvent>();
+		static void AddNewEventList()
+		{
+			Debug.Log("添加事件数目：" + newList.Count);
+			newList.Sort(QAnalysisEvent.SortMethod);
+			foreach (var eventData in newList)
+			{
+				AddEvent(eventData);
+			}
+			newList.Clear();
+		}
+		static List<QAnalysisEvent> newList = new List<QAnalysisEvent>();
 		public static float AutoFreshTime { get; set; } = 120f;
 		public static async Task FreshData() 
 		{
@@ -469,26 +481,16 @@ namespace QTool
 					var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
 					foreach (var item in list)
 					{
-						newList.Add(item.eventTime, item);
+						newList.Add(item);
 					}
 				}
 				if (newList.Count > 1000)
 				{
-					Debug.Log("添加事件数目：" + newList.Count);
-					foreach (var kv in newList)
-					{
-						AddEvent(kv.Value);
-					}
-					newList.Clear();
+					AddNewEventList();
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-
-			Debug.Log("添加事件数目：" + newList.Count);
-			foreach (var kv in newList)
-			{
-				AddEvent(kv.Value);
-			}
+			AddNewEventList();
 			newList.Clear();
 			SaveData();
 			Debug.Log("保存完成");
