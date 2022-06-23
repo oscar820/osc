@@ -399,13 +399,13 @@ namespace QTool
 		static public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
 		public List<string> EventKeyList = new List<string>();
 		public List<string> DataKeyList = new List<string>();
-		public QMailInfo LastMail=null;
+		public QMailInfo LastMail = null;
 		public static QAnalysisEvent GetEvent(string eventId)
 		{
 			if (string.IsNullOrEmpty(eventId)) return null;
 			return EventList[eventId];
 		}
-		
+
 		static QAnalysisData()
 		{
 			Load();
@@ -419,15 +419,15 @@ namespace QTool
 		public static void SaveData()
 		{
 			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey+	"_"	+ nameof(EventList),EventList.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList),TitleList.ToQData());
+			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
+			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList), TitleList.ToQData());
 		}
 		public static void ForeachTitle(Action<QTitleInfo> action)
 		{
 			var viewInfo = QAnalysisWindow.Instance.ViewEvent;
 			foreach (var title in TitleList)
 			{
-				if (title.CheckView(viewInfo)||title.DataSetting.TargetKey==viewInfo)
+				if (title.CheckView(viewInfo) || title.DataSetting.TargetKey == viewInfo)
 				{
 					action(title);
 				}
@@ -435,7 +435,7 @@ namespace QTool
 		}
 		public static bool IsLoading { get; private set; } = false;
 		public void AddTitle(QTitleInfo newTitle)
-		{ 
+		{
 			TitleList.Add(newTitle);
 			FreshKey(newTitle.Key);
 		}
@@ -451,17 +451,24 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static void AddNewEventList()
+		static async Task AddNewEventList()
 		{
-			Debug.Log("添加事件数目：" + newList.Count);
-			newList.Sort(QAnalysisEvent.SortMethod);
-			foreach (var eventData in newList)
+			var start = DateTime.Now;
+			Debug.Log("对新事件排序" + NewEventList.Count);
+			NewEventList.Sort(QAnalysisEvent.SortMethod);
+			Debug.Log("排序完成" + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + "开始添加事件" + NewEventList.Count);
+			start = DateTime.Now;
+			for (var i = 0; i < NewEventList.Count; i++)
 			{
+				var eventData = NewEventList[i];
 				AddEvent(eventData);
+				EditorUtility.DisplayProgressBar("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
 			}
-			newList.Clear();
+			EditorUtility.ClearProgressBar();
+			Debug.Log("添加事件" + NewEventList.Count + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
+			NewEventList.Clear();
 		}
-		static List<QAnalysisEvent> newList = new List<QAnalysisEvent>();
+		public static List<QAnalysisEvent> NewEventList { get; private set; } = new List<QAnalysisEvent>();
 		public static float AutoFreshTime { get; set; } = 120f;
 		public static async Task FreshData() 
 		{
@@ -473,25 +480,23 @@ namespace QTool
 			}
 			IsLoading = true;
 
-			newList.Clear();
+			NewEventList.Clear();
 			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail, (mailInfo) =>
 			{ 
 				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 				{
-					var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
-					foreach (var item in list)
+					if (!string.IsNullOrWhiteSpace(mailInfo.Body))
 					{
-						newList.Add(item);
+						var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
+						foreach (var item in list)
+						{
+							NewEventList.Add(item);
+						}
 					}
-				}
-				if (newList.Count > 1000)
-				{
-					AddNewEventList();
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-			AddNewEventList();
-			newList.Clear();
+			await AddNewEventList();
 			SaveData();
 			Debug.Log("保存完成");
 			IsLoading = false;

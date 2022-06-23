@@ -116,6 +116,9 @@ namespace QTool
 			{
 				await task;
 			}
+#if UNITY_EDITOR
+			UnityEditor.EditorUtility.ClearProgressBar();
+#endif
 			Debug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
 			Debug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
 			startTime = DateTime.Now;
@@ -171,9 +174,12 @@ namespace QTool
 									{
 										mailList[i] = mail;
 									}
-									Debug.Log("接收 "+i+"/"+endIndex+" 邮件 \t"+startIndex+" 线程");
+#if UNITY_EDITOR
+									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件 线程"+startIndex, i + "/" + endIndex  + " " + mail.Subject, (i-startIndex)*1f/(endIndex-startIndex));
+#endif
 								}
-								Debug.Log("接收结束 "+startIndex+" 线程");
+							//	Debug.Log("接收结束 "+startIndex+" 线程");
+
 							}
 							catch (Exception e)
 							{
