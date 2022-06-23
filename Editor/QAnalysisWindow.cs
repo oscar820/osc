@@ -449,7 +449,7 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static List<QAnalysisEvent> newList = new List<QAnalysisEvent>();
+		static SortedList<DateTime, QAnalysisEvent> newList = new SortedList<DateTime, QAnalysisEvent>();
 		public static float AutoFreshTime { get; set; } = 120f;
 		public static async Task FreshData() 
 		{
@@ -466,16 +466,32 @@ namespace QTool
 			{ 
 				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 				{
-					newList.AddRange(mailInfo.Body.ParseQData<List<QAnalysisEvent>>());
+					var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
+					foreach (var item in list)
+					{
+						newList.Add(item.eventTime, item);
+					}
+				}
+				if (newList.Count > 1000)
+				{
+					Debug.Log("添加事件数目：" + newList.Count);
+					foreach (var kv in newList)
+					{
+						AddEvent(kv.Value);
+					}
+					newList.Clear();
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-			newList.Sort(QAnalysisEvent.SortMethod);
-			foreach (var eventData in newList)
+
+			Debug.Log("添加事件数目：" + newList.Count);
+			foreach (var kv in newList)
 			{
-				AddEvent(eventData);
+				AddEvent(kv.Value);
 			}
+			newList.Clear();
 			SaveData();
+			Debug.Log("保存完成");
 			IsLoading = false;
 		}
 		
@@ -746,14 +762,16 @@ namespace QTool
 
 			if (endEvent == null)
 			{
+				
 				endEvent = QAnalysisData.GetEvent(EventList.StackPeek());
 				if (endEvent == null)
 				{
 					return null;
 				}
-				if (changed)
+				if (changed&&!QAnalysisData.IsLoading)
 				{
 					BufferData.RemoveKey(endEvent.eventId);
+					changed = false;
 				}
 			}
 			if (BufferData.ContainsKey(endEvent.eventId))

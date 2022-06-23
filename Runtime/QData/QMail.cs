@@ -328,7 +328,15 @@ namespace QTool
 
 		private static string ParseBase64String(string base64Str)
 		{
-			return Encoding.UTF8.GetString(Convert.FromBase64String(base64Str));
+			try
+			{
+				return Encoding.UTF8.GetString(Convert.FromBase64String(base64Str));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("错误数据:\n" + e + "\n" + base64Str);
+				return "";
+			}
 		}
 		private static string GetString(string SourceString, string Key)
 		{
