@@ -227,7 +227,7 @@ namespace QTool.Asset
 			#endregion
 			if (obj == null)
 			{
-				Debug.LogError("加载" + AddressablePathStart + key + "出错 结果为空" );
+				Debug.LogError("加载" + key + "出错 结果为空" );
 			}
 			return obj;
 		}
