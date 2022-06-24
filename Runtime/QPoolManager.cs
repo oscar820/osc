@@ -133,8 +133,10 @@ namespace QTool
             {
                 if ((obj as T).Equals(null))
                 {
-                
-                        UsingPool.Remove(obj);
+					lock (UsingPool)
+					{
+						UsingPool.Remove(obj);
+					}
                     obj = PrivateGet();
                 }
                 var gameObj = GetGameObj(obj);
@@ -148,7 +150,10 @@ namespace QTool
                 }
             }
             else if (isPoolObj) (obj as IPoolObject).OnPoolReset();
-                UsingPool.AddCheckExist(obj);
+			lock (UsingPool)
+			{
+				UsingPool.AddCheckExist(obj);
+			}
             return obj;
         }
         private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
@@ -183,15 +188,21 @@ namespace QTool
             {
                 (obj as IPoolObject).OnPoolRecover();
             }
-                UsingPool.Remove(obj);
+			lock (UsingPool)
+			{
+				UsingPool.Remove(obj);
+			}
             return obj;
         }
         private T PrivateGet()
         {
 			if (CanUsePool.Count > 0)
 			{
-				var obj = CanUsePool.Dequeue();
-				return CheckGet(obj);
+				lock (CanUsePool)
+				{
+					var obj = CanUsePool.Dequeue();
+					return CheckGet(obj);
+				}
 			}
 			else
 			{
@@ -203,21 +214,22 @@ namespace QTool
 				return CheckGet(obj);
 			}
         }
-        public T Get(T obj=null)
-        {
-			lock (this)
+		public T Get(T obj = null)
+		{
+
+			if (obj != null && CanUsePool.Contains(obj))
 			{
-				if (obj != null && CanUsePool.Contains(obj))
+				lock (CanUsePool)
 				{
 					CanUsePool.Remove(obj);
-					return CheckGet(obj);
 				}
-				else
-				{
-					return PrivateGet();
-				}
+				return CheckGet(obj);
 			}
-        }
+			else
+			{
+				return PrivateGet();
+			}
+		}
         GameObject GetGameObj(T obj)
         {
             if (isGameObject)
@@ -251,7 +263,10 @@ namespace QTool
 					return;
 				}
 				var resultObj = CheckPush(obj);
-				CanUsePool.Enqueue(resultObj);
+				lock (CanUsePool)
+				{
+					CanUsePool.Enqueue(resultObj);
+				}
 			}
         }
         public int CanUseCount
@@ -263,8 +278,14 @@ namespace QTool
         }
         public void Clear()
         {
-            UsingPool.Clear();
-            CanUsePool.Clear();
+			lock (UsingPool)
+			{
+				UsingPool.Clear();
+			}
+			lock (CanUsePool)
+			{
+				CanUsePool.Clear();
+			}
         }
 
         public Func<T> newFunc;
