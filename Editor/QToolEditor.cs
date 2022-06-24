@@ -128,7 +128,7 @@ namespace QTool
 				}
 				else
 				{
-					Debug.LogError("打包失败");
+					Debug.LogError("打包失败 "+GetBuildPath());
 				}
 			}
 			return "";
