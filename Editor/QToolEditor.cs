@@ -67,8 +67,9 @@ namespace QTool
             }
 
         }
-		public static string GetBuildPath(BuildTarget buildTarget= BuildTarget.StandaloneWindows)
+		public static string GetBuildPath()
 		{
+			BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
 			switch (buildTarget)
 			{
 				case BuildTarget.StandaloneWindows:
@@ -78,8 +79,9 @@ namespace QTool
 					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
 			}
 		}
-		public static string Build(BuildTarget buildTarget= BuildTarget.StandaloneWindows)
+		public static string Build()
 		{
+			BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
 			if (!BuildPipeline.isBuildingPlayer)
 			{
 				var startTime = DateTime.Now;
@@ -106,7 +108,7 @@ namespace QTool
 				var buildOption = new BuildPlayerOptions
 				{
 					scenes = sceneList.ToArray(),
-					locationPathName = GetBuildPath(buildTarget),
+					locationPathName = GetBuildPath(),
 					target = buildTarget,
 					options = BuildOptions.None,
 				};
