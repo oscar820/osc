@@ -23,6 +23,17 @@ namespace QTool
             Time.timeScale = value;
             OnScaleChange?.Invoke(value);
         }
+		public static float GetTimeScale(object obj)
+		{
+			if (timeScaleList.ContainsKey(obj))
+			{
+				return timeScaleList[obj];
+			}
+			else
+			{
+				return 1;
+			}
+		}
 
         static QDictionary<object, float> timeScaleList = new QDictionary<object, float>();
         public static void ChangeScale(object obj, float timeScale)
