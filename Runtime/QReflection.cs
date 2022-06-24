@@ -385,7 +385,7 @@ namespace QTool.Reflection
             {
 				if (copyTarget)
 				{
-					return targetObj.Copy();
+					return targetObj.QDataCopy();
 				}
 				return targetObj;
 			}

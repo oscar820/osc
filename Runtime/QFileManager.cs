@@ -10,11 +10,15 @@ namespace QTool
 {
     public static class FileManager
     {
-        public static T Copy<T>(this T target)
+        public static T QDataCopy<T>(this T target)
         {
 			return target.ToQData().ParseQData<T>();
 		}
-        public static string ToAssetPath(this string path)
+		public static T XmlCopy<T>(this T target)
+		{
+			return XmlDeserialize<T>(XmlSerialize(target));
+		}
+		public static string ToAssetPath(this string path)
         {
             return "Assets" + path.SplitEndString(Application.dataPath);
         }
