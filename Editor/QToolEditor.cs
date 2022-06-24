@@ -72,6 +72,7 @@ namespace QTool
 			switch (buildTarget)
 			{
 				case BuildTarget.StandaloneWindows:
+				case BuildTarget.StandaloneWindows64:
 					return Application.dataPath.Substring(0, Application.dataPath.LastIndexOf( "Assets"))+"Builds/" + buildTarget + "/"+PlayerSettings.productName+"_v"+ PlayerSettings.bundleVersion.Replace(".","_")+"/"+ PlayerSettings.productName +".exe";
 				default:
 					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
