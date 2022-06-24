@@ -28,32 +28,33 @@ namespace QTool
             {
                 key = typeof(T).ToString();
             }
-			lock (poolDic)
+			if (poolDic.ContainsKey(key))
 			{
-				if (poolDic.ContainsKey(key))
+				if (poolDic[key] is ObjectPool<T>)
 				{
-					if (poolDic[key] is ObjectPool<T>)
+					var pool = poolDic[key] as ObjectPool<T>;
+					if (newFunc != null && pool.newFunc == null)
 					{
-						var pool = poolDic[key] as ObjectPool<T>;
-						if (newFunc != null && pool.newFunc == null)
-						{
-							pool.newFunc = newFunc;
-						}
-						return pool;
+						pool.newFunc = newFunc;
 					}
-					else
-					{
-						throw new Exception("已存在重名不同类型对象池" + poolDic[key]);
-					}
-
+					return pool;
 				}
 				else
+				{
+					throw new Exception("已存在重名不同类型对象池" + poolDic[key]);
+				}
+
+			}
+			else
+			{
+				lock (poolDic)
 				{
 					var pool = new ObjectPool<T>(key, newFunc);
 					poolDic[key] = pool;
 					return pool;
 				}
 			}
+		
         }
         public static void Push(GameObject gameObject)
         {
