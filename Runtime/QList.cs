@@ -91,15 +91,14 @@ namespace QTool
     }
     public class QList<TKey, T> : QList<T> where T : IKey<TKey>
     {
-        
-        [NonSerialized]
-        [XmlIgnore]
-        protected Dictionary<TKey, T> dicBuffer = new Dictionary<TKey, T>();
-		public void ClearBuffer()
+		[NonSerialized]
+		[XmlIgnore]
+		public QKeyCache<TKey, T, int> Cache = new QKeyCache<TKey, T, int>();
+		public QList()
 		{
-			dicBuffer.Clear();
+			Cache.GetCheckInfo = (Key) => Count;
 		}
-
+		
 		public new void Add(T value)
         {
             if (value != null)
@@ -109,17 +108,17 @@ namespace QTool
         }
         public new void Sort(Comparison<T> comparison)
         {
-            dicBuffer.Clear();
-            base.Sort(comparison);
+			Cache.Clear();
+			base.Sort(comparison);
         }
         public new void Sort(int index, int count, IComparer<T> comparer)
         {
-            dicBuffer.Clear();
+			Cache.Clear();
             base.Sort(index, count, comparer);
         }
         public new void Sort()
         {
-            dicBuffer.Clear();
+			Cache.Clear();
             base.Sort();
         }
         public new bool Contains(T value)
@@ -133,7 +132,7 @@ namespace QTool
                 Debug.LogError("key is null");
                 return false;
             }
-            if (dicBuffer.ContainsKey(key) && dicBuffer[key] != null)
+            if (Cache.Cache.ContainsKey(key) && Cache.Cache[key] != null)
             {
                 return true;
             }
@@ -149,19 +148,10 @@ namespace QTool
                 Debug.LogError("key is null");
                 return default;
             }
-            if (!dicBuffer.ContainsKey(key))
-            {
-                var value = this.Get<T, TKey>(key);
-                if (value != null)
-                {
-                    dicBuffer[key] = value;
-                }
-                else
-                {
-                    return default;
-                }
-            }
-            return dicBuffer[key];
+			return Cache.Get(key,(key) =>
+			{
+				return this.Get<T, TKey>(key); 
+			});
         }
         public virtual void Set(TKey key, T value)
         {
@@ -169,14 +159,7 @@ namespace QTool
             {
                 Debug.LogError("key is null");
             }
-            if (dicBuffer.ContainsKey(key))
-            {
-                dicBuffer[key] = value;
-            }
-            else
-            {
-                dicBuffer.Add(key, value);
-            }
+			Cache.Remove(key);
             this.Set<T, TKey>(key, value);
         }
         public void Remove(TKey key)
@@ -217,9 +200,9 @@ namespace QTool
         public new void Remove(T obj)
         {
             if (obj != null)
-            {
-                base.Remove(obj);
-                dicBuffer.Remove(obj.Key);
+			{
+				Cache.Remove(obj.Key);
+				base.Remove(obj);
             }
         }
         public void RemoveKey(TKey key)
@@ -228,17 +211,17 @@ namespace QTool
         }
         public new void Clear()
         {
-            dicBuffer.Clear();
+			Cache.Clear();
             base.Clear();
         }
         public new void Reverse(int index, int count)
         {
-            dicBuffer.Clear();
+			Cache.Clear();
             base.Reverse(index, count);
         }
         public new void Reverse()
         {
-            dicBuffer.Clear();
+			Cache.Clear();
             base.Reverse();
         }
     }
@@ -247,11 +230,10 @@ namespace QTool
 
         public override T Get(TKey key)
         {
-            if (!dicBuffer.ContainsKey(key))
-            {
-                dicBuffer[key] = this.GetAndCreate<T, TKey>(key, OnCreate);
-            }
-            return dicBuffer[key];
+			return Cache.Get(key, (key) =>
+			{
+				return this.GetAndCreate<T, TKey>(key, OnCreate);
+			});
         }
         public virtual void OnCreate(T obj)
         {
@@ -402,7 +384,7 @@ namespace QTool
         }
         public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1)
         {
-			var newObj = typeInfo.ElementType.CreateInstance(index < 0 ? null : list[index]);
+			var newObj = typeInfo.ElementType.CreateInstance(index < 0 ? null : list[index],true);
 			if (index < 0)
 			{
 				index = 0;
@@ -411,7 +393,7 @@ namespace QTool
             {
                 if (typeInfo.ArrayRank == 1)
                 {
-                    var newList= typeInfo.Type.CreateInstance(null, list.Count + 1) as IList;
+                    var newList= typeInfo.Type.CreateInstance(null,false, list.Count + 1) as IList;
                  
                     for (int i = 0; i < index; i++)
                     {
@@ -438,7 +420,7 @@ namespace QTool
             {
                 if (typeInfo.ArrayRank == 1)
                 {
-                    var newList = typeInfo.Type.CreateInstance(null, list.Count -1) as IList;
+                    var newList = typeInfo.Type.CreateInstance(null,false, list.Count -1) as IList;
 
                     for (int i = 0; i < index; i++)
                     {

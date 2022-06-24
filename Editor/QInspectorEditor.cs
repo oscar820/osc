@@ -756,7 +756,7 @@ namespace QTool.Inspector
                                     var list = obj as IList;
                                     if (list == null)
                                     {
-                                        obj= typeInfo.ArrayRank==0?type.CreateInstance():type.CreateInstance(null,0);
+                                        obj= typeInfo.ArrayRank==0?type.CreateInstance():type.CreateInstance(null,false,0);
                                         list = obj as IList;
                                     }
                                     var color = GUI.backgroundColor;

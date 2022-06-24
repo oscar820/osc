@@ -15,26 +15,27 @@ namespace QTool
 		public Vector2 ViewDataSize { private set; get; }
 		public Vector2 ViewSize { private set; get; }
 		public Vector2 ViewScrollPos { private set; get; }
-		public Action<int> AddAt = null;
-		public Action<int> RemoveAt=null;
 		QList<float> CellWidth = new QList<float>();
 
 		public bool HasChanged { set; get; } = false;
-		public QGridView(Func<int, int, string> GetStringValue,Func<Vector2Int> GetSize)
+
+		public Func<int, int, int, bool> ClickCell = null;
+		public QGridView(Func<int, int, string> GetStringValue, Func<Vector2Int> GetSize, Func<int, int, int, bool> ClickCell)
 		{
 			this.GetStringValue = GetStringValue;
 			this.GetSize = GetSize;
+			this.ClickCell = ClickCell;
 		}
-	 	readonly static Vector2 DefualtCellSize = new Vector2(100,30);
-		public float GetWidth(int x=0)
+		readonly static Vector2 DefualtCellSize = new Vector2(100, 30);
+		public float GetWidth(int x = 0)
 		{
-			return Mathf.Max(CellWidth[x],100);
+			return Mathf.Max(CellWidth[x], 100);
 		}
 		public float GetHeight(int x = 0)
 		{
 			return 30;
 		}
-		public void Space(int start,int end,bool width = true)
+		public void Space(int start, int end, bool width = true)
 		{
 			Func<int, float> GetValue = null;
 			if (width)
@@ -65,7 +66,7 @@ namespace QTool
 					break;
 				}
 			}
-			for (range.width =1; range.xMax < GridSize.x; range.width++)
+			for (range.width = 1; range.xMax < GridSize.x; range.width++)
 			{
 				sum += GetWidth(range.xMax);
 				if (sum >= viewRect.xMax)
@@ -93,7 +94,7 @@ namespace QTool
 					break;
 				}
 			}
-			if (range.yMax > GridSize.y) 
+			if (range.yMax > GridSize.y)
 			{
 				range.height -= range.yMax - GridSize.y;
 			}
@@ -111,10 +112,9 @@ namespace QTool
 			Handles.DrawLine(new Vector3(lastRect.xMax, lastRect.yMin), new Vector3(lastRect.xMax, lastRect.yMax));
 			Handles.color = lastColor;
 		}
-		public Func<int, int, string> GetStringValue=null;
-		public Action<int, int, string> SetStringValue = null;
-		public Func<int, int, bool> EditCell = null;
-		public Vector2Int editIndex = Vector2Int.one * -1;
+		public Func<int, int, string> GetStringValue = null;
+		public Vector2Int ClickIndex = Vector2Int.one * -1;
+		public int buttonIndex = -1;
 		public Rect DrawCell(int x, int y)
 		{
 			var width = GUILayout.Width(GetWidth(x));
@@ -126,199 +126,154 @@ namespace QTool
 			}
 			GUILayout.Label(str, QGUITool.CenterLable, width, height);
 			var rect = GUILayoutUtility.GetLastRect();
-			if(Event.current.type!= EventType.Layout)
+			if (Event.current.type != EventType.Layout)
 			{
-				if (y > 0)
+				if (EventType.MouseUp.Equals(Event.current.type))
 				{
-					rect.MouseMenuClick((menu) => {
-						menu.AddItem(new GUIContent("复制"), false, () =>
-						{
-							GUIUtility.systemCopyBuffer = str;
-						});
-						if (SetStringValue != null)
-						{
-							menu.AddItem(new GUIContent("粘贴"), false, () =>
-							{
-								try
-								{
-									SetStringValue(x, y, GUIUtility.systemCopyBuffer);
-									HasChanged = true;
-								}
-								catch (Exception e)
-								{
-									Debug.LogError(e);
-								}
-							});
-						}
-						if (SetStringValue != null)
-						{
-							menu.AddItem(new GUIContent("清空"), false, () =>
-							{
-								try
-								{
-									SetStringValue(x, y,"");
-									HasChanged = true;
-								}
-								catch (Exception e)
-								{
-									Debug.LogError(e);
-								}
-							});
-						}
-
-						if (x == 0)
-						{
-							if (AddAt != null)
-							{
-								menu.AddItem(new GUIContent("添加行"), false, () =>
-								{
-									AddAt(y);
-									HasChanged = true;
-								});
-							}
-							if (RemoveAt != null)
-							{
-								menu.AddItem(new GUIContent("删除行"), false, () =>
-								{
-									RemoveAt(y);
-									HasChanged = true;
-								});
-							}
-						}
-					}, () =>
+					if (rect.Contains(Event.current.mousePosition))
 					{
-						if (EditCell != null)
+						buttonIndex = Event.current.button;
+						ClickIndex = new Vector2Int
 						{
-							editIndex = new Vector2Int
-							{
-								x = x,
-								y = y
-							};
-						}
-					});
+							x = x,
+							y = y
+						};
+						Event.current.Use();
+					}
 				}
-				
 			}
-		
 			return rect;
 		}
 		RectInt ViewRange;
 		int DragXIndex = -1;
-		float startPos=0;
+		float startPos = 0;
 		public void DoLayout(Action Repaint)
 		{
-			if(Event.current.type != EventType.Repaint)
+			try
 			{
-				GridSize = GetSize();
-
-				ViewRange = GetViewRange();
-
-			}
-			using (new GUILayout.VerticalScope())
-			{
-				using (new GUILayout.HorizontalScope())
+				if (DragXIndex > 0)
 				{
-					var rect = DrawCell(0, 0);
-					Handles.DrawLine(new Vector3(0, rect.yMax), new Vector3(ViewSize.x, rect.yMax));
-					Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, ViewSize.y));
-					using (new GUILayout.ScrollViewScope(new Vector2(ViewScrollPos.x, 0), GUIStyle.none, GUIStyle.none, GUILayout.Height(GetHeight())))
+					CellWidth[DragXIndex] = Event.current.mousePosition.x - startPos;
+					if (Event.current.type == EventType.MouseUp)
 					{
-						using (new GUILayout.HorizontalScope())
-						{
-							Space(1, ViewRange.x);
-							for (int x = ViewRange.x; x < ViewRange.xMax; x++)
-							{
-								var drawRect = DrawCell(x, 0);
-								DrawLine(drawRect);
-								var pos = drawRect.xMin;
-								drawRect.x += drawRect.width - 5;
-								drawRect.width = 10;
-								if (drawRect.Contains(Event.current.mousePosition))
-								{
-									if (Event.current.type == EventType.MouseDown)
-									{
-										startPos = pos+rect.xMax-ViewScrollPos.x;
-										DragXIndex = x;
-									}
-								}
-								
-							}
-							Space(ViewRange.xMax, GridSize.x);
-							GUILayout.FlexibleSpace();
-						}
-
+						DragXIndex = -1;
+						Event.current.Use();
 					}
-					GUILayout.Space(13);
-				}
-				GUILayout.Space(5);
-				using (new GUILayout.HorizontalScope())
-				{
-					using (new GUILayout.ScrollViewScope(new Vector2(0, ViewScrollPos.y), GUIStyle.none, GUIStyle.none, GUILayout.Width(GetWidth())))
-					{
-						using (new GUILayout.VerticalScope())
-						{
-							Space(1, ViewRange.y, false);
-							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
-							{
-								DrawLine( DrawCell(0, y));
-							}
-							Space(ViewRange.yMax, GridSize.y, false);
-							GUILayout.Space(13);
-						}
-					}
-					GUILayout.Space(6);
-					using (var dataView = new GUILayout.ScrollViewScope(ViewScrollPos))
-					{
-						using (new GUILayout.VerticalScope())
-						{
-							Space(1, ViewRange.y, false);
-							for (int y = ViewRange.y; y < ViewRange.yMax; y++)
-							{
-								using (new GUILayout.HorizontalScope())
-								{
-									Space(1, ViewRange.x);
-									for (int x = ViewRange.x; x < ViewRange.xMax; x++)
-									{
-										DrawLine(DrawCell(x, y));
-									}
-									Space(ViewRange.xMax, GridSize.x);
-									GUILayout.FlexibleSpace();
-								} 
-							}
-							Space(ViewRange.yMax, GridSize.y, false);
-						}
-						ViewScrollPos = dataView.scrollPosition;
-					}
-					if (Event.current.type == EventType.Repaint)
-					{
-						ViewDataSize = GUILayoutUtility.GetLastRect().size;
-					}
-				}
-			}
-			if (Event.current.type == EventType.Repaint)
-			{
-				ViewSize = GUILayoutUtility.GetLastRect().size;
-			}
-			if (DragXIndex > 0)
-			{
-
-				CellWidth[DragXIndex] = Event.current.mousePosition.x - startPos;
-				if (Event.current.type == EventType.MouseUp)
-				{
-					DragXIndex = -1;
-				}
-				Repaint();
-			}
-			if (editIndex.x >= 0 && editIndex.y >= 0)
-			{
-				if(EditCell(editIndex.x, editIndex.y))
-				{
-					HasChanged = true;
 					Repaint();
 				}
-				editIndex = Vector2Int.one * -1;
+				if (Event.current.type != EventType.Repaint)
+				{
+					GridSize = GetSize();
+
+					ViewRange = GetViewRange();
+
+				}
+				using (new GUILayout.VerticalScope())
+				{
+					using (new GUILayout.HorizontalScope())
+					{
+						var rect = DrawCell(0, 0);
+						Handles.DrawLine(new Vector3(0, rect.yMax), new Vector3(ViewSize.x, rect.yMax));
+						Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, ViewSize.y));
+						using (new GUILayout.ScrollViewScope(new Vector2(ViewScrollPos.x, 0), GUIStyle.none, GUIStyle.none, GUILayout.Height(GetHeight())))
+						{
+							using (new GUILayout.HorizontalScope())
+							{
+								Space(1, ViewRange.x);
+								for (int x = ViewRange.x; x < ViewRange.xMax; x++)
+								{
+									var drawRect = DrawCell(x, 0);
+									DrawLine(drawRect);
+									var pos = drawRect.xMin;
+									drawRect.x += drawRect.width - 5;
+									drawRect.width = 10;
+									if (drawRect.Contains(Event.current.mousePosition))
+									{
+										if (Event.current.type == EventType.MouseDown)
+										{
+											startPos = pos + rect.xMax - ViewScrollPos.x;
+											DragXIndex = x;
+											Event.current.Use();
+										}
+									}
+
+								}
+								Space(ViewRange.xMax, GridSize.x);
+								GUILayout.FlexibleSpace();
+							}
+
+						}
+						GUILayout.Space(13);
+					}
+					GUILayout.Space(5);
+					using (new GUILayout.HorizontalScope())
+					{
+						using (new GUILayout.ScrollViewScope(new Vector2(0, ViewScrollPos.y), GUIStyle.none, GUIStyle.none, GUILayout.Width(GetWidth())))
+						{
+							using (new GUILayout.VerticalScope())
+							{
+								Space(1, ViewRange.y, false);
+								for (int y = ViewRange.y; y < ViewRange.yMax; y++)
+								{
+									DrawLine(DrawCell(0, y));
+								}
+								Space(ViewRange.yMax, GridSize.y, false);
+								GUILayout.Space(13);
+							}
+						}
+						GUILayout.Space(6);
+						using (var dataView = new GUILayout.ScrollViewScope(ViewScrollPos))
+						{
+							using (new GUILayout.VerticalScope())
+							{
+								Space(1, ViewRange.y, false);
+								for (int y = ViewRange.y; y < ViewRange.yMax; y++)
+								{
+									using (new GUILayout.HorizontalScope())
+									{
+										Space(1, ViewRange.x);
+										for (int x = ViewRange.x; x < ViewRange.xMax; x++)
+										{
+											DrawLine(DrawCell(x, y));
+										}
+										Space(ViewRange.xMax, GridSize.x);
+										GUILayout.FlexibleSpace();
+									}
+								}
+								Space(ViewRange.yMax, GridSize.y, false);
+							}
+							ViewScrollPos = dataView.scrollPosition;
+						}
+						if (Event.current.type == EventType.Repaint)
+						{
+							ViewDataSize = GUILayoutUtility.GetLastRect().size;
+						}
+					}
+				}
+				if (Event.current.type == EventType.Repaint)
+				{
+					ViewSize = GUILayoutUtility.GetLastRect().size;
+				}
+				
+				if (buttonIndex >= 0)
+				{
+					if (ClickCell(ClickIndex.x, ClickIndex.y, buttonIndex))
+					{
+						HasChanged = true;
+						Repaint();
+					}
+					buttonIndex = -1;
+					
+				
+					
+				}
+				
+			}
+			catch (UnityEngine.ExitGUIException)
+			{
 			}
 		}
+
 	}
 	public class QEidtCellWindow : EditorWindow
 	{

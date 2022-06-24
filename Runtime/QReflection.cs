@@ -379,11 +379,15 @@ namespace QTool.Reflection
             return typeList;
         }
     
-        public static object CreateInstance(this Type type, object targetObj=null, params object[] param)
+        public static object CreateInstance(this Type type, object targetObj=null,bool copyTarget=false, params object[] param)
         {
             if (targetObj != null)
             {
-				return targetObj.Copy();
+				if (copyTarget)
+				{
+					return targetObj.Copy();
+				}
+				return targetObj;
 			}
             try
             {

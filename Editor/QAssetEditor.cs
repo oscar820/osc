@@ -16,29 +16,25 @@ namespace QTool.Asset {
 
 		public const string AddressableResources = nameof(AddressableResources);
 		[MenuItem("QTool/工具/批量生成AddressableResources资源")]
-        public static void AutoAddressableResources()
-        {
+		public static void AutoAddressableResources()
+		{
 			var root = "Assets/" + AddressableResources;
-			root.ForeachDirectory((directory) => {
-				var groupName = directory.SplitEndString(root+"/").SplitStartString("/");
-				if (EditorUtility.DisplayDialog("批量添加Addressable资源",
-					"以文件夹[" + directory + "] \n生成组名与标签为[" + groupName + "]的资源组"
-					, "确认", "取消"))
+			root.ForeachDirectory((directory) =>
+			{
+				var groupName = directory.SplitEndString(root + "/").SplitStartString("/");
+				var count = directory.DirectoryFileCount();
+				var index = 1f;
+				directory.ForeachDirectoryFiles((path) =>
 				{
-					var count = directory.DirectoryFileCount();
-					var index = 1f;
-					directory.ForeachDirectoryFiles((path) =>
-					{
-						EditorUtility.DisplayProgressBar("批量添加Addressable资源", "添加资源(" + index + "/" + count + ") : " + path, index / count);
-						var key = path.SplitEndString(root+"/");
-						key = key.Substring(0, key.LastIndexOf('.'));
-						AddressableTool.SetAddresableGroup(path, groupName, key);
-						index++;
-					});
-					EditorUtility.ClearProgressBar();
-				}
+					EditorUtility.DisplayProgressBar("批量添加Addressable资源", "添加资源(" + index + "/" + count + ") : " + path, index / count);
+					var key = path.SplitEndString(root + "/");
+					key = key.Substring(0, key.LastIndexOf('.'));
+					AddressableTool.SetAddresableGroup(path, groupName, key);
+					index++;
+				});
+				EditorUtility.ClearProgressBar();
 			});
-        }
+		}
 #endif
     }
 

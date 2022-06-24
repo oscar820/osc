@@ -365,7 +365,7 @@ namespace QTool
 											}
 										}
 									}
-									var array = QReflection.CreateInstance(type, null, list.Count) as Array;
+									var array = QReflection.CreateInstance(type, null, false,list.Count) as Array;
 									for (int i = 0; i < list.Count; i++)
 									{
 										array.SetValue(list[i], i);
