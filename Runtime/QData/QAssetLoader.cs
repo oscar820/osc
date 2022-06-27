@@ -136,7 +136,7 @@ namespace QTool.Asset
 		{
 			get
 			{
-				return nameof(Resources) + '/' + DirectoryPath + '/';
+				return  DirectoryPath + '/';
 			}
 		}
 #if Addressables
