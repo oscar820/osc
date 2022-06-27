@@ -251,14 +251,10 @@ namespace QTool
 				if (!UsingPool.Contains(obj))
 				{
 					var gameObj = GetGameObj(obj);
-					if (gameObj != null)
+					if (Application.isPlaying)
 					{
 						GameObject.Destroy(gameObj);
 						Debug.LogWarning("物体[" + obj + "]对象池[" + Key + "]中并不存在 无法回收强制删除");
-					}
-					else
-					{
-						Debug.LogWarning("对象[" + obj + "]对象池[" + Key + "]中不存在 无法回收");
 					}
 					return;
 				}
