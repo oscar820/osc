@@ -194,6 +194,7 @@ namespace QTool.FlowGraph
 						{
 							SetValue(x, y, GUIUtility.systemCopyBuffer);
 							change = true;
+							gridView.HasChanged = true;
 						}
 						catch (Exception e)
 						{
@@ -205,7 +206,8 @@ namespace QTool.FlowGraph
 						try
 						{
 							SetValue(x, y, "");
-							change = true;
+							 change = true;
+							gridView.HasChanged = true;
 						}
 						catch (Exception e)
 						{
@@ -218,11 +220,13 @@ namespace QTool.FlowGraph
 						{
 							AddAt(y);
 							change = true;
+							gridView.HasChanged = true;
 						});
 						menu.AddItem(new GUIContent("删除行"), false, () =>
 						{
 							RemoveAt(y);
 							change = true;
+							gridView.HasChanged = true;
 						});
 					}
 
