@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using QTool.Reflection;
 
 namespace QTool
 {
@@ -263,7 +264,7 @@ namespace QTool
 			{
 				return eventValue;
 			}
-			else if (dataKey.Contains("/"))
+			else if (dataKey.SplitTowString("/",out var start,out var end))
 			{
 				try
 				{
@@ -271,14 +272,7 @@ namespace QTool
 					{
 						return null;
 					}
-					var memeberKey = dataKey.SplitEndString("/");
-					var typeInfo = QSerializeType.Get(eventValue.GetType());
-					if (typeInfo == null)
-					{
-						Debug.LogError("不存在类型：[" +eventValue+ "]");
-					}
-					var value= typeInfo.Members[memeberKey]?.Get(eventValue);
-					return value;
+					return eventValue.GetValue(end.Replace("/", "."));
 				}
 				catch (Exception e)
 				{

@@ -84,14 +84,16 @@ namespace QTool
 			}
 			await writer.WriteLineAsync("RETR " + index);
 			var size = int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString();
-			var info = "";
-			string result = null;
-			while (( result = await reader.ReadLineAsync()) != ".")
+			using (var infoWriter = new StringWriter())
 			{
-				info += result + "\n"; 
+				string result = null;
+				while ((result = await reader.ReadLineAsync()) != ".")
+				{
+					infoWriter.Write(  result + "\n");
+				}
+				var mail = new QMailInfo(infoWriter.ToString(), index, Id);
+				return mail;
 			}
-			var mail = new QMailInfo(info,index,Id);
-			return mail;
 		}
 		
 		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
@@ -117,7 +119,10 @@ namespace QTool
 				await task;
 			}
 #if UNITY_EDITOR
-			UnityEditor.EditorUtility.ClearProgressBar();
+			if (!Application.isPlaying)
+			{
+				UnityEditor.EditorUtility.ClearProgressBar();
+			}
 #endif
 			Debug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
 			Debug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
@@ -175,7 +180,10 @@ namespace QTool
 										mailList[i] = mail;
 									}
 #if UNITY_EDITOR
-									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件 线程"+startIndex, i + "/" + endIndex  + " " + mail.Subject, (i-startIndex)*1f/(endIndex-startIndex));
+									if (!Application.isPlaying)
+									{
+										UnityEditor.EditorUtility.DisplayProgressBar("接收邮件 线程" + startIndex, i + "/" + endIndex + " " + mail.Subject, (i - startIndex) * 1f / (endIndex - startIndex));
+									}
 #endif
 								}
 							//	Debug.Log("接收结束 "+startIndex+" 线程");
@@ -208,10 +216,24 @@ namespace QTool
 							writer.AutoFlush = true;
 
 							try
-							{ 
+							{
+
 								await reader.CheckReadLine("SSL连接");
+#if UNITY_EDITOR
+								if (!Application.isPlaying)
+								{
+									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件信息", "SSL连接成功", 0.1f);
+								}
+#endif
+
 								await writer.CommondCheckReadLine("USER " + account.account, reader);
 								await writer.CommondCheckReadLine("PASS " + account.password, reader);
+#if UNITY_EDITOR
+								if (!Application.isPlaying)
+								{
+									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件信息", "SSL账户登录成功", 0.2f);
+								}
+#endif
 								var infos = await writer.CommondCheckReadLine("STAT", reader);
 								var endIndex = long.Parse(infos[1]);
 								Debug.Log("邮件总数：" + endIndex + " 总大小：" + long.Parse(infos[2]).ToSizeString());
@@ -236,6 +258,12 @@ namespace QTool
 										}
 									}
 								}
+#if UNITY_EDITOR
+								if (!Application.isPlaying)
+								{
+									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件信息", "获取起始邮件索引成功", 0.3f);
+								}
+#endif
 								await ReceiveRemailAsync(account, startIndex, endIndex, callBack,20);
 							}
 							catch (Exception e)

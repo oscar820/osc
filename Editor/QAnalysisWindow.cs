@@ -177,13 +177,14 @@ namespace QTool
 				size.x++;
 				Titles[size.x] = title;
 			});
+			size.x++;
 			if (string.IsNullOrWhiteSpace(ViewPlayer))
 			{
-				size.y = QAnalysisData.Instance.PlayerDataList.Count;
+				size.y = QAnalysisData.Instance.PlayerDataList.Count+1;
 			}
 			else
 			{
-				size.y= QAnalysisData.Instance.PlayerDataList[ViewPlayer].EventList.Count;
+				size.y= QAnalysisData.Instance.PlayerDataList[ViewPlayer].EventList.Count+1;
 			}
 			return size;
 		}
@@ -492,26 +493,38 @@ namespace QTool
 			}
 			IsLoading = true;
 
-			NewEventList.Clear();
-			await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail, (mailInfo) =>
-			{ 
-				if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
+			try
+			{
+				NewEventList.Clear();
+				await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail, (mailInfo) =>
 				{
-					if (!string.IsNullOrWhiteSpace(mailInfo.Body))
+					if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 					{
-						var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
-						foreach (var item in list)
+						if (!string.IsNullOrWhiteSpace(mailInfo.Body))
 						{
-							NewEventList.Add(item);
+							var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
+							foreach (var item in list)
+							{
+								NewEventList.Add(item);
+							}
 						}
 					}
-				}
-				Instance.LastMail = mailInfo;
-			}, Instance.LastMail);
-			AddNewEventList();
-			SaveData();
-			Debug.Log("保存完成");
-			IsLoading = false;
+					Instance.LastMail = mailInfo;
+				}, Instance.LastMail);
+				AddNewEventList();
+				SaveData();
+				Debug.Log("保存完成");
+			}
+			catch (Exception e)
+			{
+
+				throw e;
+			}
+			finally
+			{
+				IsLoading = false;
+			}
+		
 		}
 		
 	
@@ -630,9 +643,20 @@ namespace QTool
 		{
 			get
 			{
+				
 				if (!QAnalysisData.Instance.EventKeyList.Contains(dataKey)&&dataKey.Contains("/"))
 				{
-					return dataKey.SplitStartString("/");
+					var eventKey = "";
+					foreach (var eventKeyValue in QAnalysisData.Instance.EventKeyList)
+					{
+						if (dataKey.StartsWith(eventKeyValue))
+						{
+							if (eventKey.Length < eventKeyValue.Length)
+							{
+								eventKey = eventKeyValue;
+							}
+						}
+					}return eventKey;
 				}
 				else
 				{
@@ -731,9 +755,9 @@ namespace QTool
 					if (BufferData.Count == 0)
 					{
 						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
-					}
+					} 
 					else
-					{
+					{   
 						BufferData[eventData.eventId]= ((float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.dataKey).ToComputeFloat())/ 2;
 					}
 					break;

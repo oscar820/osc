@@ -494,5 +494,32 @@ namespace QTool.Reflection
                 methodeInfo?.Invoke(method);
             }
         }
-    }
+
+		public static object GetValue(this object target, string path)
+		{
+			if (path.SplitTowString(".", out var start, out var end))
+			{
+				try
+				{
+					return target.GetValue(start).GetValue(end);
+				}
+				catch (Exception e)
+				{
+					throw new Exception("路径出错：" + path, e);
+				}
+			}
+			else
+			{
+				var memeberInfo = QSerializeType.Get(target.GetType()).GetMemberInfo(path);
+				if (memeberInfo!=null)
+				{
+					return memeberInfo.Get(target);
+				} 
+				else
+				{
+					throw new Exception(" 找不到 key " + path);
+				}
+			}
+		}
+	}
 }
