@@ -264,25 +264,10 @@ namespace QTool
 			{
 				return eventValue;
 			}
-			else if (dataKey.SplitTowString("/",out var start,out var end))
+			else 
 			{
-				try
-				{
-					if (eventValue == null)
-					{
-						return null;
-					}
-					return eventValue.GetValue(end.Replace("/", "."));
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("在 " + eventKey + " 中读取 " + dataKey + " 出错：\n" + e);
-					return eventValue;
-				}
-			}
-			else
-			{
-				return eventValue;
+				var childKey = dataKey.SplitEndString(eventKey+"/").Replace("/",".");
+				return eventValue.GetValue(childKey);
 			}
 		}
 

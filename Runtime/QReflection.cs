@@ -517,7 +517,7 @@ namespace QTool.Reflection
 				} 
 				else
 				{
-					throw new Exception(" 找不到 key " + path);
+					throw new Exception(target.GetType()+" 找不到 key " + path);
 				}
 			}
 		}

@@ -109,6 +109,12 @@ namespace QTool
 				threadCount = 1;
 			}
 			List<Task> taskList = new List<Task>();
+#if UNITY_EDITOR
+			if (!Application.isPlaying)
+			{
+				UnityEditor.EditorUtility.DisplayProgressBar("开启接收邮件线程", "开启线程" + startIndex, 0.4f);
+			}
+#endif
 			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex+" ...");
 			for (int i = 0; i < threadCount; i++)
 			{
