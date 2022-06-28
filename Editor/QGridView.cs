@@ -151,7 +151,7 @@ namespace QTool
 		{
 			try
 			{
-				if (DragXIndex > 0)
+				if (DragXIndex >= 0)
 				{
 					CellWidth[DragXIndex] = Event.current.mousePosition.x - startPos;
 					if (Event.current.type == EventType.MouseUp)
@@ -175,6 +175,21 @@ namespace QTool
 						var rect = DrawCell(0, 0);
 						Handles.DrawLine(new Vector3(0, rect.yMax), new Vector3(ViewSize.x, rect.yMax));
 						Handles.DrawLine(new Vector3(rect.xMax, rect.yMin), new Vector3(rect.xMax, ViewSize.y));
+
+						var pos = rect.xMin;
+						rect.x += rect.width - 5;
+						rect.width = 10;
+						if (rect.Contains(Event.current.mousePosition))
+						{
+							if (Event.current.type == EventType.MouseDown)
+							{
+								Debug.LogError("down!");
+								startPos = pos ;
+								DragXIndex = 0;
+								Event.current.Use();
+							}
+						}
+
 						using (new GUILayout.ScrollViewScope(new Vector2(ViewScrollPos.x, 0), GUIStyle.none, GUIStyle.none, GUILayout.Height(GetHeight())))
 						{
 							using (new GUILayout.HorizontalScope())
@@ -184,7 +199,7 @@ namespace QTool
 								{
 									var drawRect = DrawCell(x, 0);
 									DrawLine(drawRect);
-									var pos = drawRect.xMin;
+									pos = drawRect.xMin;
 									drawRect.x += drawRect.width - 5;
 									drawRect.width = 10;
 									if (drawRect.Contains(Event.current.mousePosition))
