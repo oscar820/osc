@@ -72,6 +72,13 @@ namespace QTool
 				default:
 					if (!errorInfoList.Contains(condition))
 					{
+						if(condition.Contains(nameof(StackOverflowException)))
+						{
+							if (stackTrace.Length > 100)
+							{
+								stackTrace = stackTrace.Substring(0, 100);
+							}
+						}
 						errorInfoList.Add(condition);
 						Trigger(nameof(QAnalysisEventName.错误日志), condition + '\n' + stackTrace);
 					}

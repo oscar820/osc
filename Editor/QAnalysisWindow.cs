@@ -80,7 +80,7 @@ namespace QTool
 						if (QTitleWindow.GetNewTitle(out var newTitle))
 						{
 							QAnalysisData.Instance.AddTitle(newTitle);
-							QAnalysisData.Instance.FreshKey(newTitle.Key, true);
+							QAnalysisData.Instance.FreshKey(newTitle.Key);
 						}
 					});
 
@@ -88,7 +88,7 @@ namespace QTool
 					{
 						if (QTitleWindow.ChangeTitle(title))
 						{
-							QAnalysisData.Instance.FreshKey(title.Key, true);
+							QAnalysisData.Instance.FreshKey(title.Key);
 						}
 					});
 					menu.AddItem(new GUIContent("删除数据列"), false, () =>
@@ -503,11 +503,11 @@ namespace QTool
 		}
 		
 	
-		public void FreshKey(string titleKey,bool freshEventList=false)
+		public void FreshKey(string titleKey)
 		{
 			foreach (var playerData in PlayerDataList)
 			{
-				playerData.FreshKey(titleKey, freshEventList);
+				playerData.FreshKey(titleKey);
 			}
 			SaveData();
 		}
@@ -580,7 +580,7 @@ namespace QTool
 		{
 			_viewKey = null;
 			DataSetting.dataKey = eventKey;
-			QAnalysisData.Instance.FreshKey(Key,true);
+			QAnalysisData.Instance.FreshKey(Key);
 		}
 		public bool CheckView(string viewInfo)
 		{
@@ -1053,44 +1053,40 @@ namespace QTool
 				
 					//AnalysisData[title.Key].changed = true;
 				}
-				else if(title.DataSetting.TargetKey == eventData.eventKey)
-				{
-				//	AnalysisData[title.Key].changed = true;
-				}
-				else if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏暂离))
-				{
-					switch (title.DataSetting.mode)
-					{
-						case QAnalysisMode.总时长:
-						case QAnalysisMode.最新时长:
-							{
-							//	AnalysisData[title.Key].changed = true;
-							}
-							break;
-						default:
-							break;
-					}
-				}
+				//else if(title.DataSetting.TargetKey == eventData.eventKey)
+				//{
+				////	AnalysisData[title.Key].changed = true;
+				//}
+				//else if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏暂离))
+				//{
+				//	switch (title.DataSetting.mode)
+				//	{
+				//		case QAnalysisMode.总时长:
+				//		case QAnalysisMode.最新时长:
+				//			{
+				//			//	AnalysisData[title.Key].changed = true;
+				//			}
+				//			break;
+				//		default:
+				//			break;
+				//	}
+				//}
 			}
 		}
-		public void FreshKey(string titleKey,bool freshEventList)
+		public void FreshKey(string titleKey)
 		{
 			var info = AnalysisData[titleKey];
 			info.BufferData.Clear();
-			if (freshEventList)
+			info.EventList.Clear();
+			var setting = QAnalysisData.TitleList[titleKey].DataSetting;
+			foreach (var eventId in EventList)
 			{
-				info.EventList.Clear();
-				var setting = QAnalysisData.TitleList[titleKey].DataSetting;
-				foreach (var eventId in EventList)
+				var eventData = QAnalysisData.EventList[eventId];
+				if (eventData.eventKey == setting.EventKey)
 				{
-					var eventData = QAnalysisData.EventList[eventId];
-					if (eventData.eventKey == setting.EventKey)
-					{
-						info.EventList.AddCheckExist(eventData.eventId);
-					}
+					info.AddEvent(eventData);
 				}
 			}
-
 		}
 	}
 	public static class QGUITool
