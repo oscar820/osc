@@ -131,7 +131,7 @@ namespace QTool
 				}
 				else
 				{
-					return playerData.AnalysisData[Titles[x].Key].GetFreshValue()?.ToString();
+					return playerData.AnalysisData[Titles[x].Key].GetValue()?.ToString();
 				}
 			}
 			else
@@ -146,7 +146,7 @@ namespace QTool
 				{
 					if (eventData.eventKey == Titles[x].DataSetting.EventKey)
 					{
-						return playerData.AnalysisData[Titles[x].Key].GetFreshValue(eventData)?.ToString();
+						return playerData.AnalysisData[Titles[x].Key].GetValue(eventData)?.ToString();
 					}
 					else
 					{
@@ -277,7 +277,7 @@ namespace QTool
 							writer.Write(playerData.Key + "\t");
 							QAnalysisData.ForeachTitle((title) =>
 							{
-								writer.Write(playerData.AnalysisData[title.Key].GetFreshValue()?.ToString().ToElement());
+								writer.Write(playerData.AnalysisData[title.Key].GetValue()?.ToString().ToElement());
 								writer.Write("\t");
 							});
 							writer.Write("\n");
@@ -657,9 +657,101 @@ namespace QTool
 		public DateTime UpdateTime;
 		public QList<string> EventList = new QList<string>();
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
-		public bool changed = false;
+		//public bool changed = false;
 		public void AddEvent(QAnalysisEvent eventData)
 		{
+
+			var setting = QAnalysisData.TitleList[Key].DataSetting;
+			switch (setting.mode)
+			{
+				case QAnalysisMode.最新数据:
+					BufferData[eventData.eventId] = eventData.eventValue;
+					break;
+				case QAnalysisMode.起始数据:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = eventData.eventValue;
+					}
+					else
+					{
+						BufferData[eventData.eventId] = BufferData[0].Value;
+					}
+					break;
+				case QAnalysisMode.次数:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = 1;
+					}
+					else
+					{
+						BufferData[eventData.eventId] = (int)BufferData[BufferData.Count-1].Value +1;
+					}
+					break;
+				case QAnalysisMode.最小值:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = eventData.eventValue.ToComputeFloat();
+					}
+					else if ((float)BufferData[BufferData.Count - 1].Value>eventData.eventValue.ToComputeFloat())
+					{
+						BufferData[eventData.eventId] = eventData.eventValue.ToComputeFloat();
+					}
+					else
+					{
+						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value;
+					}
+					break;
+				case QAnalysisMode.最大值:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = eventData.eventValue.ToComputeFloat();
+					}
+					else if ((float)BufferData[BufferData.Count - 1].Value < eventData.eventValue.ToComputeFloat())
+					{
+						BufferData[eventData.eventId] = eventData.eventValue.ToComputeFloat();
+					}
+					else
+					{
+						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value;
+					}
+					break;
+				case QAnalysisMode.平均值:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = eventData.eventValue.ToComputeFloat();
+					}
+					else
+					{
+						BufferData[eventData.eventId]= ((float)BufferData[BufferData.Count - 1].Value + eventData.eventValue.ToComputeFloat())/ 2;
+					}
+					break;
+				case QAnalysisMode.求和:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = eventData.eventValue.ToComputeFloat();
+					}
+					else
+					{
+						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value + eventData.eventValue.ToComputeFloat();
+					}
+					break;
+				case QAnalysisMode.最新时间:
+					BufferData[eventData.eventId] = eventData.eventTime;
+					break;
+				case QAnalysisMode.起始时间:
+					if (BufferData.Count == 0)
+					{
+						BufferData[eventData.eventId] = eventData.eventTime;
+					}
+					else
+					{
+						BufferData[eventData.eventId] = BufferData[0].Value;
+					}
+					break;
+				default:
+					break;
+			}
+
 			UpdateTime = eventData.eventTime;
 			EventList.AddCheckExist(eventData.Key);
 		}
@@ -764,23 +856,24 @@ namespace QTool
 			}
 			return null;
 		}
-		public object GetFreshValue(QAnalysisEvent endEvent=null)
-		{
 
+	
+		public object GetValue(QAnalysisEvent endEvent=null)
+		{
+			if (endEvent!=null&&!EventList.Contains(endEvent.eventId))
+			{
+				Debug.LogError("不存在" + endEvent);
+				return null;
+			}
 			if (endEvent == null)
 			{
-				
 				endEvent = QAnalysisData.GetEvent(EventList.StackPeek());
 				if (endEvent == null)
 				{
 					return null;
 				}
-				if (changed&&!QAnalysisData.IsLoading)
-				{
-					BufferData.RemoveKey(endEvent.eventId);
-					changed = false;
-				}
 			}
+		
 			if (BufferData.ContainsKey(endEvent.eventId))
 			{
 				return BufferData[endEvent.eventId];
@@ -791,28 +884,28 @@ namespace QTool
 			{
 				switch (setting.mode)
 				{
-					case QAnalysisMode.最新数据:
-						freshValue = endEvent.GetValue(setting.dataKey);
-						break;
-					case QAnalysisMode.起始数据:
-						freshValue = QAnalysisData.EventList[EventList.QueuePeek()].GetValue(setting.dataKey);
-						break;
-					case QAnalysisMode.最新时间:
-						freshValue = endEvent.eventTime;
-						break;
-					case QAnalysisMode.起始时间:
-						freshValue = QAnalysisData.EventList[EventList.QueuePeek()].eventTime;
-						break;
-					case QAnalysisMode.次数:
-						{
-							int count = 0;
-							ForeachEvent((eventData) =>
-							{
-								count++;
-							}, endEvent);
-							freshValue = count;
-						}
-						break;
+					//case QAnalysisMode.最新数据:
+					//	freshValue = endEvent.GetValue(setting.dataKey);
+					//	break;
+					//case QAnalysisMode.起始数据:
+					//	freshValue = QAnalysisData.EventList[EventList.QueuePeek()].GetValue(setting.dataKey);
+					//	break;
+					//case QAnalysisMode.最新时间:
+					//	freshValue = endEvent.eventTime;
+					//	break;
+					//case QAnalysisMode.起始时间:
+					//	freshValue = QAnalysisData.EventList[EventList.QueuePeek()].eventTime;
+					//	break;
+					//case QAnalysisMode.次数:
+					//	{
+					//		int count = 0;
+					//		ForeachEvent((eventData) =>
+					//		{
+					//			count++;
+					//		}, endEvent);
+					//		freshValue = count;
+					//	}
+					//	break;
 					case QAnalysisMode.最新时长:
 						{
 							var targetData = GetPlayerData().AnalysisData[setting.TargetKey];
@@ -881,53 +974,54 @@ namespace QTool
 
 						}
 						break;
-					case QAnalysisMode.最大值:
-						{
-							freshValue = endEvent.eventValue; 
-							ForeachEvent((eventData) =>
-							{
-								if (eventData.eventValue.ToComputeFloat() > freshValue.ToComputeFloat())
-								{
-									freshValue = eventData.eventValue;
-								}
-							},endEvent);
-						}
-						break;
-					case QAnalysisMode.最小值:
-						{
-							freshValue = endEvent.eventValue;
-							ForeachEvent((eventData) =>
-							{
-								if (eventData.eventValue.ToComputeFloat() < freshValue.ToComputeFloat())
-								{
-									freshValue = eventData.eventValue;
-								}
-							}, endEvent);
-						}
-						break;
-					case QAnalysisMode.求和:
-						{
-							var sum = 0f;
-							ForeachEvent( (eventData) =>
-							{
-								sum += eventData.eventValue.ToComputeFloat();
-							}, endEvent);
-							freshValue = sum;
-						}
-						break;
-					case QAnalysisMode.平均值:
-						{
-							var sum = 0f;
-							var count = 0;
-							ForeachEvent((eventData) =>
-							{
-								sum += eventData.eventValue.ToComputeFloat();
-								count++;
-							}, endEvent);
-							freshValue = sum / count;
-						}
-						break;
+					//case QAnalysisMode.最大值:
+					//	{
+					//		freshValue = endEvent.eventValue; 
+					//		ForeachEvent((eventData) =>
+					//		{
+					//			if (eventData.eventValue.ToComputeFloat() > freshValue.ToComputeFloat())
+					//			{
+					//				freshValue = eventData.eventValue;
+					//			}
+					//		},endEvent);
+					//	}
+					//	break;
+					//case QAnalysisMode.最小值:
+					//	{
+					//		freshValue = endEvent.eventValue;
+					//		ForeachEvent((eventData) =>
+					//		{
+					//			if (eventData.eventValue.ToComputeFloat() < freshValue.ToComputeFloat())
+					//			{
+					//				freshValue = eventData.eventValue;
+					//			}
+					//		}, endEvent);
+					//	}
+					//	break;
+					//case QAnalysisMode.求和:
+					//	{
+					//		var sum = 0f;
+					//		ForeachEvent( (eventData) =>
+					//		{
+					//			sum += eventData.eventValue.ToComputeFloat();
+					//		}, endEvent);
+					//		freshValue = sum;
+					//	}
+					//	break;
+					//case QAnalysisMode.平均值:
+					//	{
+					//		var sum = 0f;
+					//		var count = 0;
+					//		ForeachEvent((eventData) =>
+					//		{
+					//			sum += eventData.eventValue.ToComputeFloat();
+					//			count++;
+					//		}, endEvent);
+					//		freshValue = sum / count;
+					//	}
+					//	break;
 					default:
+						Debug.LogError("缺少数据" + setting.mode+"["+EventList.IndexOf(endEvent.eventId) +"]");
 						break;
 				}
 			}
@@ -937,7 +1031,7 @@ namespace QTool
 
 		public override string ToString()
 		{
-			return GetFreshValue()?.ToString();
+			return GetValue()?.ToString();
 		}
 
 	}
@@ -956,11 +1050,12 @@ namespace QTool
 				if (title.DataSetting.EventKey == eventData.eventKey)
 				{
 					AnalysisData[title.Key].AddEvent(eventData);
-					AnalysisData[title.Key].changed = true;
+				
+					//AnalysisData[title.Key].changed = true;
 				}
 				else if(title.DataSetting.TargetKey == eventData.eventKey)
 				{
-					AnalysisData[title.Key].changed = true;
+				//	AnalysisData[title.Key].changed = true;
 				}
 				else if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏暂离))
 				{
@@ -969,7 +1064,7 @@ namespace QTool
 						case QAnalysisMode.总时长:
 						case QAnalysisMode.最新时长:
 							{
-								AnalysisData[title.Key].changed = true;
+							//	AnalysisData[title.Key].changed = true;
 							}
 							break;
 						default:
