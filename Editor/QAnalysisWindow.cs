@@ -463,7 +463,7 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static async Task AddNewEventList()
+		static void AddNewEventList()
 		{
 			var start = DateTime.Now;
 			Debug.Log("对新事件排序" + NewEventList.Count);
@@ -508,7 +508,7 @@ namespace QTool
 				}
 				Instance.LastMail = mailInfo;
 			}, Instance.LastMail);
-			await AddNewEventList();
+			AddNewEventList();
 			SaveData();
 			Debug.Log("保存完成");
 			IsLoading = false;
@@ -772,7 +772,7 @@ namespace QTool
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (TimeSpan)BufferData[0].Value + GetLastTimeSpan(eventData);
+						BufferData[eventData.eventId] = (TimeSpan)BufferData[BufferData.Count-1].Value + GetLastTimeSpan(eventData);
 					}
 					break;
 				default:

@@ -183,7 +183,6 @@ namespace QTool
 						{
 							if (Event.current.type == EventType.MouseDown)
 							{
-								Debug.LogError("down!");
 								startPos = pos ;
 								DragXIndex = 0;
 								Event.current.Use();
