@@ -269,14 +269,28 @@ namespace QTool
 		public static string GetBlockValue(this string value, char startChar, char endChar)
 		{
 			var start = value.IndexOf(startChar)+1;
-			var end = value.IndexOf(endChar);
-			return value.Substring(start , end - start);
+			var end = value.IndexOf(endChar,start);
+			if (end >= 0)
+			{
+				return value.Substring(start, end - start);
+			}
+			else
+			{
+				return value.Substring(start);
+			}
 		}
 		public static string GetBlockValue(this string value,string startStr,string endStr)
 		{
 			var start = value.IndexOf(startStr)+startStr.Length;
-			var end = value.IndexOf(endStr);
-			return value.Substring(start, end - start);
+			var end = value.IndexOf(endStr,start);
+			if (end >= 0)
+			{
+				return value.Substring(start, end - start);
+			}
+			else
+			{
+				return value.Substring(start);
+			}
 		}
 		public static bool SplitTowString(this string str, string splitStart,out string start,out string end)
 		{

@@ -60,7 +60,7 @@ namespace QTool
 				
 					foreach (var eventKey in QAnalysisData.Instance.DataKeyList)
 					{
-						menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.dataKey, () =>
+						menu.AddItem(new GUIContent("数据来源/" + eventKey), eventKey == title.DataSetting.DataKey, () =>
 						{
 							title.ChangeEvent(eventKey);
 						});
@@ -361,11 +361,11 @@ namespace QTool
 				var names = QAnalysisData.Instance.DataKeyList;
 				if (names.Count > 0)
 				{
-					if (names.IndexOf(titleInfo.DataSetting.dataKey) < 0)
+					if (names.IndexOf(titleInfo.DataSetting.DataKey) < 0)
 					{
-						titleInfo.DataSetting.dataKey = names[0];
+						titleInfo.DataSetting.DataKey = names[0];
 					}
-					titleInfo.DataSetting.dataKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.dataKey), names.ToArray())];
+					titleInfo.DataSetting.DataKey = names[EditorGUILayout.Popup("数据来源", names.IndexOf(titleInfo.DataSetting.DataKey), names.ToArray())];
 				}
 				titleInfo.DataSetting.mode = (QAnalysisMode)titleInfo.DataSetting.mode.Draw("计算方式", typeof(QAnalysisMode));
 				titleInfo.width =Mathf.Clamp( (int)((int)titleInfo.width).Draw("列宽", typeof(int)),10,500);
@@ -385,7 +385,7 @@ namespace QTool
 							EditorUtility.DisplayDialog("错误的列名", "已存在列名" + titleInfo.Key, "确认");
 							return;
 						}
-						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.dataKey))
+						if (string.IsNullOrWhiteSpace(titleInfo.DataSetting.DataKey))
 						{
 							EditorUtility.DisplayDialog("错误的事件名", "不能为空", "确认");
 							return;
@@ -554,16 +554,17 @@ namespace QTool
 				eventData.eventKey = eventData.eventKey.Replace("_", "/");
 			}
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
-			CheckTitle(eventData.eventKey, eventData.eventValue);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
+			CheckTitle(eventData.eventKey, eventData.eventValue);
 	
 			if (eventData.eventValue != null)
 			{
 				foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
 				{
 					var key = eventData.eventKey + "/" + memeberInfo.Key;
-					CheckTitle(key, eventData.eventValue == null ? null : memeberInfo.Get(eventData.eventValue));
 					Instance.DataKeyList.AddCheckExist(key);
+					CheckTitle(key, eventData.eventValue == null ? null : memeberInfo.Get(eventData.eventValue));
+	
 				}
 			}
 			EventList.Add(eventData);
@@ -574,7 +575,7 @@ namespace QTool
 			if (!TitleList.ContainsKey(key))
 			{
 				var title =TitleList[key];
-				title.DataSetting.dataKey = key;
+				title.DataSetting.DataKey = key;
 				if (value != null && Type.GetTypeCode(value.GetType()) != TypeCode.Object)
 				{
 					title.DataSetting.mode = QAnalysisMode.最新数据;
@@ -604,7 +605,7 @@ namespace QTool
 		public void ChangeEvent(string eventKey)
 		{
 			_viewKey = null;
-			DataSetting.dataKey = eventKey;
+			DataSetting.DataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key);
 		}
 		public bool CheckView(string viewInfo)
@@ -637,54 +638,59 @@ namespace QTool
 	}
 	public class QAnalysisSetting
 	{
-		public string dataKey; 
+		private string _dataKey;
+		public string DataKey
+		{
+			get
+			{
+				return _dataKey;
+			}
+			set
+			{
+				SetDataKey(value);
+			}
+		}
 		public QAnalysisMode mode = QAnalysisMode.最新数据;
-		public string EventKey
+		public void SetDataKey(string key)
 		{
-			get
+			_dataKey = key;
+			if (QAnalysisData.Instance.EventKeyList.Contains(_dataKey))
 			{
-				
-				if (!QAnalysisData.Instance.EventKeyList.Contains(dataKey)&&dataKey.Contains("/"))
+				EventKey= _dataKey;
+			}
+			else
+			{
+				var eventKey = "";
+				foreach (var eventKeyValue in QAnalysisData.Instance.EventKeyList)
 				{
-					var eventKey = "";
-					foreach (var eventKeyValue in QAnalysisData.Instance.EventKeyList)
+					if (_dataKey.StartsWith(eventKeyValue))
 					{
-						if (dataKey.StartsWith(eventKeyValue))
+						if (eventKey.Length < eventKeyValue.Length)
 						{
-							if (eventKey.Length < eventKeyValue.Length)
-							{
-								eventKey = eventKeyValue;
-							}
+							eventKey = eventKeyValue;
 						}
-					}return eventKey;
+					}
 				}
-				else
-				{
-					return dataKey;
-				}
+				EventKey= eventKey;
 			}
-		}
-		public string TargetKey 
-		{
-			get
+			if (EventKey.EndsWith("结束"))
 			{
-				if (EventKey.EndsWith("结束"))
-				{
-					return EventKey.Replace("结束", "开始");
-				}
-				else if (EventKey.EndsWith("开始"))
-				{
-					return EventKey.Replace("开始", "结束");
-				}
-				else
-				{
-					return EventKey;
-				}
+				TargetKey= EventKey.Replace("结束", "开始");
+			}
+			else if (EventKey.EndsWith("开始"))
+			{
+				TargetKey= EventKey.Replace("开始", "结束");
+			}
+			else
+			{
+				TargetKey= EventKey;
 			}
 		}
+		public string EventKey;
+		public string TargetKey;
 		public override string ToString()
 		{
-			return "("+dataKey + " " + mode+")";
+			return "("+DataKey + " " + mode+")";
 		}
 	}
 	public class QAnalysisInfo : IKey<string>
@@ -701,12 +707,12 @@ namespace QTool
 			switch (setting.mode)
 			{
 				case QAnalysisMode.最新数据:
-					BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey);
+					BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey);
 					break;
 				case QAnalysisMode.起始数据:
 					if (BufferData.Count == 0)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey);
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey);
 					}
 					else
 					{
@@ -726,11 +732,11 @@ namespace QTool
 				case QAnalysisMode.最小值:
 					if (BufferData.Count == 0)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else if ((float)BufferData[BufferData.Count - 1].Value>eventData.GetValue(setting.dataKey).ToComputeFloat())
+					else if ((float)BufferData[BufferData.Count - 1].Value>eventData.GetValue(setting.DataKey).ToComputeFloat())
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					else
 					{
@@ -740,11 +746,11 @@ namespace QTool
 				case QAnalysisMode.最大值:
 					if (BufferData.Count == 0)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else if ((float)BufferData[BufferData.Count - 1].Value < eventData.GetValue(setting.dataKey).ToComputeFloat())
+					else if ((float)BufferData[BufferData.Count - 1].Value < eventData.GetValue(setting.DataKey).ToComputeFloat())
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					else
 					{
@@ -754,21 +760,21 @@ namespace QTool
 				case QAnalysisMode.平均值:
 					if (BufferData.Count == 0)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					} 
 					else
 					{   
-						BufferData[eventData.eventId]= ((float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.dataKey).ToComputeFloat())/ 2;
+						BufferData[eventData.eventId]= ((float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat())/ 2;
 					}
 					break;
 				case QAnalysisMode.求和:
 					if (BufferData.Count == 0)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.dataKey).ToComputeFloat();
+						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					break;
 				case QAnalysisMode.最新时间:
@@ -1119,7 +1125,6 @@ namespace QTool
 				if (title.DataSetting.EventKey == eventData.eventKey)
 				{
 					AnalysisData[title.Key].AddEvent(eventData);
-				
 					//AnalysisData[title.Key].changed = true;
 				}
 				//else if(title.DataSetting.TargetKey == eventData.eventKey)

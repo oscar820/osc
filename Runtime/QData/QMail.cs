@@ -74,7 +74,7 @@ namespace QTool
 				throw new Exception(checkFlag+"读取出错 " +info);
 			}
 		}
-		static async Task<QMailInfo> ReceiveEmail(StreamWriter writer, StreamReader reader, long index, long countIndex = -1)
+		static async Task<QMailInfo> ReceiveEmail(StreamWriter writer, StreamReader reader, int index, int countIndex = -1)
 		{
 			string Id = "";
 			if (index == countIndex)
@@ -89,16 +89,16 @@ namespace QTool
 				string result = null;
 				while ((result = await reader.ReadLineAsync()) != ".")
 				{
-					infoWriter.Write(  result + "\n");
+					infoWriter.Write( result + "\n");
 				}
 				var mail = new QMailInfo(infoWriter.ToString(), index, Id);
 				return mail;
 			}
 		}
 		
-		public static async Task ReceiveRemailAsync(QMailAccount account, long startIndex, long endIndex, Action<QMailInfo> callBack,int threadCount=5)
+		public static async Task ReceiveRemailAsync(QMailAccount account, int startIndex, int endIndex, Action<QMailInfo> callBack,int threadCount=5)
 		{
-			QDictionary<long, QMailInfo> mailList = new QDictionary<long, QMailInfo>();
+			QDictionary<int, QMailInfo> mailList = new QDictionary<int, QMailInfo>();
 			var startTime = DateTime.Now;
 			if (startIndex >endIndex) {
 				Debug.Log("无新邮件");
@@ -108,19 +108,19 @@ namespace QTool
 			{
 				threadCount = 1;
 			}
-			List<Task> taskList = new List<Task>();
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
 				UnityEditor.EditorUtility.DisplayProgressBar("开启接收邮件线程", "开启线程" + startIndex, 0.4f);
 			}
 #endif
+			var taskList = new List<Task>();
 			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex+" ...");
 			for (int i = 0; i < threadCount; i++)
 			{
-				taskList.Add(ReceiveRemail(account, startIndex + i, endIndex,mailList,threadCount));
+				taskList.Add( ReceiveRemail(account, startIndex + i, endIndex, mailList, threadCount));
 			}
-			foreach (var task in taskList)
+			foreach (var task in taskList)	
 			{
 				await task;
 			}
@@ -134,7 +134,7 @@ namespace QTool
 			Debug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
 			startTime = DateTime.Now;
 			await Task.Delay(100);
-			for (long i = startIndex; i <= endIndex; i++)
+			for (var i = startIndex; i <= endIndex; i++)
 			{
 				var mail = mailList[i];
 				try
@@ -154,7 +154,7 @@ namespace QTool
 			Debug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
 
 		}
-		static async Task ReceiveRemail(QMailAccount account, long startIndex,long endIndex, QDictionary<long, QMailInfo> mailList, long threadCount=1)
+		static async Task ReceiveRemail(QMailAccount account, int startIndex, int endIndex, QDictionary<int, QMailInfo> mailList, int threadCount =1)
 		{
 			if (startIndex >endIndex)
 			{
@@ -178,7 +178,7 @@ namespace QTool
 								await reader.CheckReadLine("SSL连接");
 								await writer.CommondCheckReadLine("USER " + account.account, reader);
 								await writer.CommondCheckReadLine("PASS " + account.password, reader);
-								for (long i = startIndex; i <= endIndex; i+=threadCount)
+								for (var i = startIndex; i <= endIndex; i+=threadCount)
 								{
 									var mail = await ReceiveEmail(writer, reader, i, endIndex);
 									lock (mailList)
@@ -199,10 +199,10 @@ namespace QTool
 							{
 								throw new Exception("邮件接收出错：", e);
 							}
-							clientSocket.Close();
 						}
 					}
 				}
+				clientSocket.Close();
 			}
 		}
 		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo> callBack, QMailInfo lastMail)
@@ -241,9 +241,9 @@ namespace QTool
 								}
 #endif
 								var infos = await writer.CommondCheckReadLine("STAT", reader);
-								var endIndex = long.Parse(infos[1]);
+								var endIndex = int.Parse(infos[1]);
 								Debug.Log("邮件总数：" + endIndex + " 总大小：" + long.Parse(infos[2]).ToSizeString());
-								long startIndex = 1;
+								int startIndex = 1;
 								if (!string.IsNullOrWhiteSpace(lastMail?.Id)) 
 								{
 									Debug.Log("上一封邮件：" +lastMail.Index+"["+lastMail.Id+"] "+ lastMail.Date);
@@ -253,7 +253,7 @@ namespace QTool
 									}
 									else
 									{
-										for (long i = lastMail.Index - 1; i >= 1; i--)
+										for (var i = lastMail.Index - 1; i >= 1; i--)
 										{
 											if (await writer.IdCheck(i, lastMail.Id, reader))
 											{
@@ -334,13 +334,13 @@ namespace QTool
 		public string To;
 		public string Date;
 		public string Body;
-		public long Index;
+		public int Index;
 		public string Id;
 		public QMailInfo()
 		{
 
 		}
-		public QMailInfo(string mailStr, long Index,string Id)
+		public QMailInfo(string mailStr, int Index,string Id)
 		{
 			this.Index = Index;
 			this.Id = Id;
@@ -355,7 +355,12 @@ namespace QTool
 				{
 					if (GetString(mailStr, "Content-Transfer-Encoding: ") == "base64")
 					{
-						Body = ParseBase64String(mailStr.Substring(mailStr.IndexOf("base64") + 6).Trim());
+						var info = mailStr.GetBlockValue("Content-Transfer-Encoding: base64", "------=").Trim();
+						Body = ParseBase64String(info,(data)=>data.SplitStartString("="));
+						if (string.IsNullOrWhiteSpace(Body))
+						{
+							Debug.LogError("读取 [" + Subject + "]内容出错 " + Date);
+						}
 						return;
 					}
 				}
@@ -374,7 +379,7 @@ namespace QTool
 		}
 
 
-		private static string ParseBase64String(string base64Str)
+		private static string ParseBase64String(string base64Str,Func<string,string> errorFunc=null)
 		{
 			try
 			{
@@ -382,8 +387,16 @@ namespace QTool
 			}
 			catch (Exception e)
 			{
-				Debug.LogError("错误数据:\n" + e + "\n" + base64Str);
-				return "";
+				if (errorFunc != null)
+				{
+					return ParseBase64String(errorFunc(base64Str));
+				}
+				else
+				{
+					GUIUtility.systemCopyBuffer = base64Str;
+					Debug.LogError("错误数据:\n" + e + "\n" + base64Str);
+					return "";
+				}
 			}
 		}
 		private static string GetString(string SourceString, string Key)
