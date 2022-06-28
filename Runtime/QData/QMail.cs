@@ -314,15 +314,23 @@ namespace QTool
 			From = GetString(mailStr, "From: ").Trim();
 			Cc = GetString(mailStr, "Cc: ").Trim(); 
 			To = GetString(mailStr, "To: ").Trim();
-			Date= GetString(mailStr, "Date: "); 
-			if (GetString(mailStr, "Content-Type: ") == "text/html; charset=utf-8")
+			Date= GetString(mailStr, "Date: ");
+			try
 			{
-				if (GetString(mailStr, "Content-Transfer-Encoding: ") == "base64")
+				if (GetString(mailStr, "Content-Type: ") == "text/html; charset=utf-8")
 				{
-					Body = ParseBase64String(mailStr.Substring(mailStr.IndexOf("base64") + 6).Trim());
-					return;
+					if (GetString(mailStr, "Content-Transfer-Encoding: ") == "base64")
+					{
+						Body = ParseBase64String(mailStr.Substring(mailStr.IndexOf("base64") + 6).Trim());
+						return;
+					}
 				}
 			}
+			catch (Exception e)
+			{
+				throw new Exception("解析邮件[" + Subject + "][" + Date + "]内容出错", e);
+			}
+		
 
 			//Body = "未能解析格式：\n" + mailStr;
 		}
