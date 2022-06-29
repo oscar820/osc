@@ -131,6 +131,7 @@ namespace QTool
 				else
 				{
 					Debug.LogError("不支持语言 [" + value + "]");
+					value = "english";
 				}
 			}
 			if (GlobalLanguage == value)
