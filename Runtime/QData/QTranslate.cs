@@ -121,6 +121,18 @@ namespace QTool
         public static void ChangeGlobalLanguage(string value)
         {
 			value = value.ToLower();
+			if (!TranslateKeys.ContainsKey(value))
+			{
+				var obj = TranslateKeys.Get(value, (item) => item.Name);
+				if (obj != null)
+				{
+					value = obj.Key;
+				}
+				else
+				{
+					Debug.LogError("不支持语言 [" + value + "]");
+				}
+			}
 			if (GlobalLanguage == value)
             {
                 OnLanguageChange?.Invoke();
