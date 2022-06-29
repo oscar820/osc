@@ -701,7 +701,6 @@ namespace QTool
 		public DateTime UpdateTime;
 		public QList<string> EventList = new QList<string>();
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
-		//public bool changed = false;
 		public void AddEvent(QAnalysisEvent eventData)
 		{
 
@@ -822,7 +821,7 @@ namespace QTool
 				var targetData = GetPlayerData().AnalysisData[setting.TargetKey];
 				if (setting.EventKey.EndsWith("开始"))
 				{
-					return  GetTimeSpan(QAnalysisData.GetEvent(EventList.StackPeek()), targetData.GetEndEvent(GetPlayerData().UpdateTime), out var hasend, eventData);
+					return  GetTimeSpan(QAnalysisData.GetEvent(EventList.StackPeek()), targetData.GetEndEvent(eventData.eventTime), out var hasend, eventData);
 				}
 				else if (setting.EventKey.EndsWith("结束"))
 				{
@@ -1152,13 +1151,11 @@ namespace QTool
 		public void FreshKey(string titleKey)
 		{
 			var info = AnalysisData[titleKey];
-			info.BufferData.Clear();
 			info.EventList.Clear();
+			info.BufferData.Clear();
 			var setting = QAnalysisData.TitleList[titleKey].DataSetting;
-			var index = 0;
 			foreach (var eventId in EventList)
 			{
-				index++;
 				var eventData = QAnalysisData.EventList[eventId];
 				if (eventData.eventKey == setting.EventKey)
 				{
