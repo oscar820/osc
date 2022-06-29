@@ -530,10 +530,12 @@ namespace QTool
 	
 		public void FreshKey(string titleKey)
 		{
-			foreach (var playerData in PlayerDataList)
+			for (int i = 0; i < PlayerDataList.Count; i++)
 			{
-				playerData.FreshKey(titleKey);
+				PlayerDataList[i].FreshKey(titleKey);
+				EditorUtility.DisplayProgressBar("刷新数据列[" + titleKey + "]", "玩家" + i + "/" + PlayerDataList.Count + ":" + PlayerDataList[i].Key, i * 1f / PlayerDataList.Count);
 			}
+			EditorUtility.ClearProgressBar();
 			SaveData();
 		}
 		public static void Clear(bool clearAll=false)
@@ -1156,14 +1158,13 @@ namespace QTool
 			var index = 0;
 			foreach (var eventId in EventList)
 			{
+				index++;
 				var eventData = QAnalysisData.EventList[eventId];
 				if (eventData.eventKey == setting.EventKey)
 				{
-					UnityEditor.EditorUtility.DisplayProgressBar("刷新数据列 " + titleKey, "添加事件" + index++ + "/" + EventList.Count, index * 1f / EventList.Count);
 					info.AddEvent(eventData);
 				}
 			}
-			UnityEditor.EditorUtility.ClearProgressBar();
 		}
 	}
 	public static class QGUITool
