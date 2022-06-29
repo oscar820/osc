@@ -1153,14 +1153,17 @@ namespace QTool
 			info.BufferData.Clear();
 			info.EventList.Clear();
 			var setting = QAnalysisData.TitleList[titleKey].DataSetting;
+			var index = 0;
 			foreach (var eventId in EventList)
 			{
 				var eventData = QAnalysisData.EventList[eventId];
 				if (eventData.eventKey == setting.EventKey)
 				{
+					UnityEditor.EditorUtility.DisplayProgressBar("刷新数据列 " + titleKey, "添加事件" + index++ + "/" + EventList.Count, index * 1f / EventList.Count);
 					info.AddEvent(eventData);
 				}
 			}
+			UnityEditor.EditorUtility.ClearProgressBar();
 		}
 	}
 	public static class QGUITool
