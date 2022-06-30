@@ -191,7 +191,7 @@ namespace QTool
 			}
             return value;
         }
-        //public static QDictionary<string, System.Func<string>> KeyReplace = new QDictionary<string, System.Func<string>>();
+        public static QDictionary<string, System.Func<string>> KeyReplace = new QDictionary<string, System.Func<string>>();
         static string TranslateKey(string value)
         {
             if (LanguageData.ContainsKey(value)&& LanguageData[value].HasValue(GlobalLanguage))
@@ -199,10 +199,10 @@ namespace QTool
                 var translate = LanguageData[value].GetValue<string>(GlobalLanguage);
 				return translate;
 			}
-            //else if(KeyReplace.ContainsKey(value))
-            //{
-            //    return KeyReplace[value]?.Invoke();
-            //}
+            else if(KeyReplace.ContainsKey(value))
+            {
+                return KeyReplace[value]?.Invoke();
+            }
             return value;
         }
         [ViewButton("翻译刷新")]
