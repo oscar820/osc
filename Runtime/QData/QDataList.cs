@@ -173,6 +173,7 @@ namespace QTool
                    
                 }
             }
+			Debug.Log("加载 " + addPath + "\n" + this);
         }
         public QDataList()
         {
