@@ -169,7 +169,7 @@ namespace QTool
             }
         }
 
-        public static string Translate(string value)
+        public static string Translate(string value,params QKeyValue<string,string>[] keyValues)
         {
             if (string.IsNullOrEmpty(value)) { return value; }
             value = TranslateKey(value);
@@ -178,10 +178,17 @@ namespace QTool
             while (start >= 0 && end >= 0)
             {
                 var key = value.Substring(start + 1, end - start - 1);
-                value = value.Replace("{" + key + "}", TranslateKey(key));
-                start = value.IndexOf('{');
-                end = value.IndexOf('}');
-            }
+				if (keyValues.ContainsKey(key))
+				{
+					value = value.Replace("{" + key + "}", keyValues.Get(key).Value);
+				}
+				else
+				{
+					value = value.Replace("{" + key + "}", TranslateKey(key));
+				}
+				start = value.IndexOf('{');
+				end = value.IndexOf('}');
+			}
             return value;
         }
         public static QDictionary<string, System.Func<string>> KeyReplace = new QDictionary<string, System.Func<string>>();
