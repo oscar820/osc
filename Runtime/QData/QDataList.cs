@@ -158,6 +158,10 @@ namespace QTool
 							}
 							else
 							{
+								if (ContainsKey(row.Key))
+								{
+									Debug.LogWarning(LoadPath + "加载覆盖 [" + row.Key + "]\n 旧数据 " + this[row.Key]+"\n 新数据 "+row);
+								}
 								Add(row);
 							}
 							
