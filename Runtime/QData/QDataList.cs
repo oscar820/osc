@@ -135,45 +135,50 @@ namespace QTool
 			{
 				Clear();
 			}
-            using (var reader = new StringReader(dataStr))
-            {
-				int rowIndex = 0;
-                int valueIndex = 0;
-                var row = new QDataRow(this);
-                while (!reader.IsEnd())
-                {
-                    var value = reader.ReadElement(out var newLine);
-                    row[valueIndex] = value;
-                    valueIndex++;
-                    if (newLine)
-                    {
-                        if (row.Count > 0)
-                        {
-							if(!string.IsNullOrEmpty(addPath)&& rowIndex == 0)
+			using (var keyInfo = new StringWriter())
+			{
+
+				using (var reader = new StringReader(dataStr))
+				{
+					int rowIndex = 0;
+					int valueIndex = 0;
+					var row = new QDataRow(this);
+					while (!reader.IsEnd())
+					{
+						var value = reader.ReadElement(out var newLine);
+						row[valueIndex] = value;
+						valueIndex++;
+						if (newLine)
+						{
+							if (row.Count > 0)
 							{
-								for (int i = 0; i < row.Count; i++)
+								if (!string.IsNullOrEmpty(addPath) && rowIndex == 0)
 								{
-									TitleRow[i] = row[i];
+									for (int i = 0; i < row.Count; i++)
+									{
+										TitleRow[i] = row[i];
+									}
 								}
-							}
-							else
-							{
-								if (ContainsKey(row.Key))
+								else
 								{
-									Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 "+ addPath+"\n旧数据: " + this[row.Key]+"\n新数据: "+row);
+									if (ContainsKey(row.Key))
+									{
+										Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addPath + "\n旧数据: " + this[row.Key] + "\n新数据: " + row);
+									}
+									Add(row);
 								}
-								Add(row);
+								keyInfo.Write(row.Key);
+								keyInfo.Write('\t');
 							}
-							
-                        }
-                        valueIndex = 0;
-						rowIndex++;
-						row = new QDataRow(this);
-                    }
-                   
-                }
-            }
-			Debug.Log("加载"+nameof(QDataList) +":"+ addPath + "\n" + this);
+							valueIndex = 0;
+							rowIndex++;
+							row = new QDataRow(this);
+						}
+
+					}
+				}
+				Debug.Log("加载" + nameof(QDataList) + ":" + addPath + "\n" + keyInfo.ToString());
+			}
         }
         public QDataList()
         {
