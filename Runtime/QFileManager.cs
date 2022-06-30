@@ -232,7 +232,14 @@ namespace QTool
 					var texts= Resources.LoadAll<TextAsset>(loadPath);
 					foreach (var text in texts)
 					{
-						action(text.text,loadPath); 
+						action(text.text,
+#if UNITY_EDITOR
+							UnityEditor.AssetDatabase.GetAssetPath(text)
+
+#else
+							text.name
+#endif
+							); 
 					} 
 				}
 				catch (Exception e)
