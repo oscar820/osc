@@ -173,7 +173,7 @@ namespace QTool
                    
                 }
             }
-			Debug.Log("加载 " + addPath + "\n" + this);
+			Debug.Log("加载"+nameof(QDataList) +":"+ addPath + "\n" + this);
         }
         public QDataList()
         {
