@@ -161,11 +161,14 @@ namespace QTool
 								}
 								else
 								{
-									if (ContainsKey(row.Key))
+									if (!string.IsNullOrEmpty(row.Key))
 									{
-										Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addPath + "\n旧数据: " + this[row.Key] + "\n新数据: " + row);
+										if (ContainsKey(row.Key))
+										{
+											Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addPath + "\n旧数据: " + this[row.Key] + "\n新数据: " + row);
+										}
+										Add(row);
 									}
-									Add(row);
 								}
 								keyInfo.Write(row.Key);
 								keyInfo.Write('\t');
