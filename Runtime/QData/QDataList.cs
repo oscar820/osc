@@ -13,6 +13,11 @@ namespace QTool
 		}
 		public static T Get(string key)
 		{
+			if (string.IsNullOrEmpty(key))
+			{
+				Debug.LogError("key 为空");
+				return null;
+			}
 			key = key.Trim();
 			var value= list[key]; ;
 			if (value == null)
