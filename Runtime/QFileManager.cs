@@ -222,7 +222,7 @@ namespace QTool
            
         }
 
-		public static void LoadAll(string path,Action<string> action, string defaultValue = "")
+		public static void LoadAll(string path,Action<string,string> action, string defaultValue = "")
 		{
 			if (path.StartsWith(ResourcesRoot))
 			{
@@ -232,7 +232,7 @@ namespace QTool
 					var texts= Resources.LoadAll<TextAsset>(loadPath);
 					foreach (var text in texts)
 					{
-						action(text.text); 
+						action(text.text,loadPath); 
 					} 
 				}
 				catch (Exception e)
@@ -244,13 +244,13 @@ namespace QTool
 			{
 				if (File.Exists(path))
 				{
-					action(Load(path, defaultValue));
+					action(Load(path, defaultValue), path);
 				}
 				else
 				{
 					path.ForeachDirectoryFiles((filePath) =>
 					{
-						action(Load(filePath, defaultValue));
+						action(Load(filePath, defaultValue),filePath);
 					});
 				}
 			}

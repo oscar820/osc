@@ -54,9 +54,9 @@ namespace QTool
 					{
 						var data = new QDataList();
 						data.LoadPath = path;
-						FileManager.LoadAll(path, (fileValue) =>
+						FileManager.LoadAll(path, (fileValue,loadPath) =>
 						{
-							data.Parse(fileValue, path);
+							data.Parse(fileValue, loadPath);
 						}, "{}");
 						return data;
 					}
