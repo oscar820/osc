@@ -793,7 +793,7 @@ namespace QTool
 					break;
 				case QAnalysisMode.最新时长:
 					{
-						BufferData[eventData.eventId] = GetLastTimeSpan(eventData);
+						BufferData[eventData.eventId] = GetTimeSpan(eventData);
 					}
 					break;
 				case QAnalysisMode.总时长:
@@ -803,7 +803,7 @@ namespace QTool
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (TimeSpan)BufferData[BufferData.Count-1].Value + GetLastTimeSpan(eventData);
+						BufferData[eventData.eventId] = (TimeSpan)BufferData[BufferData.Count-1].Value + GetTimeSpan(eventData);
 					}
 					break;
 				default:
@@ -813,7 +813,7 @@ namespace QTool
 			UpdateTime = eventData.eventTime;
 			EventList.AddCheckExist(eventData.Key);
 		}
-		TimeSpan GetLastTimeSpan(QAnalysisEvent eventData)
+		TimeSpan GetTimeSpan(QAnalysisEvent eventData)
 		{
 			var setting = QAnalysisData.TitleList[Key].DataSetting;
 			if (EventList.Count > 0)
@@ -825,7 +825,9 @@ namespace QTool
 				}
 				else if (setting.EventKey.EndsWith("结束"))
 				{
-					return GetTimeSpan(targetData.GetEndEvent(eventData.eventTime), eventData, out var hasend);
+					var startEvent = targetData.GetEndEvent(eventData.eventTime);
+					var nextEvent =QAnalysisData.GetEvent( targetData.EventList[targetData.EventList.IndexOf(startEvent.eventId) + 1]);
+					return GetTimeSpan(startEvent, eventData, out var hasend, nextEvent);
 				}
 			}
 			return TimeSpan.Zero;
