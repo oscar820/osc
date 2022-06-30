@@ -129,9 +129,9 @@ namespace QTool
                 return base[index];
             }
         }
-       public void Parse(string dataStr,bool clear=true)
+       public void Parse(string dataStr,string addPath=null)
         {
-			if (clear)
+			if (string.IsNullOrEmpty( addPath))
 			{
 				Clear();
 			}
@@ -149,7 +149,7 @@ namespace QTool
                     {
                         if (row.Count > 0)
                         {
-							if(!clear&&rowIndex == 0)
+							if(!string.IsNullOrEmpty(addPath)&& rowIndex == 0)
 							{
 								for (int i = 0; i < row.Count; i++)
 								{
@@ -160,7 +160,7 @@ namespace QTool
 							{
 								if (ContainsKey(row.Key))
 								{
-									Debug.LogWarning(LoadPath + "加载覆盖 [" + row.Key + "]\n 旧数据 " + this[row.Key]+"\n 新数据 "+row);
+									Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 "+ addPath+"\n旧数据: " + this[row.Key]+"\n新数据: "+row);
 								}
 								Add(row);
 							}
