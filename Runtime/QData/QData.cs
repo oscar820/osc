@@ -404,49 +404,49 @@ namespace QTool
 				case TypeCode.Int16:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return short.Parse(ReadValueString(reader));
 				case TypeCode.Int32:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return int.Parse(ReadValueString(reader));
 				case TypeCode.Int64:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return long.Parse(ReadValueString(reader));
 				case TypeCode.SByte:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return sbyte.Parse(ReadValueString(reader));
 				case TypeCode.Byte:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return byte.Parse(ReadValueString(reader));
 				case TypeCode.UInt16:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return ushort.Parse(ReadValueString(reader));
 				case TypeCode.UInt32:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return uint.Parse(ReadValueString(reader));
 				case TypeCode.UInt64:
 					if (type.IsEnum)
 					{
-						return type.ParseEnum(ReadCheckString(reader));
+						return type.ParseEnum(ReadCheckString(reader,","));
 					}
 					return ulong.Parse(ReadValueString(reader));
 				default:
@@ -459,7 +459,7 @@ namespace QTool
 		const string BlockStart = "<{[\"";
 		const string BlockEnd = ">}]\",;=:";
 		static Stack<char> BlockStack = new Stack<char>();
-		public static string ReadValueString(this StringReader reader)
+		public static string ReadValueString(this StringReader reader,string ignore="")
 		{
 			return Tool.BuildString((writer) =>
 			{
@@ -472,7 +472,7 @@ namespace QTool
 						var c = (char)reader.Peek();
 						if (BlockStack.Count == 0)
 						{
-							if (BlockEnd.IndexOf(c) >= 0)
+							if (ignore.IndexOf(c)<0&& BlockEnd.IndexOf(c) >= 0)
 							{
 								break;
 							}
@@ -543,7 +543,7 @@ namespace QTool
 				writer.Write("\"");
 			}
 		}
-		public static string ReadCheckString(this StringReader reader)
+		public static string ReadCheckString(this StringReader reader,string ignore="")
 		{
 			if (reader.NextIs('\"'))
 			{
@@ -588,7 +588,7 @@ namespace QTool
 			}
 			else
 			{
-				return ReadValueString(reader);
+				return ReadValueString(reader, ignore);
 			}
 		}
 

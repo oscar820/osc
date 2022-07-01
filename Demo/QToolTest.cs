@@ -190,6 +190,9 @@ namespace QTool.Test
         [ViewButton("QDataList测试")]
         public void QDataTest()
         {
+			var enumValue = TestEnum.攻击 | TestEnum.死亡;
+
+			Debug.LogError(enumValue.ToQData() + "  :  " + enumValue.ToQData().Trim('\"').ParseQData<TestEnum>());
             var data = new QDataList(QDataStr);
             Debug.LogError(data.ToString());
             data[2].SetValue("3", "2 3");
@@ -215,6 +218,7 @@ namespace QTool.Test
         }
 		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
 		{
+			public TestEnum testEnum;
 			public string Key { get ; set ; }
 			[ViewName("数值")]
 			[ViewEnum(nameof(QDataListTestType)+".get_list")]
