@@ -213,6 +213,14 @@ namespace QTool.FlowGraph
 						}
 						else
 						{
+							var portObj = this[port];
+							if (portObj != null && !portObj.isOutput && portObj.InputPort.autoRunNode)
+							{
+								if (!portObj.Node.IsRunning)
+								{
+									Run(portObj.Node.Key);
+								}
+							}
 							this[port.Value.node].TriggerPort(port.Value);
 							curNode = null; ;
 						}
@@ -271,7 +279,7 @@ namespace QTool.FlowGraph
     }
 	public abstract class QPortAttribute : Attribute
 	{
-
+		public bool autoRunNode = false;
 	}
 	/// <summary>
 	///  指定参数端口为输入端口
@@ -293,8 +301,11 @@ namespace QTool.FlowGraph
 		{
 			this.autoGetValue = autoGetValue;
 		}
+		public QInputPortAttribute(bool autoRunNode )
+		{
+			this.autoRunNode = autoRunNode;
+		}
 	}
-	
 	/// <summary>
 	///  指定参数端口为输出端口
 	/// </summary>
@@ -303,7 +314,7 @@ namespace QTool.FlowGraph
 	{
         public static QOutputPortAttribute Normal = new QOutputPortAttribute();
 
-        public bool autoRunNode=false;
+       
         public QOutputPortAttribute(bool autoRunNode=false)
         {
 			this.autoRunNode = autoRunNode;
@@ -824,7 +835,14 @@ namespace QTool.FlowGraph
                             OutParamPorts.Add(port);
                         }
                     }
-                }
+				}
+				else
+				{
+					if (port.InputPort.autoRunNode)
+					{
+						Ports.RemoveKey(QFlowKey.FromPort);
+					}
+				}
 				if (port.KeyNameAttribute != null)
 				{
 					if (port.Value != null)

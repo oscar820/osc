@@ -137,13 +137,15 @@ namespace QTool.FlowGraph
 			
 		}
 		[ViewName("分支/全部完成")]
-		public static IEnumerator AllOver(QFlowNode This,List<QFlow> branchs)
+		
+		public static IEnumerator AllOver(QFlowNode This,[QInputPort(true)]List<QFlow> branchs)
 		{
 			List<int> taskList = new List<int> { };
 			for (int i = 0; i < branchs.Count; i++)
 			{
 				taskList.Add(i);
 			}
+			Debug.Log("全部完成节点开始：[" + taskList.ToOneString("|")+"]");
 			This.TriggerPortList.Clear();
 			while (taskList.Count > 0)
 			{
@@ -152,11 +154,13 @@ namespace QTool.FlowGraph
 					if (port.port == nameof(branchs))
 					{
 						taskList.Remove(port.index);
+						Debug.Log("完成["+port.index+"]剩余[" + taskList.ToOneString("|") + "]");
 					}
 				}
 				This.TriggerPortList.Clear();
 				yield return null;
 			}
+			Debug.Log("全部完成");
 		}
 	}
 }
