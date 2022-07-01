@@ -119,5 +119,22 @@ namespace QTool.FlowGraph
 				This.SetNetFlowPort(nameof(False));
 			}
 		}
+		[ViewName("分支/异步分支")]
+		public static void AsyncBranch(QFlowNode This, [ QOutputPort]List<QFlow> branchs)
+		{
+			for (int i = 0; i < branchs.Count; i++)
+			{
+				if (i == 0)
+				{
+					This.SetNetFlowPort(nameof(branchs), i);
+				}
+				else
+				{
+					This.RunPort(nameof(branchs), i);
+				}
+
+			}
+			
+		}
 	}
 }

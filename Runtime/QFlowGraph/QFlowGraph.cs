@@ -951,15 +951,15 @@ namespace QTool.FlowGraph
         {
             TriggerPortList.AddCheckExist(port);
         }
-        public void RunPort(string portKey)
+        public void RunPort(string portKey,int index=0)
         {
-            Graph.StartCoroutine(Key,RunPortIEnumerator(portKey));
+            Graph.StartCoroutine(Key,RunPortIEnumerator(portKey,index));
         }
-        public IEnumerator RunPortIEnumerator(string portKey)
+        public IEnumerator RunPortIEnumerator(string portKey, int index = 0)
         {
             if (Ports.ContainsKey(portKey))
             {
-                var node = Graph[ Ports[portKey].ConnectInfo.ConnectPort()].Node;
+                var node = Graph[ Ports[portKey][index].ConnectPort()].Node;
                 return node.Graph.RunIEnumerator(node.Key);
             }
             else
