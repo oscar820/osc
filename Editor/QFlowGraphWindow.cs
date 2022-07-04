@@ -312,7 +312,7 @@ namespace QTool.FlowGraph
                 {
                     node.rect.position -= ViewRange.position;
                     var lastColor = GUI.backgroundColor;
-                    GUI.backgroundColor = node.commandKey.ToColor(SelectNodes.Contains(node) ? 0.8f : 0.4f);
+                    GUI.backgroundColor =Color.Lerp( node.commandKey.ToColor(SelectNodes.Contains(node) ? 0.8f : 0.4f),Color.green,node.IsRunning?0.8f:0f);
                     node.rect = GUI.Window(i, node.rect, DrawNode, node.ViewName);
                     GUI.backgroundColor = lastColor;
                     node.rect.position += ViewRange.position;
@@ -551,34 +551,34 @@ namespace QTool.FlowGraph
             GUI.DragWindow();
 
         }
-        void DrawCurve(Vector2 start, Vector2 end,Color color)
+        void DrawCurve(Vector2 start, Vector2 end,Color color,bool isFlow=false)
         {
             if (!ViewRange.Contains(start) &&!ViewRange.Contains(end)) return;
+			if (isFlow)
+			{
+				DrawCurve(start + Vector2.up * 2, end + Vector2.up * 2, color);
+				DrawCurve(start + Vector2.down * 2, end + Vector2.down *2, color);
+			}
 			start -= ViewRange.position;
 			end -= ViewRange.position;
 			if (Vector3.Distance(start, end) < 0.1f)
 			{
 				return;
 			}
-			if (end.x >= start.x)
-			{
-				float size = (end.x- start.x)/  2;
-				Handles.DrawBezier(start, end, start + Vector2.right * size, end + Vector2.left * size, color, null, 3f);
-			}
-			else
-			{
-				var yMax = Mathf.Min(end.y, start.y) - 100;
-				Handles.DrawBezier(start, end, new Vector2(start.x+100, yMax), new Vector2(end.x-100, yMax), color, null, 3f);
-			}
-         
-        }
+			float size = (end.x - start.x) / 2;
+			var yMax = Mathf.Min(end.y, start.y) - 100;
+			var t = Mathf.Clamp(start.x - end.x, 0, 100) / 100;
+			var startOffset = Vector2.Lerp(start + Vector2.right * size, new Vector2(start.x + 100, yMax),t );
+			var endOffset= Vector2.Lerp(end + Vector2.left * size, new Vector2(end.x - 100, yMax), t);
+			Handles.DrawBezier(start, end, startOffset, endOffset, color, null, 3f);
+		}
         public void DrawCurve()
         {
             if (connectStartPort!=null)
             {
                 var connectInfo = Graph.GetConnectInfo(connectStartPort);
                 var color = GetTypeColor(Graph[connectStartPort].ConnectType);
-                DrawCurve(connectInfo.rect.center, mousePos, color);
+                DrawCurve(connectInfo.rect.center, mousePos, color, Graph[connectStartPort].ConnectType==typeof(QFlow));
                 DrawDot(mousePos - ViewRange.position, dotSize*0.8f, color);
                 if (nearPortId != null)
                 {
@@ -599,7 +599,7 @@ namespace QTool.FlowGraph
                                 var next = Graph.GetConnectInfo(connect);
                                 if (next != null)
                                 {
-                                    DrawCurve(c.rect.center, next.rect.center, color);
+                                    DrawCurve(c.rect.center, next.rect.center, color, port.ConnectType==typeof(QFlow));
                                 }
                             }
                         }
