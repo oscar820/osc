@@ -460,7 +460,7 @@ namespace QTool.FlowGraph
             {
                 if (FlowPort == null)
                 {
-                    return !isOutput && ConnectInfo.ConnectList.Count == 0&&!InputPort.HasValue;
+                    return !isOutput && ConnectInfo.ConnectList!=null&& ConnectInfo.ConnectList.Count == 0&&!InputPort.HasValue;
                 }
                 else
                 {
