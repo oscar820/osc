@@ -190,6 +190,7 @@ namespace QTool.Test
         [ViewButton("QDataList测试")]
         public void QDataTest()
         {
+			Debug.LogError("\"aslkdasdj,asldjl\"".ParseElement());
 			var enumValue = TestEnum.攻击 | TestEnum.死亡;
 
 			Debug.LogError(enumValue.ToQData() + "  :  " + enumValue.ToQData().Trim('\"').ParseQData<TestEnum>());

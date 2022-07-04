@@ -517,8 +517,7 @@ namespace QTool
 			}
 			catch (Exception e)
 			{
-
-				throw e;
+				Debug.LogError(e);
 			}
 			finally
 			{
@@ -799,7 +798,7 @@ namespace QTool
 				case QAnalysisMode.总时长:
 					if (BufferData.Count == 0)
 					{
-						BufferData[eventData.eventId] = TimeSpan.Zero;
+						BufferData[eventData.eventId] = GetTimeSpan(eventData);
 					}
 					else
 					{
@@ -816,25 +815,22 @@ namespace QTool
 		TimeSpan GetTimeSpan(QAnalysisEvent eventData)
 		{
 			var setting = QAnalysisData.TitleList[Key].DataSetting;
-			if (EventList.Count > 0)
+			var targetData = GetPlayerData(eventData).AnalysisData[setting.TargetKey];
+			if (setting.EventKey.EndsWith("开始"))
 			{
-				var targetData = GetPlayerData().AnalysisData[setting.TargetKey];
-				if (setting.EventKey.EndsWith("开始"))
-				{
-					return  GetTimeSpan(QAnalysisData.GetEvent(EventList.StackPeek()), targetData.GetEndEvent(eventData.eventTime), out var hasend, eventData);
-				}
-				else if (setting.EventKey.EndsWith("结束"))
-				{
-					var startEvent = targetData.GetEndEvent(eventData.eventTime);
-					var nextEvent =QAnalysisData.GetEvent( targetData.EventList[targetData.EventList.IndexOf(startEvent.eventId) + 1]);
-					return GetTimeSpan(startEvent, eventData, out var hasend, nextEvent);
-				}
+				return GetTimeSpan(QAnalysisData.GetEvent(EventList.StackPeek()), targetData.GetEndEvent(eventData.eventTime), out var hasend, eventData);
+			}
+			else if (setting.EventKey.EndsWith("结束"))
+			{
+				var startEvent = targetData.GetEndEvent(eventData.eventTime);
+				var nextEvent =QAnalysisData.GetEvent( targetData.EventList[targetData.EventList.IndexOf(startEvent.eventId) + 1]);
+				return GetTimeSpan(startEvent, eventData, out var hasend, nextEvent);
 			}
 			return TimeSpan.Zero;
 		}
-		QPlayerData GetPlayerData()
+		QPlayerData GetPlayerData(QAnalysisEvent eventData)
 		{
-			return QAnalysisData.Instance.PlayerDataList[QAnalysisData.GetEvent(EventList.StackPeek()).playerId];
+			return QAnalysisData.Instance.PlayerDataList[eventData.playerId];
 		}
 		enum TimeState
 		{
@@ -879,7 +875,7 @@ namespace QTool
 				else if (pauseCount == 0)
 				{
 					state = TimeState.暂离时长;
-					return GetPlayerData().UpdateTime - startData.eventTime;
+					return GetPlayerData(startData==null?endData:startData).UpdateTime - startData.eventTime;
 				}
 				else
 				{
