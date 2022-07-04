@@ -108,7 +108,7 @@ namespace QTool.FlowGraph
 		}
 
 		[ViewName("分支/判断分支")]
-		public static void BoolCheck(QFlowNode This, bool boolValue, [QFlowPort, QOutputPort] bool True, [QFlowPort,QOutputPort] object False)
+		public static void BoolCheck(QFlowNode This, bool boolValue, [QOutputPort] QFlow True, [QOutputPort] QFlow False)
 		{
 			if (boolValue)
 			{
