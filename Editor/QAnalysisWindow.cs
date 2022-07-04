@@ -132,7 +132,7 @@ namespace QTool
 			}
 			if (y == 0)
 			{
-				return Titles[x].ViewKey;
+				return ViewInfoStack.Count==0? Titles[x].Key : Titles[x].Key.SplitEndString(ViewEvent+"/");
 			}
 			if (string.IsNullOrWhiteSpace(ViewPlayer))
 			{
@@ -276,26 +276,7 @@ namespace QTool
 				}
 				if (DrawButton("复制表格数据"))
 				{
-					GUIUtility.systemCopyBuffer =Tool.BuildString((writer) =>
-					{
-						writer.Write("玩家Id\t");
-						QAnalysisData.ForeachTitle((title) =>
-						{
-							writer.Write(title.Key.SplitEndString("/"));
-							writer.Write("\t");
-						});
-						writer.Write("\n");
-						foreach (var playerData in QAnalysisData.Instance.PlayerDataList)
-						{
-							writer.Write(playerData.Key + "\t");
-							QAnalysisData.ForeachTitle((title) =>
-							{
-								writer.Write(playerData.AnalysisData[title.Key].GetValue()?.ToString().ToElement());
-								writer.Write("\t");
-							});
-							writer.Write("\n");
-						}
-					});
+					GUIUtility.systemCopyBuffer = GridView.Copy();
 					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功", "确认");
 				}
 				var lastRect = GUILayoutUtility.GetLastRect();
@@ -591,21 +572,17 @@ namespace QTool
 	public class QTitleInfo:IKey<string>
 	{
 		public string Key { get; set; }
-		string _viewKey = null;
-		public string ViewKey => _viewKey ??= Key.SplitEndString("/") + "\n<size=8>" + DataSetting + "</size>";
 		public float width = 100;
 
 
 		public QAnalysisSetting DataSetting = new QAnalysisSetting();
 		public void ChangeMode(string modeKey)
 		{
-			_viewKey = null;
 			DataSetting.mode=(QAnalysisMode) Enum.Parse(typeof(QAnalysisMode), modeKey);
 			QAnalysisData.Instance.FreshKey(Key);
 		}
 		public void ChangeEvent(string eventKey)
 		{
-			_viewKey = null;
 			DataSetting.DataKey = eventKey;
 			QAnalysisData.Instance.FreshKey(Key);
 		}

@@ -27,6 +27,18 @@ namespace QTool
 			this.ClickCell = ClickCell;
 		}
 		readonly static Vector2 DefualtCellSize = new Vector2(100, 30);
+		public string Copy()
+		{
+			var qdata = new QDataList();
+			for (int i = 0; i < GridSize.x; i++)
+			{
+				for (int j = 0; j < GridSize.y; j++)
+				{
+					qdata[j][i] = GetStringValue(i, j);
+				}
+			}
+			return qdata.ToString();
+		}
 		public float GetWidth(int x = 0)
 		{
 			return Mathf.Max(CellWidth[x], 100);
