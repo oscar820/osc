@@ -823,7 +823,7 @@ namespace QTool
 			else if (setting.EventKey.EndsWith("结束"))
 			{
 				var startEvent = targetData.GetEndEvent(eventData.eventTime);
-				var nextEvent =QAnalysisData.GetEvent( targetData.EventList[targetData.EventList.IndexOf(startEvent.eventId) + 1]);
+				var nextEvent = startEvent!=null? QAnalysisData.GetEvent( targetData.EventList[targetData.EventList.IndexOf(startEvent.eventId) + 1]):null;
 				return GetTimeSpan(startEvent, eventData, out var hasend, nextEvent);
 			}
 			return TimeSpan.Zero;
