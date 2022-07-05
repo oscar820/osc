@@ -208,7 +208,10 @@ namespace QTool
 											{
 												target = ReadType(reader, runtimeType, hasName);
 											}
-											reader.NextIs('}');
+											while (!reader.NextIs('}'))
+											{
+												reader.Read();
+											}
 
 										}
 										else if (typeInfo.IsUnityObject)
@@ -237,29 +240,27 @@ namespace QTool
 
 													if (!(reader.NextIs(':') || reader.NextIs('=')))
 													{
-														 Debug.LogError(name+" 后缺少分隔符 : 或 =  忽略"+name);
+														throw new Exception(name+" 后缺少分隔符 : 或 =\n"+reader.ReadLine());
+													}
+													if (memeberInfo != null)
+													{
+														try
+														{
+															result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
+															memeberInfo.Set(target, result);
+
+														}
+														catch (Exception e)
+														{
+															Debug.LogError("读取成员【" +name+":"+ type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+															throw e;
+														}
 													}
 													else
 													{
-														if (memeberInfo != null)
-														{
-															try
-															{
-																result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
-																memeberInfo.Set(target, result);
-
-															}
-															catch (Exception e)
-															{
-																Debug.LogError("读取成员【" + name + ":" + type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
-																throw e;
-															}
-														}
-														else
-														{
-															Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadCheckString());
-														}
+														Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadCheckString());
 													}
+
 													if (!(reader.NextIs(';') || reader.NextIs(',')))
 													{
 														if (reader.NextIs('}'))
