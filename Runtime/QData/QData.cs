@@ -650,7 +650,7 @@ namespace QTool
 						try
 						{
 							var value = row[i].ParseElement();
-							member.Set(t, value.ParseQDataType(member.Type, value.Contains("\":\"")));
+							member.Set(t, value.ParseQDataType(member.Type, value.Contains("\""+titleRow[i]+"\":")));
 						}
 						catch (System.Exception e)
 						{
