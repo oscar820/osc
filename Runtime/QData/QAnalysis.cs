@@ -124,8 +124,12 @@ namespace QTool
 				{
 					Application.Quit();
 				});
+				return false;
 			}
-			return false;
+			else
+			{
+				return true;
+			}
 		}
 		static Task stopTask = null;
 		static Task sendTask = null;
