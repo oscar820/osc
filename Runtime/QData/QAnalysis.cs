@@ -16,7 +16,6 @@ namespace QTool
 			错误日志,
 		}
 		public static string PlayerId { private set; get; }
-		const string Version = "1";
 		public static bool InitOver
 		{
 			get
@@ -142,7 +141,7 @@ namespace QTool
 			PlayerId = null;
 			stopTask = null;
 		}
-		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName+"_"+ Version;
+		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
 		public static string EventListKey => StartKey + "_" + nameof(EventList);
 	
 		static async Task SendAndClear()
