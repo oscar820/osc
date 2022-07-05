@@ -226,6 +226,13 @@ namespace QTool
 											{
 												target = QReflection.CreateInstance(type, target);
 											}
+											if (!hasName)
+											{
+												if (!(typeInfo.Members.Count>0&&typeInfo.Members[0].Type==typeof(string))&&reader.Peek() == '\"')
+												{
+													hasName = true;
+												}
+											}
 											if (hasName)
 											{
 												while (!reader.IsEnd())
