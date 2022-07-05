@@ -638,7 +638,6 @@ namespace QTool
 			var memeberList = new List<QMemeberInfo>();
 			foreach (var title in titleRow)
 			{
-				if (string.IsNullOrWhiteSpace(title)) continue;
 				var member = typeInfo.GetMemberInfo(title);
 				if (member == null)
 				{
