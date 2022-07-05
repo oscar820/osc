@@ -226,13 +226,6 @@ namespace QTool
 											{
 												target = QReflection.CreateInstance(type, target);
 											}
-											if (!hasName)
-											{
-												if (!(typeInfo.Members.Count>0&&typeInfo.Members[0].Type==typeof(string))&&reader.Peek() == '\"')
-												{
-													hasName = true;
-												}
-											}
 											if (hasName)
 											{
 												while (!reader.IsEnd())
@@ -656,7 +649,8 @@ namespace QTool
 					{
 						try
 						{
-							member.Set(t, row[i].ParseElement().ParseQDataType(member.Type, false));
+							var value = row[i].ParseElement();
+							member.Set(t, value.ParseQDataType(member.Type, value.Contains("\":\"")));
 						}
 						catch (System.Exception e)
 						{
