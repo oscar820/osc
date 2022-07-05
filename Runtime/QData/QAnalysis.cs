@@ -16,6 +16,7 @@ namespace QTool
 			错误日志,
 		}
 		public static string PlayerId { private set; get; }
+		const string Version = "1";
 		public static bool InitOver
 		{
 			get
@@ -75,9 +76,9 @@ namespace QTool
 					{
 						if(condition.Contains(nameof(StackOverflowException)))
 						{
-							if (stackTrace.Length > 100)
+							if (stackTrace.Length > 300)
 							{
-								stackTrace = stackTrace.Substring(0, 100);
+								stackTrace = stackTrace.Substring(0, 300);
 							}
 						}
 						errorInfoList.Add(condition);
@@ -141,7 +142,7 @@ namespace QTool
 			PlayerId = null;
 			stopTask = null;
 		}
-		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName;
+		public static string StartKey => nameof(QAnalysis) + "_" + Application.productName+"_"+ Version;
 		public static string EventListKey => StartKey + "_" + nameof(EventList);
 	
 		static async Task SendAndClear()
@@ -169,7 +170,7 @@ namespace QTool
 						EventList.Clear();
 						PlayerPrefs.DeleteKey(EventListKey);
 					}
-					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName + "_" + PlayerId, data))
+					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName +"_"+ EventList[0].eventId, data))
 					{
 						lock (EventList)
 						{
@@ -187,6 +188,13 @@ namespace QTool
 		static List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
 		public static void Trigger(string eventKey,object value=null)
 		{
+
+#if UNITY_EDITOR
+			if (!PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))
+			{
+				return;
+			}
+#endif
 			if (InitOver)
 			{
 				try

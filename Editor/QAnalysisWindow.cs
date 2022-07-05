@@ -32,6 +32,69 @@ namespace QTool
 				GridView = new QGridView(GetValue, GetSize, ClickCell);
 			}
 		}
+		private void OnGUI()
+		{
+
+			using (new GUILayout.HorizontalScope())
+			{
+				if (QAnalysisData.IsLoading)
+				{
+					GUI.enabled = false;
+				}
+				if (ViewInfoStack.Count > 0)
+				{
+					if (DrawButton("返回"))
+					{
+						ViewBack();
+					}
+				}
+				var editorTest = PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest");
+				var newValue = GUILayout.Toggle(editorTest, "编辑器测试", GUILayout.Width(100));
+				if (newValue != editorTest)
+				{
+					if (newValue)
+					{
+						PlayerPrefs.SetString(nameof(QAnalysis) + "_EditorTest", "true");
+					}
+					else
+					{
+						PlayerPrefs.DeleteKey(nameof(QAnalysis) + "_EditorTest");
+					}
+				}
+				if (DrawButton("刷新数据"))
+				{
+					FreshData();
+				}
+				if (DrawButton("重新获取数据"))
+				{
+					QAnalysisData.Clear();
+					FreshData();
+				}
+				if (DrawButton("重置数据表"))
+				{
+					if (EditorUtility.DisplayDialog("重置数据表", "将会清空所有本地信息\n包含列信息设置", "确认", "取消"))
+					{
+						QAnalysisData.Clear(true);
+						FreshData();
+					}
+				}
+				if (DrawButton("复制表格数据"))
+				{
+					GUIUtility.systemCopyBuffer = GridView.Copy();
+					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功", "确认");
+				}
+			
+				var lastRect = GUILayoutUtility.GetLastRect();
+				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.width, lastRect.yMax));
+				if (QAnalysisData.IsLoading)
+				{
+					GUI.enabled = true;
+					GUILayout.Label("加载中..", QGUITool.BackStyle);
+				}
+			}
+			GridView.DoLayout(Repaint);
+		}
+
 		public bool ClickCell(int x,int y,int button)
 		{
 			var change = false;
@@ -240,56 +303,7 @@ namespace QTool
 				FreshView();
 			}
 		}
-		private void OnGUI()
-		{
-		
-			using (new GUILayout.HorizontalScope())
-			{
-				if (QAnalysisData.IsLoading)
-				{
-					GUI.enabled = false;
-				}
-				if (ViewInfoStack.Count > 0)
-				{
-					if (DrawButton( "返回"))
-					{
-						ViewBack();
-					}
-				}
-
-				if (DrawButton("刷新数据"))
-				{
-					FreshData();
-				}
-				if (DrawButton("重新获取数据"))
-				{
-					QAnalysisData.Clear();
-					FreshData();
-				}
-				if (DrawButton("重置数据表"))
-				{
-					if (EditorUtility.DisplayDialog("重置数据表", "将会清空所有本地信息\n包含列信息设置", "确认","取消"))
-					{
-						QAnalysisData.Clear(true);
-						FreshData();
-					}
-				}
-				if (DrawButton("复制表格数据"))
-				{
-					GUIUtility.systemCopyBuffer = GridView.Copy();
-					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功", "确认");
-				}
-				var lastRect = GUILayoutUtility.GetLastRect();
-				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.width, lastRect.yMax));
-				if (QAnalysisData.IsLoading)
-				{
-					GUI.enabled = true;
-					GUILayout.Label( "加载中..", QGUITool.BackStyle);
-				}
-			}
-			GridView.DoLayout(Repaint);
-		}
-		
+	
 		const float CellHeight=36;
 		const float KeyWidth = 260;
 		public bool DrawButton(string name)
