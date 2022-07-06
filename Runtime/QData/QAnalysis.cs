@@ -214,10 +214,10 @@ namespace QTool
 						eventKey = eventKey, 
 						eventValue = value, 
 					};
-					lock(EventList){
+					//lock(EventList){
 						EventList.Add(eventData);
 						PlayerPrefs.SetString(EventListKey, EventList.ToQData());
-					}
+				//	}
 					Debug.Log(StartKey + " 触发事件 " + eventData);
 					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
 					{
