@@ -120,16 +120,12 @@ namespace QTool
 			if (stopTask==null)
 			{
 				stopTask = Stop();
-				stopTask.GetAwaiter().OnCompleted(() =>
-				{
-					Application.Quit();
-				});
-				return false;
 			}
-			else
+			stopTask.GetAwaiter().OnCompleted(() =>
 			{
-				return true;
-			}
+				Application.Quit();
+			});
+			return false;
 		}
 		static Task stopTask = null;
 		static Task sendTask = null;
@@ -199,7 +195,7 @@ namespace QTool
 		{
 
 #if UNITY_EDITOR
-			if (!PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))
+			if (Application.isEditor&& !PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))
 			{
 				return;
 			}
