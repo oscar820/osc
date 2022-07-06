@@ -168,6 +168,7 @@ namespace QTool
 				{
 					List<QAnalysisEvent> tempList = new List<QAnalysisEvent>();
 					var data = "";
+					var id = EventList.QueuePeek()?.eventId;
 					lock (EventList)
 					{
 						tempList.AddRange(EventList);
@@ -175,7 +176,7 @@ namespace QTool
 						EventList.Clear();
 						PlayerPrefs.DeleteKey(EventListKey);
 					}
-					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName +"_"+ EventList[0].eventId, data))
+					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName +"_"+ id, data))
 					{
 						lock (EventList)
 						{
@@ -214,10 +215,10 @@ namespace QTool
 						eventKey = eventKey, 
 						eventValue = value, 
 					};
-					//lock(EventList){
+					lock(EventList){
 						EventList.Add(eventData);
 						PlayerPrefs.SetString(EventListKey, EventList.ToQData());
-				//	}
+					}
 					Debug.Log(StartKey + " 触发事件 " + eventData);
 					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
 					{
