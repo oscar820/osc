@@ -9,6 +9,7 @@ using System.Reflection;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace QTool
 {
@@ -16,6 +17,12 @@ namespace QTool
 
     public static partial class Tool
     {
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+		static void Init()
+		{
+			CultureInfo.CurrentCulture = new CultureInfo("en-US");
+			Debug.Log("设置全局编码语言环境为 en-US");
+		}
 		public static string Version => Application.version;
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
