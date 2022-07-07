@@ -56,6 +56,7 @@
 * 如下来创建一个静态类
 
 ```
+	[QCommandType("QFlowNode测试")]
 	public static class QFlowNodeTest
 	{
 	    public static void TestNode(int a)
@@ -64,7 +65,7 @@
 	    }
 	}
 ```
-* 同时在初始化时使用`QTool.Command.QCommand.FreshCommands(typeof(QFlowNodeTest))`来创建刷新节点
+* 同时使用`[QCommandType("QFlowNode测试")]`特性来初始化所有静态函数为节点
 * 会自动生成函数名对应的节点 普通参数会自动生成为输入端口 out 参数会生成为输出端口 有返回值时会生成为输出端口
 
 * 可以使用Task多线程与协程写法来创建带有延迟逻辑的节点 如下

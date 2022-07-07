@@ -29,10 +29,6 @@ namespace QTool.FlowGraph
 		{
 			return this.ToQData().ParseQData<QFlowGraph>().InitCheck();
 		}
-		static QFlowGraph()
-		{
-			QCommand.FreshCommands(typeof(QFlowGraphNode));
-		}
         public override string ToString()
         {
             return this.ToQData();
