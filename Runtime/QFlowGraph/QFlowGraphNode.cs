@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool.FlowGraph
 {
-	[ViewName("基础")]
+	[QCommandType("基础")]
 	public static class QFlowGraphNode
 	{
 		[ViewName("数值/获取变量")]

@@ -93,7 +93,7 @@ namespace QTool.FlowGraph
         {
             GenericMenu menu = new GenericMenu();
             var fromPort = Graph[fromPortId];
-            foreach (var info in QTool.Command.QCommand.KeyDictionary)
+            foreach (var info in QCommand.KeyDictionary)
             {
                 if (fromPort.CanConnect(info, out var portKey))
                 {
@@ -112,7 +112,7 @@ namespace QTool.FlowGraph
             GenericMenu menu = new GenericMenu();
             if (curNode == null)
             {
-                foreach (var kv in QTool.Command.QCommand.KeyDictionary)
+                foreach (var kv in QCommand.KeyDictionary)
                 {
                     menu.AddItem(new GUIContent(kv.fullName), false, () =>
                    {
@@ -529,19 +529,15 @@ namespace QTool.FlowGraph
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.Space(dotSize);
             EditorGUILayout.BeginVertical();
-            if (node.command != null)
+            if (node.command == null)
             {
-                foreach (var port in node.Ports)
-                {
-                    DrawPort(port);
-                }
-            }
-            else
-            {
-                GUILayout.Label("找不到命令【" + node.commandKey + "】 ");
-            }
-            
-            EditorGUILayout.EndVertical();
+				GUILayout.Label("丢失【" + node.commandKey + "】 ",GUILayout.MaxWidth(200));
+			}
+			foreach (var port in node.Ports)
+			{
+				DrawPort(port);
+			}
+			EditorGUILayout.EndVertical();
             EditorGUILayout.Space(dotSize);
             EditorGUILayout.EndHorizontal();
             if (Event.current.type== EventType.Repaint)

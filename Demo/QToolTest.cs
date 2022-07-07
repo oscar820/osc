@@ -182,8 +182,8 @@ namespace QTool.Test
         public string commandStr;
         [ViewButton("命令测试")]
         public void CommandTest()
-        {
-            QTool.Command.QCommand.Invoke(commandStr);
+        { 
+            QCommand.Invoke(commandStr);
         }
         [TextArea(5,10)]
         public string QDataStr; 

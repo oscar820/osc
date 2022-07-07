@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QTool;
-using QTool.Command;
 using QTool.FlowGraph;
 using QTool.Reflection;
 using System.Threading.Tasks;
@@ -17,10 +16,6 @@ public class QFlowTest : MonoBehaviour
 	{
 		public QFlowGraph testGraph;
 		public List<QFlowGraph> qFlows;
-	}
-	static QFlowTest()
-	{
-		QTool.Command.QCommand.FreshCommands(typeof(QFlowNodeTest));
 	}
 	public QFlowGraphAsset graphAsset;
 	public QFlowGraph graph;
@@ -47,21 +42,19 @@ public class QFlowTest : MonoBehaviour
         graph.Run(logNode.Key);
      
     }
-	// Update is called once per frame
+	// Update is called once per frame 
 	[ContextMenu("停止【测试事件】")]
 	public void Stop()
 	{
-		graphAsset?.Graph.Stop();
+		graphAsset?.Graph.Stop(); 
 	}
     void Update()
     {
         
     }
 }
-#if UNITY_EDITOR
-[UnityEditor.InitializeOnLoad]
-#endif
-[ViewName("QFlowNode测试")]
+
+[QCommandType("QFlowNode测试")]
 public static class QFlowNodeTest
 {
 	
@@ -172,7 +165,7 @@ public static class QFlowNodeTest
             This.TriggerPortList.Clear();
             yield return null;
         }
-        Debug.LogError("任务成功");
+        Debug.LogError("任务成功"); 
         This.SetNetFlowPort(nameof(success));
     }
 }

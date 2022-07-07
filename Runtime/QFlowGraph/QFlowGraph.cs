@@ -4,13 +4,13 @@ using UnityEngine;
 using System;
 using System.Threading.Tasks;
 using QTool.Reflection;
-using QTool.Command;
 namespace QTool.FlowGraph
 {
 	
 	[System.Serializable]
     public class QFlowGraph:ISerializationCallbackReceiver
     {
+
 		[TextArea(1, 30)]
 		[QIgnore]
 		public string SerializeString;
@@ -277,10 +277,12 @@ namespace QTool.FlowGraph
             return index==0? port:port+"["+index+"]";
         }
     }
+
 	public abstract class QPortAttribute : Attribute
 	{
 		public bool autoRunNode = false;
 	}
+	
 	/// <summary>
 	///  指定参数端口为输入端口
 	/// </summary>
@@ -401,7 +403,7 @@ namespace QTool.FlowGraph
 				{
 					return name;
 				}
-				else if(InputPort.HasValue&&!HasConnect)
+				else if(InputPort!=null&&InputPort.HasValue&&!HasConnect)
 				{
 					return name + " = [" + InputPort.autoGetValue + "]";
 				}
@@ -460,7 +462,7 @@ namespace QTool.FlowGraph
             {
                 if (FlowPort == null)
                 {
-                    return !isOutput && ConnectInfo.ConnectList!=null&& ConnectInfo.ConnectList.Count == 0&&!InputPort.HasValue;
+                    return InputPort!=null && ConnectInfo.ConnectList!=null&& ConnectInfo.ConnectList.Count == 0&&!InputPort.HasValue;
                 }
                 else
                 {
@@ -558,6 +560,7 @@ namespace QTool.FlowGraph
         };
         public bool CanConnect(Type type)
         {
+			if (ConnectType == null) return false;
             if (ConnectType == type)
             {
                 return true;

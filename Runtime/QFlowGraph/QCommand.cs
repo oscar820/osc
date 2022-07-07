@@ -6,15 +6,15 @@ using System.Reflection;
 using UnityEngine;
 using QTool.FlowGraph;
 
-namespace QTool.Command
+namespace QTool
 {
     public static class QCommand 
     {
         static QCommand()
         {
-            FreshCommands(typeof(BaseCommands));
+            FreshCommands(QReflection.GetAllTypes<QCommandType>().ToArray());
         }
-        public static bool Invoke(string commandStr)
+        public static bool Invoke(string commandStr) 
         {
             if (string.IsNullOrWhiteSpace(commandStr)) return false;
             List<string> commands =new List<string>( commandStr.Split(' '));
@@ -62,7 +62,7 @@ namespace QTool.Command
                 return KeyDictionary.Get(key, (info) => info.method.Name);
             }
         }
-        public static void FreshCommands(params Type[] types)
+        internal static void FreshCommands(params Type[] types)
         {
             foreach (var t in types)
 			{
@@ -93,7 +93,7 @@ namespace QTool.Command
       
 
     }
-	[ViewName("基础")]
+	[QCommandType("基础")]
 	public static class BaseCommands
 	{
 		[ViewName("日志/普通日志")]
@@ -181,4 +181,16 @@ namespace QTool.Command
             return method.ViewName() + " " + paramViewNames.ToOneString(" ");
         }
     }
+
+
+	/// <summary>
+	///  指定类型为命令类 其中的所有公开静态函数都会转换为 可以调用的命令
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+	public class QCommandType : ViewNameAttribute
+	{
+		public QCommandType(string viewName) : base(viewName)
+		{
+		}
+	}
 }

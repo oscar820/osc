@@ -378,8 +378,20 @@ namespace QTool.Reflection
             });
             return typeList;
         }
-    
-        public static object CreateInstance(this Type type, object targetObj=null,bool copyTarget=false, params object[] param)
+		public static List<Type> GetAllTypes<T>() where T:Attribute
+		{
+			List<Type> typeList = new List<Type>();
+			foreach (var ass in GetAllAssemblies())
+			{
+				typeList.AddRange(ass.GetTypes());
+			}
+			typeList.RemoveAll((type) =>
+			{
+				return type.GetCustomAttribute<T>() == null;
+			});
+			return typeList;
+		}
+		public static object CreateInstance(this Type type, object targetObj=null,bool copyTarget=false, params object[] param)
         {
             if (targetObj != null)
             {
