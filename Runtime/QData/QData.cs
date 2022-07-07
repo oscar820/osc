@@ -653,7 +653,7 @@ namespace QTool
 						try
 						{
 							var value = row[i].ParseElement();
-							var hasName= value.Contains( "\":");
+							var hasName= value!=null&& value.Contains( "\":");
 							member.Set(t, value.ParseQDataType(member.Type, hasName));
 						}
 						catch (System.Exception e)
