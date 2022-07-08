@@ -371,7 +371,7 @@ namespace QTool.FlowGraph
                                     var fromPort = Graph.GetConnectInfo(curPortId).ConnectPort();
                                     if (fromPort != null)
                                     {
-                                        Graph[fromPort].DisConnect(curPortId);
+                                        Graph[fromPort].DisConnect(curPortId, fromPort.Value.index);
                                         StartConnect(fromPort);
                                     }
                                 }
