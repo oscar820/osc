@@ -17,11 +17,12 @@ namespace QTool
 
     public static partial class Tool
     {
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 #if UNITY_EDITOR
 		[UnityEditor.InitializeOnLoadMethod]
+#else
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 #endif
-		static void Init() 
+		static void Init()  
 		{
 			CultureInfo.CurrentCulture = new CultureInfo("en-US");
 			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
