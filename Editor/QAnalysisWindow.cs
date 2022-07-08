@@ -433,9 +433,17 @@ namespace QTool
 		public static void ForeachTitle(Action<QTitleInfo> action)
 		{
 			var viewInfo = QAnalysisWindow.Instance.ViewEvent;
+			if (viewInfo.EndsWith("开始"))
+			{
+				viewInfo = viewInfo.SplitStartString("开始");
+			}
+		 	else if (viewInfo.EndsWith("结束"))
+			{
+				viewInfo = viewInfo.SplitStartString("结束");
+			}
 			foreach (var title in TitleList)
 			{
-				if (title.CheckView(viewInfo) || title.DataSetting.TargetKey == viewInfo)
+				if (title.CheckView(viewInfo))
 				{
 					action(title);
 				}
@@ -604,13 +612,13 @@ namespace QTool
 		{
 			if (viewInfo == "玩家Id")
 			{
-				if (Key.Contains("/")) return false;
+				if (!Key.Contains("/")) return true;
 			}
-			else if (!Key.StartsWith(viewInfo))
+			else if (Key.StartsWith(viewInfo)||Key.StartsWith(viewInfo+"_开始"))
 			{
-				return false;
+				return true;
 			}
-			return true;
+			return false;
 		}
 	}
 	public enum QAnalysisMode
