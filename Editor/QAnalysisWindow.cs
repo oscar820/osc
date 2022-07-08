@@ -195,7 +195,7 @@ namespace QTool
 			}
 			if (y == 0)
 			{
-				return ViewInfoStack.Count==0? Titles[x].Key : Titles[x].Key.SplitEndString(ViewEvent+"/");
+				return ViewInfoStack.Count == 0 ? Titles[x].Key : Titles[x].GetViewKey(ViewEvent); 
 			}
 			if (string.IsNullOrWhiteSpace(ViewPlayer))
 			{
@@ -267,6 +267,14 @@ namespace QTool
 		QList<Rect> elementRect = new QList<Rect>();
 		public void ViewChange(string newEvent,string newPlayer)
 		{
+			if (newEvent.EndsWith("开始"))
+			{
+				newEvent = newEvent.SplitStartString("开始");
+			}
+			else if (newEvent.EndsWith("结束"))
+			{
+				newEvent = newEvent.SplitStartString("结束");
+			}
 			if (newEvent != ViewEvent || newPlayer != ViewPlayer)
 			{
 				ViewInfoStack.Push(newEvent);
@@ -433,14 +441,6 @@ namespace QTool
 		public static void ForeachTitle(Action<QTitleInfo> action)
 		{
 			var viewInfo = QAnalysisWindow.Instance.ViewEvent;
-			if (viewInfo.EndsWith("开始"))
-			{
-				viewInfo = viewInfo.SplitStartString("开始");
-			}
-		 	else if (viewInfo.EndsWith("结束"))
-			{
-				viewInfo = viewInfo.SplitStartString("结束");
-			}
 			foreach (var title in TitleList)
 			{
 				if (title.CheckView(viewInfo))
@@ -614,11 +614,30 @@ namespace QTool
 			{
 				if (!Key.Contains("/")) return true;
 			}
-			else if (Key.StartsWith(viewInfo)||Key.StartsWith(viewInfo+"_开始"))
+			else if (Key.StartsWith(viewInfo))
 			{
 				return true;
 			}
 			return false;
+		}
+		public string GetViewKey(string viewEvent)
+		{
+			if (Key.Contains(viewEvent+"/"))
+			{
+				return Key.SplitEndString(viewEvent + "/");
+			}
+			else if(Key.Contains(viewEvent + "开始/"))
+			{
+				return Key.SplitEndString(viewEvent + "开始/");
+			}
+			else if (Key.Contains(viewEvent + "结束/"))
+			{
+				return Key.SplitEndString(viewEvent + "结束/");
+			}
+			else
+			{
+				return Key;
+			}
 		}
 	}
 	public enum QAnalysisMode
