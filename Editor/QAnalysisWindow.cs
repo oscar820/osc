@@ -576,9 +576,9 @@ namespace QTool
 		}
 		static void CheckTitle(string key,object value)
 		{
-			if (!TitleList.ContainsKey(key))
+			var title = TitleList[key];
+			if (title.DataSetting.mode== QAnalysisMode.更新时间)
 			{
-				var title =TitleList[key];
 				title.DataSetting.DataKey = key;
 				if (value != null && Type.GetTypeCode(value.GetType()) != TypeCode.Object)
 				{
@@ -589,6 +589,17 @@ namespace QTool
 					title.DataSetting.mode = QAnalysisMode.次数;
 				}
 			}
+			if (key.Contains("/"))
+			{
+				var startKey = key.SplitStartString("/");
+				if (!TitleList.ContainsKey(startKey))
+				{
+					var spaceTitle = TitleList[startKey];
+					spaceTitle.DataSetting.DataKey = "";
+					spaceTitle.DataSetting.mode = QAnalysisMode.更新时间;
+				}
+			}
+		
 		}
 	}
 	public class QTitleInfo:IKey<string>
@@ -610,30 +621,35 @@ namespace QTool
 		}
 		public bool CheckView(string viewInfo)
 		{
+			if (viewInfo == Key) return false;
 			if (viewInfo == "玩家Id")
 			{
 				if (!Key.Contains("/")) return true;
 			}
-			else if (Key.StartsWith(viewInfo))
+			else 
 			{
-				return true;
+				var index = Key.IndexOf(viewInfo) ;
+				if (index == 0 && !Key.Substring(index + viewInfo.Length+1).Contains("/"))
+				{
+					return true;
+				}
 			}
 			return false;
 		}
 		public string GetViewKey(string viewEvent)
 		{
-			if (Key.Contains(viewEvent+"/"))
+			if (Key.Contains(viewEvent))
 			{
-				return Key.SplitEndString(viewEvent + "/");
+				return Key.SplitEndString(viewEvent ).TrimStart('/');
 			}
-			else if(Key.Contains(viewEvent + "开始/"))
-			{
-				return Key.SplitEndString(viewEvent + "开始/");
-			}
-			else if (Key.Contains(viewEvent + "结束/"))
-			{
-				return Key.SplitEndString(viewEvent + "结束/");
-			}
+			//else if(Key.Contains(viewEvent + "开始/"))
+			//{
+			//	return Key.SplitEndString(viewEvent + "开始/");
+			//}
+			//else if (Key.Contains(viewEvent + "结束/"))
+			//{
+			//	return Key.SplitEndString(viewEvent + "结束/");
+			//}
 			else
 			{
 				return Key;
@@ -642,6 +658,7 @@ namespace QTool
 	}
 	public enum QAnalysisMode
 	{
+		更新时间,
 		最新数据,
 		起始数据,
 		次数,
@@ -669,7 +686,7 @@ namespace QTool
 				SetDataKey(value);
 			}
 		}
-		public QAnalysisMode mode = QAnalysisMode.最新数据;
+		public QAnalysisMode mode = QAnalysisMode.更新时间;
 		public void SetDataKey(string key)
 		{
 			_dataKey = key;
@@ -795,6 +812,7 @@ namespace QTool
 						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					break;
+				case QAnalysisMode.更新时间:
 				case QAnalysisMode.最新时间:
 					BufferData[eventData.eventId] = eventData.eventTime;
 					break;
@@ -967,7 +985,7 @@ namespace QTool
 			}
 			else
 			{
-				Debug.LogError("缺少数据" + Key + "[" + EventList.IndexOf(eventId) + "]");
+				//Debug.LogError("缺少数据" + Key + "[" + EventList.IndexOf(eventId) + "]");
 				return null;
 			}
 			//var setting = QAnalysisData.TitleList[Key].DataSetting;
@@ -1143,6 +1161,10 @@ namespace QTool
 				{
 					AnalysisData[title.Key].AddEvent(eventData);
 					//AnalysisData[title.Key].changed = true;
+				}
+				else if(title.DataSetting.mode== QAnalysisMode.更新时间&&eventData.eventKey.StartsWith(title.Key))
+				{
+					AnalysisData[title.Key].AddEvent(eventData);
 				}
 				//else if(title.DataSetting.TargetKey == eventData.eventKey)
 				//{
