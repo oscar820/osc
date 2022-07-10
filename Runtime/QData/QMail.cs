@@ -340,10 +340,13 @@ namespace QTool
 		{
 
 		}
-		public QMailInfo(string mailStr, int Index,string Id)
+		const string AVGKey = @"X-Antivirus-Status: Clean";
+		public QMailInfo(string mailStr, int Index, string Id)
 		{
 			this.Index = Index;
 			this.Id = Id;
+			
+	
 			Subject = GetString(mailStr, "Subject: ");
 			From = GetString(mailStr, "From: ").Trim();
 			Cc = GetString(mailStr, "Cc: ").Trim(); 
@@ -356,7 +359,14 @@ namespace QTool
 					if (GetString(mailStr, "Content-Transfer-Encoding: ") == "base64")
 					{
 						var info = mailStr.GetBlockValue("Content-Transfer-Encoding: base64", "------=").Trim();
-						Body = ParseBase64String(info,(data)=>data.SplitStartString("="));
+						if (info.Contains(AVGKey))
+						{
+							Body = ParseBase64String(info.SplitEndString(AVGKey).Trim());
+						}
+						else
+						{
+							Body = ParseBase64String(info, (data) => data.SplitStartString("="));
+						}
 						if (string.IsNullOrWhiteSpace(Body))
 						{
 							Debug.LogError("读取 [" + Subject + "]内容出错 " + Date);
@@ -401,7 +411,7 @@ namespace QTool
 		}
 		private static string GetString(string SourceString, string Key)
 		{
-			var startIndex = SourceString.IndexOf('\n'+Key);
+			var startIndex =string.IsNullOrEmpty(Key)?0:SourceString.IndexOf('\n'+Key);
 			if (startIndex >= 0)
 			{
 				startIndex += Key.Length+1;
