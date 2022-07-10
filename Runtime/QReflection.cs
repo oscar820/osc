@@ -8,87 +8,95 @@ using UnityEngine;
 
 namespace QTool.Reflection
 {
-    #region 类型反射
+	#region 类型反射
 
-    public class QMemeberInfo : IKey<string>
-    {
-        public string Key { get ; set; }
+	public class QMemeberInfo : IKey<string>
+	{
+		public string Key { get; set; }
 		public string ViewName { get; set; }
-        public Type Type { get; private set; }
-        public Action<object, object> Set { get; private set; }
-        public Func<object, object> Get { get; private set; }
-        public Attribute Attribute { get; set; }
-        public MemberInfo MemeberInfo { get; private set; }
-        public QMemeberInfo(FieldInfo info)
-        {
-            MemeberInfo = info;
-			ViewName = info.ViewName();
-            Key = info.Name;
-            Type = info.FieldType;
-            Set = info.SetValue;
-            Get = info.GetValue;
-        }
-        public QMemeberInfo(PropertyInfo info)
-        {
-            MemeberInfo = info;
+		public Type Type { get; private set; }
+		public Action<object, object> Set { get; private set; }
+		public Func<object, object> Get { get; private set; }
+		public Attribute Attribute { get; set; }
+		public MemberInfo MemeberInfo { get; private set; }
+		public QMemeberInfo(FieldInfo info)
+		{
+			MemeberInfo = info;
 			ViewName = info.ViewName();
 			Key = info.Name;
-            Type = info.PropertyType;
-            if (info.SetMethod != null)
+			Type = info.FieldType;
+			Set = info.SetValue;
+			Get = info.GetValue;
+		}
+		public QMemeberInfo(PropertyInfo info)
+		{
+			MemeberInfo = info;
+			ViewName = info.ViewName();
+			Key = info.Name;
+			Type = info.PropertyType;
+			if (info.SetMethod != null)
 			{
-                Set = info.SetValue;
-            }
-            if (info.GetMethod != null)
-            {
-                Get = info.GetValue;
-            }
-        }
-        public override string ToString()
-        {
-            return   "var " + Key+" \t\t("+ Type+")"  ;
-        }
-    }
-    public class QFunctionInfo : IKey<string>
-    {
-        public string Key { get => Name; set => Name = value; }
-        public string Name { get; private set; }
-        public ParameterInfo[] ParamType { get; private set; }
-        public Type ReturnType {
-            get
-            {
-                return MethodInfo.ReturnType;
-            }
-        }
-        public MethodInfo MethodInfo { get; private set; }
-        public Func<object, object[], object> Function { get; private set; }
-        public Attribute Attribute { get;  set; }
-        public object Invoke(object target,params object[] param)
-        {
-            return Function?.Invoke(target,param);
-        }
-        public QFunctionInfo(MethodInfo info)
-        {
-            this.MethodInfo = info;
-            Key = info.Name;
-            ParamType = info.GetParameters();
-            Function = info.Invoke;
-        }
-        public override string ToString()
-        {
-            return  "function " + Name + "(" + ParamType.ToOneString(",") + ") \t\t("+ ReturnType+")" ;
-        }
-    }
+				Set = info.SetValue;
+			}
+			if (info.GetMethod != null)
+			{
+				Get = info.GetValue;
+			}
+		}
+		public override string ToString()
+		{
+			return "var " + Key + " \t\t(" + Type + ")";
+		}
+	}
+	public class QFunctionInfo : IKey<string>
+	{
+		public string Key { get => Name; set => Name = value; }
+		public string Name { get; private set; }
+		public ParameterInfo[] ParamType { get; private set; }
+		public Type ReturnType {
+			get
+			{
+				return MethodInfo.ReturnType;
+			}
+		}
+		public MethodInfo MethodInfo { get; private set; }
+		public Func<object, object[], object> Function { get; private set; }
+		public Attribute Attribute { get; set; }
+		public object Invoke(object target, params object[] param)
+		{
+			return Function?.Invoke(target, param);
+		}
+		public QFunctionInfo(MethodInfo info)
+		{
+			this.MethodInfo = info;
+			Key = info.Name;
+			ParamType = info.GetParameters();
+			Function = info.Invoke;
+		}
+		public override string ToString()
+		{
+			return "function " + Name + "(" + ParamType.ToOneString(",") + ") \t\t(" + ReturnType + ")";
+		}
+	}
+	public class QReflectionTypeInfo : QTypeInfo<QReflectionTypeInfo>
+	{
+		static QReflectionTypeInfo()
+		{
+			MemberFlags = BindingFlags.Instance | BindingFlags.Public| BindingFlags.NonPublic;
+			FunctionFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+		}
+	}
     public class QTypeInfo<T>:IKey<string> where T:QTypeInfo<T> ,new()
-    {
-        public string Key { get;  set; }
+	{
+		public static BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public;
+		public static BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public;
+		public string Key { get;  set; }
         public QList<string, QMemeberInfo> Members = new QList<string, QMemeberInfo>();
         public QList<string, QFunctionInfo> Functions = new QList<string, QFunctionInfo>();
         public bool IsList;
         public Type ElementType { get; private set; }
         public Type Type { get; private set; }
         public TypeCode Code { get; private set; }
-        public BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public;
-        public BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public ;
 		public QMemeberInfo GetMemberInfo(string keyOrViewName)
 		{
 			var info = Members[keyOrViewName];
@@ -522,7 +530,7 @@ namespace QTool.Reflection
 			}
 			else
 			{
-				var memeberInfo = QSerializeType.Get(target.GetType()).GetMemberInfo(path);
+				var memeberInfo = QReflectionTypeInfo.Get(target.GetType()).GetMemberInfo(path);
 				if (memeberInfo!=null)
 				{
 					return memeberInfo.Get(target);

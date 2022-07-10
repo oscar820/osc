@@ -84,6 +84,38 @@ namespace QTool
 			}
 			return str.RemveChars('{','}', '（','）','~','\n','\t','\r','、','|', '*', '“','”', '—','。', '…','=','#', ' ', ';', '；', '-', ',', '，', '<', '>', '【', '】', '[', ']', '{', '}', '!', '！', '?', '？', '.', '\'', '‘', '’', '\"', ':', '：');
 		}
+		public static async Task TaskRunCoroutine(this IEnumerator enumerator)
+		{
+			while (enumerator.MoveNext())
+			{
+				if(enumerator.Current is WaitForSeconds waitForSeconds)
+				{
+					var m_Seconds=(float)waitForSeconds.GetValue("m_Seconds");
+					if (Application.isPlaying)
+					{
+						await Tool.WaitGameTime(m_Seconds);
+					}
+					else
+					{
+						await Task.Delay((int)(m_Seconds*1000));
+					}
+				}
+				else
+				{
+					Debug.LogError(enumerator.Current);
+					typeof(WaitForSeconds).ForeachMemeber((file) =>
+					{
+						Debug.LogError(file.Name);
+					}, (member) =>
+					{
+						Debug.LogError(member.Name);
+					});
+					await Task.Yield();
+				}
+			
+			}
+			
+		}
 		public static float ToComputeFloat(this object value)
 		{
 			if (value == null) return 0;
