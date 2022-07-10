@@ -968,7 +968,7 @@ namespace QTool
 				eventId = EventList.StackPeek();
 				if (string.IsNullOrWhiteSpace(eventId))
 				{
-					return null;
+					return UpdateTime;
 				}
 			}
 		
