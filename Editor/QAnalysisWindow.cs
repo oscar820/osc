@@ -212,7 +212,7 @@ namespace QTool
 			else
 			{
 				var playerData = QAnalysisData.Instance.PlayerDataList[ViewPlayer];
-				var eventData=QAnalysisData.GetEvent(playerData.EventList[y - 1]);
+				var eventData= viewEventList[y - 1];
 				if (x == 0)
 				{
 					return eventData.eventTime.ToString();
@@ -247,7 +247,7 @@ namespace QTool
 			}
 			else
 			{
-				size.y= QAnalysisData.Instance.PlayerDataList[ViewPlayer].EventList.Count+1;
+				size.y= viewEventList .Count+ 1;
 			}
 			return size;
 		}
@@ -262,7 +262,7 @@ namespace QTool
 		public string ViewPlayer => ViewPlayerStack.Count > 0 ? ViewPlayerStack.Peek():"";
 		Vector2 viewPos;
 
-		List<string> viewEventList = new List<string>();
+		List<QAnalysisEvent> viewEventList = new List<QAnalysisEvent>();
 		Rect viewRect;
 		QList<Rect> elementRect = new QList<Rect>();
 		public void ViewChange(string newEvent,string newPlayer)
@@ -295,7 +295,7 @@ namespace QTool
 					{
 						if (eventData.eventKey == title.DataSetting.EventKey)
 						{
-							viewEventList.AddCheckExist(eventData.Key);
+							viewEventList.AddCheckExist(eventData);
 							return;
 						}
 					});
@@ -621,7 +621,7 @@ namespace QTool
 		}
 		public bool CheckView(string viewInfo)
 		{
-			if (viewInfo == Key) return false;
+			if (viewInfo == Key) return DataSetting.mode!= QAnalysisMode.更新时间;
 			if (viewInfo == "玩家Id")
 			{
 				if (!Key.Contains("/")) return true;
@@ -638,18 +638,11 @@ namespace QTool
 		}
 		public string GetViewKey(string viewEvent)
 		{
+			if (Key == viewEvent) return Key.SplitEndString("/");
 			if (Key.Contains(viewEvent))
 			{
 				return Key.SplitEndString(viewEvent ).TrimStart('/');
 			}
-			//else if(Key.Contains(viewEvent + "开始/"))
-			//{
-			//	return Key.SplitEndString(viewEvent + "开始/");
-			//}
-			//else if (Key.Contains(viewEvent + "结束/"))
-			//{
-			//	return Key.SplitEndString(viewEvent + "结束/");
-			//}
 			else
 			{
 				return Key;
