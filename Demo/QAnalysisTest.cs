@@ -49,12 +49,12 @@ namespace QTool
 			for (int id = 0; id < idRange&&Application.isPlaying; id++)
 			{
 				QAnalysis.Start("AllTest" + "_" +id);
-				OnOverInfo.Invoke(id + 1 + "/" + idRange + " 战斗开始");
+				OnOverInfo.Invoke(id + 1 + "/" + idRange + " 战斗/开始");
 				await Task.Delay(100);
 				await Fight();
 				await QAnalysis.Stop();
 				await Task.Delay(100);
-				OnOverInfo.Invoke(id + 1 + "/" + idRange + " 战斗结束");
+				OnOverInfo.Invoke(id + 1 + "/" + idRange + " 战斗/结束");
 			} 
 		}
 	}

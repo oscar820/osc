@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,11 +15,12 @@ namespace QTool
         /// 事件列表 对应事件触发时调用对应Action 使用方法： EventList["事件名"]+=Action;
         /// </summary>
         internal static QDictionary<string, System.Action> EventList = new QDictionary<string, System.Action>();
-        /// <summary>
-        /// 触发事件
-        /// </summary>
-        /// <param name="eventKey">事件名</param>
-        public static void Trigger(string eventKey)
+		internal static QDictionary<string, System.Action> OnceEventList = new QDictionary<string, System.Action>();
+		/// <summary>
+		/// 触发事件
+		/// </summary>
+		/// <param name="eventKey">事件名</param>
+		public static void Trigger(string eventKey)
         {
             eventKey = eventKey.Trim();
             if (string.IsNullOrWhiteSpace(eventKey))
@@ -31,22 +32,42 @@ namespace QTool
             {
                 EventList[eventKey]?.Invoke();
             }
+			if (OnceEventList.ContainsKey(eventKey))
+			{
+				OnceEventList[eventKey]?.Invoke();
+				OnceEventList[eventKey] = null;
+			}
         }
         public static void Trigger<T>(string eventKey,T value)
         {
             QEventManager<T>.Trigger(eventKey, value);
         }
-        public static void Register(string eventKey, System.Action action)
+        public static void Register(string eventKey, System.Action action,bool onceRemve=false)
         {
-            EventList[eventKey] += action;
-        }
+			if (onceRemve)
+			{
+				OnceEventList[eventKey] += action;
+			}
+			else
+			{
+				EventList[eventKey] += action;
+			}
+		}
         public static void UnRegister(string eventKey, System.Action action)
         {
             EventList[eventKey] -= action;
-        }
-        public static void Register<T>(string eventKey,System.Action<T> action)
+			OnceEventList[eventKey] -= action;
+		}
+        public static void Register<T>(string eventKey,System.Action<T> action,bool onceRemve = false)
         {
-            QEventManager<T>.EventList[eventKey] += action;
+			if (onceRemve)
+			{
+				QEventManager<T>.OnceEventList[eventKey] += action;
+			}
+			else
+			{
+				QEventManager<T>.EventList[eventKey] += action;
+			}
         }
         public static void UnRegister<T>(string eventKey, System.Action<T> action)
         {
@@ -63,7 +84,9 @@ namespace QTool
         /// 事件列表 对应事件触发时调用对应Action 使用方法： EventList["事件名"]+=Action;
         /// </summary>
         internal static QDictionary<string, System.Action<T>> EventList = new QDictionary<string, System.Action<T>>();
-        public static void Trigger(string eventKey,T value)
+
+		internal static QDictionary<string, System.Action<T>> OnceEventList = new QDictionary<string, System.Action<T>>();
+		public static void Trigger(string eventKey,T value)
         {
             eventKey = eventKey.Trim();
             if (string.IsNullOrWhiteSpace(eventKey))
@@ -75,16 +98,67 @@ namespace QTool
             {
                 EventList[eventKey]?.Invoke(value);
             }
-        }
+			if (OnceEventList.ContainsKey(eventKey))
+			{
+				OnceEventList[eventKey]?.Invoke(value);
+				OnceEventList[eventKey] = null;
+			}
+		}
     }
     [System.Serializable]
     public class QEventTrigger : MonoBehaviour
     {
+		[ViewName("注册全局事件")]
+		public bool GlobalEvent = false;
         public List<ActionEventTrigger> actionEventList = new List<ActionEventTrigger>();
         public List<StringEventTrigger> stringEventList = new List<StringEventTrigger>();
         public List<BoolEventTrigger> boolEventList = new List<BoolEventTrigger>();
         public List<FloatEventTrigger> floatEventList = new List<FloatEventTrigger>();
-        public void Invoke(string eventName, string value)
+		public void Awake()
+		{
+			if (GlobalEvent)
+			{
+				foreach (var eventTrigger in actionEventList)
+				{
+					QEventManager.Register(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+				foreach (var eventTrigger in stringEventList)
+				{
+					QEventManager.Register<string>(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+				foreach (var eventTrigger in boolEventList)
+				{
+					QEventManager.Register<bool>(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+				foreach (var eventTrigger in floatEventList)
+				{
+					QEventManager.Register<float>(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+			}
+		}
+		public void OnDestroy()
+		{
+			if (GlobalEvent)
+			{
+				foreach (var eventTrigger in actionEventList)
+				{
+					QEventManager.UnRegister(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+				foreach (var eventTrigger in stringEventList)
+				{
+					QEventManager.UnRegister<string>(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+				foreach (var eventTrigger in boolEventList)
+				{
+					QEventManager.UnRegister<bool>(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+				foreach (var eventTrigger in floatEventList)
+				{
+					QEventManager.UnRegister<float>(eventTrigger.Key, eventTrigger.eventAction.Invoke);
+				}
+			}
+		}
+		public void Invoke(string eventName, string value)
         {
             stringEventList.Get(eventName)?.eventAction?.Invoke(value);
         }
@@ -102,8 +176,8 @@ namespace QTool
         }
     }
     public class EventTriggerBase<T> : IKey<string> where T : UnityEventBase
-    {
-        public string EventName;
+	{
+		public string EventName;
         public string Key { get => EventName; set => EventName = value; }
         public T eventAction = default;
     }

@@ -49,6 +49,7 @@ namespace QTool
 					}
 				}
 				var editorTest = PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest");
+
 				var newValue = GUILayout.Toggle(editorTest, "编辑器测试", GUILayout.Width(100));
 				if (newValue != editorTest)
 				{
@@ -61,6 +62,7 @@ namespace QTool
 						PlayerPrefs.DeleteKey(nameof(QAnalysis) + "_EditorTest");
 					}
 				}
+				QAnalysisData.Setting.StartVersion = EditorGUILayout.TextField(QAnalysisData.Setting.StartVersion,GUILayout.Width(100));
 				if (DrawButton("刷新数据"))
 				{
 					FreshData();
@@ -83,7 +85,6 @@ namespace QTool
 					GUIUtility.systemCopyBuffer = GridView.Copy();
 					EditorUtility.DisplayDialog("复制表格数据", "复制数据成功", "确认");
 				}
-			
 				var lastRect = GUILayoutUtility.GetLastRect();
 				Handles.DrawLine(new Vector3(0, lastRect.yMax), new Vector3(position.width, lastRect.yMax));
 				if (QAnalysisData.IsLoading)
@@ -267,14 +268,6 @@ namespace QTool
 		QList<Rect> elementRect = new QList<Rect>();
 		public void ViewChange(string newEvent,string newPlayer)
 		{
-			if (newEvent.EndsWith("开始"))
-			{
-				newEvent = newEvent.SplitStartString("开始");
-			}
-			else if (newEvent.EndsWith("结束"))
-			{
-				newEvent = newEvent.SplitStartString("结束");
-			}
 			if (newEvent != ViewEvent || newPlayer != ViewPlayer)
 			{
 				ViewInfoStack.Push(newEvent);
@@ -407,12 +400,18 @@ namespace QTool
 
 		}
 	}
+	public class QAnalysisDataSetting
+	{
+		public string StartVersion = "0.1";
+		public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
+	}
 	public class QAnalysisData
 	{
 		public static QAnalysisData Instance { get; private set; } = Activator.CreateInstance<QAnalysisData>();
 		static public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
 		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
-		static public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
+		public static QAnalysisDataSetting Setting = new QAnalysisDataSetting();
+		public static QAutoList<string, QTitleInfo> TitleList => Setting.TitleList;
 		public List<string> EventKeyList = new List<string>();
 		public List<string> DataKeyList = new List<string>();
 		public QMailInfo LastMail = null;
@@ -430,13 +429,13 @@ namespace QTool
 		{
 			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
 			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList)).ParseQData(EventList);
-			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList)).ParseQData(TitleList);
+			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting)).ParseQData(Setting);
 		}
 		public static void SaveData()
 		{
 			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
 			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(TitleList), TitleList.ToQData());
+			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting), Setting.ToQData());
 		}
 		public static void ForeachTitle(Action<QTitleInfo> action)
 		{
@@ -474,11 +473,20 @@ namespace QTool
 			NewEventList.Sort(QAnalysisEvent.SortMethod);
 			Debug.Log("排序完成" + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + "开始添加事件" + NewEventList.Count);
 			start = DateTime.Now;
+			var curVersion=-1f;
+			var startV =Setting.StartVersion.ToComputeFloat();
 			for (var i = 0; i < NewEventList.Count; i++)
 			{
 				var eventData = NewEventList[i];
-				AddEvent(eventData);
-				EditorUtility.DisplayProgressBar("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
+				if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏_开始).Replace("_", "/"))
+				{
+					curVersion = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
+				}
+				if(curVersion >= startV)
+				{
+					AddEvent(eventData);
+					EditorUtility.DisplayProgressBar("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
+				}
 			}
 			EditorUtility.ClearProgressBar();
 			Debug.Log("添加事件" + NewEventList.Count + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
@@ -557,6 +565,14 @@ namespace QTool
 			{
 				eventData.eventKey = eventData.eventKey.Replace("_", "/");
 			}
+			if (eventData.eventKey.Contains("开始")&&!eventData.eventKey.Contains("/开始"))
+			{
+				eventData.eventKey = eventData.eventKey.Replace("开始", "/开始");
+			}
+			if (eventData.eventKey.Contains("结束") && !eventData.eventKey.Contains("/结束"))
+			{
+				eventData.eventKey = eventData.eventKey.Replace("结束", "/结束");
+			}
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
 			CheckTitle(eventData.eventKey, eventData.eventValue);
@@ -589,15 +605,25 @@ namespace QTool
 					title.DataSetting.mode = QAnalysisMode.次数;
 				}
 			}
-			if (key.Contains("/"))
+			var tKey = key;
+			var startKey = "";
+			while(tKey.SplitTowString("/",out var start,out var end))
 			{
-				var startKey = key.SplitStartString("/");
+				if (string.IsNullOrEmpty(startKey))
+				{
+					startKey = start;
+				}
+				else
+				{
+					startKey += "/" + start;
+				}
 				if (!TitleList.ContainsKey(startKey))
 				{
 					var spaceTitle = TitleList[startKey];
 					spaceTitle.DataSetting.DataKey = "";
 					spaceTitle.DataSetting.mode = QAnalysisMode.更新时间;
 				}
+				tKey = end;
 			}
 		
 		}
@@ -626,7 +652,7 @@ namespace QTool
 			{
 				if (!Key.Contains("/")) return true;
 			}
-			else 
+			else
 			{
 				var index = Key.IndexOf(viewInfo) ;
 				if (index == 0 && !Key.Substring(index + viewInfo.Length+1).Contains("/"))
@@ -880,7 +906,7 @@ namespace QTool
 				var playerData = QAnalysisData.Instance.PlayerDataList[startData.playerId];
 				QAnalysisEvent LastPauseEvent = null;
 				var pauseCount = 0;
-				var pauseData = playerData.AnalysisData[nameof(QAnalysis.QAnalysisEventName.游戏暂离)];
+				var pauseData = playerData.AnalysisData[nameof(QAnalysis.QAnalysisEventName.游戏_暂离)];
 				pauseData.ForeachEvent( (pauseEvent) =>
 				{
 					pauseCount++;

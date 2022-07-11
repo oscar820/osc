@@ -10,10 +10,10 @@ namespace QTool
 	{
 		public enum QAnalysisEventName
 		{
-			游戏开始,
-			游戏结束,
-			游戏暂离,
-			错误日志,
+			游戏_开始,
+			游戏_结束,
+			游戏_暂离,
+			游戏_错误,
 		}
 		public static string PlayerId { private set; get; }
 		public static bool InitOver
@@ -59,7 +59,7 @@ namespace QTool
 			{
 				return;
 			}
-			Trigger(nameof(QAnalysisEventName.游戏开始),new StartInfo());
+			Trigger(nameof(QAnalysisEventName.游戏_开始),new StartInfo());
 			errorInfoList.Clear();
 			Application.focusChanged += OnFocus;
 			Application.logMessageReceived += LogCallback;
@@ -87,7 +87,7 @@ namespace QTool
 							}
 						}
 						errorInfoList.Add(condition);
-						Trigger(nameof(QAnalysisEventName.错误日志), condition + '\n' + stackTrace);
+						Trigger(nameof(QAnalysisEventName.游戏_错误), condition + '\n' + stackTrace);
 					}
 					break;
 			}
@@ -96,13 +96,13 @@ namespace QTool
 		{
 			if (!focus)
 			{
-				Trigger(nameof(QAnalysisEventName.游戏暂离));
+				Trigger(nameof(QAnalysisEventName.游戏_暂离));
 				if (!Application.isEditor)
 				{
 					bool sendEvent = false;
 					foreach (var eventData in EventList)
 					{
-						if(eventData.eventKey!= nameof(QAnalysisEventName.游戏暂离))
+						if(eventData.eventKey!= nameof(QAnalysisEventName.游戏_暂离))
 						{
 							sendEvent = true;
 							break;
@@ -139,7 +139,7 @@ namespace QTool
 			{
 				return;
 			}
-			Trigger(nameof(QAnalysisEventName.游戏结束));
+			Trigger(nameof(QAnalysisEventName.游戏_结束));
 			Application.focusChanged -= OnFocus;
 			Application.logMessageReceived -= LogCallback;
 			await SendAndClear();
