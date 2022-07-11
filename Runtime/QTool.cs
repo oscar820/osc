@@ -314,6 +314,14 @@ namespace QTool
 #endif
 		}
 
+		public static bool IsAsset(this UnityEngine.Object obj)
+		{
+#if UNITY_EDITOR
+			return UnityEditor.EditorUtility.IsPersistent(obj);
+#else
+            return false;
+#endif
+		}
 		public static bool IsPrefabInstance(this UnityEngine.Object obj)
 		{
 #if UNITY_EDITOR
@@ -370,6 +378,22 @@ namespace QTool
 		//	}
 		//	return obj;
 		//}
+
+
+
+		public static string ProcessCommand(System.Diagnostics.ProcessStartInfo startInfo)
+		{
+			using (var process=new System.Diagnostics.Process { StartInfo=startInfo })
+			{
+				process.Start();
+				var result =  process.StandardOutput.ReadToEnd();
+				if (string.IsNullOrEmpty(result))
+				{
+					return  process.StandardError.ReadToEnd();
+				}
+				return result;
+			}
+		}
 	}
     public class SecondsAverageList
     {
