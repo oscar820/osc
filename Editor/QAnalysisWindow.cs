@@ -968,7 +968,7 @@ namespace QTool
 				eventId = EventList.StackPeek();
 				if (string.IsNullOrWhiteSpace(eventId))
 				{
-					return UpdateTime;
+					return QAnalysisData.TitleList[Key].DataSetting.mode== QAnalysisMode.更新时间? (object)UpdateTime: null;
 				}
 			}
 		
@@ -978,7 +978,7 @@ namespace QTool
 			}
 			else
 			{
-				return UpdateTime;
+				return null;
 			}
 		
 		}
