@@ -67,8 +67,9 @@ namespace QTool
 				if (string.IsNullOrWhiteSpace(info)) continue;
 				commitList.Add(new QFileState(info));
 			}
+			if (commitList.Count == 0) return "";
 			var commitInfo = QCommitWindow.Show(commitList);
-			if (string.IsNullOrWhiteSpace(commitInfo)) return"";
+			if (string.IsNullOrWhiteSpace(commitInfo)|| commitList.Count == 0) return"";
 			foreach (var info in commitList)
 			{
 				var filePath = (path + "/" + info.path).Replace('/', '\\');
