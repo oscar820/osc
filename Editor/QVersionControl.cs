@@ -48,8 +48,16 @@ namespace QTool
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 			Debug.Log("同步 " + result);
-			if (result.StartsWith("fatal")||result.Contains("error"))
+			if (result.StartsWith("fatal")|| result.Contains("error"))
 			{
+				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
+				Debug.LogError(mergeErrorFile);
+				commitList.Clear();
+				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
+				{
+					commitList.Add(new QFileState(fileInfo));
+				}
+				QVersionControlWindow.MergeError(commitList);
 				return false;
 			}
 			return true;
@@ -74,10 +82,11 @@ namespace QTool
 				commitList.Add(new QFileState(info));
 			}
 			if (commitList.Count == 0) return "";
-			var commitInfo = QCommitWindow.Show(commitList);
+			var commitInfo = QVersionControlWindow.Commit(commitList);
 			if (string.IsNullOrWhiteSpace(commitInfo) || commitList.Count == 0) return "";
 			foreach (var info in commitList)
 			{
+				if (!info.select) continue;
 				var filePath = (path + "/" + info.path).Replace('/', '\\');
 				switch (info.state)
 				{
@@ -140,15 +149,22 @@ namespace QTool
 
 	}
 	
-	public struct QFileState
+	public class QFileState
 	{
 		public string state;
 		public string path;
+		public bool select = true;
 		public QFileState(string initInfo)
 		{
-			initInfo.Trim().SplitTowString(" ", out var start, out var end);
-			state = start;
-			path = end;
+			if(initInfo.Trim().SplitTowString(" ", out var start, out var end))
+			{
+				state = start;
+				path = end;
+			}
+			else
+			{
+				path = start;
+			}
 		}
 		public override string ToString()
 		{
@@ -156,18 +172,17 @@ namespace QTool
 		}
 	}
 
-	public class QCommitWindow : EditorWindow
+	public class QVersionControlWindow : EditorWindow
 	{
-		public static QCommitWindow Instance { private set; get; }
-		public static string Show(List<QFileState> commitList)
+		public static QVersionControlWindow Instance { private set; get; }
+		public static string Commit(List<QFileState> commitList)
 		{
 			if (Instance == null)
 			{
-				Instance = GetWindow<QCommitWindow>();
+				Instance = GetWindow<QVersionControlWindow>();
 				Instance.minSize = new Vector2(200, 130);
 			}
 			Instance.titleContent = new GUIContent("提交本地更改");
-			Instance.commitList = commitList;
 			Instance.fileList.Clear();
 			Instance.fileList.AddRange(commitList);
 			Instance.commitInfo = "";
@@ -175,8 +190,22 @@ namespace QTool
 			Instance.ShowModal();
 			return Instance.confirm?Instance.commitInfo:"";
 		}
+		public static string MergeError(List<QFileState> mergeErrorList)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<QVersionControlWindow>();
+				Instance.minSize = new Vector2(200, 130);
+			}
+			Instance.titleContent = new GUIContent("合并冲突");
+			Instance.fileList.Clear();
+			Instance.fileList.AddRange(mergeErrorList);
+			Instance.commitInfo = "";
+			Instance.confirm = false;
+			Instance.ShowModal();
+			return Instance.confirm ? Instance.commitInfo : "";
+		}
 		public List<QFileState> fileList = new List<QFileState>();
-		public List<QFileState> commitList = new List<QFileState>();
 		public string commitInfo { get; private set; }
 		bool confirm;
 		Vector2 scrollPos = Vector2.zero;
@@ -188,12 +217,7 @@ namespace QTool
 				{
 					using (new GUILayout.HorizontalScope())
 					{
-						if (GUILayout.Toggle(commitList.Contains(file), "")){
-							commitList.AddCheckExist(file);
-						}else
-						{
-							commitList.Remove(file);
-						}
+						file.select = GUILayout.Toggle(file.select, "");
 						GUILayout.Label(file.path);
 					}
 				}
