@@ -71,6 +71,13 @@ namespace QTool
 						}
 					}
 					Debug.Log("保留本地更改 " + Stash(path));
+					foreach (var info in commitList)
+					{
+						if (info.select)
+						{
+							Debug.Log("临时删除本地更改 " + info + " " + Checkout(info.path));
+						}
+					}
 					var pullResult = Pull(path);
 					Debug.Log("还原本地更改 " + Stash(path,true));
 					return pullResult;
