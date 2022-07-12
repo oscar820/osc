@@ -17,7 +17,6 @@ namespace QTool
 		{
 			UnityEditor.Editor.finishedDefaultHeaderGUI += AddHeaderGUI;
 		}
-		static string stashVersion = "version";
 		private static void AddHeaderGUI(Editor editor)
 		{
 			if (!editor.target.IsAsset())
@@ -28,23 +27,13 @@ namespace QTool
 			{
 				PullAndCommitPush(path);
 			}
-			if (GUILayout.Button(new GUIContent("贮藏"), GUILayout.Width(80)))
-			{
-				stashVersion = GetCurrentVersion(path);
-				Debug.LogError(Stash(path));
-			}
-			if (GUILayout.Button(new GUIContent("还原贮藏"), GUILayout.Width(80)))
-			{
-				Debug.LogError(Stash(path,true));
-				Debug.LogError( Checkout(path, stashVersion));
-			}
 		}
 
 		static string CheckPathRun(string commond, string path)
 		{
 			path = Path.GetFullPath(path);
 			RunInfo.Arguments = commond;
-			if (!Directory.Exists(path))
+			if (File.Exists(path))
 			{
 				path = Path.GetDirectoryName(path);
 			}
@@ -87,23 +76,33 @@ namespace QTool
 				if (QVersionControlWindow.MergeError(commitList))
 				{
 					var version = GetCurrentVersion(path);
+					var useStash = false;
 					foreach (var info in commitList)
 					{
 						if (!info.select)
 						{
-							Debug.Log("放弃本地更改 " + info + " " + Checkout(info.path));
-						}
-					}
-					Debug.Log("保留本地更改 " + Stash(path));
-					var pullResult = Pull(path);
-					foreach (var info in commitList)
-					{
-						if (info.select)
+							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path));
+						}else
 						{
-							Debug.LogError("放弃远端更改 "+info+" "+ Checkout(info.path, version));
+							useStash = true;
 						}
 					}
-					Debug.Log("还原本地更改 " + Stash(path,true));
+					if (useStash)
+					{
+						Debug.Log("保留本地更改 " + Stash(path));
+					}
+					var pullResult = Pull(path);
+					if (useStash)
+					{
+						foreach (var info in commitList)
+						{
+							if (info.select)
+							{
+								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path, version));
+							}
+						}
+						Debug.Log("还原本地更改 " + Stash(path, true));
+					} 
 					return pullResult;
 				}
 				else
@@ -124,18 +123,22 @@ namespace QTool
 		}
 
 		static List<QFileState> commitList = new List<QFileState>();
-		static string Commit(string path)
+		static void AddCommitList(string path)
 		{
 			var statusInfo = Status(path);
-			if (statusInfo.StartsWith("fatal")) return "";
-			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+			if (statusInfo.StartsWith("fatal")) return;
 			var lines = statusInfo.Split('\n');
-			commitList.Clear();
 			foreach (var info in lines)
 			{
 				if (string.IsNullOrWhiteSpace(info)) continue;
-				commitList.Add(new QFileState(info,path));
+				commitList.Add(new QFileState(info, path));
 			}
+		}
+		static string Commit(string path)
+		{
+			commitList.Clear();
+			AddCommitList(path);
+			AddCommitList(path + ".meta");
 			if (commitList.Count == 0) return "";
 			var commitInfo = QVersionControlWindow.Commit(commitList);
 			if (string.IsNullOrWhiteSpace(commitInfo) || commitList.Count == 0) return "";
@@ -163,7 +166,7 @@ namespace QTool
 			}
 			if (commitList.Count > 0)
 			{
-				return CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m " + commitInfo, path);
+				return CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo+'\"', path);
 			}
 			else
 			{
@@ -178,7 +181,7 @@ namespace QTool
 			}
 			else
 			{
-				return CheckPathRun(nameof(Stash).ToLower(), path);
+				return CheckPathRun(nameof(Stash).ToLower()+ " -a", path);
 			}
 			
 		}
