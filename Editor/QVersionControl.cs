@@ -16,12 +16,7 @@ namespace QTool
 		static QVersionControl()
 		{
 			UnityEditor.Editor.finishedDefaultHeaderGUI += AddHeaderGUI;
-			//Selection.selectionChanged += () =>
-			//{
-			//	var target = Selection.activeObject;
-			//};
 		}
-		//static QDictionary<UnityEngine.Object, string> StateCache = new QDictionary<UnityEngine.Object, string>();
 		private static void AddHeaderGUI(Editor editor)
 		{
 			if (!editor.target.IsAsset())
@@ -52,7 +47,6 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Add).ToLower()+" "+ Path.GetFullPath(path), path);
 		}
-		static List<string> fileList = new List<string>();
 		static void Pull(string path)
 		{
 			Debug.Log("同步 "+ CheckPathRun(nameof(Pull).ToLower() + " origin", path));
@@ -62,6 +56,8 @@ namespace QTool
 		{
 			Debug.Log("上传更改 "+ CheckPathRun(nameof(Push).ToLower() + " origin" , path));
 		}
+
+		static List<QFileState> commitList = new List<QFileState>();
 		static string Commit(string path, string commitInfo)
 		{
 			if (string.IsNullOrWhiteSpace(commitInfo))
@@ -73,39 +69,40 @@ namespace QTool
 			if (statusInfo.StartsWith("fatal")) return "";
 			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
 			var lines = statusInfo.Split('\n');
-			fileList.Clear();
+			commitList.Clear();
 			foreach (var info in lines)
 			{
-				if (info.Trim().SplitTowString(" ", out var start, out var end))
+				commitList.Add(new QFileState(info));
+			}
+			if (QCommitWindow.Show(commitList))
+			{
+
+			}
+			foreach (var info in commitList)
+			{
+				var filePath = (path + "/" + info.path).Replace('/', '\\');
+				switch (info.state)
 				{
-					var filePath = (path + "/" + end).Replace('/', '\\');
-					switch (start)
-					{
-						case "??":
-							Debug.Log("新增 " + end);
-							Add(filePath);
-							fileList.AddCheckExist(end);
-							break;
-						case "D":
-							Debug.Log("删除 " + end);
-							fileList.AddCheckExist(end);
-							break;
-						case "A":
-							Debug.Log("新增 " + end);
-							fileList.AddCheckExist(end);
-							break;
-						case "M":
-							Debug.Log("更改 " + end);
-							fileList.AddCheckExist(end);
-							break;
-						default:
-							break;
-					}
+					case "??":
+						Debug.Log("新增 " + info.path);
+						Add(filePath);
+						break;
+					case "D":
+						Debug.Log("删除 " + info.path);
+						break;
+					case "A":
+						Debug.Log("新增 " + info.path);
+						break;
+					case "M":
+						Debug.Log("更改 " + info.path);
+						break;
+					default:
+						break;
 				}
 			}
-			if (fileList.Count > 0)
+			if (commitList.Count > 0)
 			{
-				RunInfo.Arguments = nameof(Commit).ToLower() + " " + fileList.ToOneString(" ") + " -m " + commitInfo;
+				RunInfo.Arguments = nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m " + commitInfo;
 				RunInfo.WorkingDirectory = path;
 				return Tool.ProcessCommand(RunInfo);
 			}
@@ -140,53 +137,65 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Status).ToLower() + " -s "+ Path.GetFullPath( path), path);
 		}
-		
 
-		//public const string COMMAND_TORTOISE_LOG = @"/command:log /path:{0} /findtype:0 /closeonend:0";
-		//public const string COMMAND_TORTOISE_PULL = @"/command:pull /path:{0} /closeonend:0";
-		//public const string COMMAND_TORTOISE_COMMIT = @"/command:commit /path:{0} /closeonend:0";
-		//public const string COMMAND_TORTOISE_PUSH = @"/command:push /path:{0} /closeonend:0";
-		//public const string COMMAND_TORTOISE_STASHSAVE = @"/command:stashsave /path:{0} /closeonend:0";
-		//public const string COMMAND_TORTOISE_STASHPOP = @"/command:stashpop /path:{0} /closeonend:0";
-		//public static string tortoiseGitPath = @"E:\TortoiseGit\bin\TortoiseGitProc.exe";
+	}
+	
+	public struct QFileState
+	{
+		public string state;
+		public string path;
+		public QFileState(string initInfo)
+		{
+			initInfo.Trim().SplitTowString(" ", out var start, out var end);
+			state = start;
+			path = end;
+		}
+		public override string ToString()
+		{
+			return path;
+		}
+	}
 
-		////[MenuItem("TortoiseGit/StashSave")]
-		//public static void GitAssetsStushSave()
-		//{
-		//	//TortoiseGit.GitCommand(GitType.StashSave, Application.dataPath, tortoiseGitPath);
-		//}
-
-		////[MenuItem("TortoiseGit/StashPop")]
-		//public static void GitAssetsStushPop()
-		//{
-		//	//TortoiseGit.GitCommand(GitType.StashPop, Application.dataPath, tortoiseGitPath);
-		//}
-
-		//[MenuItem("TortoiseGit/Push")]
-		//public static void GitAssetPush()
-		//{
-		//	//TortoiseGit.GitCommand(GitType.Push, Application.dataPath, tortoiseGitPath);
-		//	ProcessCommand(COMMAND_TORTOISE_PUSH);
-		//}
-
-		//[MenuItem("TortoiseGit/Log")]
-		//public static void GitAssetsLog()
-		//{
-		//	ProcessCommand(COMMAND_TORTOISE_LOG);
-		//}
-
-		//[MenuItem("TortoiseGit/Pull")]
-		//public static void GitAssetsPull()
-		//{
-		//	//TortoiseGit.GitCommand(GitType.Pull, Application.dataPath, tortoiseGitPath);
-		//	ProcessCommand(COMMAND_TORTOISE_PULL);
-		//}
-
-		//[MenuItem("TortoiseGit/Commit")]
-		//public static void GitAssetsCommit()
-		//{
-		//	//TortoiseGit.GitCommand(GitType.Commit, Application.dataPath, tortoiseGitPath);
-		//	ProcessCommand(COMMAND_TORTOISE_COMMIT);
-		//}
+	public class QCommitWindow : EditorWindow
+	{
+		public static QCommitWindow Instance { private set; get; }
+		public static bool Show(List<QFileState> commitList)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<QCommitWindow>();
+				Instance.minSize = new Vector2(300, 100);
+			}
+			Instance.titleContent = new GUIContent("提交本地更改");
+			Instance.commitList = commitList;
+			Instance.fileList.Clear();
+			Instance.fileList.AddRange(commitList);
+			Instance.ShowModal();
+			return string.IsNullOrWhiteSpace( Instance.commitInfo);
+		}
+		public List<QFileState> fileList = new List<QFileState>();
+		public List<QFileState> commitList = new List<QFileState>();
+		string commitInfo;
+		Vector2 scrollPos = Vector2.zero;
+		private void OnGUI()
+		{
+			using (var scroll=new GUILayout.ScrollViewScope(scrollPos))
+			{
+				foreach (var file in fileList)
+				{
+					using (new GUILayout.HorizontalScope())
+					{
+						if (GUILayout.Toggle(commitList.Contains(file), "")){
+							commitList.AddCheckExist(file);
+						}else
+						{
+							commitList.Remove(file);
+						}
+						GUILayout.Label(file.path);
+					}
+				}
+				scrollPos=scroll.scrollPosition ;
+			}
+		}
 	}
 }
