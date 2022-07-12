@@ -41,7 +41,7 @@ namespace QTool
 				Debug.LogError(e.ToString());
 			}
 			RunInfo.Arguments = commond;
-			if (File.Exists(path))
+			if (Path.HasExtension(path))
 			{
 				path = Path.GetDirectoryName(path);
 			}
@@ -147,7 +147,7 @@ namespace QTool
 		{
 			commitList.Clear();
 			AddCommitList(path);
-			if(File.Exists(path + ".meta"))
+			if (path.StartsWith("Assets"))
 			{
 				AddCommitList(path + ".meta");
 			}
@@ -163,7 +163,7 @@ namespace QTool
 				switch (info.state)
 				{
 					case "??":
-					//	Add(info.path);
+						Add(info.path);
 						break;
 					default:
 						break;
@@ -221,14 +221,14 @@ namespace QTool
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
 		{
-			CreateNoWindow = false,
+			CreateNoWindow = true,
 			RedirectStandardOutput = true,
 			RedirectStandardError=true,
 			UseShellExecute = false,
 		};
 		public static string Status(string path)
 		{
-			return CheckPathRun(nameof(Status).ToLower() + " -s "+ Path.GetFullPath(path), path);
+			return CheckPathRun(nameof(Status).ToLower() + " -s "+Path.GetFullPath(path), path);
 		}
 		[MenuItem("QTool/工具/Git/拉取更新")]
 		static void AllPull()
