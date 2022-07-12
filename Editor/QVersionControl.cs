@@ -163,9 +163,7 @@ namespace QTool
 			}
 			if (commitList.Count > 0)
 			{
-				RunInfo.Arguments = nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m " + commitInfo;
-				RunInfo.WorkingDirectory = path;
-				return Tool.ProcessCommand(RunInfo);
+				return CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m " + commitInfo, path);
 			}
 			else
 			{
@@ -229,12 +227,12 @@ namespace QTool
 			if(initInfo.Trim().SplitTowString(" ", out var start, out var end))
 			{
 				state = start;
-				path = (parentPath + "/" + end).Replace('/', '\\');
+				path = Path.GetFullPath(parentPath + "/" + end);
 				select = true;
 			}
 			else
 			{
-				path = (parentPath + "/" + start).Replace('/', '\\');
+				path = Path.GetFullPath(parentPath + "/" + start);
 				select = false;
 			}
 		}
