@@ -416,7 +416,6 @@ crashlytics-build.properties
 			Instance.commitInfo = "";
 			Instance.confirm = false;
 			Instance.ShowModal();
-			Instance.Repaint();
 			return Instance.confirm;
 		}
 		public List<QFileState> fileList = new List<QFileState>();
