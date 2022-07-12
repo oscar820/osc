@@ -44,21 +44,45 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Add).ToLower() + " " + Path.GetFullPath(path), path);
 		}
+		static string Checkout(string path)
+		{
+			return CheckPathRun(nameof(Checkout).ToLower() + " -- " + Path.GetFullPath(path), path);
+		}
 		static bool Pull(string path)
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
-			Debug.Log("同步 " + result);
 			if (result.StartsWith("fatal")|| result.Contains("error"))
 			{
+				var parentPath = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+				Debug.Log("同步出错 " + result);
 				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
-				Debug.LogError(mergeErrorFile);
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
 				{
-					commitList.Add(new QFileState(fileInfo));
+					commitList.Add(new QFileState(fileInfo,parentPath));
 				}
-				QVersionControlWindow.MergeError(commitList);
-				return false;
+				if (QVersionControlWindow.MergeError(commitList))
+				{
+					foreach (var info in commitList)
+					{
+						if (!info.select)
+						{
+							Debug.Log("放弃本地更改 " + info + " " + Checkout(info.path));
+						}
+					}
+					Debug.Log("保留本地更改 " + Stash(path));
+					var pullResult = Pull(path);
+					Debug.Log("还原本地更改 " + Stash(path,true));
+					return pullResult;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				Debug.Log("同步 " + result);
 			}
 			return true;
 		}
@@ -79,7 +103,7 @@ namespace QTool
 			foreach (var info in lines)
 			{
 				if (string.IsNullOrWhiteSpace(info)) continue;
-				commitList.Add(new QFileState(info));
+				commitList.Add(new QFileState(info,path));
 			}
 			if (commitList.Count == 0) return "";
 			var commitInfo = QVersionControlWindow.Commit(commitList);
@@ -87,12 +111,11 @@ namespace QTool
 			foreach (var info in commitList)
 			{
 				if (!info.select) continue;
-				var filePath = (path + "/" + info.path).Replace('/', '\\');
 				switch (info.state)
 				{
 					case "??":
 						Debug.Log("新增 " + info.path);
-						Add(filePath);
+						Add(info.path);
 						break;
 					case "D":
 						Debug.Log("删除 " + info.path);
@@ -118,7 +141,18 @@ namespace QTool
 				return "";
 			}
 		}
-
+		static string Stash(string path,bool pop=false)
+		{
+			if (pop)
+			{
+				return CheckPathRun(nameof(Stash).ToLower()+" pop",path);
+			}
+			else
+			{
+				return CheckPathRun(nameof(Stash).ToLower(), path);
+			}
+			
+		}
 		static void PullAndCommitPush(string path)
 		{
 			if (Pull(path))
@@ -154,16 +188,18 @@ namespace QTool
 		public string state;
 		public string path;
 		public bool select = true;
-		public QFileState(string initInfo)
+		public QFileState(string initInfo,string parentPath)
 		{
 			if(initInfo.Trim().SplitTowString(" ", out var start, out var end))
 			{
 				state = start;
-				path = end;
+				path = (parentPath + "/" + end).Replace('/', '\\');
+				select = true;
 			}
 			else
 			{
-				path = start;
+				path = (parentPath + "/" + start).Replace('/', '\\');
+				select = false;
 			}
 		}
 		public override string ToString()
@@ -190,20 +226,20 @@ namespace QTool
 			Instance.ShowModal();
 			return Instance.confirm?Instance.commitInfo:"";
 		}
-		public static string MergeError(List<QFileState> mergeErrorList)
+		public static bool MergeError(List<QFileState> mergeErrorList)
 		{
 			if (Instance == null)
 			{
 				Instance = GetWindow<QVersionControlWindow>();
 				Instance.minSize = new Vector2(200, 130);
 			}
-			Instance.titleContent = new GUIContent("合并冲突");
+			Instance.titleContent = new GUIContent("解决文件冲突");
 			Instance.fileList.Clear();
 			Instance.fileList.AddRange(mergeErrorList);
 			Instance.commitInfo = "";
 			Instance.confirm = false;
 			Instance.ShowModal();
-			return Instance.confirm ? Instance.commitInfo : "";
+			return Instance.confirm;
 		}
 		public List<QFileState> fileList = new List<QFileState>();
 		public string commitInfo { get; private set; }
@@ -223,19 +259,31 @@ namespace QTool
 				}
 				scrollPos=scroll.scrollPosition ;
 			}
-			commitInfo = EditorGUILayout.TextField(commitInfo);
-			if (GUILayout.Button("提交"))
-			{
-				if (string.IsNullOrWhiteSpace(commitInfo))
+		
+			if(titleContent.text.Contains("提交")){
+				commitInfo = EditorGUILayout.TextField(commitInfo);
+				if (GUILayout.Button("提交选中文件"))
 				{
-					EditorUtility.DisplayDialog("提交信息错误", "提交信息不能为空", "确认");
+					if (string.IsNullOrWhiteSpace(commitInfo))
+					{
+						EditorUtility.DisplayDialog("提交信息错误", "提交信息不能为空", "确认");
+					}
+					else
+					{
+						confirm = true;
+						Close();
+					}
 				}
-				else
+			}
+			else
+			{
+				if (GUILayout.Button("保留选中文件"))
 				{
 					confirm = true;
 					Close();
 				}
 			}
+			
 			if (GUILayout.Button("取消"))
 			{
 				commitInfo = "";
