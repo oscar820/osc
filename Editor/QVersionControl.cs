@@ -93,19 +93,14 @@ namespace QTool
 						{
 							Debug.Log("放弃本地更改 " + info + " " + Checkout(info.path));
 						}
-						else
-						{
-							Checkout(info.path);
-						}
 					}
 					Debug.Log("保留本地更改 " + Stash(path));
-				
 					var pullResult = Pull(path);
 					foreach (var info in commitList)
 					{
 						if (info.select)
 						{
-							Checkout(info.path, version);
+							Debug.LogError("放弃远端更改 "+info+" "+ Checkout(info.path, version));
 						}
 					}
 					Debug.Log("还原本地更改 " + Stash(path,true));
