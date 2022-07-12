@@ -5,7 +5,7 @@
 ***
 ## 主要功能
 #### [QFlowGraph 轻量化流程图](files/master/Runtime/QFlowGraph)
-3
+#### QFlowGraph 强量化Git版本控制
 ***
 ## 如何安装
 - 使用前需要安装git
