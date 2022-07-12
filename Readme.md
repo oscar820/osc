@@ -5,7 +5,12 @@
 ***
 ## 主要功能
 #### [QFlowGraph 轻量化流程图](files/master/Runtime/QFlowGraph)
+<<<<<<< Updated upstream
 456
+=======
+#### [QVersionControl 轻量化版本控制](files/master/Runtime/QFlowGraph)
+789
+>>>>>>> Stashed changes
 ***
 ## 如何安装
 - 使用前需要安装git
