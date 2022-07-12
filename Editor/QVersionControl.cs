@@ -48,13 +48,18 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Checkout).ToLower() + " -- " + Path.GetFullPath(path), path);
 		}
+		static string GetCurrentVersion(string path)
+		{
+			return CheckPathRun("log -1 --pretty=format:\"%h\"", path);
+			
+		}
 		static bool Pull(string path)
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 			if (result.StartsWith("fatal")|| result.Contains("error"))
 			{
 				var parentPath = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
-				Debug.Log("同步出错 " + result);
+				Debug.LogError("同步出错 " + result);
 				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
@@ -70,12 +75,13 @@ namespace QTool
 							Debug.Log("放弃本地更改 " + info + " " + Checkout(info.path));
 						}
 					}
+					var version = GetCurrentVersion(path);
 					Debug.Log("保留本地更改 " + Stash(path));
 					foreach (var info in commitList)
 					{
 						if (info.select)
 						{
-							Debug.Log("临时删除本地更改 " + info + " " + Checkout(info.path));
+							Debug.Log("放弃远端更改 " + info + " "+ version + " " + Checkout(info.path));
 						}
 					}
 					var pullResult = Pull(path);
@@ -165,6 +171,11 @@ namespace QTool
 			if (Pull(path))
 			{
 				var commitResul = Commit(path);
+				if (commitResul.StartsWith("error"))
+				{
+					Debug.LogError(commitResul);
+					return;
+				}
 				if (string.IsNullOrWhiteSpace(commitResul))
 				{
 					Debug.Log("无本地更新");
