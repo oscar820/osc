@@ -71,7 +71,6 @@ namespace QTool
 					if (info.Trim().SplitTowString(" ", out var start, out var end))
 					{
 						var filePath = (path + "/" + end).Replace('/','\\');
-						Debug.LogError("[" + start + "][" + end + "]");
 						switch (start)
 						{
 							case "??":
@@ -84,7 +83,7 @@ namespace QTool
 								fileList.AddCheckExist(end);
 								break;
 							default:
-								
+								Debug.LogError("[" + start + "][" + end + "]");
 								break;
 						}
 					}
