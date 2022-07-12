@@ -48,7 +48,7 @@ namespace QTool
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 			Debug.Log("同步 " + result);
-			if (result.StartsWith("fatal"))
+			if (result.StartsWith("fatal")||result.Contains("error"))
 			{
 				return false;
 			}
