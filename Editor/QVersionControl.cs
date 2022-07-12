@@ -75,10 +75,12 @@ namespace QTool
 						switch (start)
 						{
 							case "??":
+								Debug.Log("新增 " + end );
 								Add(filePath);
 								fileList.AddCheckExist(end);
 								break;
 							case "M":
+								Debug.Log("更改 " + end);
 								fileList.AddCheckExist(end);
 								break;
 							default:
