@@ -27,7 +27,7 @@ namespace QTool
 
 			if (GUILayout.Button(new GUIContent("同步更改"), GUILayout.Width(80)))
 			{
-				PullAndCommitPush(path,"提交测试");
+				PullAndCommitPush(path);
 			}
 			GUILayout.EndHorizontal();
 		}
@@ -58,13 +58,8 @@ namespace QTool
 		}
 
 		static List<QFileState> commitList = new List<QFileState>();
-		static string Commit(string path, string commitInfo)
+		static string Commit(string path)
 		{
-			if (string.IsNullOrWhiteSpace(commitInfo))
-			{
-				throw new Exception("上传信息不能为空");
-			}
-
 			var statusInfo = Status(path); 
 			if (statusInfo.StartsWith("fatal")) return "";
 			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
@@ -75,10 +70,8 @@ namespace QTool
 				if (string.IsNullOrWhiteSpace(info)) continue;
 				commitList.Add(new QFileState(info));
 			}
-			if (QCommitWindow.Show(commitList))
-			{
-
-			}
+			var commitInfo = QCommitWindow.Show(commitList);
+			if (string.IsNullOrWhiteSpace(commitInfo)) return"";
 			foreach (var info in commitList)
 			{
 				var filePath = (path + "/" + info.path).Replace('/', '\\');
@@ -113,10 +106,10 @@ namespace QTool
 			}
 		}
 
-		static void PullAndCommitPush(string path, string commitInfo)
+		static void PullAndCommitPush(string path)
 		{
 			Pull(path);
-			var commitResul= Commit(path, commitInfo);
+			var commitResul= Commit(path);
 			if (string.IsNullOrWhiteSpace(commitResul))
 			{
 				Debug.Log("无本地更新");
@@ -160,27 +153,29 @@ namespace QTool
 	public class QCommitWindow : EditorWindow
 	{
 		public static QCommitWindow Instance { private set; get; }
-		public static bool Show(List<QFileState> commitList)
+		public static string Show(List<QFileState> commitList)
 		{
 			if (Instance == null)
 			{
 				Instance = GetWindow<QCommitWindow>();
-				Instance.minSize = new Vector2(300, 100);
+				Instance.minSize = new Vector2(300, 130);
 			}
 			Instance.titleContent = new GUIContent("提交本地更改");
 			Instance.commitList = commitList;
 			Instance.fileList.Clear();
 			Instance.fileList.AddRange(commitList);
+			Instance.commitInfo = "";
 			Instance.ShowModal();
-			return string.IsNullOrWhiteSpace( Instance.commitInfo);
+			return Instance.commitInfo;
 		}
 		public List<QFileState> fileList = new List<QFileState>();
 		public List<QFileState> commitList = new List<QFileState>();
-		string commitInfo;
+		public string commitInfo { get; private set; }
 		Vector2 scrollPos = Vector2.zero;
 		private void OnGUI()
 		{
-			using (var scroll=new GUILayout.ScrollViewScope(scrollPos))
+			commitInfo = GUILayout.TextArea(commitInfo, GUILayout.Height(60));
+			using (var scroll=new GUILayout.ScrollViewScope(scrollPos,QGUITool.BackStyle))
 			{
 				foreach (var file in fileList)
 				{
@@ -196,6 +191,22 @@ namespace QTool
 					}
 				}
 				scrollPos=scroll.scrollPosition ;
+			}
+			if (GUILayout.Button("提交"))
+			{
+				if (string.IsNullOrWhiteSpace(commitInfo))
+				{
+					EditorUtility.DisplayDialog("提交信息错误", "提交信息不能为空", "确认");
+				}
+				else
+				{
+					Close();
+				}
+			}
+			if (GUILayout.Button("取消"))
+			{
+				commitInfo = "";
+				Close();
 			}
 		}
 	}
