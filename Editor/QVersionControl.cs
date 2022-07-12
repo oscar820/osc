@@ -221,7 +221,7 @@ namespace QTool
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
 		{
-			CreateNoWindow = true,
+			CreateNoWindow = false,
 			RedirectStandardOutput = true,
 			RedirectStandardError=true,
 			UseShellExecute = false,
