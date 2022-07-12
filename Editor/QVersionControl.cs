@@ -155,7 +155,6 @@ namespace QTool
 			var commitInfo = QVersionControlWindow.Commit(commitList);
 			if (string.IsNullOrWhiteSpace(commitInfo) || commitList.Count == 0) return "";
 			commitList.RemoveAll((obj) => !obj.select);
-			Debug.LogError(commitInfo);
 			for (int i = 0; i < commitList.Count; i++)
 			{
 				var info = commitList[i];
@@ -169,7 +168,7 @@ namespace QTool
 					default:
 						break;
 				}
-				Debug.LogError(info.state + "  " + info);
+				Debug.Log(info.state + "  " + info);
 			}
 			EditorUtility.ClearProgressBar();
 			if (commitList.Count > 0)
