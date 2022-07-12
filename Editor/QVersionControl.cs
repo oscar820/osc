@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 using QTool.Reflection;
-using UnityEditor.VersionControl;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -33,7 +32,7 @@ namespace QTool
 
 			if (GUILayout.Button(new GUIContent("提交"), GUILayout.Width(50)))
 			{
-				Debug.Log("提交\n"+ Commit(path));
+				Commit(path);
 			}
 			if (GUILayout.Button(new GUIContent("更新"), GUILayout.Width(50)))
 			{
@@ -57,28 +56,39 @@ namespace QTool
 		{
 			return PathRun(nameof(Add), path);
 		}
-		static string Commit(string path)
+		static void Commit(string path)
 		{
-			var state= Status(path);
-			if (state.StartsWith("fatal")) return state;
-			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
-			var lines= state.Split('\n');
-			foreach (var info in lines)
+			Task.Run(() =>
 			{
-				if(info.Trim().SplitTowString(" ",out var start,out var end))
+				var state = Status(path);
+				if (state.StartsWith("fatal")) return;
+				path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+				var lines = state.Split('\n');
+				foreach (var info in lines)
 				{
-					Debug.LogError("[" + start + "][" + end + "]");
-					if (start == "??")
+					if (info.Trim().SplitTowString(" ", out var start, out var end))
 					{
-						Debug.LogError(Add(path+"/"+end));
+						switch (start)
+						{
+							case "??":
+								Debug.LogError(Add(path + "/" + end));
+								break;
+							case "M":
+								break;
+							default:
+								Debug.LogError("[" + start + "][" + end + "]");
+								break;
+						}
 					}
 				}
-			}
 
-			RunInfo.Arguments = nameof(Commit).ToLower();
-			RunInfo.WorkingDirectory = path;
-			Debug.Log(RunInfo.ToQData());
-			return Tool.ProcessCommand(RunInfo); 
+				RunInfo.Arguments = nameof(Commit).ToLower();
+				RunInfo.WorkingDirectory = path;
+				Debug.Log(RunInfo.ToQData());
+				Debug.LogError(Tool.ProcessCommand(RunInfo));
+				Debug.Log("提交完成");
+			});
+			
 
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
