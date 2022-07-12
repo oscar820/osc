@@ -71,7 +71,8 @@ namespace QTool
 			var lines = statusInfo.Split('\n');
 			commitList.Clear();
 			foreach (var info in lines)
-			{
+			{ 
+				if (string.IsNullOrWhiteSpace(info)) continue;
 				commitList.Add(new QFileState(info));
 			}
 			if (QCommitWindow.Show(commitList))
