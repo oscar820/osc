@@ -17,6 +17,7 @@ namespace QTool
 		{
 			UnityEditor.Editor.finishedDefaultHeaderGUI += AddHeaderGUI;
 		}
+		static string stashVersion = "version";
 		private static void AddHeaderGUI(Editor editor)
 		{
 			if (!editor.target.IsAsset())
@@ -26,6 +27,16 @@ namespace QTool
 			if (GUILayout.Button(new GUIContent("同步更改"), GUILayout.Width(80)))
 			{
 				PullAndCommitPush(path);
+			}
+			if (GUILayout.Button(new GUIContent("贮藏"), GUILayout.Width(80)))
+			{
+				stashVersion = GetCurrentVersion(path);
+				Debug.LogError(Stash(path));
+			}
+			if (GUILayout.Button(new GUIContent("还原贮藏"), GUILayout.Width(80)))
+			{
+				Debug.LogError(Stash(path,true));
+				Debug.LogError( Checkout(path, stashVersion));
 			}
 		}
 
@@ -44,13 +55,20 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Add).ToLower() + " " + Path.GetFullPath(path), path);
 		}
-		static string Checkout(string path)
+		static string Checkout(string path,string version=null)
 		{
-			return CheckPathRun(nameof(Checkout).ToLower() + " -- " + Path.GetFullPath(path), path);
+			if (string.IsNullOrEmpty(version))
+			{
+				return CheckPathRun(nameof(Checkout).ToLower() + " -- " + Path.GetFullPath(path), path);
+			}
+			else
+			{
+				return CheckPathRun(nameof(Checkout).ToLower()+ " "+version+ " -- " + Path.GetFullPath(path), path);
+			}
 		}
 		static string GetCurrentVersion(string path)
 		{
-			return CheckPathRun("log -1 --pretty=format:\"%h\"", path);
+			return CheckPathRun("log -1 --pretty=oneline" , path).SplitStartString(" ");
 			
 		}
 		static bool Pull(string path)
@@ -68,23 +86,28 @@ namespace QTool
 				}
 				if (QVersionControlWindow.MergeError(commitList))
 				{
+					var version = GetCurrentVersion(path);
 					foreach (var info in commitList)
 					{
 						if (!info.select)
 						{
 							Debug.Log("放弃本地更改 " + info + " " + Checkout(info.path));
 						}
+						else
+						{
+							Checkout(info.path);
+						}
 					}
-					var version = GetCurrentVersion(path);
 					Debug.Log("保留本地更改 " + Stash(path));
+				
+					var pullResult = Pull(path);
 					foreach (var info in commitList)
 					{
 						if (info.select)
 						{
-							Debug.Log("放弃远端更改 " + info + " "+ version + " " + Checkout(info.path));
+							Checkout(info.path, version);
 						}
 					}
-					var pullResult = Pull(path);
 					Debug.Log("还原本地更改 " + Stash(path,true));
 					return pullResult;
 				}
