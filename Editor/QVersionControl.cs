@@ -78,6 +78,10 @@ namespace QTool
 								Add(filePath);
 								fileList.AddCheckExist(end);
 								break;
+							case "A":
+								Debug.Log("新增 " + end);
+								fileList.AddCheckExist(end);
+								break;
 							case "M":
 								Debug.Log("更改 " + end);
 								fileList.AddCheckExist(end);
