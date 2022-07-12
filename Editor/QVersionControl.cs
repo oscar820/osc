@@ -230,8 +230,14 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Status).ToLower() + " -s "+ Path.GetFullPath(path), path);
 		}
+		[MenuItem("QTool/工具/Git/拉取更新")]
+		static void AllPull()
+		{
+			var path = Directory.GetCurrentDirectory();
+			Debug.Log(Pull(path));
+		}
 		[MenuItem("QTool/工具/Git/以粘贴版信息初始化仓库")]
-		static async void Init()
+		static  void AllInit()
 		{
 			if(string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
 			{
@@ -247,7 +253,7 @@ namespace QTool
 				}
 			}
 			var path = Directory.GetCurrentDirectory();
-			Debug.Log(CheckPathRun(nameof(Init).ToLower(), path));
+			Debug.Log(CheckPathRun("init", path));
 			Debug.Log(CheckPathRun("remote add origin \"" + GUIUtility.systemCopyBuffer + "\"", path));
 			GitIgnoreFile();
 			Debug.Log(CheckPathRun(nameof(Add).ToLower() + " .", path));
