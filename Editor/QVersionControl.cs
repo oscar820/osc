@@ -28,8 +28,8 @@ namespace QTool
 				PullAndCommitPush(path);
 			}
 		}
-		
-		static string CheckPathRun(string commond,string path)
+
+		static string CheckPathRun(string commond, string path)
 		{
 			path = Path.GetFullPath(path);
 			RunInfo.Arguments = commond;
@@ -42,34 +42,36 @@ namespace QTool
 		}
 		static string Add(string path)
 		{
-			return CheckPathRun(nameof(Add).ToLower()+" "+ Path.GetFullPath(path), path);
+			return CheckPathRun(nameof(Add).ToLower() + " " + Path.GetFullPath(path), path);
 		}
-		static void Pull(string path)
+		static bool Pull(string path)
 		{
-			Debug.Log("同步 "+ CheckPathRun(nameof(Pull).ToLower() + " origin", path));
+			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
+			Debug.Log("同步 " + result);
+			return !result.StartsWith("error");
 		}
-	
+
 		static void Push(string path)
 		{
-			Debug.Log("上传更改 "+ CheckPathRun(nameof(Push).ToLower() + " origin" , path));
+			Debug.Log("上传更改 " + CheckPathRun(nameof(Push).ToLower() + " origin", path));
 		}
 
 		static List<QFileState> commitList = new List<QFileState>();
 		static string Commit(string path)
 		{
-			var statusInfo = Status(path); 
+			var statusInfo = Status(path);
 			if (statusInfo.StartsWith("fatal")) return "";
 			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
 			var lines = statusInfo.Split('\n');
 			commitList.Clear();
 			foreach (var info in lines)
-			{ 
+			{
 				if (string.IsNullOrWhiteSpace(info)) continue;
 				commitList.Add(new QFileState(info));
 			}
 			if (commitList.Count == 0) return "";
 			var commitInfo = QCommitWindow.Show(commitList);
-			if (string.IsNullOrWhiteSpace(commitInfo)|| commitList.Count == 0) return"";
+			if (string.IsNullOrWhiteSpace(commitInfo) || commitList.Count == 0) return "";
 			foreach (var info in commitList)
 			{
 				var filePath = (path + "/" + info.path).Replace('/', '\\');
@@ -106,16 +108,18 @@ namespace QTool
 
 		static void PullAndCommitPush(string path)
 		{
-			Pull(path);
-			var commitResul= Commit(path);
-			if (string.IsNullOrWhiteSpace(commitResul))
+			if (Pull(path))
 			{
-				Debug.Log("无本地更新");
-			}
-			else
-			{
-				Debug.Log("提交更改 " + commitResul);
-				Push(path);
+				var commitResul = Commit(path);
+				if (string.IsNullOrWhiteSpace(commitResul))
+				{
+					Debug.Log("无本地更新");
+				}
+				else
+				{
+					Debug.Log("提交更改 " + commitResul);
+					Push(path);
+				}
 			}
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
@@ -172,7 +176,7 @@ namespace QTool
 		Vector2 scrollPos = Vector2.zero;
 		private void OnGUI()
 		{
-			commitInfo = GUILayout.TextArea(commitInfo, GUILayout.Height(60));
+			commitInfo = GUILayout.TextField(commitInfo, GUILayout.Height(60));
 			using (var scroll=new GUILayout.ScrollViewScope(scrollPos,QGUITool.BackStyle))
 			{
 				foreach (var file in fileList)
