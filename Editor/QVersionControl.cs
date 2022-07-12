@@ -52,7 +52,7 @@ namespace QTool
 		}
 		static string Add(string path)
 		{
-			return CheckPathRun(nameof(Add).ToLower() + " " + Path.GetFullPath(path), path);
+			return CheckPathRun(nameof(Add).ToLower() + " \""+Path.GetFullPath(path)+"\"", path);
 		}
 		static string Checkout(string path,string version=null)
 		{
@@ -381,7 +381,7 @@ crashlytics-build.properties
 		}
 		public override string ToString()
 		{
-			return path;
+			return "\""+ path+"\"";
 		}
 	}
 
