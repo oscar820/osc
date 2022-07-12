@@ -208,7 +208,6 @@ namespace QTool
 				}
 				else
 				{
-					Debug.Log("提交更改 " + commitResul);
 					Push(path);
 				}
 			}
