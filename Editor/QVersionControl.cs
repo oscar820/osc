@@ -69,7 +69,7 @@ namespace QTool
 				throw new Exception("上传信息不能为空");
 			}
 
-			var statusInfo = Status(path);
+			var statusInfo = Status(path); 
 			if (statusInfo.StartsWith("fatal")) return "";
 			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
 			var lines = statusInfo.Split('\n');
