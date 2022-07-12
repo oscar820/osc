@@ -173,13 +173,7 @@ namespace QTool
 			EditorUtility.ClearProgressBar();
 			if (commitList.Count > 0)
 			{
-				//Debug.LogError(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " - m \"" + commitInfo + '\"');
-				var info= CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo + '\"', path);
-				if (info.StartsWith("error"))
-				{
-					return info;
-				}
-				return commitInfo;
+				return CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo + '\"', path);
 			}
 			else
 			{
@@ -228,7 +222,7 @@ namespace QTool
 		};
 		public static string Status(string path)
 		{
-			return CheckPathRun(nameof(Status).ToLower() + " -s "+Path.GetFullPath(path), path);
+			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath(path)+"\"", path);
 		}
 		[MenuItem("QTool/工具/Git/拉取更新")]
 		static void AllPull()
