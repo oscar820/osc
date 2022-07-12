@@ -70,7 +70,6 @@ namespace QTool
 			}
 
 			var statusInfo = Status(path);
-			Debug.Log(statusInfo);
 			if (statusInfo.StartsWith("fatal")) return "";
 			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
 			var lines = statusInfo.Split('\n');
