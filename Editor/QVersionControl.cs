@@ -33,7 +33,6 @@ namespace QTool
 		{
 			try
 			{
-
 				path = Path.GetFullPath(path);
 			}
 			catch (Exception e)
@@ -47,7 +46,9 @@ namespace QTool
 			}
 			RunInfo.WorkingDirectory =path;
 			Debug.Log("git "+ RunInfo.Arguments);
-			return Tool.ProcessCommand(RunInfo); ;
+			var result= Tool.ProcessCommand(RunInfo);
+			Debug.Log( result);
+			return result;
 		}
 		static string Add(string path)
 		{
@@ -134,7 +135,6 @@ namespace QTool
 		static void AddCommitList(string path)
 		{
 			var statusInfo = Status(path);
-			Debug.Log("commit " + statusInfo);
 			if (statusInfo.StartsWith("fatal")) return;
 			var lines = statusInfo.Split('\n');
 			foreach (var info in lines)
