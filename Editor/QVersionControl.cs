@@ -178,7 +178,6 @@ namespace QTool
 		Vector2 scrollPos = Vector2.zero;
 		private void OnGUI()
 		{ 
-			commitInfo = EditorGUILayout.DelayedTextField(commitInfo, GUILayout.Height(60));
 			using (var scroll=new GUILayout.ScrollViewScope(scrollPos,QGUITool.BackStyle))
 			{
 				foreach (var file in fileList)
@@ -196,6 +195,7 @@ namespace QTool
 				}
 				scrollPos=scroll.scrollPosition ;
 			}
+			commitInfo = EditorGUILayout.TextArea(commitInfo, GUILayout.Height(60));
 			if (GUILayout.Button("提交"))
 			{
 				if (string.IsNullOrWhiteSpace(commitInfo))
