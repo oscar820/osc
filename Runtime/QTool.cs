@@ -386,12 +386,7 @@ namespace QTool
 			using (var process=new System.Diagnostics.Process { StartInfo=startInfo })
 			{
 				process.Start();
-				var result =  process.StandardOutput.ReadToEnd();
-				if (string.IsNullOrEmpty(result))
-				{
-					return  process.StandardError.ReadToEnd();
-				}
-				return result;
+				return process.StandardOutput.ReadToEnd()+ process.StandardError.ReadToEnd();
 			}
 		}
 	}

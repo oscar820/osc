@@ -30,80 +30,105 @@ namespace QTool
 			if (path.EndsWith("unity_builtin_extra")) return;
 			GUILayout.BeginHorizontal();
 
-			if (GUILayout.Button(new GUIContent("提交"), GUILayout.Width(50)))
+			if (GUILayout.Button(new GUIContent("同步更改"), GUILayout.Width(80)))
 			{
-				Commit(path,"提交测试");
-			}
-			if (GUILayout.Button(new GUIContent("更新"), GUILayout.Width(50)))
-			{
-				Debug.Log("状态 ");
+				PullAndCommitPush(path,"提交测试");
 			}
 			GUILayout.EndHorizontal();
 		}
-		static string PathRun(string commond,string path)
+		
+		static string CheckPathRun(string commond,string path)
 		{
 			path = Path.GetFullPath(path);
-			RunInfo.Arguments = commond.ToLower()+" " + Path.GetFullPath(path);
+			RunInfo.Arguments = commond;
 			if (!Directory.Exists(path))
 			{
 				path = Path.GetDirectoryName(path);
 			}
 			RunInfo.WorkingDirectory = path;
-			Debug.Log(RunInfo.ToQData());
 			return Tool.ProcessCommand(RunInfo); ;
 		}
 		static string Add(string path)
 		{
-			return PathRun(nameof(Add), path);
+			return CheckPathRun(nameof(Add).ToLower()+" "+ Path.GetFullPath(path), path);
 		}
 		static List<string> fileList = new List<string>();
-		static void Commit(string path,string info)
+		static void Pull(string path)
 		{
-			Task.Run(() =>
+			Debug.Log("同步 "+ CheckPathRun(nameof(Pull).ToLower() + " origin", path));
+		}
+	
+		static void Push(string path)
+		{
+			Debug.Log("上传更改 "+ CheckPathRun(nameof(Push).ToLower() + " origin" , path));
+		}
+		static string Commit(string path, string commitInfo)
+		{
+			if (string.IsNullOrWhiteSpace(commitInfo))
 			{
-				var state = Status(path);
-				if (state.StartsWith("fatal")) return;
-				path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
-				var lines = state.Split('\n');
-				fileList.Clear();
-				foreach (var info in lines)
+				throw new Exception("上传信息不能为空");
+			}
+
+			var statusInfo = Status(path);
+			Debug.Log(statusInfo);
+			if (statusInfo.StartsWith("fatal")) return "";
+			path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+			var lines = statusInfo.Split('\n');
+			fileList.Clear();
+			foreach (var info in lines)
+			{
+				if (info.Trim().SplitTowString(" ", out var start, out var end))
 				{
-					if (info.Trim().SplitTowString(" ", out var start, out var end))
+					var filePath = (path + "/" + end).Replace('/', '\\');
+					switch (start)
 					{
-						var filePath = (path + "/" + end).Replace('/','\\');
-						switch (start)
-						{
-							case "??":
-								Debug.Log("新增 " + end );
-								Add(filePath);
-								fileList.AddCheckExist(end);
-								break;
-							case "D":
-							case "A":
-								Debug.Log("新增 " + end);
-								fileList.AddCheckExist(end);
-								break;
-							case "M":
-								Debug.Log("更改 " + end);
-								fileList.AddCheckExist(end);
-								break;
-							default:
-								Debug.LogError("[" + start + "][" + end + "]");
-								break;
-						}
+						case "??":
+							Debug.Log("新增 " + end);
+							Add(filePath);
+							fileList.AddCheckExist(end);
+							break;
+						case "D":
+							Debug.Log("删除 " + end);
+							fileList.AddCheckExist(end);
+							break;
+						case "A":
+							Debug.Log("新增 " + end);
+							fileList.AddCheckExist(end);
+							break;
+						case "M":
+							Debug.Log("更改 " + end);
+							fileList.AddCheckExist(end);
+							break;
+						default:
+							break;
 					}
 				}
-				if (fileList.Count > 0)
-				{
-					RunInfo.Arguments = nameof(Commit).ToLower() + " " + fileList.ToOneString(" ") + " -m " + info;
-					RunInfo.WorkingDirectory = path;
-					Debug.Log(RunInfo.ToQData());
-					Debug.LogError(Tool.ProcessCommand(RunInfo));
-					Debug.Log("提交完成");
-				}
-			});
-			
+			}
+			if (fileList.Count > 0)
+			{
+				RunInfo.Arguments = nameof(Commit).ToLower() + " " + fileList.ToOneString(" ") + " -m " + commitInfo;
+				RunInfo.WorkingDirectory = path;
+				return Tool.ProcessCommand(RunInfo);
+			}
+			else
+			{
+				return "";
+			}
+		}
 
+		static void PullAndCommitPush(string path, string commitInfo)
+		{
+			Pull(path);
+			var commitResul= Commit(path, commitInfo);
+			if (string.IsNullOrWhiteSpace(commitResul))
+			{
+				Debug.Log("无本地更新");
+			}
+			else
+			{
+				Debug.Log("提交更改" + commitResul);
+				Push(path);
+			}
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
 		{
@@ -114,12 +139,9 @@ namespace QTool
 		};
 		public static string Status(string path)
 		{
-			return PathRun(nameof(Status) + " -s",path);
+			return CheckPathRun(nameof(Status).ToLower() + " -s "+ Path.GetFullPath( path), path);
 		}
-		static void Push()
-		{
-			
-		}
+		
 
 		//public const string COMMAND_TORTOISE_LOG = @"/command:log /path:{0} /findtype:0 /closeonend:0";
 		//public const string COMMAND_TORTOISE_PULL = @"/command:pull /path:{0} /closeonend:0";
