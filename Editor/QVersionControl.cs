@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 using QTool.Reflection;
 using System.IO;
 using System.Threading.Tasks;
-
+using System.Collections.Generic;
 namespace QTool
 {
 
@@ -32,7 +32,7 @@ namespace QTool
 
 			if (GUILayout.Button(new GUIContent("提交"), GUILayout.Width(50)))
 			{
-				Commit(path);
+				Commit(path,"提交测试");
 			}
 			if (GUILayout.Button(new GUIContent("更新"), GUILayout.Width(50)))
 			{
@@ -56,7 +56,8 @@ namespace QTool
 		{
 			return PathRun(nameof(Add), path);
 		}
-		static void Commit(string path)
+		static List<string> fileList = new List<string>();
+		static void Commit(string path,string info)
 		{
 			Task.Run(() =>
 			{
@@ -64,29 +65,36 @@ namespace QTool
 				if (state.StartsWith("fatal")) return;
 				path = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
 				var lines = state.Split('\n');
+				fileList.Clear();
 				foreach (var info in lines)
 				{
 					if (info.Trim().SplitTowString(" ", out var start, out var end))
 					{
+						var filePath = (path + "/" + end).Replace('/','\\');
+						Debug.LogError("[" + start + "][" + end + "]");
 						switch (start)
 						{
 							case "??":
-								Debug.LogError(Add(path + "/" + end));
+								Add(filePath);
+								fileList.AddCheckExist(end);
 								break;
 							case "M":
+								fileList.AddCheckExist(end);
 								break;
 							default:
-								Debug.LogError("[" + start + "][" + end + "]");
+								
 								break;
 						}
 					}
 				}
-
-				RunInfo.Arguments = nameof(Commit).ToLower();
-				RunInfo.WorkingDirectory = path;
-				Debug.Log(RunInfo.ToQData());
-				Debug.LogError(Tool.ProcessCommand(RunInfo));
-				Debug.Log("提交完成");
+				if (fileList.Count > 0)
+				{
+					RunInfo.Arguments = nameof(Commit).ToLower() + " " + fileList.ToOneString(" ") + " -m " + info;
+					RunInfo.WorkingDirectory = path;
+					Debug.Log(RunInfo.ToQData());
+					Debug.LogError(Tool.ProcessCommand(RunInfo));
+					Debug.Log("提交完成");
+				}
 			});
 			
 
