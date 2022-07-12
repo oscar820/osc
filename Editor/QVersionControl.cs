@@ -23,13 +23,10 @@ namespace QTool
 				return;
 			var path = AssetDatabase.GetAssetPath(editor.target);
 			if (path.EndsWith("unity_builtin_extra")) return;
-			GUILayout.BeginHorizontal();
-
 			if (GUILayout.Button(new GUIContent("同步更改"), GUILayout.Width(80)))
 			{
 				PullAndCommitPush(path);
 			}
-			GUILayout.EndHorizontal();
 		}
 		
 		static string CheckPathRun(string commond,string path)
