@@ -48,7 +48,11 @@ namespace QTool
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 			Debug.Log("同步 " + result);
-			return !result.StartsWith("error");
+			if (result.StartsWith("fatal"))
+			{
+				return false;
+			}
+			return true;
 		}
 
 		static void Push(string path)
@@ -160,7 +164,7 @@ namespace QTool
 			if (Instance == null)
 			{
 				Instance = GetWindow<QCommitWindow>();
-				Instance.minSize = new Vector2(300, 130);
+				Instance.minSize = new Vector2(200, 130);
 			}
 			Instance.titleContent = new GUIContent("提交本地更改");
 			Instance.commitList = commitList;
@@ -195,7 +199,7 @@ namespace QTool
 				}
 				scrollPos=scroll.scrollPosition ;
 			}
-			commitInfo = EditorGUILayout.TextArea(commitInfo, GUILayout.Height(60));
+			commitInfo = EditorGUILayout.TextField(commitInfo);
 			if (GUILayout.Button("提交"))
 			{
 				if (string.IsNullOrWhiteSpace(commitInfo))
