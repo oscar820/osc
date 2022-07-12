@@ -167,16 +167,18 @@ namespace QTool
 			Instance.fileList.Clear();
 			Instance.fileList.AddRange(commitList);
 			Instance.commitInfo = "";
+			Instance.confirm = false;
 			Instance.ShowModal();
-			return Instance.commitInfo;
+			return Instance.confirm?Instance.commitInfo:"";
 		}
 		public List<QFileState> fileList = new List<QFileState>();
 		public List<QFileState> commitList = new List<QFileState>();
 		public string commitInfo { get; private set; }
+		bool confirm;
 		Vector2 scrollPos = Vector2.zero;
 		private void OnGUI()
-		{
-			commitInfo = GUILayout.TextField(commitInfo, GUILayout.Height(60));
+		{ 
+			commitInfo = EditorGUILayout.DelayedTextField(commitInfo, GUILayout.Height(60));
 			using (var scroll=new GUILayout.ScrollViewScope(scrollPos,QGUITool.BackStyle))
 			{
 				foreach (var file in fileList)
@@ -202,6 +204,7 @@ namespace QTool
 				}
 				else
 				{
+					confirm = true;
 					Close();
 				}
 			}
