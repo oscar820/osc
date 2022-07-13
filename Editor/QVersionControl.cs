@@ -69,14 +69,14 @@ namespace QTool
 			return CheckPathRun("log -1 --pretty=oneline" , path).SplitStartString(" ");
 			
 		}
-		static bool Pull(string path)
+		static string Pull(string path)
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
 			if (result.Contains("Timed out")||result.Contains("Could not resolve host"))
 			{
-				Debug.LogError("同步超时 " + result);
-				return false;
+				EditorUtility.DisplayDialog("同步超时", result, "确认");
+				return result;
 			}
 			if (result.StartsWith("fatal")|| result.Contains("error"))
 			{
@@ -123,14 +123,13 @@ namespace QTool
 				}
 				else
 				{
-					return false;
+					return "";
 				}
 			}
 			else
 			{
-				Debug.Log("同步 " + result);
+				return result;
 			}
-			return true;
 		}
 		static bool CheckResult(string path)
 		{
@@ -204,33 +203,34 @@ namespace QTool
 		}
 		static void PullAndCommitPush(string path)
 		{
-			if (Pull(path))
+			var resultInfo = Pull(path);
+			if (CheckResult(resultInfo))
 			{
-				var commitResul = Commit(path);
-				if (commitResul.StartsWith("error")||commitResul.Contains("fatal"))
+				resultInfo = Commit(path);
+				if (resultInfo.StartsWith("error")|| resultInfo.Contains("fatal"))
 				{
-					EditorUtility.DisplayDialog("拉取更新失败", commitResul, "确认");
+					EditorUtility.DisplayDialog("拉取更新失败", resultInfo, "确认");
 					return;
 				}
-				if (string.IsNullOrWhiteSpace(commitResul))
+				if (string.IsNullOrWhiteSpace(resultInfo))
 				{
 					Debug.Log("无本地提交更新");
 				}
 				else
 				{
-					var pushResult = Push(path);
-					if (CheckResult(pushResult))
+					resultInfo = Push(path);
+					if (CheckResult(resultInfo))
 					{
-						EditorUtility.DisplayDialog("提交更新成功", pushResult, "确认");
+						EditorUtility.DisplayDialog("提交更新成功", resultInfo, "确认");
 						return;
 					}
 					else
 					{
-						EditorUtility.DisplayDialog("提交更新失败", pushResult, "确认");
+						EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
 					}
 				}
 			}
-			if (EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
+			if (!CheckResult(resultInfo)&& EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
 			{
 				PullAndCommitPush(path);
 			}
