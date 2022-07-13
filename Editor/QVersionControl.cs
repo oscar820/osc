@@ -367,7 +367,7 @@ crashlytics-build.properties
 					initInfo.Trim().SplitTowString(" ", out var start, out var end);
 					state = start;
 					end = end.Trim().Trim('\"');
-					path = Path.GetFullPath(parentPath.EndsWith(end) ? parentPath : Path.Combine( parentPath, end));
+					path = end;// Path.GetFullPath(parentPath.EndsWith(end) ? parentPath : Path.Combine( parentPath, end));
 					select = true;
 
 
@@ -375,7 +375,7 @@ crashlytics-build.properties
 				else
 				{
 					initInfo = initInfo.Trim('\"');
-					path = Path.GetFullPath(parentPath.EndsWith(initInfo) ? parentPath : Path.Combine(parentPath , initInfo));
+					path = initInfo;// Path.GetFullPath(parentPath.EndsWith(initInfo) ? parentPath : Path.Combine(parentPath , initInfo));
 					select = false;
 				}
 				switch (state)
