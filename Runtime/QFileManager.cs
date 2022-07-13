@@ -18,6 +18,18 @@ namespace QTool
 		{
 			return XmlDeserialize<T>(XmlSerialize(target));
 		}
+		//public static string ToFullPath(this string path)
+		//{
+		//	if (Application.isPlaying)
+		//	{
+		//		if (path.StartsWith("Assets"))
+		//		{
+		//			return 
+		//		}
+		//	}
+			
+		//	return "Assets" + path.SplitEndString(Application.dataPath);
+		//}
 		public static string ToAssetPath(this string path)
         {
             return "Assets" + path.SplitEndString(Application.dataPath);

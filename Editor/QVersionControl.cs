@@ -83,7 +83,7 @@ namespace QTool
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
 				{
-					commitList.Add(new QFileState(false,fileInfo));
+					commitList.Add(new QFileState(false,fileInfo,path));
 				}
 				if (QVersionControlWindow.MergeError(commitList))
 				{
@@ -198,7 +198,7 @@ namespace QTool
 			if (Pull(path))
 			{
 				var commitResul = Commit(path);
-				if (commitResul.StartsWith("error"))
+				if (commitResul.StartsWith("error")||commitResul.Contains("fatal"))
 				{
 					Debug.LogError(commitResul);
 					return;
@@ -358,7 +358,7 @@ crashlytics-build.properties
 		public string path;
 		public bool select = true;
 		public string viewString;
-		public QFileState(bool hasState, string initInfo, string parentPath="")
+		public QFileState(bool hasState, string initInfo, string parentPath)
 		{
 			try
 			{
@@ -367,7 +367,7 @@ crashlytics-build.properties
 					initInfo.Trim().SplitTowString(" ", out var start, out var end);
 					state = start;
 					end = end.Trim().Trim('\"');
-					path = Path.GetFullPath(parentPath.EndsWith(end) ? parentPath : (parentPath + "/" + end));
+					path = Path.GetFullPath(parentPath.EndsWith(end) ? parentPath : Path.Combine( parentPath, end));
 					select = true;
 
 
@@ -375,7 +375,7 @@ crashlytics-build.properties
 				else
 				{
 					initInfo = initInfo.Trim('\"');
-					path = Path.GetFullPath(parentPath.EndsWith(initInfo) ? parentPath : (parentPath + "/" + initInfo));
+					path = Path.GetFullPath(parentPath.EndsWith(initInfo) ? parentPath : Path.Combine(parentPath , initInfo));
 					select = false;
 				}
 				switch (state)
