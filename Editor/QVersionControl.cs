@@ -78,9 +78,12 @@ namespace QTool
 				EditorUtility.DisplayDialog("同步超时", result, "确认");
 				return result;
 			}
-			if (result.StartsWith("fatal")|| result.Contains("error"))
+			if (CheckResult(result))
 			{
-				Debug.LogError("同步出错 " + result);
+				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge"))
+				{
+					return result;
+				}
 				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
@@ -225,13 +228,14 @@ namespace QTool
 						EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
 					}
 				}
-				
+
 			}
 			EditorUtility.ClearProgressBar();
-			if (!CheckResult(resultInfo)&& EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
+			if (!CheckResult(resultInfo) && EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
 			{
 				PullAndCommitPush(path);
 			}
+			EditorUtility.ClearProgressBar();
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
 		{
