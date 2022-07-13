@@ -87,6 +87,7 @@ namespace QTool
 				{
 					commitList.Add(new QFileState(false,fileInfo,path));
 				}
+				EditorUtility.ClearProgressBar();
 				if (QVersionControlWindow.MergeError(commitList))
 				{
 					var version = GetCurrentVersion(path);
@@ -165,6 +166,7 @@ namespace QTool
 				AddCommitList(path + ".meta");
 			}
 			if (commitList.Count == 0) return "";
+			EditorUtility.ClearProgressBar();
 			var commitInfo = QVersionControlWindow.Commit(commitList);
 			if (string.IsNullOrWhiteSpace(commitInfo) || commitList.Count == 0) return "";
 			commitList.RemoveAll((obj) => !obj.select);
@@ -203,21 +205,29 @@ namespace QTool
 		}
 		static void PullAndCommitPush(string path)
 		{
+			EditorUtility.DisplayProgressBar("同步更新", "拉取远端更新中...", 0.2f);
 			var resultInfo = Pull(path);
 			if (CheckResult(resultInfo))
 			{
+				EditorUtility.DisplayProgressBar("同步更新", "检测本地更改", 0.5f);
 				resultInfo = Commit(path);
 				if (resultInfo.StartsWith("error")|| resultInfo.Contains("fatal"))
 				{
-					EditorUtility.DisplayDialog("拉取更新失败", resultInfo, "确认");
-					return;
-				}
-				resultInfo = Push(path);
-				if (!CheckResult(resultInfo))
-				{
 					EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
 				}
+				else
+				{
+					EditorUtility.DisplayProgressBar("同步更新", "同步更改中...", 0.7f);
+					resultInfo = Push(path);
+					EditorUtility.DisplayProgressBar("同步更新", "更新完毕",0.9f);
+					if (!CheckResult(resultInfo))
+					{
+						EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
+					}
+				}
+				
 			}
+			EditorUtility.ClearProgressBar();
 			if (!CheckResult(resultInfo)&& EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
 			{
 				PullAndCommitPush(path);
