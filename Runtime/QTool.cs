@@ -145,6 +145,10 @@ namespace QTool
 							}
 						}
 					}
+					if (newNamber.Length > 0)
+					{
+						numbers.Add(newNamber);
+					}
 					var sum = 0f;
 					for (int i = 0; i < numbers.Count; i++)
 					{

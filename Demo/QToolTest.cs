@@ -216,7 +216,17 @@ namespace QTool.Test
 
 			Debug.LogError(QDataListTestType.list.ToOneString());
 			Debug.LogError(new List<TTestClass>() { new TTestClass { Key = "1" }, new TTestClass { Key = "2" } }.ToQDataList());
-        }
+		}
+		[ViewButton("ToComuteFloatTest")]
+		public void ToComuteFloatTest()
+		{
+			Debug.Log("1.1"+"  :  "+"1.1".ToComputeFloat());
+			Debug.Log("1.2" + "  :  " + "1.2".ToComputeFloat());
+			Debug.Log("1.25" + "  :  " + "1.25".ToComputeFloat());
+			Debug.Log("1.1.1" + "  :  " + "1.1.1".ToComputeFloat());
+			Debug.Log("1.2.5" + "  :  " + "1.2.5".ToComputeFloat());
+			Debug.Log("1.2.25" + "  :  " + "1.2.25".ToComputeFloat());
+		}
 		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
 		{
 			public TestEnum testEnum;
