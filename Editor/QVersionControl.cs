@@ -23,10 +23,12 @@ namespace QTool
 				return;
 			var path = AssetDatabase.GetAssetPath(editor.target);
 			if (path.EndsWith("unity_builtin_extra")) return;
+			GUILayout.Space(10);
 			if (GUILayout.Button(new GUIContent("同步更改"), GUILayout.Width(80)))
 			{
 				PullAndCommitPush(path);
 			}
+			GUILayout.Space(10);
 		}
 
 		static string CheckPathRun(string commond, string path)
@@ -383,7 +385,7 @@ crashlytics-build.properties
 					case "M": viewString= "<color=#99ff99><b>修改</b> " + path + "</color>"; break;
 					case "??":
 					case "A": viewString = "<color=#9999ff><b>新增</b> " + path + "</color>"; break;
-					case "D": viewString = "<color=#ff9999><b>新增</b> " + path + "</color>"; break;
+					case "D": viewString = "<color=#ff9999><b>删除</b> " + path + "</color>"; break;
 					default:
 						viewString = "<color=red>"+state + " " + path+ "</color>";
 						break;
