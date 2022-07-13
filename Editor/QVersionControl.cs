@@ -388,6 +388,7 @@ crashlytics-build.properties
 					case "M": viewString= "<color=#99ff99><b>修改</b> " + path + "</color>"; break;
 					case "??":
 					case "A": viewString = "<color=#9999ff><b>新增</b> " + path + "</color>"; break;
+					case "D": viewString = "<color=#ff9999><b>新增</b> " + path + "</color>"; break;
 					default:
 						viewString = state + " " + path;
 						break;
