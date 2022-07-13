@@ -390,24 +390,17 @@ namespace QTool
 					Debug.Log(startInfo.FileName + " " + startInfo.Arguments);
 					process.Start();
 					var info = process.StandardOutput.ReadToEnd();
-					if (string.IsNullOrWhiteSpace(info))
+					var error = process.StandardError.ReadToEnd();
+					if (!string.IsNullOrWhiteSpace(error))
 					{
-						var error = process.StandardError.ReadToEnd();
-						if (!string.IsNullOrWhiteSpace(error))
-						{
-							Debug.LogError(error);
-							return error;
-						}
-						else
-						{
-							Debug.Log("命令运行结束 " + startInfo.FileName + " " + startInfo.Arguments);
-						}
+						Debug.LogError(error);
+						return error;
 					}
 					else
 					{
 						Debug.Log(info);
 					}
-					return info;
+					return info+error;
 				}
 				catch (Exception e)
 				{
