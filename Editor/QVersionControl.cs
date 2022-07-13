@@ -71,7 +71,7 @@ namespace QTool
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
-			if (result.Contains("Timed out"))
+			if (result.Contains("Timed out")||result.Contains("Could not resolve host"))
 			{
 				Debug.LogError("同步超时 " + result);
 				return false;
