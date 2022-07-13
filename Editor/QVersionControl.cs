@@ -219,12 +219,7 @@ namespace QTool
 				else
 				{
 					resultInfo = Push(path);
-					if (CheckResult(resultInfo))
-					{
-						EditorUtility.DisplayDialog("提交更新成功", resultInfo, "确认");
-						return;
-					}
-					else
+					if (!CheckResult(resultInfo))
 					{
 						EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
 					}
