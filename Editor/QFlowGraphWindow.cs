@@ -52,7 +52,7 @@ namespace QTool.FlowGraph
 			Instance.OnSave = OnSave;
 
 		}
-        [MenuItem("Assets/QTool/Create/QFlowGraph", priority = 0)]
+        [MenuItem("Assets/QTool/Create/QFlowGraph")]
         public static void CreateNewFile()
         {
             var selectPath = Application.dataPath;

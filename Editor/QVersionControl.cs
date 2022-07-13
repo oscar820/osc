@@ -73,6 +73,12 @@ namespace QTool
 		static bool Pull(string path)
 		{
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
+
+			if (result.Contains("Timed out"))
+			{
+				Debug.LogError("同步超时 " + result);
+				return false;
+			}
 			if (result.StartsWith("fatal")|| result.Contains("error"))
 			{
 				Debug.LogError("同步出错 " + result);
@@ -204,7 +210,7 @@ namespace QTool
 				}
 				if (string.IsNullOrWhiteSpace(commitResul))
 				{
-					Debug.Log("无本地更新");
+					Debug.Log("无本地提交更新");
 				}
 				else
 				{
@@ -223,13 +229,19 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath(path)+"\"", path);
 		}
-		[MenuItem("QTool/工具/Git/拉取更新")]
+		[MenuItem("QTool/Git/拉取更新")]
 		static void AllPull()
 		{
 			var path = Directory.GetCurrentDirectory();
 			Debug.Log(Pull(path));
 		}
-		[MenuItem("QTool/工具/Git/以粘贴版信息初始化仓库")]
+		[MenuItem("QTool/Git/提交更新")]
+		static void AllPush()
+		{
+			var path = Directory.GetCurrentDirectory();
+			PullAndCommitPush(path);
+		}
+		[MenuItem("QTool/Git/以粘贴版信息初始化仓库")]
 		static  void AllInit()
 		{
 			if(string.IsNullOrWhiteSpace(GUIUtility.systemCopyBuffer))
@@ -266,7 +278,6 @@ namespace QTool
 
 		}
 		#region 忽略文件
-		[MenuItem("QTool/忽略文件")]
 		public static void GitIgnoreFile()
 		{
 			FileManager.Save(".gitignore", @"# This .gitignore file should be placed at the root of your Unity project directory
@@ -351,6 +362,7 @@ crashlytics-build.properties
 		public string state;
 		public string path;
 		public bool select = true;
+		public string viewString;
 		public QFileState(bool hasState, string initInfo, string parentPath)
 		{
 			try
@@ -370,6 +382,15 @@ crashlytics-build.properties
 					initInfo = initInfo.Trim('\"');
 					path = Path.GetFullPath(parentPath.EndsWith(initInfo) ? parentPath : (parentPath + "/" + initInfo));
 					select = false;
+				}
+				switch (state)
+				{//We are<b>not</ b > amused
+					case "M": viewString= "<color=#99ff99><b>修改</b> " + path + "</color>"; break;
+					case "??":
+					case "A": viewString = "<color=#9999ff><b>新增</b> " + path + "</color>"; break;
+					default:
+						viewString = state + " " + path;
+						break;
 				}
 			}
 			catch (Exception e)
@@ -431,7 +452,10 @@ crashlytics-build.properties
 					using (new GUILayout.HorizontalScope())
 					{
 						file.select = GUILayout.Toggle(file.select, "");
-						GUILayout.Label(file.path);
+						if (GUILayout.Button(file.viewString,QGUITool.CenterLable))
+						{
+							file.select =! file.select;
+						}
 					}
 				}
 				scrollPos=scroll.scrollPosition ;

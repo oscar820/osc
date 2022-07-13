@@ -14,13 +14,13 @@ namespace QTool
 {
     public static class QToolEditor
     {
-		[MenuItem("QTool/工具/翻译语言测试", priority = 0)]
+		[MenuItem("QTool/工具/查看翻译语言信息")]
 		public static void LanguageTest()
 		{
 			Debug.LogError(QTool.QTranslate.LanguageData.ToString());
 			GUIUtility.systemCopyBuffer = QTool.QTranslate.LanguageData.ToString();
 		}
-		[MenuItem("QTool/工具/查找资源", priority = 0)]
+		[MenuItem("QTool/工具/通过粘贴版Id查找资源")]
 		public static void FindAsset()
 		{
 			try
@@ -134,13 +134,13 @@ namespace QTool
 			return "";
 		}
      
-        [MenuItem("QTool/工具/打包测试当前场景")]
+        [MenuItem("QTool/打包/打包测试当前场景")]
         private static void BuildRandRun()
         {
 			PlayerPrefs.SetString("QToolBuildPath", Build());
 			RunBuild();
 		}
-		[MenuItem("QTool/工具/运行测试包")]
+		[MenuItem("QTool/打包/运行测试包")]
 		private static void RunBuild()
 		{
 			var path = PlayerPrefs.GetString("QToolBuildPath", GetBuildPath());

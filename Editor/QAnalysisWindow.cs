@@ -1090,7 +1090,7 @@ namespace QTool
 		static GUIStyle _centerLable;
 		public static GUIStyle TextArea => _textArea ??= new GUIStyle(EditorStyles.textField) { alignment = TextAnchor.MiddleCenter };
 		static GUIStyle _textArea;
-		public static GUIStyle LeftLable => _leftLable ??= new GUIStyle(EditorStyles.label);
+		public static GUIStyle LeftLable => _leftLable ??= new GUIStyle(EditorStyles.label) { richText = true };
 		static GUIStyle _leftLable;
 		public static GUIStyle RightLabel => _rightLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
 		static GUIStyle _rightLabel;
