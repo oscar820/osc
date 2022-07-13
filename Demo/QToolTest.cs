@@ -223,7 +223,7 @@ namespace QTool.Test
 			Debug.Log("1.1"+"  :  "+"1.1".ToComputeFloat());
 			Debug.Log("1.2" + "  :  " + "1.2".ToComputeFloat());
 			Debug.Log("1.25" + "  :  " + "1.25".ToComputeFloat());
-			Debug.Log("1.1.1" + "  :  " + "1.1.1".ToComputeFloat());
+			Debug.Log("" + "  :  " + "".ToComputeFloat());
 			Debug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
 			Debug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
 		}

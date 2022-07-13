@@ -121,6 +121,7 @@ namespace QTool
 			if (value == null) return 0;
 			if(value is string str)
 			{
+				if (string.IsNullOrWhiteSpace(str)) return 0;
 				if(float.TryParse(str, out var newFloat))
 				{
 					return newFloat;

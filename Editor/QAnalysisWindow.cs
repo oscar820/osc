@@ -468,21 +468,21 @@ namespace QTool
 		}
 		static void AddNewEventList()
 		{
+			QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 			var start = DateTime.Now;
 			Debug.Log("对新事件排序" + NewEventList.Count);
 			NewEventList.Sort(QAnalysisEvent.SortMethod);
 			Debug.Log("排序完成" + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + "开始添加事件" + NewEventList.Count);
 			start = DateTime.Now;
-			var curVersion=-1f;
 			var startV =Setting.StartVersion.ToComputeFloat();
 			for (var i = 0; i < NewEventList.Count; i++)
 			{
 				var eventData = NewEventList[i];
 				if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏_开始).Replace("_", "/"))
 				{
-					curVersion = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
+					playerVersion[eventData.playerId] = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
 				}
-				if(curVersion >= startV)
+				if(playerVersion[eventData.playerId] >= startV)
 				{
 					AddEvent(eventData);
 					EditorUtility.DisplayProgressBar("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
