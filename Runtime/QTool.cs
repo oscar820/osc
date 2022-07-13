@@ -134,7 +134,7 @@ namespace QTool
 						var c = str[i];
 						if (char.IsNumber(c))
 						{
-							newNamber += c;
+							newNamber = c+newNamber;
 						}
 						else
 						{
