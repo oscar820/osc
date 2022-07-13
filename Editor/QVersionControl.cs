@@ -83,12 +83,13 @@ namespace QTool
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
 				{
-					commitList.Add(new QFileState(false,fileInfo,path));
+					commitList.Add(new QFileState(false,fileInfo));
 				}
 				if (QVersionControlWindow.MergeError(commitList))
 				{
 					var version = GetCurrentVersion(path);
 					var useStash = false;
+					var files = "";
 					foreach (var info in commitList)
 					{
 						if (!info.select)
@@ -96,12 +97,13 @@ namespace QTool
 							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path));
 						}else
 						{
+							files += info + " ";
 							useStash = true;
 						}
 					}
 					if (useStash)
 					{
-						Debug.Log("保留本地更改 " + Stash(path));
+						Debug.Log("保留本地更改 " + StashPush(files,path));
 					}
 					var pullResult = Pull(path);
 					if (useStash)
@@ -113,7 +115,7 @@ namespace QTool
 								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path, version));
 							}
 						}
-						Debug.Log("还原本地更改 " + Stash(path, true));
+						Debug.Log("还原本地更改 " + StashPop(path));
 					} 
 					return pullResult;
 				}
@@ -183,17 +185,13 @@ namespace QTool
 				return "";
 			}
 		}
-		static string Stash(string path,bool pop=false)
+		static string StashPush(string files,string path)
 		{
-			if (pop)
-			{
-				return CheckPathRun(nameof(Stash).ToLower()+" pop",path);
-			}
-			else
-			{
-				return CheckPathRun(nameof(Stash).ToLower()+ " -a", path);
-			}
-			
+			return CheckPathRun("stash push " + files.Trim() + " -a", path);
+		}
+		static string StashPop(string path)
+		{
+			return CheckPathRun("stash pop",path);
 		}
 		static void PullAndCommitPush(string path)
 		{
@@ -360,7 +358,7 @@ crashlytics-build.properties
 		public string path;
 		public bool select = true;
 		public string viewString;
-		public QFileState(bool hasState, string initInfo, string parentPath)
+		public QFileState(bool hasState, string initInfo, string parentPath="")
 		{
 			try
 			{
