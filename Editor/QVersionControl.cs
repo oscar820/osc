@@ -212,17 +212,10 @@ namespace QTool
 					EditorUtility.DisplayDialog("拉取更新失败", resultInfo, "确认");
 					return;
 				}
-				if (string.IsNullOrWhiteSpace(resultInfo))
+				resultInfo = Push(path);
+				if (!CheckResult(resultInfo))
 				{
-					Debug.Log("无本地提交更新");
-				}
-				else
-				{
-					resultInfo = Push(path);
-					if (!CheckResult(resultInfo))
-					{
-						EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
-					}
+					EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
 				}
 			}
 			if (!CheckResult(resultInfo)&& EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
