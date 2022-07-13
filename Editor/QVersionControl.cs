@@ -45,10 +45,7 @@ namespace QTool
 				path = Path.GetDirectoryName(path);
 			}
 			RunInfo.WorkingDirectory =path;
-			Debug.Log("git "+ RunInfo.Arguments);
-			var result= Tool.ProcessCommand(RunInfo);
-			Debug.Log( result);
-			return result;
+			return Tool.ProcessCommand(RunInfo);
 		}
 		static string Add(string path)
 		{
@@ -58,11 +55,11 @@ namespace QTool
 		{
 			if (string.IsNullOrEmpty(version))
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " -- " + Path.GetFullPath(path), path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + Path.GetFullPath(path)+"\"", path);
 			}
 			else
 			{
-				return CheckPathRun(nameof(Checkout).ToLower()+ " "+version+ " -- " + Path.GetFullPath(path), path);
+				return CheckPathRun(nameof(Checkout).ToLower()+ " "+version+ " -- \"" + Path.GetFullPath(path)+"\"", path);
 			}
 		}
 		static string GetCurrentVersion(string path)

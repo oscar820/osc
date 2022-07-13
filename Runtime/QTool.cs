@@ -385,8 +385,36 @@ namespace QTool
 		{
 			using (var process=new System.Diagnostics.Process { StartInfo=startInfo })
 			{
-				process.Start();
-				return process.StandardOutput.ReadToEnd()+ process.StandardError.ReadToEnd();
+				try
+				{
+					Debug.Log(startInfo.FileName + " " + startInfo.Arguments);
+					process.Start();
+					var info = process.StandardOutput.ReadToEnd();
+					if (string.IsNullOrWhiteSpace(info))
+					{
+						var error = process.StandardError.ReadToEnd();
+						if (!string.IsNullOrWhiteSpace(error))
+						{
+							Debug.LogError(error);
+							return error;
+						}
+						else
+						{
+							Debug.Log("命令运行结束 " + startInfo.FileName + " " + startInfo.Arguments);
+						}
+					}
+					else
+					{
+						Debug.Log(info);
+					}
+					return info;
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("运行 " + startInfo.FileName + " 出错");
+					return "";
+				}
+			
 			}
 		}
 	}
