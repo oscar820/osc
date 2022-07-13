@@ -132,6 +132,7 @@ namespace QTool
 			}
 			else
 			{
+				AssetDatabase.Refresh();
 				return result;
 			}
 		}
