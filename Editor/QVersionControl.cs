@@ -132,10 +132,17 @@ namespace QTool
 			}
 			return true;
 		}
-
-		static void Push(string path)
+		static bool CheckResult(string path)
 		{
-			Debug.Log("上传更改 " + CheckPathRun(nameof(Push).ToLower() + " origin master", path));
+			if (path.Contains("error") || path.Contains("fatal"))
+			{
+				return false;
+			}
+			return true;
+		}
+		static string Push(string path)
+		{
+			return CheckPathRun(nameof(Push).ToLower() + " origin master", path);
 		}
 
 		static List<QFileState> commitList = new List<QFileState>();
@@ -202,7 +209,7 @@ namespace QTool
 				var commitResul = Commit(path);
 				if (commitResul.StartsWith("error")||commitResul.Contains("fatal"))
 				{
-					Debug.LogError(commitResul);
+					EditorUtility.DisplayDialog("拉取更新失败", commitResul, "确认");
 					return;
 				}
 				if (string.IsNullOrWhiteSpace(commitResul))
@@ -211,8 +218,21 @@ namespace QTool
 				}
 				else
 				{
-					Push(path);
+					var pushResult = Push(path);
+					if (CheckResult(pushResult))
+					{
+						EditorUtility.DisplayDialog("提交更新成功", pushResult, "确认");
+						return;
+					}
+					else
+					{
+						EditorUtility.DisplayDialog("提交更新失败", pushResult, "确认");
+					}
 				}
+			}
+			if (EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
+			{
+				PullAndCommitPush(path);
 			}
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
