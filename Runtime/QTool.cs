@@ -404,10 +404,10 @@ namespace QTool
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("运行 " + startInfo.FileName + " 出错");
+					Debug.LogError("运行 " + startInfo.FileName + " 出错 " + startInfo.FileName + " " + startInfo.Arguments +"\n" + e);
 					return "";
 				}
-			
+
 			}
 		}
 	}

@@ -387,7 +387,7 @@ crashlytics-build.properties
 					case "A": viewString = "<color=#9999ff><b>新增</b> " + path + "</color>"; break;
 					case "D": viewString = "<color=#ff9999><b>新增</b> " + path + "</color>"; break;
 					default:
-						viewString = state + " " + path;
+						viewString = "<color=red>"+state + " " + path+ "</color>";
 						break;
 				}
 			}
