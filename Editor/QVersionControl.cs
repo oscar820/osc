@@ -142,7 +142,6 @@ namespace QTool
 			}
 			else
 			{
-				AssetDatabase.Refresh();
 				return result;
 			}
 		}
@@ -246,6 +245,7 @@ namespace QTool
 			{
 				PullAndCommitPush(path);
 			}
+			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
 		}
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
@@ -264,6 +264,7 @@ namespace QTool
 		{
 			var path = Directory.GetCurrentDirectory();
 			Debug.Log(Pull(path));
+			AssetDatabase.Refresh();
 		}
 		[MenuItem("QTool/Git/提交更新")]
 		static void AllPush()
