@@ -22,7 +22,7 @@ namespace QTool
         /// 事件列表 对应事件触发时调用对应Action 使用方法： EventList["事件名"]+=Action;
         /// </summary>
         internal static QDictionary<string, System.Action> EventList = new QDictionary<string, System.Action>();
-		internal static QDictionary<string, System.Action> OnceEventList = new QDictionary<string, System.Action>();
+		//internal static QDictionary<string, System.Action> OnceEventList = new QDictionary<string, System.Action>();
 		internal static QDictionary<string, System.Action<string>> KeyEventList = new QDictionary<string ,System.Action<string>>();
 		/// <summary>
 		/// 触发事件
@@ -41,11 +41,11 @@ namespace QTool
             {
                 EventList[eventKey]?.Invoke();
             }
-			if (OnceEventList.ContainsKey(eventKey))
-			{
-				OnceEventList[eventKey]?.Invoke();
-				OnceEventList[eventKey] = null;
-			}
+			//if (OnceEventList.ContainsKey(eventKey))
+			//{
+			//	OnceEventList[eventKey]?.Invoke();
+			//	OnceEventList[eventKey] = null;
+			//}
 			if (KeyEventList.ContainsKey(eventKey))
 			{
 				KeyEventList[eventKey]?.Invoke(eventKey);
@@ -63,33 +63,19 @@ namespace QTool
 		{
 			KeyEventList[eventKey] -= action;
 		}
-		public static void Register(string eventKey, System.Action action,bool onceRemve=false)
+		public static void Register(string eventKey, System.Action action)
         {
-			if (onceRemve)
-			{
-				OnceEventList[eventKey] += action;
-			}
-			else
-			{
-				EventList[eventKey] += action;
-			}
+			EventList[eventKey] += action;
 		}
         public static void UnRegister(string eventKey, System.Action action)
         {
             EventList[eventKey] -= action;
-			OnceEventList[eventKey] -= action;
+		//	OnceEventList[eventKey] -= action;
 		}
-        public static void Register<T>(string eventKey,System.Action<T> action,bool onceRemve = false)
+        public static void Register<T>(string eventKey,System.Action<T> action)
         {
-			if (onceRemve)
-			{
-				QEventManager<T>.OnceEventList[eventKey] += action;
-			}
-			else
-			{
-				QEventManager<T>.EventList[eventKey] += action;
-			}
-        }
+			QEventManager<T>.EventList[eventKey] += action;
+		}
         public static void UnRegister<T>(string eventKey, System.Action<T> action)
         {
             QEventManager<T>.EventList[eventKey] -= action;
