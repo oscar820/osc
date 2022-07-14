@@ -50,19 +50,19 @@ namespace QTool
 			RunInfo.WorkingDirectory = path;
 			return Tool.ProcessCommand(RunInfo);
 		}
-		static string Add(string path)
+		static string Add(string addPath,string folderPath)
 		{
-			return CheckPathRun(nameof(Add).ToLower() + " \"" + path + "\"", path);
+			return CheckPathRun(nameof(Add).ToLower() + " \"" + addPath + "\"", folderPath);
 		}
-		static string Checkout(string path, string version = null)
+		static string Checkout(string path,string folderPath, string version = null)
 		{
 			if (string.IsNullOrEmpty(version))
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
 			}
 			else
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
 			}
 		}
 		static string GetCurrentVersion(string path)
@@ -117,7 +117,7 @@ namespace QTool
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
 				{
-					commitList.Add(new QFileState(false,fileInfo,path));
+					commitList.Add(new QFileState(false,fileInfo));
 				}
 				EditorUtility.ClearProgressBar();
 				if (QVersionControlWindow.MergeError(commitList))
@@ -129,7 +129,7 @@ namespace QTool
 					{
 						if (!info.select)
 						{
-							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path));
+							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path,path));
 						}else
 						{
 							files += info + " ";
@@ -147,7 +147,7 @@ namespace QTool
 						{
 							if (info.select)
 							{
-								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path, version));
+								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path,path, version));
 							}
 						}
 						Debug.Log("还原本地更改 " + StashPop(path));
@@ -186,17 +186,17 @@ namespace QTool
 			foreach (var info in lines)
 			{
 				if (string.IsNullOrWhiteSpace(info)) continue;
-				commitList.Add(new QFileState(true,info, path));
+				commitList.Add(new QFileState(true,info));
 			}
 		}
 		static string Commit(string path)
 		{
 			commitList.Clear();
 			AddCommitList(path);
-			if (path.StartsWith("Assets"))
-			{
-				AddCommitList(path + ".meta");
-			}
+			//if (path.StartsWith("Assets"))
+			//{
+			//	AddCommitList(path + ".meta");
+			//}
 			if (commitList.Count == 0) return "";
 			EditorUtility.ClearProgressBar();
 			var commitInfo = QVersionControlWindow.Commit(commitList);
@@ -210,7 +210,7 @@ namespace QTool
 				switch (info.state)
 				{
 					case "??":
-						Add(info.path);
+						Add(info.path,path);
 						break;
 					default:
 						break;
@@ -413,7 +413,7 @@ crashlytics-build.properties
 		public string path;
 		public bool select = true;
 		public string viewString;
-		public QFileState(bool hasState, string initInfo, string parentPath)
+		public QFileState(bool hasState, string initInfo)
 		{
 			try
 			{
@@ -422,7 +422,7 @@ crashlytics-build.properties
 					initInfo.Trim().SplitTowString(" ", out var start, out var end);
 					state = start;
 					end = end.Trim().Trim('\"');
-					path = end;// Path.GetFullPath(parentPath.EndsWith(end) ? parentPath : Path.Combine( parentPath, end));
+					path = end;
 					select = true;
 
 
@@ -430,7 +430,7 @@ crashlytics-build.properties
 				else
 				{
 					initInfo = initInfo.Trim('\"');
-					path = initInfo;// Path.GetFullPath(parentPath.EndsWith(initInfo) ? parentPath : Path.Combine(parentPath , initInfo));
+					path = initInfo;
 					select = false;
 				}
 				switch (state)
@@ -448,7 +448,7 @@ crashlytics-build.properties
 			catch (Exception e)
 			{
 
-				Debug.LogError("路径出错 " + parentPath + "   " + initInfo + " \n" + e);
+				Debug.LogError("路径出错 "+ initInfo + " \n" + e);
 			}
 
 		}
