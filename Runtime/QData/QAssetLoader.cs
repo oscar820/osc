@@ -243,13 +243,13 @@ namespace QTool.Asset
 			return obj;
 		}
 #if Addressables
-		public static void AddressablesRelease<T>(params T[] objs) where T : UnityEngine.Object
+		public static void AddressablesRelease(params TObj[] objs)
 		{
 			Addressables.Release(objs);
 		}
 #endif
 		
-		public static void ResourcesRelease<T>(params T[] objs) where T : UnityEngine.Object
+		public static void ResourcesRelease(params TObj[] objs) 
 		{
 			foreach (var obj in objs)
 			{
