@@ -23,7 +23,7 @@ namespace QTool
         /// </summary>
         internal static QDictionary<string, System.Action> EventList = new QDictionary<string, System.Action>();
 		internal static QDictionary<string, System.Action> OnceEventList = new QDictionary<string, System.Action>();
-		internal static QDictionary<string, System.Action<string>> OnceKeyEventList = new QDictionary<string ,System.Action<string>>();
+		internal static QDictionary<string, System.Action<string>> KeyEventList = new QDictionary<string ,System.Action<string>>();
 		/// <summary>
 		/// 触发事件
 		/// </summary>
@@ -46,19 +46,22 @@ namespace QTool
 				OnceEventList[eventKey]?.Invoke();
 				OnceEventList[eventKey] = null;
 			}
-			if (OnceKeyEventList.ContainsKey(eventKey))
+			if (KeyEventList.ContainsKey(eventKey))
 			{
-				OnceKeyEventList[eventKey]?.Invoke(eventKey);
-				OnceKeyEventList[eventKey] = null;
+				KeyEventList[eventKey]?.Invoke(eventKey);
 			}
         }
         public static void Trigger<T>(string eventKey,T value)
         {
             QEventManager<T>.Trigger(eventKey, value);
         }
-		public static void RegisterOnceKeyEvent(string eventKey, System.Action<string> action)
+		public static void RegisterKeyEvent(string eventKey, System.Action<string> action)
 		{
-			OnceKeyEventList[eventKey] += action;
+			KeyEventList[eventKey] += action;
+		}
+		public static void UnRegisterKeyEvent(string eventKey, System.Action<string> action)
+		{
+			KeyEventList[eventKey] -= action;
 		}
 		public static void Register(string eventKey, System.Action action,bool onceRemve=false)
         {
