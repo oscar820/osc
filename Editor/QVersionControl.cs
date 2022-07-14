@@ -144,7 +144,7 @@ namespace QTool
 					}
 					if (useStash)
 					{
-						Debug.Log("保留本地更改 " + StashPush(files, rootPath));
+						QDebug.Log("保留本地更改 " + StashPush(files, rootPath));
 					}
 					var pullResult = Pull(path);
 					if (useStash)
@@ -156,7 +156,7 @@ namespace QTool
 								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path, rootPath, version));
 							}
 						}
-						Debug.Log("还原本地更改 " + StashPop(rootPath));
+						QDebug.Log("还原本地更改 " + StashPop(rootPath));
 					} 
 					return pullResult;
 				}
@@ -221,7 +221,7 @@ namespace QTool
 					default:
 						break;
 				}
-				Debug.Log(info.state + "  " + info);
+				QDebug.Log(info.state + "  " + info);
 			}
 			EditorUtility.ClearProgressBar();
 			if (commitList.Count > 0)
@@ -288,7 +288,7 @@ namespace QTool
 		static void AllPull()
 		{
 			var path = Directory.GetCurrentDirectory();
-			Debug.Log(Pull(path));
+			QDebug.Log(Pull(path));
 			AssetDatabase.Refresh();
 		}
 		[MenuItem("QTool/Git/提交更新")]
@@ -314,11 +314,11 @@ namespace QTool
 				}
 			}
 			var path = Directory.GetCurrentDirectory();
-			Debug.Log(CheckPathRun("init", path));
-			Debug.Log(CheckPathRun("remote add origin \"" + GUIUtility.systemCopyBuffer + "\"", path));
+			QDebug.Log(CheckPathRun("init", path));
+			QDebug.Log(CheckPathRun("remote add origin \"" + GUIUtility.systemCopyBuffer + "\"", path));
 			GitIgnoreFile();
-			Debug.Log(CheckPathRun(nameof(Add).ToLower() + " .", path));
-			Debug.Log(CheckPathRun(nameof(Commit).ToLower() + " -m 初始化", path));
+			QDebug.Log(CheckPathRun(nameof(Add).ToLower() + " .", path));
+			QDebug.Log(CheckPathRun(nameof(Commit).ToLower() + " -m 初始化", path));
 			_ =Task.Run(() =>
 			{
 				Push(path);

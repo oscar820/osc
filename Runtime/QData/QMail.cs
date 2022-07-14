@@ -40,7 +40,7 @@ namespace QTool
 							message.Attachments.Add(new Attachment(filePath));
 						}
 						await client.SendMailAsync(message);
-						Debug.Log("发送邮件成功 " + message.Subject + " " + message.Body.ToSizeString() + " \n" + message.Body);
+						QDebug.Log("发送邮件成功 " + message.Subject + " " + message.Body.ToSizeString() + " \n" + message.Body);
 						return true;
 					}
 				}
@@ -80,7 +80,7 @@ namespace QTool
 			if (index == countIndex)
 			{
 				Id = (await writer.CommondCheckReadLine("UIDL " + index, reader))[2];
-				Debug.Log("LastID:"+index+"[" + Id+"]");
+				QDebug.Log("LastID:"+index+"[" + Id+"]");
 			}
 			await writer.WriteLineAsync("RETR " + index);
 			var size = int.Parse((await reader.CheckReadLine("RETR " + index))[1]).ToSizeString();
@@ -101,7 +101,7 @@ namespace QTool
 			QDictionary<int, QMailInfo> mailList = new QDictionary<int, QMailInfo>();
 			var startTime = DateTime.Now;
 			if (startIndex >endIndex) {
-				Debug.Log("无新邮件");
+				QDebug.Log("无新邮件");
 				return;
 			}
 			if (threadCount <= 0)
@@ -115,7 +115,7 @@ namespace QTool
 			}
 #endif
 			var taskList = new List<Task>();
-			Debug.Log("开始接收邮件" + startIndex + " -> " + endIndex+" ...");
+			QDebug.Log("开始接收邮件" + startIndex + " -> " + endIndex+" ...");
 			for (int i = 0; i < threadCount; i++)
 			{
 				taskList.Add( ReceiveRemail(account, startIndex + i, endIndex, mailList, threadCount));
@@ -130,8 +130,8 @@ namespace QTool
 				UnityEditor.EditorUtility.ClearProgressBar();
 			}
 #endif
-			Debug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
-			Debug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
+			QDebug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
+			QDebug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
 			startTime = DateTime.Now;
 			await Task.Delay(100);
 			for (var i = startIndex; i <= endIndex; i++)
@@ -151,7 +151,7 @@ namespace QTool
 				}
 			}
 			await Task.Delay(100);
-			Debug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
+			QDebug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
 
 		}
 		static async Task ReceiveRemail(QMailAccount account, int startIndex, int endIndex, QDictionary<int, QMailInfo> mailList, int threadCount =1)
@@ -192,7 +192,7 @@ namespace QTool
 									}
 #endif
 								}
-							//	Debug.Log("接收结束 "+startIndex+" 线程");
+							//	QDebug.Log("接收结束 "+startIndex+" 线程");
 
 							}
 							catch (Exception e)
@@ -242,11 +242,11 @@ namespace QTool
 #endif
 								var infos = await writer.CommondCheckReadLine("STAT", reader);
 								var endIndex = int.Parse(infos[1]);
-								Debug.Log("邮件总数：" + endIndex + " 总大小：" + long.Parse(infos[2]).ToSizeString());
+								QDebug.Log("邮件总数：" + endIndex + " 总大小：" + long.Parse(infos[2]).ToSizeString());
 								int startIndex = 1;
 								if (!string.IsNullOrWhiteSpace(lastMail?.Id)) 
 								{
-									Debug.Log("上一封邮件：" +lastMail.Index+"["+lastMail.Id+"] "+ lastMail.Date);
+									QDebug.Log("上一封邮件：" +lastMail.Index+"["+lastMail.Id+"] "+ lastMail.Date);
 									if (await writer.IdCheck(lastMail.Index, lastMail.Id, reader))
 									{
 										startIndex = lastMail.Index + 1;

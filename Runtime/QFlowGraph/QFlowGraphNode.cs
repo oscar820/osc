@@ -145,7 +145,7 @@ namespace QTool.FlowGraph
 			{
 				taskList.Add(i);
 			}
-			Debug.Log("全部完成节点开始：[" + taskList.ToOneString("|")+"]");
+			QDebug.Log("全部完成节点开始：[" + taskList.ToOneString("|")+"]");
 			This.TriggerPortList.Clear();
 			while (taskList.Count > 0)
 			{
@@ -154,13 +154,13 @@ namespace QTool.FlowGraph
 					if (port.port == nameof(branchs))
 					{
 						taskList.Remove(port.index);
-						Debug.Log("完成["+port.index+"]剩余[" + taskList.ToOneString("|") + "]");
+						QDebug.Log("完成["+port.index+"]剩余[" + taskList.ToOneString("|") + "]");
 					}
 				}
 				This.TriggerPortList.Clear();
 				yield return null;
 			}
-			Debug.Log("全部完成");
+			QDebug.Log("全部完成");
 		}
 	}
 }

@@ -88,7 +88,7 @@ namespace QTool
             }, BindingFlags.Public | BindingFlags.Static);
             TypeList.AddCheckExist(type);
 
-			Debug.Log("初始化命令："+type+"\n" + KeyDictionary.ToOneString());
+			QDebug.Log("初始化命令："+type+"\n" + KeyDictionary.ToOneString());
 		}
       
 
@@ -99,7 +99,7 @@ namespace QTool
 		[ViewName("日志/普通日志")]
 		public static void Log(object obj)
 		{
-			Debug.Log(obj);
+			QDebug.Log(obj);
 		}
 		[ViewName("日志/警告日志")] 
 		public static void LogWarning(object obj)

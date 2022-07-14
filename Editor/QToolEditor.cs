@@ -91,7 +91,7 @@ namespace QTool
 				UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent(out var result);
 				if(string.IsNullOrWhiteSpace(result.Error))
 				{
-					Debug.Log("Addressable Build 完成 ：" + result.Duration+"s");
+					QDebug.Log("Addressable Build 完成 ：" + result.Duration+"s");
 				}
 				else
 				{
@@ -115,8 +115,8 @@ namespace QTool
 				var buildInfo = BuildPipeline.BuildPlayer(buildOption);
 				if (buildInfo.summary.result == BuildResult.Succeeded)
 				{
-					Debug.Log("打包成功" + buildOption.locationPathName);
-					Debug.Log("打包用时：" + Math.Ceiling((DateTime.Now - startTime).TotalMinutes) + " 分钟");
+					QDebug.Log("打包成功" + buildOption.locationPathName);
+					QDebug.Log("打包用时：" + Math.Ceiling((DateTime.Now - startTime).TotalMinutes) + " 分钟");
 					var versions = PlayerSettings.bundleVersion.Split('.');
 					if (versions.Length > 0)
 					{

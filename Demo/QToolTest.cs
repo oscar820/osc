@@ -87,10 +87,10 @@ namespace QTool.Test
 		{
 			var a = UnityEngine.Random.Range(1,100);
 			var b = UnityEngine.Random.Range(1, 100);
-			Debug.Log(a + " + " + b + " = " + a.OperaterAdd(b) + " " + (a + b));
+			QDebug.Log(a + " + " + b + " = " + a.OperaterAdd(b) + " " + (a + b));
 			Vector2 v2A = new Vector2(UnityEngine.Random.Range(1, 100), UnityEngine.Random.Range(1, 100));
 			Vector2 v2B = new Vector2(UnityEngine.Random.Range(1, 100), UnityEngine.Random.Range(1, 100));
-			Debug.Log(v2A + " + " + v2B + " = " + v2A.OperaterAdd(v2B) + " " + (v2A + v2B));
+			QDebug.Log(v2A + " + " + v2B + " = " + v2A.OperaterAdd(v2B) + " " + (v2A + v2B));
 		}
 		public int testTimes = 1;
         [ContextMenu("序列化测试")]
@@ -177,7 +177,7 @@ namespace QTool.Test
 					test2 = testBytes.GetString().ParseQData<TTestClass>(test2,false);
                 }
             });
-			Debug.Log("QData类型更改反序列化测试：" + "{newKey:asldkj,rect:{position:{x:1,z:2}}".ParseQData<TTestClass>().rect.ToQData());
+			QDebug.Log("QData类型更改反序列化测试：" + "{newKey:asldkj,rect:{position:{x:1,z:2}}".ParseQData<TTestClass>().rect.ToQData());
         }
         public string commandStr;
         [ViewButton("命令测试")]
@@ -226,12 +226,12 @@ namespace QTool.Test
 		[ViewButton("ToComuteFloatTest")]
 		public void ToComuteFloatTest()
 		{
-			Debug.Log("1.1"+"  :  "+"1.1".ToComputeFloat());
-			Debug.Log("1.2" + "  :  " + "1.2".ToComputeFloat());
-			Debug.Log("1.25" + "  :  " + "1.25".ToComputeFloat());
-			Debug.Log("" + "  :  " + "".ToComputeFloat());
-			Debug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
-			Debug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
+			QDebug.Log("1.1"+"  :  "+"1.1".ToComputeFloat());
+			QDebug.Log("1.2" + "  :  " + "1.2".ToComputeFloat());
+			QDebug.Log("1.25" + "  :  " + "1.25".ToComputeFloat());
+			QDebug.Log("" + "  :  " + "".ToComputeFloat());
+			QDebug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
+			QDebug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
 		}
 		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
 		{

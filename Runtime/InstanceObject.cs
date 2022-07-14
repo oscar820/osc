@@ -44,7 +44,7 @@ namespace QTool
         {
             if (_instance != null) return;
             _instance = this as T;
-            Debug.Log("初始化单例【" + typeof(T).Name + "】");
+            QDebug.Log("初始化单例【" + typeof(T).Name + "】");
         }
     }
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>

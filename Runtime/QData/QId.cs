@@ -57,7 +57,7 @@ namespace QTool
                 }
 
                 var bytes = writer.ToArray();
-                Debug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ToSizeString());
+                QDebug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ToSizeString());
                 return bytes;
             }
         }
@@ -138,7 +138,7 @@ namespace QTool
                 {
                     reader.ReadObject(item);
                 }
-                Debug.Log("读取数据完成数目：" + shortCount);
+                QDebug.Log("读取数据完成数目：" + shortCount);
             }
         }
     } 

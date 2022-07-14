@@ -185,7 +185,7 @@ namespace QTool
 
 					}
 				}
-				Debug.Log("加载" + nameof(QDataList) + ":" + addPath + "\n" + keyInfo.ToString());
+				QDebug.Log("加载" + nameof(QDataList) + ":" + addPath + "\n" + keyInfo.ToString());
 			}
         }
         public QDataList()

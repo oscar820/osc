@@ -4,14 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 namespace QTool
 {
-	public static class QDebug
-	{
-		[System.Diagnostics.Conditional("QDebug")]
-		public static void Log(object obj)
-		{
-			Debug.Log(obj);
-		}
-	}
+	
     public static class QEventManager
     {
         ///// <summary>

@@ -666,7 +666,7 @@ namespace QTool
 				}
 				list.Add(t as T);
 			}
-			Debug.Log("读取 " + type.Name + " 完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList);
+			QDebug.Log("读取 " + type.Name + " 完成：\n" + list.ToOneString() + "\n\nQDataList:\n" + qdataList);
 			return list;
 		}
 	}

@@ -77,7 +77,7 @@ namespace QTool
 							UnityEditor.EditorUtility.SetDirty(QAssetObjectManager.Instance);
 							UnityEditor.AssetDatabase.SaveAssets();
 						}
-						Debug.Log("生成对象 " + obj + " 引用Id：" + id);
+						QDebug.Log("生成对象 " + obj + " 引用Id：" + id);
                     }
                     return objRef.Key;
                 }

@@ -191,7 +191,7 @@ namespace QTool.Asset
 			}
 #endif
 			#endregion
-			Debug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + objList.ToOneString());
+			QDebug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + objList.ToOneString());
 			return objList;
 		}
 		public static async Task<TObj> LoadAsync(string key)

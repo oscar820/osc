@@ -143,7 +143,7 @@ namespace QTool
                 GlobalLanguage = value;
 				QEventManager.Trigger(nameof(QTranslate) + "_语言", GlobalLanguage);
             }
-            Debug.Log("文本语言：" + value);
+            QDebug.Log("文本语言：" + value);
         }
       //  static event System.Action OnLanguageChange;
         #endregion

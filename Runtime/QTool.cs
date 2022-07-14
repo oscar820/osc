@@ -26,7 +26,7 @@ namespace QTool
 		{
 			CultureInfo.CurrentCulture = new CultureInfo("en-US");
 			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
-			Debug.Log("设置全局编码语言环境为 en-US");
+			QDebug.Log("设置全局编码语言环境为 en-US");
 		}
 		public static string Version => Application.version;
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
@@ -398,7 +398,7 @@ namespace QTool
 			{
 				try
 				{
-					Debug.Log(startInfo.FileName.ToLower() + " " + startInfo.Arguments+"\n 运行路径"+startInfo.WorkingDirectory);
+					QDebug.Log(startInfo.FileName.ToLower() + " " + startInfo.Arguments+"\n 运行路径"+startInfo.WorkingDirectory);
 					process.Start();
 					var info = process.StandardOutput.ReadToEnd();
 					var error = process.StandardError.ReadToEnd();
@@ -409,7 +409,7 @@ namespace QTool
 					}
 					else
 					{
-						Debug.Log(info);
+						QDebug.Log(info);
 					}
 					return info+error;
 				}

@@ -470,9 +470,9 @@ namespace QTool
 		{
 			QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 			var start = DateTime.Now;
-			Debug.Log("对新事件排序" + NewEventList.Count);
+			QDebug.Log("对新事件排序" + NewEventList.Count);
 			NewEventList.Sort(QAnalysisEvent.SortMethod);
-			Debug.Log("排序完成" + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + "开始添加事件" + NewEventList.Count);
+			QDebug.Log("排序完成" + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + "开始添加事件" + NewEventList.Count);
 			start = DateTime.Now;
 			var startV =Setting.StartVersion.ToComputeFloat();
 			for (var i = 0; i < NewEventList.Count; i++)
@@ -489,7 +489,7 @@ namespace QTool
 				}
 			}
 			EditorUtility.ClearProgressBar();
-			Debug.Log("添加事件" + NewEventList.Count + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
+			QDebug.Log("添加事件" + NewEventList.Count + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
 			NewEventList.Clear();
 		}
 		public static List<QAnalysisEvent> NewEventList { get; private set; } = new List<QAnalysisEvent>();
@@ -524,7 +524,7 @@ namespace QTool
 				}, Instance.LastMail);
 				AddNewEventList();
 				SaveData();
-				Debug.Log("保存完成");
+				QDebug.Log("保存完成");
 			}
 			catch (Exception e)
 			{
