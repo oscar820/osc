@@ -335,7 +335,7 @@ namespace QTool.Asset
 				key = key.Substring(0, key.IndexOf(" "));
 			}
 			AddressablesRelease(key);
-			QPoolManager.Push(key, obj);
+			QPoolManager.Push(DirectoryPath + "_" + key, obj);
 		}
 #endif
 	}
