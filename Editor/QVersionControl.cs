@@ -53,10 +53,6 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Add).ToLower() + " \"" + Path.GetFullPath(path) + "\"", path);
 		}
-		static string CheckChinese(string path)
-		{
-			return CheckPathRun("git config --global core.quotepath false", path);
-		}
 		static string Checkout(string path, string version = null)
 		{
 			if (string.IsNullOrEmpty(version))
@@ -73,23 +69,42 @@ namespace QTool
 			return CheckPathRun("log -1 --pretty=oneline", path).SplitStartString(" ");
 
 		}
-		static void CheckInit(string path)
+		static bool CheckInit(string path)
 		{
 			
-			if (!PlayerPrefs.HasKey(nameof(CheckChinese)))
+
+			if (!PlayerPrefs.HasKey(nameof(CheckInit)))
 			{
-				if (CheckResult(CheckChinese(path)))
+				var result = CheckPathRun("config --global core.quotepath false", path);
+				var name = CheckPathRun("config user.name", path);
+				if(string.IsNullOrWhiteSpace(name))
 				{
-					PlayerPrefs.SetInt(nameof(CheckChinese), 1);
+					if(!InputTextWindow.Show("设置Git用户名",out name)){
+						return false;
+					}
+					result = CheckPathRun("onfig--global user.name \"" + name + "\"", path);
 				}
+				var email = CheckPathRun("config user.name", path);
+				if (string.IsNullOrWhiteSpace(email))
+				{
+					if(!InputTextWindow.Show("设置Git联系邮箱", out email))
+					{
+						return false;
+					}
+					result = CheckPathRun("onfig--global user.name \"" + email + "\"", path);
+				}
+				result = CheckPathRun("config user.email", path);
+				PlayerPrefs.SetInt(nameof(CheckInit), 1);
 			}
-			var result= CheckPathRun("git config user.name", path);
-			result = CheckPathRun("git config user.email", path);
-			
+			return true;
+
 		}
 		static string Pull(string path)
 		{
-			CheckInit(path);
+			if (!CheckInit(path))
+			{
+				return "error 取消设置git基础信息";
+			}
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
 			if (result.Contains("Timed out")||result.Contains("Could not resolve host"))
@@ -455,8 +470,8 @@ crashlytics-build.properties
 			if (Instance == null)
 			{
 				Instance = GetWindow<InputTextWindow>();
-				Instance.minSize = new Vector2(200, 130);
-				Instance.maxSize = new Vector2(200, 130);
+				Instance.minSize = new Vector2(200, 70);
+				Instance.maxSize = new Vector2(200, 70);
 			}
 			Instance.titleContent = new GUIContent(name);
 			text = "";
@@ -469,14 +484,17 @@ crashlytics-build.properties
 		private void OnGUI()
 		{
 			text = EditorGUILayout.TextField(text);
-			if (string.IsNullOrWhiteSpace(text))
+			if (GUILayout.Button("确认"))
 			{
-				EditorUtility.DisplayDialog("提交信息错误", "提交信息不能为空", "确认");
-			}
-			else
-			{
-				confirm = true;
-				Close();
+				if (string.IsNullOrWhiteSpace(text))
+				{
+					EditorUtility.DisplayDialog(titleContent.text+"错误", titleContent.text+ "不能为空", "确认");
+				}
+				else
+				{
+					confirm = true;
+					Close();
+				}
 			}
 
 			if (GUILayout.Button("取消"))
