@@ -16,14 +16,14 @@ public class AddressableTest : MonoBehaviour
     async void LoadTest1()
     {
         //   Debug.LogError( await ResourceTest.GetAsync("test1"));
-         var obj=await ResourceTest.LoadAsync("Test1");
+         var obj=await ResourceTest.BothLoadAsync("Test1");
         text.text = "加载完成:" + obj;
     }
     [ContextMenu("加载全部")]
     async void LoadAll()
     {
      //   Debug.LogError( await ResourceTest.GetAsync("test1"));
-        await ResourceTest.LoadAllAsync();
+        await ResourceTest.BothLoadAllAsync();
         //text.text = "加载完成:" + ResourceTest.objDic.Count + ResourceTest.objDic.ToOneString();
     }
 

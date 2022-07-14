@@ -149,7 +149,7 @@ namespace QTool.Asset
 			}
 		}
 #endif
-		public static async Task<IList<TObj>> LoadAllAsync()
+		public static async Task<IList<TObj>> BothLoadAllAsync()
 		{
 			List<TObj> objList = new List<TObj>();
 			objList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
@@ -195,54 +195,72 @@ namespace QTool.Asset
 			QDebug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + objList.ToOneString());
 			return objList;
 		}
-		public static async Task<TObj> LoadAsync(string key)
+		public static TObj ResourcesLoad(string key)
 		{
 			if (Cache.ContainsKey(key))
 			{
 				return Cache[key];
 			}
 			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
-			#region Addressables
+			if (obj != null)
+			{
+				Cache[key] = obj;
+			}
+			return obj;
+		}
 
 #if Addressables
-			if (obj == null)
+		public static async Task< TObj> AddressablesLoad(string key)
+		{
+			if (Cache.ContainsKey(key))
 			{
-				key = key.Replace('\\', '/');
+				return Cache[key];
+			}
+			TObj obj = null;
+			key = key.Replace('\\', '/');
 #if UNITY_EDITOR
-				if (!Application.isPlaying)
-				{
-					obj = AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + AddressablePathStart + key);
-				}
-				else
+			if (!Application.isPlaying)
+			{
+				obj = AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + AddressablePathStart + key);
+			}
+			else
 
 #endif
+			{
+				var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
+				obj = await loader.Task;
+				if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
 				{
-					var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
-					obj = await loader.Task;
-					if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+					if (loader.OperationException != null)
 					{
-						if (loader.OperationException != null)
-						{
-							Debug.LogError("异步加载" + AddressablePathStart + key + "出错" + loader.OperationException);
-						}
+						Debug.LogError("异步加载" + AddressablePathStart + key + "出错" + loader.OperationException);
 					}
 				}
 			}
+			if (obj != null)
+			{
+				Cache[key] = obj;
+			}
+			return obj;
+		}
 #endif
-			#endregion
+		public static async Task<TObj> BothLoadAsync(string key)
+		{
+			var obj = ResourcesLoad(key);
+#if Addressables
+			if (obj == null)
+			{
+				obj = await AddressablesLoad(key);
+			}
+#endif
 			if (obj == null)
 			{
 				Debug.LogError("加载" + key + "出错 结果为空" );
 			}
-			else
-			{
-				Cache[key] = obj;
-			}
-
 			return obj;
 		}
 #if Addressables
-		public static void ReleaseAddressables<T>(params T[] objs) where T : UnityEngine.Object
+		public static void AddressablesRelease<T>(params T[] objs) where T : UnityEngine.Object
 		{
 			foreach (var obj in objs)
 			{
@@ -252,7 +270,7 @@ namespace QTool.Asset
 		}
 #endif
 		
-		public static void ReleaseResources<T>(params T[] objs) where T : UnityEngine.Object
+		public static void ResourcesRelease<T>(params T[] objs) where T : UnityEngine.Object
 		{
 			foreach (var obj in objs)
 			{
