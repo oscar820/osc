@@ -53,6 +53,10 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Add).ToLower() + " \""+Path.GetFullPath(path)+"\"", path);
 		}
+		static string CheckChinese(string path)
+		{
+			return CheckPathRun("git config --global core.quotepath false", path);
+		}
 		static string Checkout(string path,string version=null)
 		{
 			if (string.IsNullOrEmpty(version))
@@ -71,6 +75,12 @@ namespace QTool
 		}
 		static string Pull(string path)
 		{
+			if (!PlayerPrefs.HasKey(nameof(CheckChinese)))
+			{
+				if (CheckResult(CheckChinese(path))){
+					PlayerPrefs.SetInt(nameof(CheckChinese), 1);
+				}
+			}
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
 			if (result.Contains("Timed out")||result.Contains("Could not resolve host"))

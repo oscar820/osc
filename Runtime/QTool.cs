@@ -121,7 +121,6 @@ namespace QTool
 			if (value == null) return 0;
 			if(value is string str)
 			{
-				if (string.IsNullOrWhiteSpace(str)) return 0;
 				if(float.TryParse(str, out var newFloat))
 				{
 					return newFloat;
@@ -135,7 +134,7 @@ namespace QTool
 						var c = str[i];
 						if (char.IsNumber(c))
 						{
-							newNamber = c+newNamber;
+							newNamber += c;
 						}
 						else
 						{
@@ -145,10 +144,6 @@ namespace QTool
 								newNamber = "";
 							}
 						}
-					}
-					if (newNamber.Length > 0)
-					{
-						numbers.Add(newNamber);
 					}
 					var sum = 0f;
 					for (int i = 0; i < numbers.Count; i++)
@@ -390,29 +385,8 @@ namespace QTool
 		{
 			using (var process=new System.Diagnostics.Process { StartInfo=startInfo })
 			{
-				try
-				{
-					Debug.Log(startInfo.FileName + " " + startInfo.Arguments);
-					process.Start();
-					var info = process.StandardOutput.ReadToEnd();
-					var error = process.StandardError.ReadToEnd();
-					if (!string.IsNullOrWhiteSpace(error))
-					{
-						Debug.LogError(error);
-						return error;
-					}
-					else
-					{
-						Debug.Log(info);
-					}
-					return info+error;
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("运行 " + startInfo.FileName + " 出错 " + startInfo.FileName + " " + startInfo.Arguments +"\n" + e);
-					return "";
-				}
-
+				process.Start();
+				return process.StandardOutput.ReadToEnd()+ process.StandardError.ReadToEnd();
 			}
 		}
 	}
