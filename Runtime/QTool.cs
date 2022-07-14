@@ -215,7 +215,13 @@ namespace QTool
 				return Enum.Parse(type, str);
 			}
 		}
-        public static async Task<bool> WaitGameTime(float second, bool ignoreTimeScale = false)
+		public static  bool IsInCamera(this Camera camera,Vector3 pos)
+		{
+			Vector3 vec = camera.WorldToViewportPoint(pos);
+			return (vec.x > 0 && vec.x < 1 && vec.y > 0 && vec.y < 1);
+		}
+
+		public static async Task<bool> WaitGameTime(float second, bool ignoreTimeScale = false)
         {
             var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
             return await Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
@@ -392,7 +398,7 @@ namespace QTool
 			{
 				try
 				{
-					Debug.Log(startInfo.FileName.ToLower() + " " + startInfo.Arguments);
+					Debug.Log(startInfo.FileName.ToLower() + " " + startInfo.Arguments+"\n 运行路径"+startInfo.WorkingDirectory);
 					process.Start();
 					var info = process.StandardOutput.ReadToEnd();
 					var error = process.StandardError.ReadToEnd();

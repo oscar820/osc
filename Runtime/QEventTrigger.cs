@@ -4,13 +4,20 @@ using UnityEngine;
 using UnityEngine.Events;
 namespace QTool
 {
-   
+	public static class QDebug
+	{
+		[System.Diagnostics.Conditional("QDebug")]
+		public static void Log(object obj)
+		{
+			Debug.Log(obj);
+		}
+	}
     public static class QEventManager
     {
-        /// <summary>
-        /// 当任意事件触发时调用
-        /// </summary>
-        public static event System.Action<string> OnEventTigger;
+        ///// <summary>
+        ///// 当任意事件触发时调用
+        ///// </summary>
+        //public static event System.Action<string> OnEventTigger;
         /// <summary>
         /// 事件列表 对应事件触发时调用对应Action 使用方法： EventList["事件名"]+=Action;
         /// </summary>
@@ -22,12 +29,13 @@ namespace QTool
 		/// <param name="eventKey">事件名</param>
 		public static void Trigger(string eventKey)
         {
-            eventKey = eventKey.Trim();
+			QDebug.Log("触发事件 "+eventKey);
+			eventKey = eventKey.Trim();
             if (string.IsNullOrWhiteSpace(eventKey))
             {
                 return;
             }
-            OnEventTigger?.Invoke(eventKey);
+           // OnEventTigger?.Invoke(eventKey);
             if (EventList.ContainsKey(eventKey))
             {
                 EventList[eventKey]?.Invoke();
@@ -76,10 +84,10 @@ namespace QTool
     }
     public class QEventManager<T>
     {
-        /// <summary>
-        /// 当任意事件触发时调用
-        /// </summary>
-        public static event System.Action<string, T> OnEventTigger;
+        ///// <summary>
+        ///// 当任意事件触发时调用
+        ///// </summary>
+        //public static event System.Action<string, T> OnEventTigger;
         /// <summary>
         /// 事件列表 对应事件触发时调用对应Action 使用方法： EventList["事件名"]+=Action;
         /// </summary>
@@ -88,12 +96,13 @@ namespace QTool
 		internal static QDictionary<string, System.Action<T>> OnceEventList = new QDictionary<string, System.Action<T>>();
 		public static void Trigger(string eventKey,T value)
         {
-            eventKey = eventKey.Trim();
+			QDebug.Log("触发事件 " + eventKey + " " + value);
+			eventKey = eventKey.Trim();
             if (string.IsNullOrWhiteSpace(eventKey))
             {
                 return;
             }
-            OnEventTigger?.Invoke(eventKey, value);
+           // OnEventTigger?.Invoke(eventKey, value);
             if (EventList.ContainsKey(eventKey))
             {
                 EventList[eventKey]?.Invoke(value);

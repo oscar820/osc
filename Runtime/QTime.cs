@@ -22,7 +22,8 @@ namespace QTool
             }
             Time.timeScale = value;
             OnScaleChange?.Invoke(value);
-        }
+			QEventManager.Trigger("时间更改信息", timeScaleList.ToOneString());
+		}
 		public static float GetTimeScale(object obj)
 		{
 			if (timeScaleList.ContainsKey(obj))

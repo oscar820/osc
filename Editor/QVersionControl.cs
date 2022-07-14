@@ -41,7 +41,7 @@ namespace QTool
 			}
 			catch (Exception e)
 			{
-				Debug.LogError(e.ToString());
+				Debug.LogError(path+" " +e.ToString());
 			}
 			if (Path.HasExtension(path))
 			{
@@ -96,6 +96,12 @@ namespace QTool
 		}
 		static string Pull(string path)
 		{
+			var rootPath = CheckPathRun("rev-parse --git-dir", path).SplitStartString("/.git");
+			if (!CheckResult(path))
+			{
+				return path;
+			}
+			
 			if (!CheckInit(path))
 			{
 				return "error 取消设置git基础信息";
@@ -129,7 +135,7 @@ namespace QTool
 					{
 						if (!info.select)
 						{
-							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path,path));
+							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path, rootPath));
 						}else
 						{
 							files += info + " ";
@@ -138,7 +144,7 @@ namespace QTool
 					}
 					if (useStash)
 					{
-						Debug.Log("保留本地更改 " + StashPush(files,path));
+						Debug.Log("保留本地更改 " + StashPush(files, rootPath));
 					}
 					var pullResult = Pull(path);
 					if (useStash)
@@ -147,16 +153,16 @@ namespace QTool
 						{
 							if (info.select)
 							{
-								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path,path, version));
+								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path, rootPath, version));
 							}
 						}
-						Debug.Log("还原本地更改 " + StashPop(path));
+						Debug.Log("还原本地更改 " + StashPop(rootPath));
 					} 
 					return pullResult;
 				}
 				else
 				{
-					return "";
+					return "error 取消";
 				}
 			}
 			else

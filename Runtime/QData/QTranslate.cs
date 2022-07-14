@@ -135,23 +135,23 @@ namespace QTool
 				}
 			}
 			if (GlobalLanguage == value)
-            {
-                OnLanguageChange?.Invoke();
+			{
+				QEventManager.Trigger(nameof(QTranslate) + "_语言");
             }
             else
             {
                 GlobalLanguage = value;
-                OnLanguageChange?.Invoke();
+				QEventManager.Trigger(nameof(QTranslate) + "_语言");
             }
             Debug.Log("文本语言：" + value);
         }
-        static event System.Action OnLanguageChange;
+      //  static event System.Action OnLanguageChange;
         #endregion
         public StringEvent OnValueChange;
         public StringEvent OnTranslateChange;
         private void Awake()
         {
-            OnLanguageChange += ChangeLanguage;
+			QEventManager.Register<string>(nameof(QTranslate) + "_语言", Fresh);
         }
         private void Start()
         {
@@ -159,14 +159,7 @@ namespace QTool
         }
         private void OnDestroy()
         {
-            OnLanguageChange -= ChangeLanguage;
-        }
-        public void ChangeLanguage()
-        {
-            if (string.IsNullOrWhiteSpace(language))
-            {
-                CheckFresh();
-            }
+			QEventManager.UnRegister<string>(nameof(QTranslate) + "_语言", Fresh);
         }
 
         public static string Translate(string value,params QKeyValue<string,string>[] keyValues)
@@ -205,6 +198,10 @@ namespace QTool
             }
             return value;
         }
+		private void Fresh(string key)
+		{
+			CheckFresh();
+		}
         [ViewButton("翻译刷新")]
         private void CheckFresh()
         {

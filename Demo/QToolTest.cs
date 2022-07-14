@@ -186,8 +186,14 @@ namespace QTool.Test
             QCommand.Invoke(commandStr);
         }
         [TextArea(5,10)]
-        public string QDataStr; 
-        [ViewButton("QDataList测试")]
+        public string QDataStr;
+
+		[ViewButton("时间测试")]
+		public void TimeTest()
+		{
+			QTime.ChangeScale("测试时间", UnityEngine.Random.Range(0, 2));
+		}
+		[ViewButton("QDataList测试")]
         public void QDataTest()
         {
 			Debug.LogError("\"aslkdasdj,asldjl\"".ParseElement());
