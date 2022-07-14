@@ -22,6 +22,7 @@ namespace QTool
             }
             Time.timeScale = value;
             OnScaleChange?.Invoke(value);
+			QEventManager.Trigger("时间更改信息","TimeScale "+Time.timeScale+"  "+ timeScaleList.ToOneString());
 		}
 		public static float GetTimeScale(object obj)
 		{
@@ -55,12 +56,14 @@ namespace QTool
 				timeScaleList[obj] = timeScale;
 			}
 			UpdateTimeScale();
-			QEventManager.Trigger("时间更改信息", timeScaleList.ToOneString());
 		}
         public static void RevertScale(object obj)
         {
-            timeScaleList.RemoveKey(obj);
-            UpdateTimeScale();
+			if (timeScaleList.ContainsKey(obj))
+			{
+				timeScaleList.RemoveKey(obj);
+				UpdateTimeScale();
+			}
         }
     }
 	public class QWaitTime
