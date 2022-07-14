@@ -2364,7 +2364,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "asdlk\u6587\u672C\u8BED\u8A00\u963F\u677E\u5927\u6D4B\u8BD5dadaslkj"
+  m_Text: "asdlk\u6D4B\u8BD5\u6587\u672C\u963F\u677E\u5927\u6D4B\u8BD5\u6587\u672Cdadaslkj"
 --- !u!222 &574360976
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2385,10 +2385,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bacc336a6d7b86e45b2cb1b342da1a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  curValue: "asdlk{\u6587\u672C\u8BED\u8A00}\u963F\u677E\u5927{test}dadaslkj"
+  curValue: "asdlk{\u6D4B\u8BD5\u6587\u672C}\u963F\u677E\u5927{\u6D4B\u8BD5\u6587\u672C}dadaslkj"
   value: "asdlk{\u6D4B\u8BD5\u6587\u672C}\u963F\u677E\u5927{\u6D4B\u8BD5\u6587\u672C}dadaslkj"
   language: 
-  translateResult: "asdlk\u6587\u672C\u8BED\u8A00\u963F\u677E\u5927\u6D4B\u8BD5dadaslkj"
+  translateResult: "asdlk\u6D4B\u8BD5\u6587\u672C\u963F\u677E\u5927\u6D4B\u8BD5\u6587\u672Cdadaslkj"
   OnValueChange:
     m_PersistentCalls:
       m_Calls: []

@@ -9,7 +9,7 @@ namespace QTool
 		[System.Diagnostics.Conditional("QDebug")]
 		public static void Log(object obj)
 		{
-			QDebug.Log(obj);
+			Debug.Log(obj);
 		}
 	}
 }
