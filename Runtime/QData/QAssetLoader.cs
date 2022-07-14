@@ -328,15 +328,14 @@ namespace QTool.Asset
 			obj.name = key;
 			return obj;
 		}
-		public static async void PoolPush(string key, GameObject obj)
+		public static void PoolPush(string key, GameObject obj)
 		{
 			if (key.Contains(" "))
 			{
 				key = key.Substring(0, key.IndexOf(" "));
 			}
 			AddressablesRelease(key);
-			var pool = await GetPool(key);
-			pool.Push(obj);
+			QPoolManager.Push(key, obj);
 		}
 #endif
 	}
