@@ -33,6 +33,8 @@ namespace QTool
 
 		static string CheckPathRun(string commond, string path)
 		{
+			
+			RunInfo.Arguments = commond;
 			try
 			{
 				path = Path.GetFullPath(path);
@@ -41,7 +43,6 @@ namespace QTool
 			{
 				Debug.LogError(e.ToString());
 			}
-			RunInfo.Arguments = commond;
 			if (Path.HasExtension(path))
 			{
 				path = Path.GetDirectoryName(path);
@@ -51,17 +52,17 @@ namespace QTool
 		}
 		static string Add(string path)
 		{
-			return CheckPathRun(nameof(Add).ToLower() + " \"" + Path.GetFullPath(path) + "\"", path);
+			return CheckPathRun(nameof(Add).ToLower() + " \"" + path + "\"", path);
 		}
 		static string Checkout(string path, string version = null)
 		{
 			if (string.IsNullOrEmpty(version))
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + Path.GetFullPath(path) + "\"", path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", path);
 			}
 			else
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" + Path.GetFullPath(path) + "\"", path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", path);
 			}
 		}
 		static string GetCurrentVersion(string path)
@@ -275,7 +276,7 @@ namespace QTool
 		};
 		public static string Status(string path)
 		{
-			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath(path)+"\"", path);
+			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
 		}
 		[MenuItem("QTool/Git/拉取更新")]
 		static void AllPull()
