@@ -86,7 +86,7 @@ namespace QTool
         [SerializeField]
         private string value;
         [SerializeField]
-        [ViewName("翻译语言")]
+        [ViewName("固定翻译语言")]
         private string language = "";
         [SerializeField]
         [ViewName("翻译结果")]
@@ -136,12 +136,12 @@ namespace QTool
 			}
 			if (GlobalLanguage == value)
 			{
-				QEventManager.Trigger(nameof(QTranslate) + "_语言");
+				QEventManager.Trigger(nameof(QTranslate) + "_语言",GlobalLanguage);
             }
             else
             {
                 GlobalLanguage = value;
-				QEventManager.Trigger(nameof(QTranslate) + "_语言");
+				QEventManager.Trigger(nameof(QTranslate) + "_语言", GlobalLanguage);
             }
             Debug.Log("文本语言：" + value);
         }
@@ -151,7 +151,7 @@ namespace QTool
         public StringEvent OnTranslateChange;
         private void Awake()
         {
-			QEventManager.Register<string>(nameof(QTranslate) + "_语言", Fresh);
+			QEventManager.Register<string>(nameof(QTranslate) + "_语言", CheckFresh);
         }
         private void Start()
         {
@@ -159,7 +159,7 @@ namespace QTool
         }
         private void OnDestroy()
         {
-			QEventManager.UnRegister<string>(nameof(QTranslate) + "_语言", Fresh);
+			QEventManager.UnRegister<string>(nameof(QTranslate) + "_语言", CheckFresh);
         }
 
         public static string Translate(string value,params QKeyValue<string,string>[] keyValues)
@@ -198,12 +198,9 @@ namespace QTool
             }
             return value;
         }
-		private void Fresh(string key)
-		{
-			CheckFresh();
-		}
+	
         [ViewButton("翻译刷新")]
-        private void CheckFresh()
+        private void CheckFresh(string key=null)
         {
             if (curValue != value)
             {

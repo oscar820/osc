@@ -60,18 +60,33 @@ namespace QTool.Reflection
 			}
 		}
 		public MethodInfo MethodInfo { get; private set; }
-		public Func<object, object[], object> Function { get; private set; }
 		public Attribute Attribute { get; set; }
 		public object Invoke(object target, params object[] param)
 		{
-			return Function?.Invoke(target, param);
+			if (ParamType.Length > param.Length)
+			{
+				var newParam = new object[ParamType.Length];
+				for (int i = 0; i < param.Length; i++)
+				{
+					newParam[i] = param[i];
+				}
+				for (int i = param.Length; i < newParam.Length; i++)
+				{
+					if (ParamType[i].HasDefaultValue)
+					{
+						newParam[i] = ParamType[i].DefaultValue;
+					}
+				}
+				param = newParam;
+			}
+			return MethodInfo?.Invoke(target, param);
 		}
 		public QFunctionInfo(MethodInfo info)
 		{
 			this.MethodInfo = info;
 			Key = info.Name;
 			ParamType = info.GetParameters();
-			Function = info.Invoke;
+		//	Function = info.Invoke;
 		}
 		public override string ToString()
 		{
