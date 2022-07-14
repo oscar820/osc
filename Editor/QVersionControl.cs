@@ -88,7 +88,7 @@ namespace QTool
 				EditorUtility.DisplayDialog("同步超时", result, "确认");
 				return result;
 			}
-			if (CheckResult(result))
+			if (!CheckResult(result))
 			{
 				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge"))
 				{
