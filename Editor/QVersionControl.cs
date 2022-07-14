@@ -75,27 +75,21 @@ namespace QTool
 
 			if (!PlayerPrefs.HasKey(nameof(CheckInit)))
 			{
+			
 				var result = CheckPathRun("config --global core.quotepath false", path);
 				var name = CheckPathRun("config user.name", path);
-				if(string.IsNullOrWhiteSpace(name))
+				if (string.IsNullOrWhiteSpace(name))
 				{
-					if(!InputTextWindow.Show("设置Git用户名",out name)){
-						return false;
-					}
-					result = CheckPathRun("onfig--global user.name \"" + name + "\"", path);
-				}
-				var email = CheckPathRun("config user.name", path);
-				if (string.IsNullOrWhiteSpace(email))
-				{
-					if(!InputTextWindow.Show("设置Git联系邮箱", out email))
+					EditorUtility.ClearProgressBar();
+					if (!InputTextWindow.Show("设置Git用户名", out name))
 					{
 						return false;
 					}
-					result = CheckPathRun("onfig--global user.name \"" + email + "\"", path);
+					CheckPathRun("config --global user.name \"" + name + "\"", path);
 				}
-				result = CheckPathRun("config user.email", path);
 				PlayerPrefs.SetInt(nameof(CheckInit), 1);
 			}
+			
 			return true;
 
 		}
@@ -440,6 +434,7 @@ crashlytics-build.properties
 				}
 				switch (state)
 				{//We are<b>not</ b > amused
+					case "MM":
 					case "M": viewString= "<color=#99ff99><b>修改</b> " + path + "</color>"; break;
 					case "??":
 					case "A": viewString = "<color=#9999ff><b>新增</b> " + path + "</color>"; break;
