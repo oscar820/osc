@@ -125,7 +125,6 @@ namespace QTool.Asset
 	#endregion
 	public abstract class QAssetLoader<TPath, TObj> where TObj : UnityEngine.Object
 	{
-		static QDictionary<string, TObj> Cache = new QDictionary<string, TObj>();
 		public static string DirectoryPath
 		{
 			get
@@ -197,25 +196,13 @@ namespace QTool.Asset
 		}
 		public static TObj ResourcesLoad(string key)
 		{
-			if (Cache.ContainsKey(key))
-			{
-				return Cache[key];
-			}
 			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
-			if (obj != null)
-			{
-				Cache[key] = obj;
-			}
 			return obj;
 		}
 
 #if Addressables
 		public static async Task< TObj> AddressablesLoad(string key)
 		{
-			if (Cache.ContainsKey(key))
-			{
-				return Cache[key];
-			}
 			TObj obj = null;
 			key = key.Replace('\\', '/');
 #if UNITY_EDITOR
@@ -236,10 +223,6 @@ namespace QTool.Asset
 						Debug.LogError("异步加载" + AddressablePathStart + key + "出错" + loader.OperationException);
 					}
 				}
-			}
-			if (obj != null)
-			{
-				Cache[key] = obj;
 			}
 			return obj;
 		}
@@ -262,10 +245,6 @@ namespace QTool.Asset
 #if Addressables
 		public static void AddressablesRelease<T>(params T[] objs) where T : UnityEngine.Object
 		{
-			foreach (var obj in objs)
-			{
-				Cache.RemoveAll((kv) => kv.Value == obj);
-			}
 			Addressables.Release(objs);
 		}
 #endif
@@ -274,7 +253,6 @@ namespace QTool.Asset
 		{
 			foreach (var obj in objs)
 			{
-				Cache.RemoveAll((kv) => kv.Value == obj);
 				if (obj == null) continue; ;
 				if (obj is GameObject)
 				{
