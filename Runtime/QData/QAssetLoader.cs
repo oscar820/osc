@@ -125,6 +125,7 @@ namespace QTool.Asset
 	#endregion
 	public abstract class QAssetLoader<TPath, TObj> where TObj : UnityEngine.Object
 	{
+		static QDictionary<string, TObj> Cache = new QDictionary<string, TObj>();
 		public static string DirectoryPath
 		{
 			get
@@ -196,6 +197,10 @@ namespace QTool.Asset
 		}
 		public static async Task<TObj> LoadAsync(string key)
 		{
+			if (Cache.ContainsKey(key))
+			{
+				return Cache[key];
+			}
 			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
 			#region Addressables
 
@@ -229,12 +234,21 @@ namespace QTool.Asset
 			{
 				Debug.LogError("加载" + key + "出错 结果为空" );
 			}
+			else
+			{
+				Cache[key] = obj;
+			}
+
 			return obj;
 		}
 #if Addressables
-		public static void ReleaseAddressables<T>(params T[] obj) where T : UnityEngine.Object
+		public static void ReleaseAddressables<T>(params T[] objs) where T : UnityEngine.Object
 		{
-			Addressables.Release(obj);
+			foreach (var obj in objs)
+			{
+				Cache.RemoveAll((kv) => kv.Value == obj);
+			}
+			Addressables.Release(objs);
 		}
 #endif
 		
@@ -242,6 +256,7 @@ namespace QTool.Asset
 		{
 			foreach (var obj in objs)
 			{
+				Cache.RemoveAll((kv) => kv.Value == obj);
 				if (obj == null) continue; ;
 				if (obj is GameObject)
 				{
