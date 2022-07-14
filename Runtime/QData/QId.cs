@@ -7,10 +7,10 @@ using QTool.Inspector;
 using QTool.Asset;
 namespace QTool
 {
-    public class QIdPrefabs : QPrefabLoader<QIdPrefabs>
-    {
+    //public class QIdPrefabs : QPrefabLoader<QIdPrefabs>
+    //{
 
-    }
+    //}
     public static class QIdExtends
     {
         public static QId GetQId(this Component mono)
@@ -30,117 +30,117 @@ namespace QTool
             }
             return obj.GetComponent<QId>();
         }
-        public static byte[] SaveAllInstance<IDType>(this QList<string, IDType> InstanceIdList) where IDType : QId
-        {
-            using (QBinaryWriter writer = new QBinaryWriter())
-            {
-                var saveList = new List<QId>();
-                foreach (var item in InstanceIdList)
-                {
-                    if (item.IsSceneInstance)
-                    {
-                        saveList.Add(item);
-                    }
-                }
-                writer.Write((short)saveList.Count);
+        //public static byte[] SaveAllInstance<IDType>(this QList<string, IDType> InstanceIdList) where IDType : QId
+        //{
+        //    using (QBinaryWriter writer = new QBinaryWriter())
+        //    {
+        //        var saveList = new List<QId>();
+        //        foreach (var item in InstanceIdList)
+        //        {
+        //            if (item.IsSceneInstance)
+        //            {
+        //                saveList.Add(item);
+        //            }
+        //        }
+        //        writer.Write((short)saveList.Count);
 
-                foreach (var qId in saveList)
-                {
+        //        foreach (var qId in saveList)
+        //        {
 
                   
-                    writer.Write(qId.InstanceId);
-                    writer.Write(qId.PrefabId);
-                }
-                foreach (var qId in saveList)
-                {
-                    writer.WriteObject(qId);
-                }
+        //            writer.Write(qId.InstanceId);
+        //            writer.Write(qId.PrefabId);
+        //        }
+        //        foreach (var qId in saveList)
+        //        {
+        //            writer.WriteObject(qId);
+        //        }
 
-                var bytes = writer.ToArray();
-                QDebug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ToSizeString());
-                return bytes;
-            }
-        }
-        public static void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes) where IDType:QId
-        {
-            LoadAllInstance(InstanceIdList,bytes,(prefab)=> {
-                if (prefab != null)
-                {
-                    var obj = GameObject.Instantiate(prefab, null);
-                    return obj.GetComponent<IDType>();
-                }
-                else
-                {
-                    return null;
-                }
+        //        var bytes = writer.ToArray();
+        //        QDebug.Log("保存数据 数目：" + saveList.Count+" 大小："+ bytes.Length.ToSizeString());
+        //        return bytes;
+        //    }
+        //}
+        //public static void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes) where IDType:QId
+        //{
+        //    LoadAllInstance(InstanceIdList,bytes,(prefab)=> {
+        //        if (prefab != null)
+        //        {
+        //            var obj = GameObject.Instantiate(prefab, null);
+        //            return obj.GetComponent<IDType>();
+        //        }
+        //        else
+        //        {
+        //            return null;
+        //        }
               
-            },(qid)=> { 
-                GameObject.Destroy(qid.gameObject);
-            });
-        }
-        public static async void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes,System.Func<GameObject, IDType> createFunc,System.Action<IDType> destoryFunc ) where IDType : QId
-        {
-            using (QBinaryReader reader = new QBinaryReader(bytes))
-            {
+        //    },(qid)=> { 
+        //        GameObject.Destroy(qid.gameObject);
+        //    });
+        //}
+        //public static async void LoadAllInstance<IDType>(this QList<string, IDType> InstanceIdList, byte[] bytes,System.Func<GameObject, IDType> createFunc,System.Action<IDType> destoryFunc ) where IDType : QId
+        //{
+        //    using (QBinaryReader reader = new QBinaryReader(bytes))
+        //    {
          
-                var loadList = new List<IDType>();
-                var shortCount = reader.ReadInt16();
-                for (int i = 0; i < shortCount; i++)
-                {
-                    var key = reader.ReadString();
-                    var prefabId= reader.ReadString();
+        //        var loadList = new List<IDType>();
+        //        var shortCount = reader.ReadInt16();
+        //        for (int i = 0; i < shortCount; i++)
+        //        {
+        //            var key = reader.ReadString();
+        //            var prefabId= reader.ReadString();
                
-                    if (InstanceIdList.ContainsKey(key)&&InstanceIdList[key]!=null)
-                    {
-                        var qid = InstanceIdList[key];
-                        loadList.Add(qid);
-                        loadList.Replace(i, loadList.IndexOf(qid));
-                    }
-                    else if(createFunc!=null)
-                    {
-                        var prefab = await QIdPrefabs.LoadAsync(prefabId);
-                        if (prefab != null)
-                        {
-                            var id = createFunc.Invoke(prefab);
-                            if (id == null)
-                            {
-                                Debug.LogError("创建【" + prefab + "】失败 读取存档中断");
-                                return;
-                            }
-                            id.InstanceId = key;
-                            loadList.Add(id);
-                            InstanceIdList[key] = id;
-                            loadList.Replace(i, loadList.IndexOf(id));
-                        }
-                        else
-                        {
-                            Debug.LogError("不存在【" + prefabId + "】["+key+"]预制体 读取存档中断");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("不存在【" + key + "】读取存档中断");
-                        return;
-                    }
-                }
-                if (destoryFunc != null)
-                {
-                    foreach (var item in InstanceIdList)
-                    {
-                        if (!loadList.Contains(item)&&item.IsSceneInstance)
-                        {
-                            destoryFunc.Invoke(item);
-                        }
-                    }
-                }
-                foreach (var item in loadList)
-                {
-                    reader.ReadObject(item);
-                }
-                QDebug.Log("读取数据完成数目：" + shortCount);
-            }
-        }
+        //            if (InstanceIdList.ContainsKey(key)&&InstanceIdList[key]!=null)
+        //            {
+        //                var qid = InstanceIdList[key];
+        //                loadList.Add(qid);
+        //                loadList.Replace(i, loadList.IndexOf(qid));
+        //            }
+        //            else if(createFunc!=null)
+        //            {
+        //                var prefab = await QIdPrefabs.LoadAsync(prefabId);
+        //                if (prefab != null)
+        //                {
+        //                    var id = createFunc.Invoke(prefab);
+        //                    if (id == null)
+        //                    {
+        //                        Debug.LogError("创建【" + prefab + "】失败 读取存档中断");
+        //                        return;
+        //                    }
+        //                    id.InstanceId = key;
+        //                    loadList.Add(id);
+        //                    InstanceIdList[key] = id;
+        //                    loadList.Replace(i, loadList.IndexOf(id));
+        //                }
+        //                else
+        //                {
+        //                    Debug.LogError("不存在【" + prefabId + "】["+key+"]预制体 读取存档中断");
+        //                    return;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                Debug.LogError("不存在【" + key + "】读取存档中断");
+        //                return;
+        //            }
+        //        }
+        //        if (destoryFunc != null)
+        //        {
+        //            foreach (var item in InstanceIdList)
+        //            {
+        //                if (!loadList.Contains(item)&&item.IsSceneInstance)
+        //                {
+        //                    destoryFunc.Invoke(item);
+        //                }
+        //            }
+        //        }
+        //        foreach (var item in loadList)
+        //        {
+        //            reader.ReadObject(item);
+        //        }
+        //        QDebug.Log("读取数据完成数目：" + shortCount);
+        //    }
+        //}
     } 
 
     [DisallowMultipleComponent]

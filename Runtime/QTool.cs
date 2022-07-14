@@ -42,13 +42,13 @@ namespace QTool
             }
             return KeyColor[colorKey];
         }
-		public static Transform GetChild(this Transform transform,string childPath)
+		public static Transform GetChild(this Transform transform,string childPath,bool autuCreate=false)
 		{
 			if (childPath.SplitTowString(".", out var start, out var end))
 			{
 				try
 				{
-					return transform.GetChild(start).GetChild(end);
+					return GetChild(transform,start,autuCreate).GetChild(end,autuCreate);
 				}
 				catch (Exception e)
 				{
@@ -64,7 +64,17 @@ namespace QTool
 				}
 				else
 				{
-					throw new Exception(" 找不到 key [" + start+"]"+childPath);
+					if (autuCreate)
+					{
+						child = new GameObject(start).transform;
+						child.position = transform.position;
+						child.SetParent(transform);
+						return child;
+					}
+					else
+					{
+						throw new Exception(" 找不到 key [" + start + "]" + childPath);
+					}
 				}
 			}
 		}

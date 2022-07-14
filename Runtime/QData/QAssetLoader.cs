@@ -255,102 +255,106 @@ namespace QTool.Asset
 			
 		}
 	}
-    public abstract class QPrefabLoader<TPath>: QAssetLoader<TPath,GameObject> where TPath:QPrefabLoader<TPath>
-    {
-        static async Task<ObjectPool<GameObject>> GetPool(string key)
-        {
-            var poolkey =DirectoryPath+"_" + key + "_AssetList";
-			var prefab = await LoadAsync(key);
-			if (prefab != null)
-			{
-				return QPoolManager.GetPool(poolkey, prefab);
+	public abstract class QPrefabLoader<TPath> : QAssetLoader<TPath, GameObject> where TPath : QPrefabLoader<TPath>
+	{
 
-			}
-			else
-			{
-				return null;
-			}
-		}
-      
-        public static async Task<GameObject> GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
-        {
-            var obj =await GetInstance(key, parent);
-            obj.transform.position = position;
-            obj.transform.localRotation = rotation;
-            return obj;
-        }
-        public static async void Push(string key,GameObject obj)
-        {
-            if (key.Contains(" "))
-            {
-                key = key.Substring(0, key.IndexOf(" "));
-            }
-			var pool = await GetPool(key);
-			if (pool == null)
-			{
-				GameObject.Destroy(obj);
-			}
-			else
-			{
-				pool.Push(obj);
-			}
-        }
-        public static void Push(GameObject obj)
-        {
-            Push(obj.name, obj);
-        }
-        public static void Push(List<GameObject> objList)
-        {
-            foreach (var obj in objList)
-            {
-                Push(obj);
-            }
-            objList.Clear();
-        }
-        public static async Task<GameObject> GetInstance(string key, Transform parent = null)
-        {
-            var pool = await GetPool(key);
-            if (pool == null)
-            {
-                Debug.LogError("无法实例化预制体[" + key + "]");
-                return null;
-            }
-            var obj = pool.Get();
-            if (obj == null)
-            {
-                return null;
-            }
-            if (parent != null)
-            {
-                obj.transform.SetParent(parent,false);
-            }
-            if (obj.transform is RectTransform)
-            {
-                var prefab = await LoadAsync(key);
-                (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
-            }
-            obj.name = key;
-            return obj;
-        }
-        public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
-        {
-            var obj =await GetInstance(key, parent);
-            if (obj == null)
-            {
-                return null;
-            }
-            return obj.GetComponent<CT>();
-        }
-        public async static Task<CT> GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
-        {
-            var obj =await GetInstance(key, pos, rotation, parent);
-            if (obj == null)
-            {
-                return null;
-            }
-            return obj.GetComponent<CT>();
-        }
-    }
+	}
+  //  public abstract class QPrefabLoader<TPath>: QAssetLoader<TPath,GameObject> where TPath:QPrefabLoader<TPath>
+  //  {
+  //      static async Task<ObjectPool<GameObject>> GetPool(string key)
+  //      {
+  //          var poolkey =DirectoryPath+"_" + key + "_AssetList";
+  //	var prefab = await LoadAsync(key);
+  //	if (prefab != null)
+  //	{
+  //		return QPoolManager.GetPool(poolkey, prefab);
+
+		//	}
+		//	else
+		//	{
+		//		return null;
+		//	}
+		//}
+
+		//      public static async Task<GameObject> GetInstance(string key, Vector3 position,Quaternion rotation,Transform parent = null)
+		//      {
+		//          var obj =await GetInstance(key, parent);
+		//          obj.transform.position = position;
+		//          obj.transform.localRotation = rotation;
+		//          return obj;
+		//      }
+		//      public static async void Push(string key,GameObject obj)
+		//      {
+		//          if (key.Contains(" "))
+		//          {
+		//              key = key.Substring(0, key.IndexOf(" "));
+		//          }
+		//	var pool = await GetPool(key);
+		//	if (pool == null)
+		//	{
+		//		GameObject.Destroy(obj);
+		//	}
+		//	else
+		//	{
+		//		pool.Push(obj);
+		//	}
+		//      }
+		//      public static void Push(GameObject obj)
+		//      {
+		//          Push(obj.name, obj);
+		//      }
+		//      public static void Push(List<GameObject> objList)
+		//      {
+		//          foreach (var obj in objList)
+		//          {
+		//              Push(obj);
+		//          }
+		//          objList.Clear();
+		//      }
+		//      public static async Task<GameObject> GetInstance(string key, Transform parent = null)
+		//      {
+		//          var pool = await GetPool(key);
+		//          if (pool == null)
+		//          {
+		//              Debug.LogError("无法实例化预制体[" + key + "]");
+		//              return null;
+		//          }
+		//          var obj = pool.Get();
+		//          if (obj == null)
+		//          {
+		//              return null;
+		//          }
+		//          if (parent != null)
+		//          {
+		//              obj.transform.SetParent(parent,false);
+		//          }
+		//          if (obj.transform is RectTransform)
+		//          {
+		//              var prefab = await LoadAsync(key);
+		//              (obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
+		//          }
+		//          obj.name = key;
+		//          return obj;
+		//      }
+		//      public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
+		//      {
+		//          var obj =await GetInstance(key, parent);
+		//          if (obj == null)
+		//          {
+		//              return null;
+		//          }
+		//          return obj.GetComponent<CT>();
+		//      }
+		//      public async static Task<CT> GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
+		//      {
+		//          var obj =await GetInstance(key, pos, rotation, parent);
+		//          if (obj == null)
+		//          {
+		//              return null;
+		//          }
+		//          return obj.GetComponent<CT>();
+		//      }
+		//  }
 }
 
 

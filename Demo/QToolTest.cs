@@ -72,16 +72,16 @@ namespace QTool.Test
 			
 		}
         public byte[] scenebytes;  
-        [ContextMenu("保存场景")]
-        public void SaveAll()
-        {
-            scenebytes=QId.InstanceIdList.SaveAllInstance();
-        }
-        [ContextMenu("读取场景")]
-        public void LoadAll()
-        {
-            QId.InstanceIdList.LoadAllInstance(scenebytes);
-        }
+        //[ContextMenu("保存场景")]
+        //public void SaveAll()
+        //{
+        //    scenebytes=QId.InstanceIdList.SaveAllInstance();
+        //}
+        //[ContextMenu("读取场景")]
+        //public void LoadAll()
+        //{
+        //    QId.InstanceIdList.LoadAllInstance(scenebytes);
+        //}
 		[ContextMenu("运算符测试")]
 		public void OperarterTest()
 		{

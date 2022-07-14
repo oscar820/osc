@@ -34,7 +34,7 @@ public class QPoolTest : MonoBehaviour
 				}
 			}
 			objList.Clear();
-			for (int i = 0; i < size; i++)
+			for (int i = 0; i <Random.Range(0, size); i++)
 			{
 				if (usePool)
 				{ 

@@ -48,19 +48,31 @@ namespace QTool
         public QDictionary()
         {
 
-        }
-        public T defaultValue { private set; get; } = default;
+		}
+		public Func<TKey, T> createAction { private set; get; }
+		public T defaultValue { private set; get; } = default;
         public QDictionary(T defaultValue)
         {
             this.defaultValue = defaultValue;
-        }
-        public void Add(TKey key, T value)
+		}
+		public QDictionary( Func<TKey,T> createAction)
+		{
+			this.createAction = createAction;
+		}
+		public void Add(TKey key, T value)
         {
             this[key] = value;
         }
         public override void OnCreate(QKeyValue<TKey, T> obj)
         {
-            obj.Value = defaultValue;
+			if (createAction != null)
+			{
+				obj.Value = createAction(obj.Key);
+			}
+			else
+			{
+				obj.Value = defaultValue;
+			}
             base.OnCreate(obj);
         }
     }

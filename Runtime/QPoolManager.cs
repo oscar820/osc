@@ -156,29 +156,25 @@ namespace QTool
 			}
             return obj;
         }
-        private static Dictionary<string, Transform> parentList = new Dictionary<string, Transform>();
-        private static Transform GetPoolParent(string name)
-        {
-            if (!Application.isPlaying) return null;
-            if (parentList.ContainsKey(name))
-            {
-                return parentList[name];
-            }
-            else
-            {
-                var poolName = name + "_QPool";
-                var parent = new GameObject(poolName).transform;
-                parentList.Add(name, parent);
-                return parent;
-            }
-        }
+		Transform _poolParent = null;	
+		public Transform PoolParent
+		{
+			get
+			{
+				if (_poolParent == null)
+				{
+					_poolParent = QToolManager.Instance.transform.GetChild("QPoolManager." + Key,true);
+				}
+				return _poolParent;
+			}
+		}
         T CheckPush(T obj)
         {
             var gameObj = GetGameObj(obj);
             if (gameObj != null)
             {
                 gameObj.SetActive(false);
-                gameObj.transform.SetParent(GetPoolParent(Key),false);
+                gameObj.transform.SetParent(PoolParent, false);
                 foreach (var poolObj in gameObj.GetComponents<IPoolObject>())
                 {
                     poolObj.OnPoolRecover();
@@ -201,6 +197,7 @@ namespace QTool
 				lock (CanUsePool)
 				{
 					var obj = CanUsePool.Dequeue();
+					QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 					return CheckGet(obj);
 				}
 			}
@@ -211,6 +208,7 @@ namespace QTool
 					throw new Exception("对象池创建函数为空  " + this);
 				}
 				var obj = newFunc();
+				QDebug.ChangeProfilerCount(Key + " "+nameof(AllCount), AllCount);
 				return CheckGet(obj);
 			}
         }
@@ -263,6 +261,7 @@ namespace QTool
 				{
 					CanUsePool.Enqueue(resultObj);
 				}
+				QDebug.ChangeProfilerCount(Key + " UseCount" , AllCount-CanUseCount);
 			}
         }
         public int CanUseCount
@@ -282,7 +281,9 @@ namespace QTool
 			{
 				CanUsePool.Clear();
 			}
-        }
+			QDebug.ChangeProfilerCount(Key + " " + nameof(AllCount), AllCount);
+			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
+		}
 
         public Func<T> newFunc;
         public bool isPoolObj = false;

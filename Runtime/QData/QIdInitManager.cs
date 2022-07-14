@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
 {
-    public class QIdInitManager : QManagerBase<QIdInitManager>
+    public class QIdInitManager : InstanceBehaviour<QIdInitManager>
     {
         public List<QId> qIdInitList = new List<QId>();
         [ExecuteInEditMode]
