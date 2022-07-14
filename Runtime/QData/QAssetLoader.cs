@@ -125,6 +125,7 @@ namespace QTool.Asset
 	#endregion
 	public abstract class QAssetLoader<TPath, TObj> where TObj : UnityEngine.Object
 	{
+		public static QDictionary<string, TObj> Cache = new QDictionary<string, TObj>();
 		public static string DirectoryPath
 		{
 			get
@@ -197,6 +198,10 @@ namespace QTool.Asset
 		public static TObj ResourcesLoad(string key)
 		{
 			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
+			if (obj != null && !Cache.ContainsKey(key))
+			{
+				Cache[key] = obj;
+			}
 			return obj;
 		}
 
@@ -224,6 +229,10 @@ namespace QTool.Asset
 					}
 				}
 			}
+			if(obj!=null&& !Cache.ContainsKey(key))
+			{
+				Cache[key] = obj;
+			}
 			return obj;
 		}
 #endif
@@ -243,12 +252,19 @@ namespace QTool.Asset
 			return obj;
 		}
 #if Addressables
+		public static void AddressablesRelease(string key)
+		{
+			Addressables.Release(Cache[key]);
+		}
 		public static void AddressablesRelease(params TObj[] objs)
 		{
 			Addressables.Release(objs);
 		}
 #endif
-		
+		public static void ResourcesRelease(string key)
+		{
+			Resources.UnloadAsset(Cache[key]);
+		}
 		public static void ResourcesRelease(params TObj[] objs) 
 		{
 			foreach (var obj in objs)
