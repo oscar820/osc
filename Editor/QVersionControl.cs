@@ -46,41 +46,50 @@ namespace QTool
 			{
 				path = Path.GetDirectoryName(path);
 			}
-			RunInfo.WorkingDirectory =path;
+			RunInfo.WorkingDirectory = path;
 			return Tool.ProcessCommand(RunInfo);
 		}
 		static string Add(string path)
 		{
-			return CheckPathRun(nameof(Add).ToLower() + " \""+Path.GetFullPath(path)+"\"", path);
+			return CheckPathRun(nameof(Add).ToLower() + " \"" + Path.GetFullPath(path) + "\"", path);
 		}
 		static string CheckChinese(string path)
 		{
 			return CheckPathRun("git config --global core.quotepath false", path);
 		}
-		static string Checkout(string path,string version=null)
+		static string Checkout(string path, string version = null)
 		{
 			if (string.IsNullOrEmpty(version))
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + Path.GetFullPath(path)+"\"", path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + Path.GetFullPath(path) + "\"", path);
 			}
 			else
 			{
-				return CheckPathRun(nameof(Checkout).ToLower()+ " "+version+ " -- \"" + Path.GetFullPath(path)+"\"", path);
+				return CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" + Path.GetFullPath(path) + "\"", path);
 			}
 		}
 		static string GetCurrentVersion(string path)
 		{
-			return CheckPathRun("log -1 --pretty=oneline" , path).SplitStartString(" ");
+			return CheckPathRun("log -1 --pretty=oneline", path).SplitStartString(" ");
+
+		}
+		static void CheckInit(string path)
+		{
+			
+			if (!PlayerPrefs.HasKey(nameof(CheckChinese)))
+			{
+				if (CheckResult(CheckChinese(path)))
+				{
+					PlayerPrefs.SetInt(nameof(CheckChinese), 1);
+				}
+			}
+			var result= CheckPathRun("git config user.name", path);
+			result = CheckPathRun("git config user.email", path);
 			
 		}
 		static string Pull(string path)
 		{
-			if (!PlayerPrefs.HasKey(nameof(CheckChinese)))
-			{
-				if (CheckResult(CheckChinese(path))){
-					PlayerPrefs.SetInt(nameof(CheckChinese), 1);
-				}
-			}
+			CheckInit(path);
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
 			if (result.Contains("Timed out")||result.Contains("Could not resolve host"))
@@ -437,7 +446,46 @@ crashlytics-build.properties
 			return "\""+ path+"\"";
 		}
 	}
+	public class InputTextWindow : EditorWindow
+	{
+		public static InputTextWindow Instance { private set; get; }
+	
+		public static bool Show(string name,out string text)
+		{
+			if (Instance == null)
+			{
+				Instance = GetWindow<InputTextWindow>();
+				Instance.minSize = new Vector2(200, 130);
+				Instance.maxSize = new Vector2(200, 130);
+			}
+			Instance.titleContent = new GUIContent(name);
+			text = "";
+			Instance.ShowModal();
+			text = Instance.text;
+			return Instance.confirm;
+		}
+		bool confirm;
+		string text;
+		private void OnGUI()
+		{
+			text = EditorGUILayout.TextField(text);
+			if (string.IsNullOrWhiteSpace(text))
+			{
+				EditorUtility.DisplayDialog("提交信息错误", "提交信息不能为空", "确认");
+			}
+			else
+			{
+				confirm = true;
+				Close();
+			}
 
+			if (GUILayout.Button("取消"))
+			{
+				text = "";
+				Close();
+			}
+		}
+	}
 	public class QVersionControlWindow : EditorWindow
 	{
 		public static QVersionControlWindow Instance { private set; get; }
