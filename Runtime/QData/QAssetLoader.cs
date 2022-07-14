@@ -254,6 +254,11 @@ namespace QTool.Asset
 #if Addressables
 		public static void AddressablesRelease(string key)
 		{
+			if (!Cache.ContainsKey(key))
+			{
+				Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 " + key);
+				return;
+			}
 			Addressables.Release(Cache[key]);
 		}
 		public static void AddressablesRelease(params TObj[] objs)
@@ -263,6 +268,11 @@ namespace QTool.Asset
 #endif
 		public static void ResourcesRelease(string key)
 		{
+			if (!Cache.ContainsKey(key))
+			{
+				Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 " + key);
+				return;
+			}
 			Resources.UnloadAsset(Cache[key]);
 		}
 		public static void ResourcesRelease(params TObj[] objs) 

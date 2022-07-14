@@ -62,8 +62,14 @@ namespace QTool
         }
         public static void Push<T>(string poolName, T obj) where T : class
         {
-            var pool = GetPool<T>(poolName);
-            pool?.Push(obj);
+			if (poolDic.ContainsKey(poolName))
+			{
+				(poolDic[poolName] as ObjectPool<T>).Push(obj);
+			}
+			else
+			{
+				Debug.LogError("不存在对象池 " + obj);
+			}
         }
     }
     public abstract class PoolObject<T>:IPoolObject where T : PoolObject<T>,new()
