@@ -140,15 +140,6 @@ namespace QTool.Asset
 				return  DirectoryPath + '/';
 			}
 		}
-#if Addressables
-		public static string AddressablePathStart
-		{
-			get
-			{
-				return   DirectoryPath + '/';
-			}
-		}
-#endif
 		public static async Task<IList<TObj>> BothLoadAllAsync()
 		{
 			List<TObj> objList = new List<TObj>();
@@ -205,8 +196,32 @@ namespace QTool.Asset
 			return obj;
 		}
 
+		public static async Task<TObj> BothLoadAsync(string key)
+		{
+			var obj = ResourcesLoad(key);
 #if Addressables
-		public static async Task< TObj> AddressablesLoad(string key)
+
+			if (obj == null)
+			{
+				obj = await AddressablesLoad(key);
+			}
+
+#endif
+			if (obj == null)
+			{
+				Debug.LogError("加载" + key + "出错 结果为空" );
+			}
+			return obj;
+		}
+#if Addressables
+		public static string AddressablePathStart
+		{
+			get
+			{
+				return DirectoryPath + '/';
+			}
+		}
+		public static async Task<TObj> AddressablesLoad(string key)
 		{
 			TObj obj = null;
 			key = key.Replace('\\', '/');
@@ -229,29 +244,23 @@ namespace QTool.Asset
 					}
 				}
 			}
-			if(obj!=null&& !Cache.ContainsKey(key))
+			if (obj != null && !Cache.ContainsKey(key))
 			{
 				Cache[key] = obj;
 			}
 			return obj;
 		}
-#endif
-		public static async Task<TObj> BothLoadAsync(string key)
+		public static async Task AddressablesPreviewLoad(string key)
 		{
-			var obj = ResourcesLoad(key);
-#if Addressables
-			if (obj == null)
+			if (!Cache.ContainsKey(key))
 			{
-				obj = await AddressablesLoad(key);
+				var obj= await AddressablesLoad(key);
+				if (obj != null)
+				{
+					Cache[key] = obj;
+				}
 			}
-#endif
-			if (obj == null)
-			{
-				Debug.LogError("加载" + key + "出错 结果为空" );
-			}
-			return obj;
 		}
-#if Addressables
 		public static void AddressablesRelease(string key)
 		{
 			if (!Cache.ContainsKey(key))
@@ -265,6 +274,8 @@ namespace QTool.Asset
 		{
 			Addressables.Release(objs);
 		}
+
+
 #endif
 		public static void ResourcesRelease(string key)
 		{
@@ -291,6 +302,7 @@ namespace QTool.Asset
 			}
 			
 		}
+
 	}
 	public abstract class QPrefabLoader<TPath> : QAssetLoader<TPath, GameObject> where TPath : QPrefabLoader<TPath>
 	{
@@ -338,102 +350,6 @@ namespace QTool.Asset
 		}
 #endif
 	}
-	//public abstract class QPrefabLoader<TPath> : QAssetLoader<TPath, GameObject> where TPath : QPrefabLoader<TPath>
-	//{
-	//	static async Task<ObjectPool<GameObject>> GetPool(string key)
-	//	{
-	//		var poolkey = DirectoryPath + "_" + key + "_AssetList";
-	//		var prefab = await LoadAsync(key);
-	//		if (prefab != null)
-	//		{
-	//			return QPoolManager.GetPool(poolkey, prefab);
-
-	//		}
-	//		else
-	//		{
-	//			return null;
-	//		}
-	//	}
-
-	//	public static async Task<GameObject> GetInstance(string key, Vector3 position, Quaternion rotation, Transform parent = null)
-	//	{
-	//		var obj = await GetInstance(key, parent);
-	//		obj.transform.position = position;
-	//		obj.transform.localRotation = rotation;
-	//		return obj;
-	//	}
-	//	public static async void Push(string key, GameObject obj)
-	//	{
-	//		if (key.Contains(" "))
-	//		{
-	//			key = key.Substring(0, key.IndexOf(" "));
-	//		}
-	//		var pool = await GetPool(key);
-	//		if (pool == null)
-	//		{
-	//			GameObject.Destroy(obj);
-	//		}
-	//		else
-	//		{
-	//			pool.Push(obj);
-	//		}
-	//	}
-	//	public static void Push(GameObject obj)
-	//	{
-	//		Push(obj.name, obj);
-	//	}
-	//	public static void Push(List<GameObject> objList)
-	//	{
-	//		foreach (var obj in objList)
-	//		{
-	//			Push(obj);
-	//		}
-	//		objList.Clear();
-	//	}
-	//	public static async Task<GameObject> GetInstance(string key, Transform parent = null)
-	//	{
-	//		var pool = await GetPool(key);
-	//		if (pool == null)
-	//		{
-	//			Debug.LogError("无法实例化预制体[" + key + "]");
-	//			return null;
-	//		}
-	//		var obj = pool.Get();
-	//		if (obj == null)
-	//		{
-	//			return null;
-	//		}
-	//		if (parent != null)
-	//		{
-	//			obj.transform.SetParent(parent, false);
-	//		}
-	//		if (obj.transform is RectTransform)
-	//		{
-	//			var prefab = await LoadAsync(key);
-	//			(obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
-	//		}
-	//		obj.name = key;
-	//		return obj;
-	//	}
-	//	public async static Task<CT> GetInstance<CT>(string key, Transform parent = null) where CT : Component
-	//	{
-	//		var obj = await GetInstance(key, parent);
-	//		if (obj == null)
-	//		{
-	//			return null;
-	//		}
-	//		return obj.GetComponent<CT>();
-	//	}
-	//	public async static Task<CT> GetInstance<CT>(string key, Vector3 pos, Quaternion rotation, Transform parent = null) where CT : Component
-	//	{
-	//		var obj = await GetInstance(key, pos, rotation, parent);
-	//		if (obj == null)
-	//		{
-	//			return null;
-	//		}
-	//		return obj.GetComponent<CT>();
-	//	}
-	//}
 }
 
 
