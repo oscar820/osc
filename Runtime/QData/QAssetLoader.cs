@@ -297,11 +297,10 @@ namespace QTool.Asset
 #if Addressables
 		static async Task<ObjectPool<GameObject>> GetPool(string key)
 		{
-			var poolkey = DirectoryPath + "_" + key ;
 			var prefab = await AddressablesLoad(key);
 			if (prefab != null)
 			{
-				return QPoolManager.GetPool(poolkey, prefab);
+				return QPoolManager.GetPool(DirectoryPath + "_" + key, prefab);
 			}
 			else
 			{

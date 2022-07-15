@@ -8,8 +8,11 @@ namespace QTool
     {
         
         static QDictionary<string, PoolBase> poolDic = new QDictionary<string, PoolBase>();
-
-        public static GameObject Get(string poolKey ,GameObject prefab)
+		public static GameObject Get(GameObject prefab)
+		{
+			return GetPool(prefab.name, prefab).Get();
+		}
+		public static GameObject Get(string poolKey ,GameObject prefab)
         {
             return GetPool(poolKey,prefab).Get() ;
         }

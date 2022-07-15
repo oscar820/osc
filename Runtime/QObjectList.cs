@@ -7,12 +7,11 @@ namespace QTool
     public class QObjectList : MonoBehaviour
     {
         public GameObject prefab;
-
-        public QTool.ObjectPool<GameObject> Pool
+		ObjectPool<GameObject> _pool;
+		public ObjectPool<GameObject> Pool
         {
-            get=> QPoolManager.GetPool(prefab.name+"_QGameObjList", prefab);
+            get=> _pool??= QPoolManager.GetPool(nameof(QObjectList)+"_"+prefab.name, prefab);
         }
-
         List<GameObject> objList = new List<GameObject>();
 
         public virtual GameObject this[string name]
