@@ -105,11 +105,9 @@ namespace QTool
             Push(this as T);
         }
         public abstract void OnPoolRecover();
-        public abstract void OnPoolReset();
     }
     public interface IPoolObject
     {
-       // void OnPoolReset();
         void OnPoolRecover();
     }
     public abstract class PoolBase
@@ -149,13 +147,8 @@ namespace QTool
                 if (gameObj != null)
                 {
                     gameObj.SetActive(true);
-                    //foreach (var poolObj in gameObj.GetComponents<IPoolObject>())
-                    //{
-                    //    poolObj.OnPoolReset();
-                    //}
                 }
             }
-            //else if (isPoolObj) (obj as IPoolObject).OnPoolReset();
 			lock (UsingPool)
 			{
 				UsingPool.AddCheckExist(obj);
