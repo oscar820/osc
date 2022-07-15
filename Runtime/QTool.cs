@@ -401,14 +401,24 @@ namespace QTool
 		//}
 
 
-
-		public static string ProcessCommand(System.Diagnostics.ProcessStartInfo startInfo)
+		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo()
 		{
-			using (var process=new System.Diagnostics.Process { StartInfo=startInfo })
+			CreateNoWindow = true,
+			RedirectStandardOutput = true,
+			RedirectStandardError = true,
+			UseShellExecute = false,
+		};
+		public static string ProcessCommand(string fileName,string Arguments,string workPah)
+		{
+			RunInfo.FileName = fileName;
+			RunInfo.Arguments = Arguments;
+			RunInfo.WorkingDirectory = workPah;
+			using (var process=new System.Diagnostics.Process {StartInfo= RunInfo })
 			{
 				try
 				{
-					QDebug.Log(startInfo.FileName.ToLower() + " " + startInfo.Arguments+"\n 运行路径"+startInfo.WorkingDirectory);
+					
+					QDebug.Log(RunInfo.FileName + " " + RunInfo.Arguments+"\n 运行路径"+ RunInfo.WorkingDirectory);
 					process.Start();
 					var info = process.StandardOutput.ReadToEnd();
 					var error = process.StandardError.ReadToEnd();
@@ -425,7 +435,7 @@ namespace QTool
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("运行 " + startInfo.FileName + " 出错 " + startInfo.FileName.ToLower() + " " + startInfo.Arguments +"\n" + e);
+					Debug.LogError("运行 " + RunInfo.FileName + " 出错 " + RunInfo.FileName + " " + RunInfo.Arguments +"\n" + e);
 					return "";
 				}
 

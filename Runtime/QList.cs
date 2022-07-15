@@ -293,7 +293,13 @@ namespace QTool
 		}
 		public static string GetBlockValue(this string value,string startStr,string endStr)
 		{
-			var start = value.IndexOf(startStr)+startStr.Length;
+			var index = value.IndexOf(startStr);
+			if (index < 0)
+			{
+				return "";
+			}
+			var start = +startStr.Length;
+			
 			var end = value.IndexOf(endStr,start);
 			if (end >= 0)
 			{

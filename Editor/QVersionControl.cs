@@ -31,24 +31,22 @@ namespace QTool
 			GUILayout.Space(10);
 		}
 
-		static string CheckPathRun(string commond, string path)
+		static string CheckPathRun(string commond, string path,string file="git")
 		{
-			
-			RunInfo.Arguments = commond;
 			try
 			{
 				path = Path.GetFullPath(path);
+				if (Path.HasExtension(path))
+				{
+					path = Path.GetDirectoryName(path);
+				}
 			}
 			catch (Exception e)
 			{
 				Debug.LogError(path+" " +e.ToString());
 			}
-			if (Path.HasExtension(path))
-			{
-				path = Path.GetDirectoryName(path);
-			}
-			RunInfo.WorkingDirectory = path;
-			return Tool.ProcessCommand(RunInfo);
+			
+			return Tool.ProcessCommand(file, commond,path);
 		}
 		static string Add(string addPath,string folderPath)
 		{
@@ -56,13 +54,25 @@ namespace QTool
 		}
 		static string Checkout(string path,string folderPath, string version = null)
 		{
+			string result = "";
 			if (string.IsNullOrEmpty(version))
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
+				result= CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
+				
 			}
 			else
 			{
-				return CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
+				result= CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
+
+				return result;
+			}
+			if (CheckResult(result))
+			{
+				return result;
+			}
+			else
+			{
+				return CheckPathRun("clean -f \"" +path + "\"", folderPath);
 			}
 		}
 		static string GetCurrentVersion(string path)
@@ -96,7 +106,12 @@ namespace QTool
 		}
 		static string Pull(string path)
 		{
-			var rootPath = CheckPathRun("rev-parse --git-dir", path).SplitStartString("/.git");
+
+			var rootPath = CheckPathRun("rev-parse --git-dir", path).Trim().SplitStartString("/.git");
+			if (rootPath.EndsWith( ".git"))
+			{
+				rootPath = path;
+			}
 			if (!CheckResult(path))
 			{
 				return path;
@@ -115,11 +130,14 @@ namespace QTool
 			}
 			if (!CheckResult(result))
 			{
-				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge"))
+				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge")&&!result.Contains("error: The following untracked working tree files would be overwritten by merge"))
 				{
 					return result;
 				}
 				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
+				
+				mergeErrorFile+= result.GetBlockValue("error: The following untracked working tree files would be overwritten by merge:", "Please move or remove them before you merge.");
+		
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
 				{
@@ -273,13 +291,7 @@ namespace QTool
 			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
 		}
-		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo("Git")
-		{
-			CreateNoWindow = true,
-			RedirectStandardOutput = true,
-			RedirectStandardError=true,
-			UseShellExecute = false,
-		};
+	
 		public static string Status(string path)
 		{
 			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
