@@ -93,7 +93,7 @@ namespace QTool
                             gameObj.SetDirty();
                           
                         }
-                        if (!gameObj.activeSelf)
+                        if (!Application.isPlaying&& !gameObj.activeSelf)
                         {
                             QIdInitManager.Instance.qIdInitList.AddCheckExist(qId);
                         }
