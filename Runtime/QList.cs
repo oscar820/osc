@@ -298,9 +298,11 @@ namespace QTool
 			{
 				return "";
 			}
-			var start = +startStr.Length;
+			var start =index+ startStr.Length;
 			
 			var end = value.IndexOf(endStr,start);
+
+			Debug.LogError(value + "]  [" + startStr + "]   [" + endStr + "  index" + start + " enx"+end+" "+ value.Substring(start, end - start));
 			if (end >= 0)
 			{
 				return value.Substring(start, end - start);
