@@ -15,11 +15,14 @@ public class QPoolTest : MonoBehaviour
 	{
 		Application.targetFrameRate = 60;
 		Pool= QPoolManager.GetPool("测试Pool", prefab); ;
+
+		Debug.LogError("aslk");
 	}
 	public ObjectPool<GameObject> Pool;
 	private void FixedUpdate()
 	{
 		if (!run) return;
+		Debug.LogError("asldkj");
 		if (count >= 10)
 		{
 			foreach (var item in objList)

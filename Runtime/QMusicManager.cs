@@ -5,7 +5,7 @@ using UnityEngine;
 using System;
 namespace QTool
 {
-    public class QMusicManager : QManagerBase<QMusicManager>
+    public class QMusicManager : QToolManagerBase<QMusicManager>
     {
         
         static AudioSource previewAudio;

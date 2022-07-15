@@ -67,4 +67,29 @@ namespace QTool
         }
     }
 
+	public abstract class InstanceManager<T> : InstanceBehaviour<T> where T : InstanceManager<T>
+	{
+		public static GameObject InstanceObj => Instance.gameObject;
+		public new static T Instance
+		{
+			get
+			{
+				if (_instance == null)
+				{
+					_instance = GameObject.FindObjectOfType<T>();
+					if (_instance == null)
+					{
+						var obj = GameObject.Find(typeof(T).Name);
+						if (obj == null)
+						{
+							obj = new GameObject(typeof(T).Name);
+						}
+						_instance = obj.AddComponent<T>();
+						_instance.SetDirty();
+					}
+				}
+				return _instance;
+			}
+		}
+	}
 }

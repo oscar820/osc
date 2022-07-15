@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 namespace QTool
 {
-    public class QCapture : QManagerBase<QCapture>
+    public class QCapture : QToolManagerBase<QCapture>
     {
         RenderTexture renderTexture;
         IEnumerator CaptureIEnumerator()
