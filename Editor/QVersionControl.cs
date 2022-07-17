@@ -440,7 +440,7 @@ crashlytics-build.properties
 					initInfo.Trim().SplitTowString(" ", out var start, out var end);
 					state = start;
 					end = end.Trim().Trim('\"');
-					path = end;
+					path = end.Trim();
 					select = true;
 
 
@@ -448,7 +448,7 @@ crashlytics-build.properties
 				else
 				{
 					initInfo = initInfo.Trim('\"');
-					path = initInfo;
+					path = initInfo.Trim();
 					select = false;
 				}
 				switch (state)
