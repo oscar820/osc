@@ -305,6 +305,7 @@ namespace QTool
 										if (count > 1000)
 										{
 											Debug.LogError("数据读取出错 " + type);
+											break;
 										}
 									}
 									return target;
