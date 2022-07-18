@@ -99,20 +99,20 @@ namespace QTool.Test
 
 			Debug.LogError(test1.ToQData().ToIdString());
 
-			//Tool.RunTimeCheck("Xml写入", () =>
-   //         {
-   //             for (int i = 0; i < testTimes; i++)
-   //             {
-   //                 testBytes = QFileManager.QXmlSerialize(test1).GetBytes();
-   //         }
-   //         },() => testBytes.Length,()=> QFileManager.QXmlSerialize(test1));
-   //         Tool.RunTimeCheck("Xml读取", () =>
-   //         {
-   //             for (int i = 0; i < testTimes; i++)
-   //             {
-   //                 test2 = QFileManager.QXmlDeserialize<TTestClass>(testBytes.GetString());
-   //             }
-   //         });
+			Tool.RunTimeCheck("Xml写入", () =>
+            {
+                for (int i = 0; i < testTimes; i++)
+                {
+                    testBytes = QFileManager.QXmlSerialize(test1).GetBytes();
+            }
+            },() => testBytes.Length,()=> QFileManager.QXmlSerialize(test1));
+            Tool.RunTimeCheck("Xml读取", () =>
+            {
+                for (int i = 0; i < testTimes; i++)
+                {
+                    test2 = QFileManager.QXmlDeserialize<TTestClass>(testBytes.GetString());
+                }
+            });
             Tool.RunTimeCheck("QSerialize写入", () =>
             {
                 for (int i = 0; i < testTimes; i++)

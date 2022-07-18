@@ -291,13 +291,13 @@ namespace QTool
 						{
 							case QObjectType.DynamicObject:
 								{
-									reader.NextIs('{');
+									var hasStart= reader.NextIs('{');
 									var runtimeType = QReflection.ParseType(reader.ReadCheckString()); 
 									if (reader.NextIs(':') || reader.NextIs('='))
 									{
 										target = ReadObject(reader, typeInfo, hasName,target);
 									}
-									while (!reader.NextIs('}'))
+									while (hasStart&&!reader.NextIs('}'))
 									{
 										reader.Read();
 									}
