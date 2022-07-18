@@ -73,7 +73,7 @@ namespace QTool
                         };
                         QAssetObjectManager.Instance.objList.Add(objRef);
 						if (!Application.isPlaying)
-						{
+						{ 
 							UnityEditor.EditorUtility.SetDirty(QAssetObjectManager.Instance);
 							UnityEditor.AssetDatabase.SaveAssets();
 						}
@@ -134,7 +134,7 @@ namespace QTool
         }
 
     }
-    public class QObjectReference<T> : QIdObject where T:Object
+    public class QIdObject<T> : QIdObject where T:Object
     {
         public T Object
         {
