@@ -293,7 +293,7 @@ namespace QTool
 								{
 									var hasStart= reader.NextIs('{');
 									var str = reader.ReadCheckString();
-									if (str != "null")
+									if (str != "null"||string.IsNullOrEmpty(str))
 									{
 										var runtimeType = QReflection.ParseType(reader.ReadCheckString());
 										if (reader.NextIs(':') || reader.NextIs('='))
