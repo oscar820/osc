@@ -63,6 +63,10 @@ namespace QTool
         {
             this[key] = value;
         }
+		public void Set(TKey key, T value)
+		{
+			this[key] = value;
+		}
 		public T Get(TKey key,T defaultValue)
 		{
 			if (!ContainsKey(key))
