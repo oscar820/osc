@@ -724,7 +724,7 @@ namespace QTool
 	{
 
 	}
-	[AttributeUsage(AttributeTargets.Class )]
+	[AttributeUsage(AttributeTargets.Class ,AllowMultiple = false,Inherited = false)]
 	public class QDynamicAttribute : Attribute
 	{
 
