@@ -76,14 +76,10 @@ namespace QTool
 			{
 				if (_instance == null)
 				{
-					_instance = GameObject.FindObjectOfType<T>();
+					_instance = GameObject.FindObjectOfType<T>(true);
 					if (_instance == null)
 					{
-						var obj = GameObject.Find(typeof(T).Name);
-						if (obj == null)
-						{
-							obj = new GameObject(typeof(T).Name);
-						}
+						var obj = new GameObject(typeof(T).Name);
 						_instance = obj.AddComponent<T>();
 						_instance.SetDirty();
 					}
