@@ -295,7 +295,14 @@ namespace QTool
 									var runtimeType = QReflection.ParseType(reader.ReadCheckString()); 
 									if (reader.NextIs(':') || reader.NextIs('='))
 									{
-										target = ReadObject(reader, typeInfo, hasName,target);
+										if (type == runtimeType)
+										{
+											target = ReadObject(reader, typeInfo, hasName, target);
+										}
+										else
+										{
+											target = ReadType(reader, runtimeType, hasName, target);
+										}
 									}
 									if (hasStart)
 									{
