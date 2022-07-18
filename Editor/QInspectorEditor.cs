@@ -660,6 +660,7 @@ namespace QTool.Inspector
                 case TypeCode.Object:
                     switch (typeInfo.objType)
                     {
+						case QObjectType.DynamicObject:
                         case QObjectType.Object:
                             if (type == typeof(object))
                             {

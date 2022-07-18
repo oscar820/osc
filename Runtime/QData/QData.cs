@@ -64,24 +64,31 @@ namespace QTool
 				case TypeCode.Object:
 					{
 						var typeInfo = QSerializeType.Get(type);
+						if (obj == null) { writer.Write("null"); break; }
 						switch (typeInfo.objType)
 						{
+							case QObjectType.DynamicObject:
+								{
+									writer.Write('{');
+									var runtimeType = obj.GetType();
+									WriteCheckString(writer, runtimeType.FullName);
+									writer.Write(':');
+									WriteType(writer, obj, runtimeType, hasName);
+									writer.Write('}');
+								}
+								break;
+							case QObjectType.UnityObject:
+								{
+									writer.Write('{');
+									writer.Write(QObjectReference.GetId(obj as UnityEngine.Object));
+									writer.Write('}');
+								}
+								break;
 							case QObjectType.Object:
 								{
-									if (obj == null) { writer.Write("null"); break; }
+									
 									writer.Write('{');
-									if (type == typeof(object))
-									{
-										var runtimeType = obj.GetType();
-										WriteCheckString(writer, runtimeType.FullName);
-										writer.Write(':');
-										WriteType(writer, obj, runtimeType, hasName);
-									}
-									else if (typeInfo.IsUnityObject)
-									{
-										writer.Write(QObjectReference.GetId(obj as UnityEngine.Object));
-									}
-									else if (typeInfo.IsIQData)
+									if (typeInfo.IsIQData)
 									{
 										(obj as IQData).ToQData(writer);
 									}
@@ -685,6 +692,8 @@ namespace QTool
 
 	public enum QObjectType
 	{
+		UnityObject,
+		DynamicObject,
 		Object,
 		List,
 		Array,
@@ -724,6 +733,7 @@ namespace QTool
 			base.Init(type);
 			if (Code == TypeCode.Object)
 			{
+				objType = QObjectType.Object;
 				if (typeof(Task).IsAssignableFrom(type))
 				{
 					objType = QObjectType.CantSerialize;
@@ -732,9 +742,18 @@ namespace QTool
 				IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
 				IsIQData = typeof(IQData).IsAssignableFrom(type);
 				IsUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(type);
+				
 				if (IsIQSerialize || IsIQData)
 				{
 					objType = QObjectType.Object;
+				}
+				else if(type==typeof(object)||type.IsAbstract||type.IsInterface)
+				{
+					objType = QObjectType.DynamicObject;
+				}
+				else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
+				{
+					objType = QObjectType.UnityObject;
 				}
 				else if (IsArray)
 				{
