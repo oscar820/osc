@@ -6,7 +6,7 @@ namespace QTool.FlowGraph
   
     public class QFlowGraphAsset : ScriptableObject
     {
-        public List<QObjectReference> ObjList;
+        public List<QIdObject> ObjList;
 		[SerializeField]
 		public QFlowGraph Graph;
         public void Init(string qsmStr)

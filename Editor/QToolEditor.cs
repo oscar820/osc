@@ -160,7 +160,7 @@ namespace QTool
 			{
 				foreach (var obj in Selection.objects)
 				{
-					var id= QObjectReference.GetId(obj);
+					var id= QIdObject.GetId(obj);
 				}
 			}
 			

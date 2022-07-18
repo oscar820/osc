@@ -15,7 +15,7 @@ namespace QTool.Inspector
 
     #region 自定义显示效果
 
-    [CustomPropertyDrawer(typeof(QObjectReference))]
+    [CustomPropertyDrawer(typeof(QIdObject))]
     public class QObjectReferenceDrawer : PropertyDrawer
     {
         public static string Draw(string lable, string id,Type type,Rect? rect=null, params GUILayoutOption[] options)
@@ -23,7 +23,7 @@ namespace QTool.Inspector
             using (new EditorGUILayout.HorizontalScope())
             {
                 var name = lable + "【" + (id == null ? "" : id.Substring(0, Mathf.Min(4, id.Length))) + "~】";
-                var oldObj =QObjectReference.GetObject(id,type);
+                var oldObj =QIdObject.GetObject(id,type);
                 var newObj = oldObj;
 
                 if (rect == null)
@@ -36,12 +36,12 @@ namespace QTool.Inspector
                 }
                 if (newObj != oldObj)
                 {
-                   id= QObjectReference.GetId(newObj);
+                   id= QIdObject.GetId(newObj);
                 }
             }
             return id;
         }
-        public static QObjectReference Draw(string lable, QObjectReference ir, params GUILayoutOption[] options)
+        public static QIdObject Draw(string lable, QIdObject ir, params GUILayoutOption[] options)
         {
             using ( new EditorGUILayout.HorizontalScope())
             {
@@ -55,7 +55,7 @@ namespace QTool.Inspector
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-			var id = property.FindPropertyRelative(nameof(QObjectReference.id));
+			var id = property.FindPropertyRelative(nameof(QIdObject.id));
 			id.stringValue= Draw(label.text, id.stringValue,typeof(UnityEngine.Object),position);
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -690,9 +690,9 @@ namespace QTool.Inspector
                                 {
                                     obj = type.CreateInstance();
                                 }
-                                if (typeof(QObjectReference).IsAssignableFrom(type))
+                                if (typeof(QIdObject).IsAssignableFrom(type))
                                 {
-                                    obj = QObjectReferenceDrawer.Draw(name, (QObjectReference)obj, layoutOption);
+                                    obj = QObjectReferenceDrawer.Draw(name, (QIdObject)obj, layoutOption);
                                 }
                                 else
                                 {

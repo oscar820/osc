@@ -16,7 +16,7 @@ namespace QTool
     }
   
     [System.Serializable]
-    public class QObjectReference
+    public class QIdObject
     {
         public string id;
         Object _obj;
@@ -134,7 +134,7 @@ namespace QTool
         }
 
     }
-    public class QObjectReference<T> : QObjectReference where T:Object
+    public class QObjectReference<T> : QIdObject where T:Object
     {
         public T Object
         {

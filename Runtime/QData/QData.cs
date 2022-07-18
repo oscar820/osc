@@ -80,7 +80,7 @@ namespace QTool
 							case QObjectType.UnityObject:
 								{
 									writer.Write('{');
-									writer.Write(QObjectReference.GetId(obj as UnityEngine.Object));
+									writer.Write(QIdObject.GetId(obj as UnityEngine.Object));
 									writer.Write('}');
 								}
 								break;
@@ -217,7 +217,7 @@ namespace QTool
 							case QObjectType.UnityObject:
 								{
 									reader.NextIs('{');
-									target = QObjectReference.GetObject(reader.ReadValueString(), type); 
+									target = QIdObject.GetObject(reader.ReadValueString(), type); 
 									reader.NextIs('}');
 									return target;
 								}

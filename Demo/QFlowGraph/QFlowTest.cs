@@ -98,7 +98,7 @@ public static class QFlowNodeTest
         outInt = inInt;
         outFloat = inFloat;
     }
-    public static void ObjectTest(object obj, QObjectReference objRef,Object _object,GameObject gameObject,Sprite sprite,UnityEngine.UI.Image image, Vector3 vector3)
+    public static void ObjectTest(object obj, QIdObject objRef,Object _object,GameObject gameObject,Sprite sprite,UnityEngine.UI.Image image, Vector3 vector3)
     {
 		image.color = Color.black;
     }

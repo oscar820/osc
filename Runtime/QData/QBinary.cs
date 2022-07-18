@@ -40,7 +40,7 @@ namespace QTool.Binary
 									break;
 								case QObjectType.UnityObject:
 									{
-										writer.Write(QObjectReference.GetId(value as UnityEngine.Object));
+										writer.Write(QIdObject.GetId(value as UnityEngine.Object));
 									}
 									break;
 								case QObjectType.List:
@@ -165,7 +165,7 @@ namespace QTool.Binary
 							}
 						case QObjectType.UnityObject:
 							{
-								target = QObjectReference.GetObject(reader.ReadString(), type);
+								target = QIdObject.GetObject(reader.ReadString(), type);
 								return target;
 							}
 						case QObjectType.List:

@@ -20,7 +20,7 @@ namespace QTool.Test
     [ScriptToggle(nameof(scriptList))]
     public class QToolTest : MonoBehaviour
     {
-        public QObjectReference instanceTest;
+        public QIdObject instanceTest;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
         public static List<string> scriptList=> new List<string> { "QId" };
         public bool toggle;
