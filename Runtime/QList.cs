@@ -63,7 +63,15 @@ namespace QTool
         {
             this[key] = value;
         }
-        public override void OnCreate(QKeyValue<TKey, T> obj)
+		public T Get(TKey key,T defaultValue)
+		{
+			if (!ContainsKey(key))
+			{
+				Add(key, defaultValue);
+;			}
+			return this[key];
+		}
+		public override void OnCreate(QKeyValue<TKey, T> obj)
         {
 			if (createAction != null)
 			{
