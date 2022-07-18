@@ -35,7 +35,7 @@ namespace QTool
     }
     public class QDataList: QAutoList<string, QDataRow>
 	{
-		public static string ResourcesPathRoot => FileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
+		public static string ResourcesPathRoot => QFileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
 		//public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
 		public static string GetResourcesDataPath(string name)
 		{
@@ -53,13 +53,13 @@ namespace QTool
         {
 			return QDataListCache.Get(path, (key) =>
 			{
-				if (FileManager.Exists(path, true))
+				if (QFileManager.Exists(path, true))
 				{
 					try
 					{
 						var data = new QDataList();
 						data.LoadPath = path;
-						FileManager.LoadAll(path, (fileValue,loadPath) =>
+						QFileManager.LoadAll(path, (fileValue,loadPath) =>
 						{
 							data.Parse(fileValue, loadPath);
 						}, "{}");
@@ -86,7 +86,7 @@ namespace QTool
 
 		}
 		public static QKeyCache<string,QDataList, DateTime> QDataListCache = new QKeyCache<string,QDataList, DateTime>((key)=> {
-			return FileManager.GetLastWriteTime(key);
+			return QFileManager.GetLastWriteTime(key);
 		});
         public override void OnCreate(QDataRow obj)
         {
@@ -100,7 +100,7 @@ namespace QTool
             {
                 path = LoadPath;
             }
-            FileManager.Save(path, ToString(),true);
+            QFileManager.Save(path, ToString(),true);
         }
         public bool TryGetTitleIndex(string title,out int index)
         {

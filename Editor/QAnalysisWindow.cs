@@ -427,15 +427,15 @@ namespace QTool
 		}
 		public static void Load()
 		{
-			FileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
-			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList)).ParseQData(EventList);
-			FileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting)).ParseQData(Setting);
+			QFileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
+			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList)).ParseQData(EventList);
+			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting)).ParseQData(Setting);
 		}
 		public static void SaveData()
 		{
-			FileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
-			FileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting), Setting.ToQData());
+			QFileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
+			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
+			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting), Setting.ToQData());
 		}
 		public static void ForeachTitle(Action<QTitleInfo> action)
 		{

@@ -8,16 +8,16 @@ using System.Runtime.InteropServices;
 
 namespace QTool
 {
-    public static class FileManager
+    public static class QFileManager
     {
         public static T QDataCopy<T>(this T target)
         {
 			return target.ToQData().ParseQData<T>();
 		}
-		public static T XmlCopy<T>(this T target)
-		{
-			return XmlDeserialize<T>(XmlSerialize(target));
-		}
+		//public static T QXmlCopy<T>(this T target)
+		//{
+		//	return QXmlDeserialize<T>(QXmlSerialize(target));
+		//}
 		//public static string ToFullPath(this string path)
 		//{
 		//	if (Application.isPlaying)
@@ -128,35 +128,35 @@ namespace QTool
                 return xz;
             }
         }
-        public static string XmlSerialize<T>(T t, params Type[] extraTypes)
-        {
-            using (StringWriter sw = new StringWriter())
-            {
-                if (t == null)
-                {
-                    Debug.LogError("序列化数据为空" + typeof(T));
-                    return null;
-                }
-                GetSerializer(typeof(T), extraTypes).Serialize(sw, t);
-                return sw.ToString();
-            }
-        }
-        public static T XmlDeserialize<T>(string s, params Type[] extraTypes)
-        {
-            using (StringReader sr = new StringReader(s))
-            {
-                try
-                {
-                    XmlSerializer xz = GetSerializer(typeof(T), extraTypes);
-                    return (T)xz.Deserialize(sr);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Xml序列化出错：\n" + e);
-                    return default;
-                }
-            }
-        }
+		public static string QXmlSerialize<T>(T t, params Type[] extraTypes)
+		{
+			using (StringWriter sw = new StringWriter())
+			{
+				if (t == null)
+				{
+					Debug.LogError("序列化数据为空" + typeof(T));
+					return null;
+				}
+				GetSerializer(typeof(T), extraTypes).Serialize(sw, t);
+				return sw.ToString();
+			}
+		}
+		public static T QXmlDeserialize<T>(string s, params Type[] extraTypes)
+		{
+			using (StringReader sr = new StringReader(s))
+			{
+				try
+				{
+					XmlSerializer xz = GetSerializer(typeof(T), extraTypes);
+					return (T)xz.Deserialize(sr);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Xml序列化出错：\n" + e);
+					return default;
+				}
+			}
+		}
 		public const string ResourcesRoot = "Assets/Resources/";
 		public static DateTime GetLastWriteTime(string path)
 		{
@@ -330,14 +330,14 @@ namespace QTool
             }
             return path;
         }
-        public static void SaveXml<T>(string path, T data)
-        {
-            Save(path, XmlSerialize(data));
-        }
-        public static T LoadXml<T>(string path)
-        {
-            return XmlDeserialize<T>(Load(path));
-        }
+        //public static void SaveXml<T>(string path, T data)
+        //{
+        //    Save(path, QXmlSerialize(data));
+        //}
+        //public static T LoadXml<T>(string path)
+        //{
+        //    return QXmlDeserialize<T>(Load(path));
+        //}
         public static bool Save(string path, string data,bool checkUpdate=false)
         {
 			try

@@ -48,7 +48,7 @@ namespace QTool.FlowGraph
 		{
 			try
 			{
-				lastTime = FileManager.GetLastWriteTime(path);
+				lastTime = QFileManager.GetLastWriteTime(path);
 				var type = QReflection.ParseType(path.GetBlockValue(nameof(QDataList) + "Assets" + '/', ".txt").SplitStartString("/"));
 				if (type != null)
 				{
@@ -98,7 +98,7 @@ namespace QTool.FlowGraph
 			if (PlayerPrefs.HasKey(key))
 			{
 				var path = PlayerPrefs.GetString(key);
-				if (FileManager.GetLastWriteTime(path) > lastTime)
+				if (QFileManager.GetLastWriteTime(path) > lastTime)
 				{
 					Open(path);
 				}

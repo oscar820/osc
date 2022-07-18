@@ -63,7 +63,7 @@ namespace QTool.FlowGraph
             var path = EditorUtility.SaveFilePanel("保存QFG文件", selectPath, nameof(QFlowGraphAsset), "qfg");
 			if (!string.IsNullOrWhiteSpace(path))
 			{
-				FileManager.Save(path, (new QFlowGraph()).ToQData());
+				QFileManager.Save(path, (new QFlowGraph()).ToQData());
 				AssetDatabase.Refresh();
 				var asset = AssetDatabase.LoadAssetAtPath<QFlowGraphAsset>(path.ToAssetPath());
 				Open(asset.Graph, asset.Save);

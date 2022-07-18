@@ -348,7 +348,7 @@ namespace QTool
 		#region 忽略文件
 		public static void GitIgnoreFile()
 		{
-			FileManager.Save(".gitignore", @"# This .gitignore file should be placed at the root of your Unity project directory
+			QFileManager.Save(".gitignore", @"# This .gitignore file should be placed at the root of your Unity project directory
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #

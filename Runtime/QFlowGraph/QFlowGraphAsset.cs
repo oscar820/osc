@@ -21,7 +21,7 @@ namespace QTool.FlowGraph
 #if UNITY_EDITOR
 				Graph.Name = name;
 
-				FileManager.Save(UnityEditor.AssetDatabase.GetAssetPath(this), Graph.SerializeString);
+				QFileManager.Save(UnityEditor.AssetDatabase.GetAssetPath(this), Graph.SerializeString);
 				if (!Application.isPlaying)
 				{
 					UnityEditor.AssetDatabase.Refresh();
