@@ -297,15 +297,11 @@ namespace QTool
 									{
 										target = ReadObject(reader, typeInfo, hasName,target);
 									}
-									int count = 0;
-									while (hasStart && !reader.IsEnd()&&!reader.NextIs('}'))
+									if (hasStart)
 									{
-										reader.Read();
-										count++;
-										if (count > 1000)
+										while (!reader.IsEnd() && !reader.NextIs('}'))
 										{
-											Debug.LogError("数据读取出错 " + type);
-											break;
+											reader.Read();
 										}
 									}
 									return target;
