@@ -541,6 +541,7 @@ namespace QTool
 		{
 			if (value == null)
 			{
+				writer.Write("\"\"");
 				return;
 			}
 			using (StringReader reader = new StringReader(value))
