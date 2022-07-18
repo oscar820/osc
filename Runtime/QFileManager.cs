@@ -330,15 +330,15 @@ namespace QTool
             }
             return path;
         }
-        //public static void SaveXml<T>(string path, T data)
-        //{
-        //    Save(path, QXmlSerialize(data));
-        //}
-        //public static T LoadXml<T>(string path)
-        //{
-        //    return QXmlDeserialize<T>(Load(path));
-        //}
-        public static bool Save(string path, string data,bool checkUpdate=false)
+		public static void SaveQData<T>(string path, T data)
+		{
+			Save(path, data.ToQData());
+		}
+		public static T LoadQData<T>(string path)
+		{
+			return Load(path).ParseQData<T>();
+		}
+		public static bool Save(string path, string data,bool checkUpdate=false)
         {
 			try
 			{
