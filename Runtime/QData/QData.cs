@@ -56,6 +56,49 @@ namespace QTool
 		{
 			WriteType(writer, obj, typeof(T), hasName);
 		}
+		static void WriteObject(this StringWriter writer, object obj, QSerializeType typeInfo, bool hasName = true)
+		{
+			writer.Write('{');
+			if (typeInfo.IsIQData)
+			{
+				(obj as IQData).ToQData(writer);
+			}
+			else
+			{
+				if (hasName)
+				{
+					for (int i = 0; i < typeInfo.Members.Count; i++)
+					{
+						var memberInfo = typeInfo.Members[i];
+						var member = memberInfo.Get(obj);
+						WriteCheckString(writer, memberInfo.Key);
+						writer.Write(':');
+						WriteType(writer, member, memberInfo.Type, hasName);
+						if (i < typeInfo.Members.Count - 1)
+						{
+							writer.Write(',');
+						}
+					}
+				}
+				else
+				{
+					for (int i = 0; i < typeInfo.Members.Count; i++)
+					{
+						var memberInfo = typeInfo.Members[i];
+						var member = memberInfo.Get(obj);
+						WriteType(writer, member, memberInfo.Type, hasName);
+						if (i < typeInfo.Members.Count - 1)
+						{
+							writer.Write(',');
+						}
+					}
+				}
+
+			}
+			writer.Write('}');
+
+
+		}
 		public static void WriteType(this StringWriter writer, object obj, Type type, bool hasName=true)
 		{
 			var typeCode = Type.GetTypeCode(type);
@@ -73,7 +116,7 @@ namespace QTool
 									var runtimeType = obj.GetType();
 									WriteCheckString(writer, runtimeType.FullName);
 									writer.Write(':');
-									WriteType(writer, obj, runtimeType, hasName);
+									WriteObject(writer, obj, typeInfo, hasName);
 									writer.Write('}');
 								}
 								break;
@@ -86,46 +129,7 @@ namespace QTool
 								break;
 							case QObjectType.Object:
 								{
-									
-									writer.Write('{');
-									if (typeInfo.IsIQData)
-									{
-										(obj as IQData).ToQData(writer);
-									}
-									else
-									{
-										if (hasName)
-										{
-											for (int i = 0; i < typeInfo.Members.Count; i++)
-											{
-												var memberInfo = typeInfo.Members[i];
-												var member = memberInfo.Get(obj);
-												WriteCheckString(writer, memberInfo.Key);
-												writer.Write(':');
-												WriteType(writer, member, memberInfo.Type, hasName);
-												if (i < typeInfo.Members.Count - 1)
-												{
-													writer.Write(',');
-												}
-											}
-										}
-										else
-										{
-											for (int i = 0; i < typeInfo.Members.Count; i++)
-											{
-												var memberInfo = typeInfo.Members[i];
-												var member = memberInfo.Get(obj);
-												WriteType(writer, member, memberInfo.Type, hasName);
-												if (i < typeInfo.Members.Count - 1)
-												{
-													writer.Write(',');
-												}
-											}
-										}
-
-									}
-									writer.Write('}');
-
+									WriteObject(writer, obj, typeInfo, hasName);
 									break;
 								}
 							case QObjectType.List:
