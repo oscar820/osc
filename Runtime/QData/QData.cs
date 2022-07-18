@@ -137,7 +137,7 @@ namespace QTool
 												{
 													WriteCheckString(writer, runtimeType.FullName);
 													writer.Write(':');
-													WriteType(writer, obj, type, hasName);
+													WriteType(writer, obj, runtimeType, hasName);
 												}
 												break;
 										}

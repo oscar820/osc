@@ -99,41 +99,41 @@ namespace QTool.Test
 
 			Debug.LogError(test1.ToQData().ToIdString());
 
-			Tool.RunTimeCheck("Xml写入", () =>
-            {
-                for (int i = 0; i < testTimes; i++)
-                {
-                    testBytes = QFileManager.QXmlSerialize(test1).GetBytes();
-            }
-            },() => testBytes.Length,()=> QFileManager.QXmlSerialize(test1));
-            Tool.RunTimeCheck("Xml读取", () =>
-            {
-                for (int i = 0; i < testTimes; i++)
-                {
-                    test2 = QFileManager.QXmlDeserialize<TTestClass>(testBytes.GetString());
-                }
-            });
-            Tool.RunTimeCheck("QSerialize写入", () =>
-            {
-                for (int i = 0; i < testTimes; i++)
-                {
-                    testBytes = QSerialize.Serialize(test1);
-            }
-            }, () => testBytes.Length);
-			Tool.RunTimeCheck("QSerialize读取", () =>
-			{
-				for (int i = 0; i < testTimes; i++)
-				{
-					test2 = QSerialize.Deserialize<TTestClass>(testBytes);
-				}
-			});
-			Tool.RunTimeCheck("QSerialize读取 有Target", () =>
-            {
-                for (int i = 0; i < testTimes; i++)
-                {
-                    test2 = QSerialize.Deserialize<TTestClass>(testBytes, test2);
-                }
-            });
+			//Tool.RunTimeCheck("Xml写入", () =>
+   //         {
+   //             for (int i = 0; i < testTimes; i++)
+   //             {
+   //                 testBytes = QFileManager.QXmlSerialize(test1).GetBytes();
+   //         }
+   //         },() => testBytes.Length,()=> QFileManager.QXmlSerialize(test1));
+   //         Tool.RunTimeCheck("Xml读取", () =>
+   //         {
+   //             for (int i = 0; i < testTimes; i++)
+   //             {
+   //                 test2 = QFileManager.QXmlDeserialize<TTestClass>(testBytes.GetString());
+   //             }
+   //         });
+   //         Tool.RunTimeCheck("QSerialize写入", () =>
+   //         {
+   //             for (int i = 0; i < testTimes; i++)
+   //             {
+   //                 testBytes = QSerialize.Serialize(test1);
+   //         }
+   //         }, () => testBytes.Length);
+			//Tool.RunTimeCheck("QSerialize读取", () =>
+			//{
+			//	for (int i = 0; i < testTimes; i++)
+			//	{
+			//		test2 = QSerialize.Deserialize<TTestClass>(testBytes);
+			//	}
+			//});
+			//Tool.RunTimeCheck("QSerialize读取 有Target", () =>
+   //         {
+   //             for (int i = 0; i < testTimes; i++)
+   //             {
+   //                 test2 = QSerialize.Deserialize<TTestClass>(testBytes, test2);
+   //             }
+   //         });
             Tool.RunTimeCheck("QData写入", () =>
             {
                 for (int i = 0; i < testTimes; i++)
@@ -257,7 +257,7 @@ namespace QTool.Test
         防御 = 1 << 2,
         死亡 = 1 << 3,
     }
-
+	[QDynamic]
     [System.Serializable]
     public class TTestClass:IKey<string>
     {
