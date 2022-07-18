@@ -122,24 +122,17 @@ namespace QTool
 										writer.Write('{');
 										var runtimeType = obj.GetType();
 										var runtimeTypeInfo = QSerializeType.Get(runtimeType);
-										if (runtimeTypeInfo.Code == TypeCode.Object && runtimeTypeInfo.objType == QObjectType.CantSerialize)
+										if (runtimeTypeInfo.Code != TypeCode.Object)
 										{
-											writer.Write("}");
+											WriteType(writer, obj, type, hasName);
 										}
-										else
+										else if (runtimeTypeInfo.objType != QObjectType.CantSerialize)
 										{
 											WriteCheckString(writer, runtimeType.FullName);
 											writer.Write(':');
-											if (runtimeType == type)
-											{
-												WriteObject(writer, obj, runtimeTypeInfo, hasName);
-											}
-											else
-											{
-												WriteType(writer, obj, type, hasName);
-											}
-											writer.Write('}');
+											WriteObject(writer, obj, runtimeTypeInfo, hasName);
 										}
+										writer.Write('}');
 									}
 									
 									
