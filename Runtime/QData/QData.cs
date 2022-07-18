@@ -114,10 +114,19 @@ namespace QTool
 								{
 									writer.Write('{');
 									var runtimeType = obj.GetType();
-									WriteCheckString(writer, runtimeType.FullName);
-									writer.Write(':');
-									WriteObject(writer, obj, typeInfo, hasName);
-									writer.Write('}');
+									var runtimeTypeInfo = QSerializeType.Get(runtimeType);
+									if(runtimeTypeInfo.Code== TypeCode.Object&&runtimeTypeInfo.objType== QObjectType.CantSerialize)
+									{
+										writer.Write("}");
+									}
+									else
+									{
+										WriteCheckString(writer, runtimeType.FullName);
+										writer.Write(':');
+										WriteObject(writer, obj, typeInfo, hasName);
+										writer.Write('}');
+									}
+									
 								}
 								break;
 							case QObjectType.UnityObject:
@@ -235,7 +244,7 @@ namespace QTool
 								}
 								catch (Exception e)
 								{
-									Debug.LogError("读取成员【" + name + ":" + typeInfo.Type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+									Debug.LogError("读取成员【" + name + ":" + typeInfo.Type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e+"\n 剩余信息"+reader.ReadToEnd());
 									throw e;
 								}
 							}
@@ -296,35 +305,32 @@ namespace QTool
 							case QObjectType.DynamicObject:
 								{
 									var hasStart= reader.NextIs('{');
-									var str = reader.ReadCheckString();
-									if (str != "null"||string.IsNullOrEmpty(str))
-									{
-										var runtimeType = QReflection.ParseType(str);
-										if (reader.NextIs(':') || reader.NextIs('='))
-										{
-											if (type == runtimeType)
-											{
-												target = ReadObject(reader, typeInfo, hasName, target);
-											}
-											else
-											{
-												target = ReadType(reader, runtimeType, hasName, target);
-											}
-										}
-										if (hasStart)
-										{
-											while (!reader.IsEnd() && !reader.NextIs('}'))
-											{
-												reader.Read();
-											}
-										}
-										return target;
-									}
-									else
+									if (hasStart && reader.NextIs('}'))
 									{
 										return null;
 									}
-									
+									var str = reader.ReadCheckString();
+									var runtimeType = QReflection.ParseType(str);
+									if (reader.NextIs(':') || reader.NextIs('='))
+									{
+										if (type == runtimeType)
+										{
+											target = ReadObject(reader, typeInfo, hasName, target);
+										}
+										else
+										{
+											target = ReadType(reader, runtimeType, hasName, target);
+										}
+									}
+									if (hasStart)
+									{
+										while (!reader.IsEnd() && !reader.NextIs('}'))
+										{
+											reader.Read();
+										}
+									}
+									return target;
+
 								}
 							case QObjectType.UnityObject:
 								{
@@ -415,6 +421,7 @@ namespace QTool
 									return TimeSpan.FromTicks(reader.ReadQData<long>());
 								}
 							default:
+								Debug.LogError("不支持类型[" + type + "]");
 								return null;
 						}
 					}
