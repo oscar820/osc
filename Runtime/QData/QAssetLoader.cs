@@ -250,23 +250,7 @@ namespace QTool.Asset
 			}
 			return obj;
 		}
-		public static async Task AddressablesPreviewLoad(string key)
-		{
-			if (!Cache.ContainsKey(key))
-			{
-				Cache[key] = null;
-				var obj= await AddressablesLoad(key);
-				if (obj != null)
-				{
-					Cache[key] = obj;
-				}
-			 	var previewObj= GameObject.Instantiate(obj);
-				if (await QTool.Tool.WaitGameTime(0.1f, true))
-				{
-					GameObject.Destroy(previewObj);
-				}
-			}
-		}
+	
 		public static void AddressablesRelease(string key)
 		{
 			if (!Cache.ContainsKey(key))
@@ -353,6 +337,22 @@ namespace QTool.Asset
 			}
 			AddressablesRelease(key);
 			QPoolManager.Push(DirectoryPath + "_" + key, obj);
+		}
+
+
+		public static async Task AddressablesPreviewLoad(string key)
+		{
+			if (!Cache.ContainsKey(key))
+			{
+				Cache[key] = null;
+				var previewObj =await PoolGet(key);
+				var pos= Camera.main.transform.forward*100 + Camera.main.transform.position;
+				previewObj.transform.position = pos;
+				if (await QTool.Tool.WaitGameTime(0.3f, true))
+				{
+					PoolPush(key,previewObj);
+				}
+			}
 		}
 #endif
 	}
