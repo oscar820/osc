@@ -58,6 +58,8 @@ namespace QTool
 		}
 		static void WriteObject(this StringWriter writer, object obj, QSerializeType typeInfo, bool hasName = true)
 		{
+
+			if (obj == null) { writer.Write("null"); return; }
 			writer.Write('{');
 			if (typeInfo.IsIQData)
 			{
@@ -107,33 +109,48 @@ namespace QTool
 				case TypeCode.Object:
 					{
 						var typeInfo = QSerializeType.Get(type);
-						if (obj == null) { writer.Write("null"); break; }
 						switch (typeInfo.objType)
 						{
 							case QObjectType.DynamicObject:
 								{
-									writer.Write('{');
-									var runtimeType = obj.GetType();
-									var runtimeTypeInfo = QSerializeType.Get(runtimeType);
-									if(runtimeTypeInfo.Code== TypeCode.Object&&runtimeTypeInfo.objType== QObjectType.CantSerialize)
+									if(obj == null)
 									{
-										writer.Write("}");
+										writer.Write("null");
 									}
 									else
 									{
-										WriteCheckString(writer, runtimeType.FullName);
-										writer.Write(':');
-										WriteObject(writer, obj, typeInfo, hasName);
-										writer.Write('}');
+										writer.Write('{');
+										var runtimeType = obj.GetType();
+										var runtimeTypeInfo = QSerializeType.Get(runtimeType);
+										if (runtimeTypeInfo.Code == TypeCode.Object && runtimeTypeInfo.objType == QObjectType.CantSerialize)
+										{
+											writer.Write("}");
+										}
+										else
+										{
+											WriteCheckString(writer, runtimeType.FullName);
+											writer.Write(':');
+											WriteObject(writer, obj, typeInfo, hasName);
+											writer.Write('}');
+										}
 									}
+									
 									
 								}
 								break;
 							case QObjectType.UnityObject:
 								{
-									writer.Write('{');
-									writer.Write(QIdObject.GetId(obj as UnityEngine.Object));
-									writer.Write('}');
+									if (obj == null)
+									{
+										writer.Write("null");
+									}
+									else
+									{
+										writer.Write('{');
+										writer.Write(QIdObject.GetId(obj as UnityEngine.Object));
+										writer.Write('}');
+									}
+								
 								}
 								break;
 							case QObjectType.Object:
@@ -304,29 +321,39 @@ namespace QTool
 						{
 							case QObjectType.DynamicObject:
 								{
-									var hasStart= reader.NextIs('{');
-									if (hasStart && reader.NextIs('}'))
+									if(reader.NextIs('{'))
 									{
-										return null;
-									}
-									var str = reader.ReadCheckString();
-									var runtimeType = QReflection.ParseType(str);
-									if (reader.NextIs(':') || reader.NextIs('='))
-									{
-										if (type == runtimeType)
+										if (reader.NextIs('}'))
 										{
-											target = ReadObject(reader, typeInfo, hasName, target);
+											return null;
 										}
-										else
+										var str = reader.ReadCheckString();
+										var runtimeType = QReflection.ParseType(str);
+										if (reader.NextIs(':') || reader.NextIs('='))
 										{
-											target = ReadType(reader, runtimeType, hasName, target);
+											if (type == runtimeType)
+											{
+												target = ReadObject(reader, typeInfo, hasName, target);
+											}
+											else
+											{
+												target = ReadType(reader, runtimeType, hasName, target);
+											}
 										}
-									}
-									if (hasStart)
-									{
 										while (!reader.IsEnd() && !reader.NextIs('}'))
 										{
 											reader.Read();
+										}
+									}
+									else
+									{
+										if (reader.ReadValueString() == "null")
+										{
+											target = null;
+										}
+										else
+										{
+											target = null;
 										}
 									}
 									return target;
