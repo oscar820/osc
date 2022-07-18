@@ -189,6 +189,96 @@ namespace QTool
 		{
 			return (T)ReadType(reader, typeof(T), hasName, target);
 		}
+		static object ReadObject(this StringReader reader, QSerializeType typeInfo, bool hasName = true, object target = null)
+		{
+			if (reader.NextIs('{'))
+			{
+				if (reader.NextIs('}'))
+				{
+					return null;
+				}
+				if (typeInfo.IsIQData)
+				{
+					target = QReflection.CreateInstance(typeInfo.Type, target);
+					(target as IQData).ParseQData(reader); reader.NextIs('}');
+				}
+				else
+				{
+					if (target == null)
+					{
+						target = QReflection.CreateInstance(typeInfo.Type, target);
+					}
+					if (hasName)
+					{
+						while (!reader.IsEnd())
+						{
+							var name = reader.ReadCheckString();
+							var memeberInfo = typeInfo.Members[name];
+
+							object result = null;
+
+							if (!(reader.NextIs(':') || reader.NextIs('=')))
+							{
+								throw new Exception(name + " 后缺少分隔符 : 或 =\n" + reader.ReadLine());
+							}
+							if (memeberInfo != null)
+							{
+								try
+								{
+									result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
+									memeberInfo.Set(target, result);
+
+								}
+								catch (Exception e)
+								{
+									Debug.LogError("读取成员【" + name + ":" + typeInfo.Type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
+									throw e;
+								}
+							}
+							else
+							{
+								Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadCheckString());
+							}
+
+							if (!(reader.NextIs(';') || reader.NextIs(',')))
+							{
+								if (reader.NextIs('}'))
+								{
+									break;
+								}
+							}
+						}
+					}
+					else
+					{
+						foreach (var memeberInfo in typeInfo.Members)
+						{
+							memeberInfo.Set(target, reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target)));
+							if (!(reader.NextIs(';') || reader.NextIs(',')))
+							{
+								if (reader.NextIs('}'))
+								{
+									break;
+								}
+							}
+						}
+					}
+
+				}
+			}
+			else
+			{
+				if (reader.ReadValueString() == "null")
+				{
+					target = null;
+				}
+				else
+				{
+					target = null;
+				}
+			}
+			return target;
+		}
 		public static object ReadType(this StringReader reader, Type type, bool hasName = true, object target = null)
 		{
 			var typeCode = Type.GetTypeCode(type);
@@ -197,7 +287,6 @@ namespace QTool
 				case TypeCode.Object:
 					{
 						var typeInfo = QSerializeType.Get(type);
-
 						switch (typeInfo.objType)
 						{
 							case QObjectType.DynamicObject:
@@ -206,7 +295,7 @@ namespace QTool
 									var runtimeType = QReflection.ParseType(reader.ReadCheckString()); 
 									if (reader.NextIs(':') || reader.NextIs('='))
 									{
-										target = ReadType(reader, runtimeType, hasName);
+										target = ReadObject(reader, typeInfo, hasName,target);
 									}
 									while (!reader.NextIs('}'))
 									{
@@ -223,92 +312,7 @@ namespace QTool
 								}
 							case QObjectType.Object:
 								{
-									if (reader.NextIs('{'))
-									{
-										if (reader.NextIs('}'))
-										{
-											return null;
-										}
-										 if (typeInfo.IsIQData)
-										{
-											target = QReflection.CreateInstance(type, target) ;
-											(target as IQData).ParseQData(reader); reader.NextIs('}');
-										}
-										else
-										{
-											if (target == null)
-											{
-												target = QReflection.CreateInstance(type, target);
-											}
-											if (hasName)
-											{
-												while (!reader.IsEnd())
-												{
-													var name = reader.ReadCheckString();
-													var memeberInfo = typeInfo.Members[name];
-
-													object result = null;
-
-													if (!(reader.NextIs(':') || reader.NextIs('=')))
-													{
-														throw new Exception(name+" 后缺少分隔符 : 或 =\n"+reader.ReadLine());
-													}
-													if (memeberInfo != null)
-													{
-														try
-														{
-															result = reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target));
-															memeberInfo.Set(target, result);
-
-														}
-														catch (Exception e)
-														{
-															Debug.LogError("读取成员【" +name+":"+ type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e);
-															throw e;
-														}
-													}
-													else
-													{
-														Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadCheckString());
-													}
-
-													if (!(reader.NextIs(';') || reader.NextIs(',')))
-													{
-														if (reader.NextIs('}'))
-														{
-															break;
-														}
-													}
-												}
-											}
-											else
-											{
-												foreach (var memeberInfo in typeInfo.Members)
-												{
-													memeberInfo.Set(target, reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target)));
-													if (!(reader.NextIs(';') || reader.NextIs(',')))
-													{
-														if (reader.NextIs('}'))
-														{
-															break;
-														}
-													}
-												}
-											}
-
-										}
-									}
-									else
-									{
-										if(reader.ReadValueString()=="null")
-										{
-											target = null;
-										}
-										else 
-										{
-											target = null;
-										}
-									}
+									target=ReadObject(reader, typeInfo, hasName, target);
 								}
 								return target;
 
@@ -688,7 +692,11 @@ namespace QTool
 	{
 
 	}
+	[AttributeUsage(AttributeTargets.Class )]
+	public class QDynamicAttribute : Attribute
+	{
 
+	}
 
 	public enum QObjectType
 	{
@@ -746,7 +754,7 @@ namespace QTool
 				{
 					objType = QObjectType.Object;
 				}
-				else if(type==typeof(object)||type.IsAbstract||type.IsInterface)
+				else if( type==typeof(object)||type.IsAbstract||type.IsInterface|| type.GetCustomAttribute<QDynamicAttribute>()!=null)
 				{
 					objType = QObjectType.DynamicObject;
 				}
