@@ -254,10 +254,16 @@ namespace QTool.Asset
 		{
 			if (!Cache.ContainsKey(key))
 			{
+				Cache[key] = null;
 				var obj= await AddressablesLoad(key);
 				if (obj != null)
 				{
 					Cache[key] = obj;
+				}
+			 	var previewObj= GameObject.Instantiate(obj);
+				if (await QTool.Tool.WaitGameTime(0.1f, true))
+				{
+					GameObject.Destroy(previewObj);
 				}
 			}
 		}
