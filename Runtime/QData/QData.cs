@@ -295,7 +295,7 @@ namespace QTool
 									var str = reader.ReadCheckString();
 									if (str != "null"||string.IsNullOrEmpty(str))
 									{
-										var runtimeType = QReflection.ParseType(reader.ReadCheckString());
+										var runtimeType = QReflection.ParseType(str);
 										if (reader.NextIs(':') || reader.NextIs('='))
 										{
 											if (type == runtimeType)
