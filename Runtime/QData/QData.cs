@@ -298,7 +298,7 @@ namespace QTool
 										target = ReadObject(reader, typeInfo, hasName,target);
 									}
 									int count = 0;
-									while (hasStart && !reader.IsEnd()&&reader.NextIs('}'))
+									while (hasStart && !reader.IsEnd()&&!reader.NextIs('}'))
 									{
 										reader.Read();
 										count++;
