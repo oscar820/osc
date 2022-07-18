@@ -754,13 +754,13 @@ namespace QTool
 				{
 					objType = QObjectType.Object;
 				}
-				else if( type==typeof(object)||type.IsAbstract||type.IsInterface|| type.GetCustomAttribute<QDynamicAttribute>()!=null)
-				{
-					objType = QObjectType.DynamicObject;
-				}
-				else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
+				else if (typeof(UnityEngine.Object).IsAssignableFrom(type))
 				{
 					objType = QObjectType.UnityObject;
+				}
+				else if( type==typeof(System.Object)||type.IsAbstract||type.IsInterface|| type.GetCustomAttribute<QDynamicAttribute>()!=null)
+				{
+					objType = QObjectType.DynamicObject;
 				}
 				else if (IsArray)
 				{
