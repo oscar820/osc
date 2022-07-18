@@ -292,31 +292,48 @@ namespace QTool
 							case QObjectType.DynamicObject:
 								{
 									var hasStart= reader.NextIs('{');
-									var runtimeType = QReflection.ParseType(reader.ReadCheckString()); 
-									if (reader.NextIs(':') || reader.NextIs('='))
+									var str = reader.ReadCheckString();
+									if (str != "null")
 									{
-										if (type == runtimeType)
+										var runtimeType = QReflection.ParseType(reader.ReadCheckString());
+										if (reader.NextIs(':') || reader.NextIs('='))
 										{
-											target = ReadObject(reader, typeInfo, hasName, target);
+											if (type == runtimeType)
+											{
+												target = ReadObject(reader, typeInfo, hasName, target);
+											}
+											else
+											{
+												target = ReadType(reader, runtimeType, hasName, target);
+											}
 										}
-										else
+										if (hasStart)
 										{
-											target = ReadType(reader, runtimeType, hasName, target);
+											while (!reader.IsEnd() && !reader.NextIs('}'))
+											{
+												reader.Read();
+											}
 										}
+										return target;
 									}
-									if (hasStart)
+									else
 									{
-										while (!reader.IsEnd() && !reader.NextIs('}'))
-										{
-											reader.Read();
-										}
+										return null;
 									}
-									return target;
+									
 								}
 							case QObjectType.UnityObject:
 								{
 									reader.NextIs('{');
-									target = QIdObject.GetObject(reader.ReadValueString(), type); 
+									var str = reader.ReadValueString();
+									if (str == "null")
+									{
+										target = null;
+									}
+									else
+									{
+										target = QIdObject.GetObject(str, type);
+									}
 									reader.NextIs('}');
 									return target;
 								}
