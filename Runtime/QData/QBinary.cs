@@ -31,8 +31,19 @@ namespace QTool.Binary
                             QSerializeType typeInfo = QSerializeType.Get(type);
                             switch (typeInfo.objType)
                             {
-
-                                case QObjectType.List:
+								case QObjectType.DynamicObject:
+									{
+										var runtimeType = value.GetType();
+										writer.Write(runtimeType.FullName);
+										writer.SerializeType(value,runtimeType);
+									}
+									break;
+								case QObjectType.UnityObject:
+									{
+										writer.Write(QObjectReference.GetId(value as UnityEngine.Object));
+									}
+									break;
+								case QObjectType.List:
 								case QObjectType.Array:
 									var list = value as IList;
                                     writer.Write(list.Count);
@@ -146,7 +157,17 @@ namespace QTool.Binary
                     typeInfo = QSerializeType.Get(type);
                     switch (typeInfo.objType)
                     {
-
+						case QObjectType.DynamicObject:
+							{
+								var runtimeType = QReflection.ParseType(reader.ReadString());
+								target = reader.ReadObjectType(runtimeType, target);
+								return target;
+							}
+						case QObjectType.UnityObject:
+							{
+								target = QObjectReference.GetObject(reader.ReadString(), type);
+								return target;
+							}
 						case QObjectType.List:
 						case QObjectType.Array:
 							{

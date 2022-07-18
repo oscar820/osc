@@ -661,33 +661,31 @@ namespace QTool.Inspector
                     switch (typeInfo.objType)
                     {
 						case QObjectType.DynamicObject:
-                        case QObjectType.Object:
-                            if (type == typeof(object))
-                            {
-                                using (new EditorGUILayout.HorizontalScope(layoutOption))
-                                {
-                                    if (obj == null)
-                                    {
-                                        obj = "";
-                                    }
-                                    var objType = obj.GetType();
-                                    var oldType = TypeList.IndexOf(objType); 
-                                    var newType = EditorGUILayout.Popup(oldType, TypeMenuList.ToArray(),GUILayout.Width(20), GUILayout.Height(20));
-                                    if (newType != oldType)
-                                    {
-                                        objType = TypeList[newType];
-                                        obj = objType.CreateInstance();
-                                    }
-                                    obj = Draw(obj, name, objType);
-
-                                }
+							{
+								using (new EditorGUILayout.HorizontalScope(layoutOption))
+								{
+									if (obj == null)
+									{
+										obj = "";
+									}
+									var objType = obj.GetType();
+									var oldType = TypeList.IndexOf(objType);
+									var newType = EditorGUILayout.Popup(oldType, TypeMenuList.ToArray(), GUILayout.Width(20), GUILayout.Height(20));
+									if (newType != oldType)
+									{
+										objType = TypeList[newType];
+										obj = objType.CreateInstance();
+									}
+									obj = Draw(obj, name, objType);
+								}
+							}break;
+						case QObjectType.UnityObject:
+							{
+								obj = EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj, type, true, layoutOption);
 							}
-                            else if(typeof(UnityEngine.Object).IsAssignableFrom(type))
-                            {
-                                obj= EditorGUILayout.ObjectField(name, (UnityEngine.Object)obj,type,true, layoutOption);
-                            }
-                            else
-                            {
+							break;
+                        case QObjectType.Object:
+							{ 
                                 if (obj == null)
                                 {
                                     obj = type.CreateInstance();

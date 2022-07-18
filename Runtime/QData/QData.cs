@@ -200,6 +200,27 @@ namespace QTool
 
 						switch (typeInfo.objType)
 						{
+							case QObjectType.DynamicObject:
+								{
+									reader.NextIs('{');
+									var runtimeType = QReflection.ParseType(reader.ReadCheckString()); 
+									if (reader.NextIs(':') || reader.NextIs('='))
+									{
+										target = ReadType(reader, runtimeType, hasName);
+									}
+									while (!reader.NextIs('}'))
+									{
+										reader.Read();
+									}
+									return target;
+								}
+							case QObjectType.UnityObject:
+								{
+									reader.NextIs('{');
+									target = QObjectReference.GetObject(reader.ReadValueString(), type); 
+									reader.NextIs('}');
+									return target;
+								}
 							case QObjectType.Object:
 								{
 									if (reader.NextIs('{'))
@@ -208,24 +229,7 @@ namespace QTool
 										{
 											return null;
 										}
-										if (type == typeof(object))
-										{
-											var runtimeType = QReflection.ParseType(reader.ReadCheckString());
-											if (reader.NextIs(':') || reader.NextIs('='))
-											{
-												target = ReadType(reader, runtimeType, hasName);
-											}
-											while (!reader.NextIs('}'))
-											{
-												reader.Read();
-											}
-
-										}
-										else if (typeInfo.IsUnityObject)
-										{
-											target = QObjectReference.GetObject(reader.ReadValueString(), type); reader.NextIs('}');
-										}
-										else if (typeInfo.IsIQData)
+										 if (typeInfo.IsIQData)
 										{
 											target = QReflection.CreateInstance(type, target) ;
 											(target as IQData).ParseQData(reader); reader.NextIs('}');
@@ -296,11 +300,7 @@ namespace QTool
 									}
 									else
 									{
-										if (typeInfo.IsUnityObject)
-										{
-											target = QObjectReference.GetObject(reader.ReadValueString(), type);
-										}
-										else if(reader.ReadValueString()=="null")
+										if(reader.ReadValueString()=="null")
 										{
 											target = null;
 										}
@@ -725,7 +725,7 @@ namespace QTool
 		public QObjectType objType = QObjectType.Object;
 		public bool IsIQSerialize { private set; get; }
 		public bool IsIQData { private set; get; }
-		public bool IsUnityObject { private set; get; }
+		//public bool IsUnityObject { private set; get; }
 		protected override void Init(Type type)
 		{
 
@@ -741,9 +741,8 @@ namespace QTool
 				}
 				IsIQSerialize = typeof(Binary.IQSerialize).IsAssignableFrom(type);
 				IsIQData = typeof(IQData).IsAssignableFrom(type);
-				IsUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(type);
 				
-				if (IsIQSerialize || IsIQData)
+				if (IsIQData)
 				{
 					objType = QObjectType.Object;
 				}
