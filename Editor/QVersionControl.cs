@@ -123,15 +123,12 @@ namespace QTool
 			}
 			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
-			if (result.Contains("Timed out")||result.Contains("Could not resolve host"))
-			{
-				EditorUtility.DisplayDialog("同步超时", result, "确认");
-				return result;
-			}
+			
 			if (!CheckResult(result))
 			{
 				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge")&&!result.Contains("error: The following untracked working tree files would be overwritten by merge"))
 				{
+					EditorUtility.DisplayDialog("拉取更新出错", result, "确认");
 					return result;
 				}
 				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
@@ -182,9 +179,11 @@ namespace QTool
 				{
 					return "error 取消";
 				}
+
 			}
 			else
 			{
+				
 				return result;
 			}
 		}
