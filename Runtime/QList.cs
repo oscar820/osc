@@ -300,11 +300,8 @@ namespace QTool
 			{
 				var key = value.Substring(start + 1, end - start - 1);
 				var result = action(key);
-				if (result != key)
-				{
-					value = value.Substring(0, start) + result + value.Substring(end+1);
-					end += result.Length - key.Length - 2;
-				}
+				value = value.Substring(0, start) + result + value.Substring(end + 1);
+				end += result.Length - key.Length - 2;
 				start = value.IndexOf(startChar, end+1);
 				end = value.IndexOf(endChar, end+1);
 			}
