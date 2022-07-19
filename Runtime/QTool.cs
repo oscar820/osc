@@ -419,8 +419,11 @@ namespace QTool
 				{
 					
 					QDebug.Log(RunInfo.FileName + " " + RunInfo.Arguments+"\n 运行路径"+ RunInfo.WorkingDirectory);
-					process.Start();
-					process.WaitForExit()
+					await Task.Run(() =>
+					{
+						process.Start();
+						process.WaitForExit();
+					});
 					var info = await process.StandardOutput.ReadToEndAsync();
 					var error = await process.StandardError.ReadToEndAsync();
 					if (!string.IsNullOrWhiteSpace(error))
