@@ -91,18 +91,12 @@ namespace QTool
         }
         public static T Get()
         {
-            lock (Pool)
-            {
-                return Pool.Get();
-            }
-        }
+			return Pool.Get();
+		}
         public static void Push(T obj)
         {
-			lock (Pool)
-			{
-				Pool.Push(obj);
-			}
-        }
+			Pool.Push(obj);
+		}
         public void Recover()
         {
             Push(this as T);
@@ -196,12 +190,13 @@ namespace QTool
         {
 			if (CanUsePool.Count > 0)
 			{
+				T obj = default;
 				lock (CanUsePool)
 				{
-					var obj = CanUsePool.Dequeue();
-					QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
-					return CheckGet(obj);
+					obj = CanUsePool.Dequeue();
 				}
+				QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
+				return CheckGet(obj);
 			}
 			else
 			{
@@ -216,7 +211,6 @@ namespace QTool
         }
 		public T Get(T obj = null)
 		{
-
 			if (obj != null && CanUsePool.Contains(obj))
 			{
 				lock (CanUsePool)
@@ -242,30 +236,27 @@ namespace QTool
             }
             return null;
         }
-        public void Push(T obj)
-        {
-			lock (this)
-			{
+		public void Push(T obj)
+		{
 
-				if (obj == null || CanUsePool.Contains(obj)) return;
-				if (!UsingPool.Contains(obj))
+			if (obj == null || CanUsePool.Contains(obj)) return;
+			if (!UsingPool.Contains(obj))
+			{
+				var gameObj = GetGameObj(obj);
+				if (Application.isPlaying)
 				{
-					var gameObj = GetGameObj(obj);
-					if (Application.isPlaying)
-					{
-						Debug.LogWarning("物体[" + obj + "]对象池[" + Key + "]中并不存在 无法回收强制删除");
-						GameObject.Destroy(gameObj);
-					}
-					return;
+					Debug.LogWarning("物体[" + obj + "]对象池[" + Key + "]中并不存在 无法回收强制删除");
+					GameObject.Destroy(gameObj);
 				}
-				var resultObj = CheckPush(obj);
-				lock (CanUsePool)
-				{
-					CanUsePool.Enqueue(resultObj);
-				}
-				QDebug.ChangeProfilerCount(Key + " UseCount" , AllCount-CanUseCount);
+				return;
 			}
-        }
+			var resultObj = CheckPush(obj);
+			lock (CanUsePool)
+			{
+				CanUsePool.Enqueue(resultObj);
+			}
+			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
+		}
         public int CanUseCount
         {
             get
