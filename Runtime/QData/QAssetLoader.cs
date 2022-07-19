@@ -346,9 +346,9 @@ namespace QTool.Asset
 			{
 				Cache[key] = null;
 				var previewObj =await PoolGet(key);
-				var pos= Camera.main.transform.forward*100 + Camera.main.transform.position;
+				var pos= Camera.main.transform.forward*-100 + Camera.main.transform.position;
 				previewObj.transform.position = pos;
-				if (await QTool.Tool.WaitGameTime(0.3f, true))
+				if (await QTool.Tool.WaitGameTime(0.1f, true))
 				{
 					PoolPush(key,previewObj);
 				}
