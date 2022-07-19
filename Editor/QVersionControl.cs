@@ -259,11 +259,11 @@ namespace QTool
 		{
 			return CheckPathRun("stash pop",path);
 		}
-		static void PullAndCommitPush(string path)
+		static void PullAndCommitPush(string path,bool commit=true)
 		{
 			EditorUtility.DisplayProgressBar("同步更新", "拉取远端更新中...", 0.2f);
 			var resultInfo = Pull(path);
-			if (CheckResult(resultInfo))
+			if (CheckResult(resultInfo)&&commit)
 			{
 				EditorUtility.DisplayProgressBar("同步更新", "检测本地更改", 0.5f);
 				resultInfo = Commit(path);
@@ -284,9 +284,9 @@ namespace QTool
 
 			}
 			EditorUtility.ClearProgressBar();
-			if (!CheckResult(resultInfo) && EditorUtility.DisplayDialog("提交更新失败", "是否重新更新", "重试", "取消"))
+			if (!CheckResult(resultInfo) && EditorUtility.DisplayDialog("提交更新失败", resultInfo, "重试", "取消"))
 			{
-				PullAndCommitPush(path);
+				PullAndCommitPush(path,commit);
 			}
 			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
@@ -296,14 +296,13 @@ namespace QTool
 		{
 			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
 		}
-		[MenuItem("QTool/Git/拉取更新")]
+		[MenuItem("QTool/Git/全局拉取更新")]
 		static void AllPull()
 		{
 			var path = Directory.GetCurrentDirectory();
-			QDebug.Log(Pull(path));
-			AssetDatabase.Refresh();
+			PullAndCommitPush(path,false);
 		}
-		[MenuItem("QTool/Git/提交更新")]
+		[MenuItem("QTool/Git/全局同步更新")]
 		static void AllPush()
 		{
 			var path = Directory.GetCurrentDirectory();
