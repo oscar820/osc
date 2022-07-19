@@ -294,27 +294,6 @@ namespace QTool
 		{
 			return await CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
 		}
-		[MenuItem("QTool/Git/测试")]
-		static async void Test()
-		{
-			var path = Directory.GetCurrentDirectory();
-			var rootPath =(await CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
-			if (rootPath.EndsWith(".git"))
-			{
-				rootPath = path;
-			}
-			if (!CheckResult(path))
-			{
-				Debug.LogError( path);
-			}
-
-			if (!await CheckInit(path))
-			{
-				Debug.LogError( "error 取消设置git基础信息");
-			}
-			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
-			Debug.LogError(result);
-		}
 		[MenuItem("QTool/Git/全局拉取更新")]
 		static void AllPull()
 		{
