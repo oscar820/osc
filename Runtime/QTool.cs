@@ -408,11 +408,12 @@ namespace QTool
 			RedirectStandardError = true,
 			UseShellExecute = false,
 		};
-		public static async Task<string> ProcessCommand(string fileName,string Arguments,string workPah)
+		public static async Task<string> ProcessCommand(string fileName,string Arguments,string workPah,bool openWindow=false)
 		{
 			RunInfo.FileName = fileName;
 			RunInfo.Arguments = Arguments;
 			RunInfo.WorkingDirectory = workPah;
+			RunInfo.CreateNoWindow = !openWindow;
 			using (var process=new System.Diagnostics.Process {StartInfo= RunInfo })
 			{
 				try

@@ -31,7 +31,7 @@ namespace QTool
 			GUILayout.Space(10);
 		}
 
-		static async Task<string> CheckPathRun(string commond, string path,string file="git")
+		static async Task<string> CheckPathRun(string commond, string path,bool window=false)
 		{
 			try
 			{
@@ -46,7 +46,7 @@ namespace QTool
 				Debug.LogError(path+" " +e.ToString());
 			}
 			
-			return await Tool.ProcessCommand(file, commond,path);
+			return await Tool.ProcessCommand("git", commond,path,window);
 		}
 		static async Task<string> Add(string addPath,string folderPath)
 		{
@@ -121,7 +121,7 @@ namespace QTool
 			{
 				return "error 取消设置git基础信息";
 			}
-			var result =await CheckPathRun(nameof(Pull).ToLower() + " origin", path);
+			var result =await CheckPathRun(nameof(Pull).ToLower() + " origin", path,true);
 			EditorUtility.DisplayDialog("拉取更新 ", result, "确认");
 
 			if (!CheckResult(result))
@@ -150,7 +150,7 @@ namespace QTool
 					{
 						if (!info.select)
 						{
-							Debug.LogError("放弃本地更改 " + info + " " + Checkout(info.path, rootPath));
+							Debug.LogError("放弃本地更改 " + info + " " +(await Checkout(info.path, rootPath)));
 						}else
 						{
 							files += info + " ";
@@ -159,7 +159,7 @@ namespace QTool
 					}
 					if (useStash)
 					{
-						QDebug.Log("保留本地更改 " + StashPush(files, rootPath));
+						QDebug.Log("保留本地更改 " +(await StashPush(files, rootPath)));
 					}
 					var pullResult =await Pull(path);
 					if (useStash)
@@ -168,10 +168,10 @@ namespace QTool
 						{
 							if (info.select)
 							{
-								Debug.LogError("放弃远端更改 " + info + " " + Checkout(info.path, rootPath, version));
+								Debug.LogError("放弃远端更改 " + info + " " + (await Checkout(info.path, rootPath, version)));
 							}
 						}
-						QDebug.Log("还原本地更改 " + StashPop(rootPath));
+						QDebug.Log("还原本地更改 " + (await StashPop(rootPath)));
 					} 
 					return pullResult;
 				}
