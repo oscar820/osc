@@ -26,9 +26,9 @@ namespace QTool
 		{
 			CultureInfo.CurrentCulture = new CultureInfo("en-US");
 			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
-			QDebug.Log("设置全局编码语言环境为 en-US");
+			QTranslate.KeyReplace["版本号"] = Application.version;
 		}
-		public static string Version => Application.version;
+		public static string Version => Application.version; 
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
         public static Color ToColor(this string key, float s = 0.5f, float v = 1f)

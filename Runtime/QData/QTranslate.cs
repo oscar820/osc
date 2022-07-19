@@ -15,7 +15,6 @@ namespace QTool
 	}
 	public class QTranslate : MonoBehaviour
 	{
-
 		public static QList<string, QTranslateKey> TranslateKeys = new QList<string, QTranslateKey>
 		{
 			new QTranslateKey
@@ -164,23 +163,10 @@ namespace QTool
 
         public static string Translate(string value)
         {
-            if (string.IsNullOrEmpty(value)) { return value; }
+			if (string.IsNullOrEmpty(value)) { return value; }
             value = TranslateKey(value);
-            var start = value.IndexOf('{');
-            var end = value.IndexOf('}');
-            while (start >= 0 && end >= 0)
-            {
-                var key = value.Substring(start + 1, end - start - 1);
-				var translateValue = TranslateKey(key);
-				if (translateValue != key)
-				{
-					value = value.Replace("{" + key + "}",translateValue );
-				}
-				end += translateValue.Length - key.Length - 2;
-				start = value.IndexOf('{', end);
-				end = value.IndexOf('}', end);
-			}
-            return value;
+			value= value.ForeachBlockValue('{', '}', TranslateKey); 
+            return value; 
         }
         public static QDictionary<string, string> KeyReplace = new QDictionary<string, string>();
         static string TranslateKey(string value)
