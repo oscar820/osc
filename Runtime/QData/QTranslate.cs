@@ -162,41 +162,38 @@ namespace QTool
 			QEventManager.UnRegister<string>(nameof(QTranslate) + "_语言", CheckFresh);
         }
 
-        public static string Translate(string value,string changeKey="",string changeValue= "")
+        public static string Translate(string value)
         {
             if (string.IsNullOrEmpty(value)) { return value; }
-			value = value.Trim();
-			value = TranslateKey(value);
+            value = TranslateKey(value);
             var start = value.IndexOf('{');
             var end = value.IndexOf('}');
             while (start >= 0 && end >= 0)
             {
                 var key = value.Substring(start + 1, end - start - 1);
-				if (key==changeKey)
+				var translateValue = TranslateKey(key);
+				if (translateValue != key)
 				{
-					value = value.Replace("{" + key + "}", changeValue);
+					value = value.Replace("{" + key + "}",translateValue );
 				}
-				else
-				{
-					value = value.Replace("{" + key + "}", TranslateKey(key));
-				}
-				start = value.IndexOf('{');
-				end = value.IndexOf('}');
+				end += translateValue.Length - key.Length - 2;
+				start = value.IndexOf('{', end);
+				end = value.IndexOf('}', end);
 			}
             return value;
         }
-        public static QDictionary<string, System.Func<string>> KeyReplace = new QDictionary<string, System.Func<string>>();
+        public static QDictionary<string, string> KeyReplace = new QDictionary<string, string>();
         static string TranslateKey(string value)
         {
-            if (LanguageData.ContainsKey(value)&& LanguageData[value].HasValue(GlobalLanguage))
+			if (KeyReplace.ContainsKey(value))
+			{
+				return KeyReplace[value];
+			}
+			else if (LanguageData.ContainsKey(value)&& LanguageData[value].HasValue(GlobalLanguage))
             {
                 var translate = LanguageData[value].GetValue<string>(GlobalLanguage);
 				return translate;
 			}
-            else if(KeyReplace.ContainsKey(value))
-            {
-                return KeyReplace[value]?.Invoke();
-            }
             return value;
         }
 	
