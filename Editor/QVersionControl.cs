@@ -31,7 +31,7 @@ namespace QTool
 			GUILayout.Space(10);
 		}
 
-		static string CheckPathRun(string commond, string path,string file="git")
+		static async Task<string> CheckPathRun(string commond, string path,string file="git")
 		{
 			try
 			{
@@ -46,23 +46,23 @@ namespace QTool
 				Debug.LogError(path+" " +e.ToString());
 			}
 			
-			return Tool.ProcessCommand(file, commond,path);
+			return await Tool.ProcessCommand(file, commond,path);
 		}
-		static string Add(string addPath,string folderPath)
+		static async Task<string> Add(string addPath,string folderPath)
 		{
-			return CheckPathRun(nameof(Add).ToLower() + " \"" + addPath + "\"", folderPath);
+			return await CheckPathRun(nameof(Add).ToLower() + " \"" + addPath + "\"", folderPath);
 		}
-		static string Checkout(string path,string folderPath, string version = null)
+		static async Task<string> Checkout(string path,string folderPath, string version = null)
 		{
 			string result = "";
 			if (string.IsNullOrEmpty(version))
 			{
-				result= CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
+				result=await CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
 				
 			}
 			else
 			{
-				result= CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
+				result= await CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
 
 				return result;
 			}
@@ -72,23 +72,23 @@ namespace QTool
 			}
 			else
 			{
-				return CheckPathRun("clean -f \"" +path + "\"", folderPath);
+				return await CheckPathRun("clean -f \"" +path + "\"", folderPath);
 			}
 		}
-		static string GetCurrentVersion(string path)
+		static async Task<string> GetCurrentVersion(string path)
 		{
-			return CheckPathRun("log -1 --pretty=oneline", path).SplitStartString(" ");
+			return (await CheckPathRun("log -1 --pretty=oneline", path)).SplitStartString(" ");
 
 		}
-		static bool CheckInit(string path)
+		static async Task<bool> CheckInit(string path)
 		{
 			
 
 			if (!PlayerPrefs.HasKey(nameof(CheckInit)))
 			{
 			
-				var result = CheckPathRun("config --global core.quotepath false", path);
-				var name = CheckPathRun("config user.name", path);
+				var result = await CheckPathRun("config --global core.quotepath false", path);
+				var name =await CheckPathRun("config user.name", path);
 				if (string.IsNullOrWhiteSpace(name))
 				{
 					EditorUtility.ClearProgressBar();
@@ -104,10 +104,10 @@ namespace QTool
 			return true;
 
 		}
-		static string Pull(string path)
+		static async Task<string> Pull(string path)
 		{
 
-			var rootPath = CheckPathRun("rev-parse --git-dir", path).Trim().SplitStartString("/.git");
+			var rootPath =(await CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
 			if (rootPath.EndsWith( ".git"))
 			{
 				rootPath = path;
@@ -117,11 +117,11 @@ namespace QTool
 				return path;
 			}
 			
-			if (!CheckInit(path))
+			if (!await CheckInit(path))
 			{
 				return "error 取消设置git基础信息";
 			}
-			var result = CheckPathRun(nameof(Pull).ToLower() + " origin", path);
+			var result =await CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 
 			
 			if (!CheckResult(result))
@@ -143,7 +143,7 @@ namespace QTool
 				EditorUtility.ClearProgressBar();
 				if (QVersionControlWindow.MergeError(commitList))
 				{
-					var version = GetCurrentVersion(path);
+					var version =await GetCurrentVersion(path);
 					var useStash = false;
 					var files = "";
 					foreach (var info in commitList)
@@ -161,7 +161,7 @@ namespace QTool
 					{
 						QDebug.Log("保留本地更改 " + StashPush(files, rootPath));
 					}
-					var pullResult = Pull(path);
+					var pullResult =await Pull(path);
 					if (useStash)
 					{
 						foreach (var info in commitList)
@@ -195,15 +195,15 @@ namespace QTool
 			}
 			return true;
 		}
-		static string Push(string path)
+		static async Task<string> Push(string path)
 		{
-			return CheckPathRun(nameof(Push).ToLower() + " origin master", path);
+			return await CheckPathRun(nameof(Push).ToLower() + " origin master", path);
 		}
 
 		static List<QFileState> commitList = new List<QFileState>();
-		static void AddCommitList(string path)
+		static async Task AddCommitList(string path)
 		{
-			var statusInfo = Status(path);
+			var statusInfo =await Status(path);
 			if (statusInfo.StartsWith("fatal")) return;
 			var lines = statusInfo.Split('\n');
 			foreach (var info in lines)
@@ -212,10 +212,10 @@ namespace QTool
 				commitList.Add(new QFileState(true,info));
 			}
 		}
-		static string Commit(string path)
+		static async Task<string> Commit(string path)
 		{
 			commitList.Clear();
-			AddCommitList(path);
+			await AddCommitList(path);
 			//if (path.StartsWith("Assets"))
 			//{
 			//	AddCommitList(path + ".meta");
@@ -243,29 +243,29 @@ namespace QTool
 			EditorUtility.ClearProgressBar();
 			if (commitList.Count > 0)
 			{
-				return CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo + '\"', path);
+				return await CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo + '\"', path);
 			}
 			else
 			{
 				return "";
 			}
 		}
-		static string StashPush(string files,string path)
+		static async Task<string> StashPush(string files,string path)
 		{
-			return CheckPathRun("stash push " + files.Trim() + " -a", path);
+			return await CheckPathRun("stash push " + files.Trim() + " -a", path);
 		}
-		static string StashPop(string path)
+		static async Task<string> StashPop(string path)
 		{
-			return CheckPathRun("stash pop",path);
+			return await CheckPathRun("stash pop",path);
 		}
-		static void PullAndCommitPush(string path,bool commit=true)
+		static async void PullAndCommitPush(string path,bool commit=true)
 		{
 			EditorUtility.DisplayProgressBar("同步更新", "拉取远端更新中...", 0.2f);
-			var resultInfo = Pull(path);
+			var resultInfo =await Pull(path);
 			if (CheckResult(resultInfo)&&commit)
 			{
 				EditorUtility.DisplayProgressBar("同步更新", "检测本地更改", 0.5f);
-				resultInfo = Commit(path);
+				resultInfo =await Commit(path);
 				if (resultInfo.StartsWith("error")|| resultInfo.Contains("fatal"))
 				{
 					EditorUtility.DisplayDialog("提交更新失败", resultInfo, "确认");
@@ -273,7 +273,7 @@ namespace QTool
 				else
 				{
 					EditorUtility.DisplayProgressBar("同步更新", "同步更改中...", 0.7f);
-					resultInfo = Push(path);
+					resultInfo =await Push(path);
 					EditorUtility.DisplayProgressBar("同步更新", "更新完毕",0.9f);
 					if (!CheckResult(resultInfo))
 					{
@@ -291,15 +291,15 @@ namespace QTool
 			EditorUtility.ClearProgressBar();
 		}
 	
-		public static string Status(string path)
+		public static async Task<string> Status(string path)
 		{
-			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
+			return await CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
 		}
 		[MenuItem("QTool/Git/测试")]
-		static void Test()
+		static async void Test()
 		{
 			var path = Directory.GetCurrentDirectory();
-			var rootPath = CheckPathRun("rev-parse --git-dir", path).Trim().SplitStartString("/.git");
+			var rootPath =(await CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
 			if (rootPath.EndsWith(".git"))
 			{
 				rootPath = path;
@@ -309,7 +309,7 @@ namespace QTool
 				Debug.LogError( path);
 			}
 
-			if (!CheckInit(path))
+			if (!await CheckInit(path))
 			{
 				Debug.LogError( "error 取消设置git基础信息");
 			}

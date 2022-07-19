@@ -408,7 +408,7 @@ namespace QTool
 			RedirectStandardError = true,
 			UseShellExecute = false,
 		};
-		public static string ProcessCommand(string fileName,string Arguments,string workPah)
+		public static async Task<string> ProcessCommand(string fileName,string Arguments,string workPah)
 		{
 			RunInfo.FileName = fileName;
 			RunInfo.Arguments = Arguments;
@@ -420,8 +420,8 @@ namespace QTool
 					
 					QDebug.Log(RunInfo.FileName + " " + RunInfo.Arguments+"\n 运行路径"+ RunInfo.WorkingDirectory);
 					process.Start();
-					var info = process.StandardOutput.ReadToEnd();
-					var error = process.StandardError.ReadToEnd();
+					var info = await process.StandardOutput.ReadToEndAsync();
+					var error = await process.StandardError.ReadToEndAsync();
 					if (!string.IsNullOrWhiteSpace(error))
 					{
 						Debug.LogError(error);
