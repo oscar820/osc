@@ -187,7 +187,7 @@ namespace QTool
         {
 			if (KeyReplace.ContainsKey(value))
 			{
-				return KeyReplace[value];
+				return TranslateKey(KeyReplace[value]);
 			}
 			else if (LanguageData.ContainsKey(value)&& LanguageData[value].HasValue(GlobalLanguage))
             {
