@@ -122,8 +122,6 @@ namespace QTool
 				return "error 取消设置git基础信息";
 			}
 			var result =await CheckPathRun(nameof(Pull).ToLower() + " origin", path,true);
-			EditorUtility.DisplayDialog("拉取更新 ", result, "确认");
-
 			if (!CheckResult(result))
 			{
 				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge")&&!result.Contains("error: The following untracked working tree files would be overwritten by merge"))
@@ -183,7 +181,8 @@ namespace QTool
 			}
 			else
 			{
-				
+
+				EditorUtility.DisplayDialog("拉取更新完成 ", "拉取更新成功", "确认");
 				return result;
 			}
 		}
