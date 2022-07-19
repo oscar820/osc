@@ -305,7 +305,6 @@ namespace QTool
 					value = value.Substring(0, start) + result + value.Substring(end+1);
 					end += result.Length - key.Length - 2;
 				}
-				Debug.LogError(key + ":" + result + " => " + value);
 				start = value.IndexOf(startChar, end+1);
 				end = value.IndexOf(endChar, end+1);
 			}
