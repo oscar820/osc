@@ -165,6 +165,7 @@ namespace QTool
         public static string Translate(string value,params QKeyValue<string,string>[] keyValues)
         {
             if (string.IsNullOrEmpty(value)) { return value; }
+			value= value.Trim();
             value = TranslateKey(value);
             var start = value.IndexOf('{');
             var end = value.IndexOf('}');
