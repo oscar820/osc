@@ -164,6 +164,7 @@ namespace QTool
         public static string Translate(string value)
         {
 			if (string.IsNullOrEmpty(value)) { return value; }
+			value = value.Trim();
             value = TranslateKey(value);
 			value= value.ForeachBlockValue('{', '}', TranslateKey); 
             return value; 
