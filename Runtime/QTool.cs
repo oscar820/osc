@@ -403,7 +403,7 @@ namespace QTool
 
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo()
 		{
-			CreateNoWindow = true,
+			CreateNoWindow = false,
 			RedirectStandardOutput = true,
 			RedirectStandardError = true,
 			UseShellExecute = false,
@@ -419,11 +419,7 @@ namespace QTool
 				{
 					
 					QDebug.Log(RunInfo.FileName + " " + RunInfo.Arguments+"\n 运行路径"+ RunInfo.WorkingDirectory);
-					await Task.Run(() =>
-					{
-						process.Start();
-						process.WaitForExit();
-					});
+					process.Start();
 					var info = await process.StandardOutput.ReadToEndAsync();
 					var error = await process.StandardError.ReadToEndAsync();
 					if (!string.IsNullOrWhiteSpace(error))
