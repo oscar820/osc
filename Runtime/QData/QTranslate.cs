@@ -162,19 +162,19 @@ namespace QTool
 			QEventManager.UnRegister<string>(nameof(QTranslate) + "_语言", CheckFresh);
         }
 
-        public static string Translate(string value,params QKeyValue<string,string>[] keyValues)
+        public static string Translate(string value,string changeKey="",string changeValue= "")
         {
             if (string.IsNullOrEmpty(value)) { return value; }
-			value= value.Trim();
-            value = TranslateKey(value);
+			value = value.Trim();
+			value = TranslateKey(value);
             var start = value.IndexOf('{');
             var end = value.IndexOf('}');
             while (start >= 0 && end >= 0)
             {
                 var key = value.Substring(start + 1, end - start - 1);
-				if (keyValues.ContainsKey(key))
+				if (key==changeKey)
 				{
-					value = value.Replace("{" + key + "}", keyValues.Get(key).Value);
+					value = value.Replace("{" + key + "}", changeValue);
 				}
 				else
 				{
