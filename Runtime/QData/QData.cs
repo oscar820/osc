@@ -544,38 +544,35 @@ namespace QTool
 		{
 			return Tool.BuildString((writer) =>
 			{
-				lock (BlockStack)
+				int index = -1;
+				BlockStack.Clear();
+				while (!reader.IsEnd())
 				{
-					int index = -1;
-					BlockStack.Clear();
-					while (!reader.IsEnd())
+					var c = (char)reader.Peek();
+					if (BlockStack.Count == 0)
 					{
-						var c = (char)reader.Peek();
-						if (BlockStack.Count == 0)
+						if (ignore.IndexOf(c) < 0 && BlockEnd.IndexOf(c) >= 0)
 						{
-							if (ignore.IndexOf(c)<0&& BlockEnd.IndexOf(c) >= 0)
-							{
-								break;
-							}
-							else if ((index = BlockStart.IndexOf(c)) >= 0)
-							{
-								BlockStack.Push(BlockEnd[index]);
-							}
+							break;
 						}
-						else
+						else if ((index = BlockStart.IndexOf(c)) >= 0)
 						{
-							if (BlockStack.Peek() == c)
-							{
-								BlockStack.Pop();
-							}
-							else if ((index = BlockStart.IndexOf(c)) >= 0)
-							{
-								BlockStack.Push(BlockEnd[index]);
-							}
+							BlockStack.Push(BlockEnd[index]);
 						}
-						reader.Read();
-						writer.Write(c);
 					}
+					else
+					{
+						if (BlockStack.Peek() == c)
+						{
+							BlockStack.Pop();
+						}
+						else if ((index = BlockStart.IndexOf(c)) >= 0)
+						{
+							BlockStack.Push(BlockEnd[index]);
+						}
+					}
+					reader.Read();
+					writer.Write(c);
 				}
 			});
 		}
