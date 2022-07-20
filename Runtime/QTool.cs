@@ -103,7 +103,10 @@ namespace QTool
 					var m_Seconds=(float)waitForSeconds.GetValue("m_Seconds");
 					if (Application.isPlaying)
 					{
-						await Tool.WaitGameTime(m_Seconds);
+						if(!await Tool.WaitGameTime(m_Seconds))
+						{
+							return;
+						}
 					}
 					else
 					{
