@@ -79,6 +79,7 @@ namespace QTool
 					if (_instance == null)
 					{
 						var obj = new GameObject(typeof(T).Name);
+						GameObject.DontDestroyOnLoad(obj);
 						_instance = obj.AddComponent<T>();
 						_instance.SetDirty();
 					}
