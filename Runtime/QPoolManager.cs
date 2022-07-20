@@ -294,7 +294,7 @@ namespace QTool
             this.Key = poolName;
 			if (isCom || isGameObject)
 			{
-				UnityEngine.SceneManagement.SceneManager.sceneUnloaded += (scene) =>
+				UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene,mode) =>
 				{
 					Clear();
 					
