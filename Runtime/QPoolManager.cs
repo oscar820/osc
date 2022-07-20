@@ -152,7 +152,7 @@ namespace QTool
 			}
             return obj;
         }
-		Transform _poolParent = null;	
+		//Transform _poolParent = null;	
 		public Transform PoolParent
 		{
 			get
