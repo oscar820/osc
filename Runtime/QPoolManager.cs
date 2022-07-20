@@ -146,12 +146,16 @@ namespace QTool
 			UsingPool.AddCheckExist(obj);
 			return obj;
         }
-		//Transform _poolParent = null;	
+		Transform _poolParent = null;	
 		public Transform PoolParent
 		{
 			get
 			{
-				return QPoolManager.Instance.transform.GetChild( Key, true);
+				if (_poolParent == null)
+				{
+					_poolParent=QPoolManager.Instance.transform.GetChild(Key, true);
+				}
+				return _poolParent;
 			}
 		}
         T CheckPush(T obj)
