@@ -317,17 +317,27 @@ namespace QTool.Asset
 				Debug.LogError("无法实例化预制体[" + key + "]");
 				return null;
 			}
-			var obj = pool.Get();
-			if (obj == null)
+			Debug.LogError("尝试获取对象 " + key);
+			try
 			{
+
+				var obj = pool.Get();
+				if (obj == null)
+				{
+					return null;
+				}
+				if (parent != null)
+				{
+					obj.transform.SetParent(parent, false);
+				}
+				obj.name = key;
+				return obj;
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("尝试获取对象【"+key+"】出错 :" + e);
 				return null;
 			}
-			if (parent != null)
-			{
-				obj.transform.SetParent(parent, false);
-			}
-			obj.name = key;
-			return obj;
 		}
 		public static void PoolPush(string key, GameObject obj)
 		{
