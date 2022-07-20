@@ -306,6 +306,7 @@ namespace QTool
 		public string smtpServer;
 		public void Init()
 		{
+			if (string.IsNullOrWhiteSpace(account)) return;
 			this.popServer = string.IsNullOrEmpty(this.popServer) ? GetServer(account, "pop.") : this.popServer;
 			this.smtpServer = string.IsNullOrEmpty(this.smtpServer) ? GetServer(account, "smtp.") : this.smtpServer;
 		}
