@@ -122,16 +122,18 @@ namespace QTool
 				return "error 取消设置git基础信息";
 			}
 			var result =CheckPathRun(nameof(Pull).ToLower() + " origin", path,true);
-			if (!CheckResult(result))
+			var mergerTip = "Your local changes to the following files would be overwritten by merge:";
+			var untrackedTip = "error: The following untracked working tree files would be overwritten by merge";
+			if (!CheckResult(result)||result.Contains(mergerTip))
 			{
-				if(!result.Contains("error: Your local changes to the following files would be overwritten by merge")&&!result.Contains("error: The following untracked working tree files would be overwritten by merge"))
+				if(!result.Contains(mergerTip) &&!result.Contains(untrackedTip))
 				{
 					EditorUtility.DisplayDialog("拉取更新出错", result, "确认");
 					return result;
 				}
-				var mergeErrorFile = result.GetBlockValue("error: Your local changes to the following files would be overwritten by merge:", "Please commit your changes or stash them before you merge.");
+				var mergeErrorFile = result.GetBlockValue(mergerTip, "Please commit your changes or stash them before you merge.");
 				
-				mergeErrorFile+= result.GetBlockValue("error: The following untracked working tree files would be overwritten by merge:", "Please move or remove them before you merge.");
+				mergeErrorFile+= result.GetBlockValue(untrackedTip, "Please move or remove them before you merge.");
 		
 				commitList.Clear();
 				foreach (var fileInfo in mergeErrorFile.Trim().Split('\n'))
