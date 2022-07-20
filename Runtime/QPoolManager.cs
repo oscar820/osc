@@ -157,7 +157,7 @@ namespace QTool
 		{
 			get
 			{
-				//if (_poolParent == null)
+				if (_poolParent == null)
 				{
 					_poolParent = QPoolManager.Instance.transform.GetChild(Key, true);
 				}
@@ -290,6 +290,9 @@ namespace QTool
             isGameObject = type == typeof(GameObject);
             this.newFunc = newFunc;
             this.Key = poolName;
+			UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene,mode) => {
+				_poolParent=null;
+			};
         }
     }
 }
