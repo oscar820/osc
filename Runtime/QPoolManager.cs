@@ -264,16 +264,18 @@ namespace QTool
                 return CanUsePool.Count;
             }
         }
-        public void Clear()
-        {
-			lock (UsingPool)
+		public void Clear()
+		{
+			for (int i = PoolParent.childCount - 1; i >= 0; i--)
 			{
-				UsingPool.Clear();
+				var child = PoolParent.GetChild(i);
+				if (child != null)
+				{
+					GameObject.Destroy(child);
+				}
 			}
-			lock (CanUsePool)
-			{
-				CanUsePool.Clear();
-			}
+			UsingPool.Clear();
+			CanUsePool.Clear();
 			QDebug.ChangeProfilerCount(Key + " " + nameof(AllCount), AllCount);
 			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 		}
@@ -295,14 +297,7 @@ namespace QTool
 				UnityEngine.SceneManagement.SceneManager.sceneUnloaded += (scene) =>
 				{
 					Clear();
-					for (int i = PoolParent.childCount-1; i >=0; i--)
-					{
-						var child = PoolParent.GetChild(i);
-						if (child != null)
-						{
-							GameObject.Destroy(child);
-						}
-					}
+					
 				};
 			}
         }
