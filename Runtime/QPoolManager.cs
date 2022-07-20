@@ -19,9 +19,7 @@ namespace QTool
         public static ObjectPool<GameObject> GetPool(string poolKey,GameObject prefab)
         {
             return GetPool(poolKey, () => { var result = GameObject.Instantiate(prefab);
-				if (result != null) {
-					result.name = prefab.name;
-				}
+				result.name = prefab.name;
 				return result; });
         }
         public static T Get<T>(string poolName, System.Func<T> newFunc = null) where T : class

@@ -318,7 +318,6 @@ namespace QTool.Asset
 				Debug.LogError("无法实例化预制体[" + key + "]");
 				return null;
 			}
-			Debug.LogError("尝试获取对象 " + key);
 			try
 			{
 
