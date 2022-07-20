@@ -14,10 +14,10 @@ namespace QTool
             {
                 if (_instance == null)
                 {
-                    _instance = QToolManager.InstanceObj.GetComponent<T>();
+                    _instance = QToolManager.Instance.transform.GetComponent<T>();
                     if (_instance == null)
                     {
-                        _instance = QToolManager.InstanceObj.AddComponent<T>();
+                        _instance = QToolManager.Instance.gameObject.AddComponent<T>();
                         _instance.SetDirty();
                     }
                 }

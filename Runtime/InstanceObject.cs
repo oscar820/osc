@@ -69,7 +69,6 @@ namespace QTool
 
 	public abstract class InstanceManager<T> : InstanceBehaviour<T> where T : InstanceManager<T>
 	{
-		public static GameObject InstanceObj => Instance.gameObject;
 		public new static T Instance
 		{
 			get
