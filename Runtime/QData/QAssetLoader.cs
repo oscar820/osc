@@ -299,6 +299,7 @@ namespace QTool.Asset
 #if Addressables
 		static async Task<ObjectPool<GameObject>> GetPool(string key)
 		{
+			await AddressablesPreviewLoad(key);
 			var prefab = await AddressablesLoad(key);
 			if (prefab != null)
 			{
