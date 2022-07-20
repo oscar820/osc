@@ -286,7 +286,6 @@ namespace QTool
 			{
 				PullAndCommitPush(path,commit);
 			}
-			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
 		}
 	
