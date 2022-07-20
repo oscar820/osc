@@ -50,12 +50,10 @@ namespace QTool
 			}
 			else
 			{
-				lock (poolDic)
-				{
-					var pool = new ObjectPool<T>(key, newFunc);
-					poolDic[key] = pool;
-					return pool;
-				}
+
+				var pool = new ObjectPool<T>(key, newFunc);
+				poolDic[key] = pool;
+				return pool;
 			}
 		
         }
