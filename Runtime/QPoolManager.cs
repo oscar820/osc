@@ -157,11 +157,7 @@ namespace QTool
 		{
 			get
 			{
-				if (_poolParent == null)
-				{
-					_poolParent = QPoolManager.Instance.transform.GetChild(Key, true);
-				}
-				return _poolParent;
+				return QPoolManager.Instance.transform.GetChild(Key, true);
 			}
 		}
         T CheckPush(T obj)
@@ -290,13 +286,6 @@ namespace QTool
             isGameObject = type == typeof(GameObject);
             this.newFunc = newFunc;
             this.Key = poolName;
-			UnityEngine.SceneManagement.SceneManager.sceneUnloaded += (scene) => {
-				if (_poolParent != null)
-				{
-					GameObject.Destroy(_poolParent.gameObject);
-				}
-				_poolParent=null;
-			};
         }
     }
 }
