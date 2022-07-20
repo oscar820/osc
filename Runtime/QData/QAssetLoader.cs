@@ -299,7 +299,6 @@ namespace QTool.Asset
 #if Addressables
 		static async Task<ObjectPool<GameObject>> GetPool(string key)
 		{
-			await AddressablesPreviewLoad(key);
 			var prefab = await AddressablesLoad(key);
 			if (prefab != null)
 			{
@@ -312,6 +311,7 @@ namespace QTool.Asset
 		}
 		public static async Task<GameObject> PoolGet(string key, Transform parent = null)
 		{
+			await AddressablesPreviewLoad(key, parent);
 			var pool = await GetPool(key);
 			if (pool == null)
 			{
@@ -350,14 +350,17 @@ namespace QTool.Asset
 		}
 
 
-		public static async Task AddressablesPreviewLoad(string key)
+		public static async Task AddressablesPreviewLoad(string key, Transform parent = null)
 		{
 			if (!Cache.ContainsKey(key))
 			{
 				Cache[key] = null;
-				var previewObj =await PoolGet(key);
-				var pos= Camera.main.transform.forward*-100 + Camera.main.transform.position;
-				previewObj.transform.position = pos;
+				var previewObj =await PoolGet(key, parent);
+				if (parent == null)
+				{
+					var pos = Camera.main.transform.forward * -100 + Camera.main.transform.position;
+					previewObj.transform.position = pos;
+				}
 				if (await QTool.Tool.WaitGameTime(0.1f, true))
 				{
 					PoolPush(key,previewObj);
