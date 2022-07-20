@@ -54,24 +54,28 @@ namespace QTool
 			{
 
 				var pool = new ObjectPool<T>(key, newFunc);
-				poolDic[key] = pool;
+				lock (poolDic)
+				{
+					poolDic[key] = pool;
+				}
 				return pool;
 			}
 		
         }
-        public static void Push(GameObject gameObject)
+        public static bool Push(GameObject gameObject)
         {
-            Push(gameObject.name, gameObject);
+            return Push(gameObject.name, gameObject);
         }
-        public static void Push<T>(string poolName, T obj) where T : class
+        public static bool Push<T>(string poolName, T obj) where T : class
         {
 			if (poolDic.ContainsKey(poolName))
 			{
-				(poolDic[poolName] as ObjectPool<T>).Push(obj);
+				return (poolDic[poolName] as ObjectPool<T>).Push(obj);
 			}
 			else
 			{
 				Debug.LogError("不存在对象池 " + obj);
+				return false;
 			}
         }
     }
@@ -222,10 +226,10 @@ namespace QTool
             }
             return null;
         }
-		public void Push(T obj)
+		public bool Push(T obj)
 		{
 
-			if (obj == null || CanUsePool.Contains(obj)) return;
+			if (obj == null || CanUsePool.Contains(obj)) return false;
 			if (!UsingPool.Contains(obj))
 			{
 				var gameObj = GetGameObj(obj);
@@ -234,11 +238,12 @@ namespace QTool
 					Debug.LogWarning("物体[" + obj + "]对象池[" + Key + "]中并不存在 无法回收强制删除");
 					GameObject.Destroy(gameObj);
 				}
-				return;
+				return false;
 			}
 			var resultObj = CheckPush(obj);
 			CanUsePool.Enqueue(resultObj);
 			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
+			return true;
 		}
         public int CanUseCount
         {

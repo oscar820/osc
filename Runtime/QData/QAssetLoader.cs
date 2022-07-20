@@ -339,14 +339,18 @@ namespace QTool.Asset
 				return null;
 			}
 		}
-		public static void PoolPush(string key, GameObject obj)
+		public static bool PoolPush(string key, GameObject obj)
 		{
 			if (key.Contains(" "))
 			{
 				key = key.Substring(0, key.IndexOf(" "));
 			}
-			AddressablesRelease(key);
-			QPoolManager.Push(DirectoryPath + "_" + key, obj);
+			var boolValue= QPoolManager.Push(DirectoryPath + "_" + key, obj);
+			if (boolValue)
+			{
+				AddressablesRelease(key);
+			}
+			return boolValue;
 		}
 
 
