@@ -152,11 +152,16 @@ namespace QTool
 			}
             return obj;
         }
+		Transform _poolParent = null;	
 		public Transform PoolParent
 		{
 			get
 			{
-				return QPoolManager.Instance.transform.GetChild(Key, true);
+				if (_poolParent == null)
+				{
+					_poolParent = QPoolManager.Instance.transform.GetChild(Key,true);
+				}
+				return _poolParent;
 			}
 		}
         T CheckPush(T obj)
@@ -285,6 +290,21 @@ namespace QTool
             isGameObject = type == typeof(GameObject);
             this.newFunc = newFunc;
             this.Key = poolName;
+			if (isCom || isGameObject)
+			{
+				UnityEngine.SceneManagement.SceneManager.sceneUnloaded += (scene) =>
+				{
+					Clear();
+					for (int i = PoolParent.childCount-1; i >=0; i--)
+					{
+						var child = PoolParent.GetChild(i);
+						if (child != null)
+						{
+							GameObject.Destroy(child);
+						}
+					}
+				};
+			}
         }
     }
 }
