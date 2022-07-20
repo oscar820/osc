@@ -157,11 +157,7 @@ namespace QTool
 		{
 			get
 			{
-				if (_poolParent == null)
-				{
-					_poolParent = QPoolManager.Instance.transform.GetChild(Key,true);
-				}
-				return _poolParent;
+				return QPoolManager.Instance.transform.GetChild( Key, true);
 			}
 		}
         T CheckPush(T obj)
@@ -264,18 +260,16 @@ namespace QTool
                 return CanUsePool.Count;
             }
         }
-		public void Clear()
-		{
-			for (int i = PoolParent.childCount - 1; i >= 0; i--)
+        public void Clear()
+        {
+			lock (UsingPool)
 			{
-				var child = PoolParent.GetChild(i);
-				if (child != null)
-				{
-					GameObject.Destroy(child);
-				}
+				UsingPool.Clear();
 			}
-			UsingPool.Clear();
-			CanUsePool.Clear();
+			lock (CanUsePool)
+			{
+				CanUsePool.Clear();
+			}
 			QDebug.ChangeProfilerCount(Key + " " + nameof(AllCount), AllCount);
 			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 		}
@@ -292,14 +286,7 @@ namespace QTool
             isGameObject = type == typeof(GameObject);
             this.newFunc = newFunc;
             this.Key = poolName;
-			if (isCom || isGameObject)
-			{
-				UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene,mode) =>
-				{
-					Clear();
-					
-				};
-			}
+
         }
     }
 }
