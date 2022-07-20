@@ -134,11 +134,8 @@ namespace QTool
             {
                 if ((obj as T).Equals(null))
                 {
-					lock (UsingPool)
-					{
-						UsingPool.Remove(obj);
-					}
-                    obj = PrivateGet();
+					UsingPool.Remove(obj);
+					obj = PrivateGet();
                 }
                 var gameObj = GetGameObj(obj);
                 if (gameObj != null)
@@ -146,11 +143,8 @@ namespace QTool
                     gameObj.SetActive(true);
                 }
             }
-			lock (UsingPool)
-			{
-				UsingPool.AddCheckExist(obj);
-			}
-            return obj;
+			UsingPool.AddCheckExist(obj);
+			return obj;
         }
 		//Transform _poolParent = null;	
 		public Transform PoolParent
@@ -176,21 +170,15 @@ namespace QTool
             {
                 (obj as IPoolObject).OnPoolRecover();
             }
-			lock (UsingPool)
-			{
-				UsingPool.Remove(obj);
-			}
-            return obj;
+			UsingPool.Remove(obj);
+			return obj;
         }
         private T PrivateGet()
         {
 			if (CanUsePool.Count > 0)
 			{
 				T obj = default;
-				lock (CanUsePool)
-				{
-					obj = CanUsePool.Dequeue();
-				}
+				obj = CanUsePool.Dequeue();
 				QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 				return CheckGet(obj);
 			}
@@ -209,10 +197,8 @@ namespace QTool
 		{
 			if (obj != null && CanUsePool.Contains(obj))
 			{
-				lock (CanUsePool)
-				{
-					CanUsePool.Remove(obj);
-				}
+
+				CanUsePool.Remove(obj);
 				return CheckGet(obj);
 			}
 			else
@@ -247,10 +233,7 @@ namespace QTool
 				return;
 			}
 			var resultObj = CheckPush(obj);
-			lock (CanUsePool)
-			{
-				CanUsePool.Enqueue(resultObj);
-			}
+			CanUsePool.Enqueue(resultObj);
 			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 		}
         public int CanUseCount
@@ -262,14 +245,8 @@ namespace QTool
         }
         public void Clear()
         {
-			lock (UsingPool)
-			{
-				UsingPool.Clear();
-			}
-			lock (CanUsePool)
-			{
-				CanUsePool.Clear();
-			}
+			UsingPool.Clear();
+			CanUsePool.Clear();
 			QDebug.ChangeProfilerCount(Key + " " + nameof(AllCount), AllCount);
 			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 		}
