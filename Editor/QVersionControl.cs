@@ -123,7 +123,7 @@ namespace QTool
 			}
 			var result =CheckPathRun(nameof(Pull).ToLower() + " origin", path,true);
 			var mergerTip = "Your local changes to the following files would be overwritten by merge:";
-			var untrackedTip = "error: The following untracked working tree files would be overwritten by merge";
+			var untrackedTip = "error: The following untracked working tree files would be overwritten by merge:";
 			if (!CheckResult(result)||result.Contains(mergerTip))
 			{
 				if(!result.Contains(mergerTip) &&!result.Contains(untrackedTip))
