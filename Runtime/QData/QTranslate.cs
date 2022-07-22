@@ -185,8 +185,12 @@ namespace QTool
 			}
             return value;
         }
-	
-        [ViewButton("翻译刷新")]
+		private void OnEnable()
+		{
+			CheckFresh();
+		}
+
+		[ViewButton("翻译刷新")]
         private void CheckFresh(string key=null)
         {
             if (curValue != value)
