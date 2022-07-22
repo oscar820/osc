@@ -91,6 +91,8 @@ namespace QTool
         [ViewName("翻译结果")]
         [ReadOnly]
         private string translateResult = "";
+		[ViewName("强制刷新翻译")]
+		public bool forceUpdate;
         public string Language
         {
             get
@@ -106,7 +108,7 @@ namespace QTool
             }
             set
             {
-                if (this.value != value)
+                if (this.value != value||forceUpdate)
                 {
                     this.value = value;
                     CheckFresh();
