@@ -79,7 +79,7 @@ namespace QTool
 					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
 			}
 		}
-		public static string Build()
+		public static string Build(params string[] scenes)
 		{
 			BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
 			if (!BuildPipeline.isBuildingPlayer)
@@ -99,15 +99,10 @@ namespace QTool
 					return "";
 				}
 #endif
-				var sceneList = new List<string>();
-				sceneList.AddCheckExist(SceneManager.GetActiveScene().path);
-				foreach (var scene in EditorBuildSettings.scenes)
-				{
-					sceneList.AddCheckExist(scene.path);
-				}
+			
 				var buildOption = new BuildPlayerOptions
 				{
-					scenes = sceneList.ToArray(),
+					scenes = scenes,
 					locationPathName = GetBuildPath(),
 					target = buildTarget,
 					options = BuildOptions.None,
@@ -134,10 +129,22 @@ namespace QTool
 			return "";
 		}
      
-        [MenuItem("QTool/打包/打包测试当前场景")]
+        [MenuItem("QTool/打包/打包游戏")]
         private static void BuildRandRun()
-        {
-			PlayerPrefs.SetString("QToolBuildPath", Build());
+		{
+			var sceneList = new List<string>();
+			sceneList.AddCheckExist(SceneManager.GetActiveScene().path);
+			foreach (var scene in EditorBuildSettings.scenes)
+			{
+				sceneList.AddCheckExist(scene.path);
+			}
+			PlayerPrefs.SetString("QToolBuildPath", Build(sceneList.ToArray()));
+			RunBuild();
+		}
+		[MenuItem("QTool/打包/打包当前场景")]
+		private static void BuildRandRunScene()
+		{
+			PlayerPrefs.SetString("QToolBuildPath", Build(SceneManager.GetActiveScene().path));
 			RunBuild();
 		}
 		[MenuItem("QTool/打包/运行测试包")]
