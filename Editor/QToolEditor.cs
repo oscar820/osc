@@ -133,7 +133,6 @@ namespace QTool
         private static void BuildRandRun()
 		{
 			var sceneList = new List<string>();
-			sceneList.AddCheckExist(SceneManager.GetActiveScene().path);
 			foreach (var scene in EditorBuildSettings.scenes)
 			{
 				sceneList.AddCheckExist(scene.path);
