@@ -24,7 +24,7 @@ namespace QTool
         {
             captureOver = false;
             StartCoroutine(CaptureIEnumerator());
-            await Tool.Wait(() => captureOver);
+            await QTask.Wait(() => captureOver);
             return renderTexture;
         }
     }

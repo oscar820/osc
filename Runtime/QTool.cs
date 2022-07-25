@@ -42,6 +42,12 @@ namespace QTool
             }
             return KeyColor[colorKey];
         }
+
+		internal static Task<bool> Wait(float m_Seconds)
+		{
+			throw new NotImplementedException();
+		}
+
 		public static Transform GetChild(this Transform transform,string childPath,bool autuCreate=false)
 		{
 			if (childPath.SplitTowString(".", out var start, out var end))
@@ -94,41 +100,7 @@ namespace QTool
 			}
 			return str.RemveChars('{','}', '（','）','~','\n','\t','\r','、','|', '*', '“','”', '—','。', '…','=','#', ' ', ';', '；', '-', ',', '，', '<', '>', '【', '】', '[', ']', '{', '}', '!', '！', '?', '？', '.', '\'', '‘', '’', '\"', ':', '：');
 		}
-		public static async Task TaskRunCoroutine(this IEnumerator enumerator)
-		{
-			while (enumerator.MoveNext())
-			{
-				if(enumerator.Current is WaitForSeconds waitForSeconds)
-				{
-					var m_Seconds=(float)waitForSeconds.GetValue("m_Seconds");
-					if (Application.isPlaying)
-					{
-						if(!await Tool.WaitGameTime(m_Seconds))
-						{
-							return;
-						}
-					}
-					else
-					{
-						await Task.Delay((int)(m_Seconds*1000));
-					}
-				}
-				else
-				{
-					Debug.LogError(enumerator.Current);
-					typeof(WaitForSeconds).ForeachMemeber((file) =>
-					{
-						Debug.LogError(file.Name);
-					}, (member) =>
-					{
-						Debug.LogError(member.Name);
-					});
-					await Task.Yield();
-				}
-			
-			}
-			
-		}
+		
 		public static float ToComputeFloat(this object value)
 		{
 			if (value == null) return 0;
@@ -234,37 +206,13 @@ namespace QTool
 			return (vec.x > 0 && vec.x < 1 && vec.y > 0 && vec.y < 1);
 		}
 
-		public static async Task<bool> WaitGameTime(float second, bool ignoreTimeScale = false)
-        {
-            var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
-            return await Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
-        }
+	
 
 		public static string ToQTimeString(this DateTime time)
 		{
 			return time.ToString("yyyy-MM-dd HH:mm:ss.fff zzz"); 
 		}
-		public static Action StopAllWait;
-
-		public static async Task<bool> Wait(Func<bool> flagFunc)
-		{
-			var WaitStop = false;
-			if (flagFunc == null) return Application.isPlaying ;
-			Action OnWaitStop = () => { WaitStop = true; };
-			StopAllWait += OnWaitStop;
-			while (!flagFunc.Invoke())
-			{
-				await Task.Delay(100);
-				if (!Application.isPlaying||WaitStop)
-				{
-					StopAllWait -= OnWaitStop;
-					return false;
-				}
-			}
-			StopAllWait -= OnWaitStop;
-			return true;
-		}
-
+	
         internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
         {
             start?.Invoke();
