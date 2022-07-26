@@ -23,24 +23,34 @@ namespace QTool
             {
                 if (_instance == null)
                 {
-                     _instance= Resources.Load<T>(typeof(T).Name);
+					var key = typeof(T).Name;
+
+					 _instance = Resources.Load<T>(key);
+					AddressableLoad(key);
 #if UNITY_EDITOR
-                    if (_instance==null)
+					if (_instance==null)
                     {
                         var obj = ScriptableObject.CreateInstance<T>();
                         _instance = obj;
-                        UnityEditor.AssetDatabase.CreateAsset(obj, ("Assets/Resources/" + typeof(T).Name + ".asset").CheckFolder());
+                        UnityEditor.AssetDatabase.CreateAsset(obj, ("Assets/Resources/" + key + ".asset").CheckFolder());
 						if (!Application.isPlaying)
 						{
 							UnityEditor.AssetDatabase.Refresh();
 						}
                     }
-#endif 
-                }
+#endif
+				}
                 return _instance; 
             }
         }
-        public virtual void Awake()
+		static async void AddressableLoad(string key)
+		{
+#if Addressables
+			_instance = await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(key).Task;
+#endif
+		}
+
+		public virtual void Awake()
         {
             if (_instance != null) return;
             _instance = this as T;
