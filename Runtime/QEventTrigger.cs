@@ -23,25 +23,26 @@ namespace QTool
 		/// <param name="eventKey">事件名</param>
 		public static void Trigger(string eventKey)
         {
-			QDebug.Log("触发事件 "+eventKey);
-			eventKey = eventKey.Trim();
-            if (string.IsNullOrWhiteSpace(eventKey))
-            {
-                return;
-            }
-           // OnEventTigger?.Invoke(eventKey);
-            if (EventList.ContainsKey(eventKey))
-            {
-                EventList[eventKey]?.Invoke();
-            }
-			//if (OnceEventList.ContainsKey(eventKey))
-			//{
-			//	OnceEventList[eventKey]?.Invoke();
-			//	OnceEventList[eventKey] = null;
-			//}
-			if (KeyEventList.ContainsKey(eventKey))
+			Debug.Log("触发事件 " + eventKey);
+			try
 			{
-				KeyEventList[eventKey]?.Invoke(eventKey);
+				eventKey = eventKey.Trim();
+				if (string.IsNullOrWhiteSpace(eventKey))
+				{
+					return;
+				}
+				if (EventList.ContainsKey(eventKey))
+				{
+					EventList[eventKey]?.Invoke();
+				}
+				if (KeyEventList.ContainsKey(eventKey))
+				{
+					KeyEventList[eventKey]?.Invoke(eventKey);
+				}
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError("触发事件[" + eventKey + "]出错：\n" + e);
 			}
         }
         public static void Trigger<T>(string eventKey,T value)
@@ -88,22 +89,30 @@ namespace QTool
 		internal static QDictionary<string, System.Action<T>> OnceEventList = new QDictionary<string, System.Action<T>>();
 		public static void Trigger(string eventKey,T value)
         {
-			QDebug.Log("触发事件 " + eventKey + " " + value);
-			eventKey = eventKey.Trim();
-            if (string.IsNullOrWhiteSpace(eventKey))
-            {
-                return;
-            }
-           // OnEventTigger?.Invoke(eventKey, value);
-            if (EventList.ContainsKey(eventKey))
-            {
-                EventList[eventKey]?.Invoke(value);
-            }
-			if (OnceEventList.ContainsKey(eventKey))
+			Debug.Log("触发事件 " + eventKey+"("+value+")");
+			try
 			{
-				OnceEventList[eventKey]?.Invoke(value);
-				OnceEventList[eventKey] = null;
+				eventKey = eventKey.Trim();
+				if (string.IsNullOrWhiteSpace(eventKey))
+				{
+					return;
+				}
+				// OnEventTigger?.Invoke(eventKey, value);
+				if (EventList.ContainsKey(eventKey))
+				{
+					EventList[eventKey]?.Invoke(value);
+				}
+				if (OnceEventList.ContainsKey(eventKey))
+				{
+					OnceEventList[eventKey]?.Invoke(value);
+					OnceEventList[eventKey] = null;
+				}
 			}
+			catch (System.Exception e)
+			{
+				Debug.LogError("触发事件[" + eventKey + ":" + value + "]出错\n" + e);
+			}
+			
 		}
     }
     [System.Serializable]
