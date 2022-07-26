@@ -259,7 +259,7 @@ namespace QTool
 		{
 			return CheckPathRun("stash pop",path);
 		}
-		static async void PullAndCommitPush(string path,bool commit=true)
+		static void PullAndCommitPush(string path,bool commit=true)
 		{
 			EditorUtility.DisplayProgressBar("同步更新", "拉取远端更新中...", 0.2f);
 			var resultInfo =Pull(path);
@@ -289,6 +289,10 @@ namespace QTool
 				PullAndCommitPush(path,commit);
 			}
 			EditorUtility.ClearProgressBar();
+			if (CheckResult(resultInfo))
+			{
+				AssetDatabase.Refresh();
+			}
 		}
 	
 		public static string Status(string path)
