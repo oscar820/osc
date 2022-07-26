@@ -16,7 +16,7 @@ public class AddressableTest : MonoBehaviour
     async void LoadTest1()
     {
         //   Debug.LogError( await ResourceTest.GetAsync("test1"));
-         var obj=await ResourceTest.BothLoadAsync("Test1");
+         var obj=await ResourceTest.LoadAsync("Test1");
         text.text = "加载完成:" + obj;
     }
     [ContextMenu("加载全部")]

@@ -133,13 +133,6 @@ namespace QTool.Asset
 				return typeof(TPath).Name;
 			}
 		}
-		public static string ResourcesPathStart
-		{
-			get
-			{
-				return  DirectoryPath + '/';
-			}
-		}
 		public static async Task<IList<TObj>> BothLoadAllAsync()
 		{
 			List<TObj> objList = new List<TObj>();
@@ -186,71 +179,41 @@ namespace QTool.Asset
 			QDebug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + objList.ToOneString());
 			return objList;
 		}
-		public static TObj ResourcesLoad(string key)
-		{
-			var obj = Resources.Load<TObj>(ResourcesPathStart + key.Replace('\\', '/'));
-			if (obj != null && !Cache.ContainsKey(key))
-			{
-				Cache[key] = obj;
-			}
-			return obj;
-		}
-
-		public static async Task<TObj> BothLoadAsync(string key)
-		{
-			var obj = ResourcesLoad(key);
-#if Addressables
-
-			if (obj == null)
-			{
-				obj = await AddressablesLoad(key);
-			}
-
-#endif
-			if (obj == null)
-			{
-				Debug.LogError("加载" + key + "出错 结果为空" );
-			}
-			return obj;
-		}
-#if Addressables
-		public static string AddressablePathStart
-		{
-			get
-			{
-				return DirectoryPath + '/';
-			}
-		}
-		public static async Task<TObj> AddressablesLoad(string key)
+	
+		public static async Task<TObj> LoadAsync(string key)
 		{
 			TObj obj = null;
 			key = key.Replace('\\', '/');
+#if Addressables
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
-				obj = AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + AddressablePathStart + key);
+				obj = AssetDatabase.LoadAssetAtPath<TObj>("AddressableResources/" + DirectoryPath + "/" + key);
 			}
 			else
 
 #endif
 			{
-				var loader = Addressables.LoadAssetAsync<TObj>(AddressablePathStart + key);
+				var loader = Addressables.LoadAssetAsync<TObj>(DirectoryPath + "/" + key);
 				obj = await loader.Task;
 				if (loader.Status != UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
 				{
 					if (loader.OperationException != null)
 					{
-						Debug.LogError("异步加载" + AddressablePathStart + key + "出错" + loader.OperationException);
+						Debug.LogError("异步加载" + DirectoryPath + "/" + key + "出错" + loader.OperationException);
 					}
 				}
 			}
+#else
+			obj= Resources.Load<TObj>(DirectoryPath + "/" + key);
+#endif
 			if (obj != null && !Cache.ContainsKey(key))
 			{
 				Cache[key] = obj;
 			}
 			return obj;
 		}
-	
+#if Addressables
 		public static void AddressablesRelease(string key)
 		{
 			if (!Cache.ContainsKey(key))
@@ -299,7 +262,7 @@ namespace QTool.Asset
 #if Addressables
 		static async Task<ObjectPool<GameObject>> GetPool(string key)
 		{
-			var prefab = await AddressablesLoad(key);
+			var prefab = await LoadAsync(key);
 			if (prefab != null)
 			{
 				return QPoolManager.GetPool(DirectoryPath + "_" + key, prefab);
