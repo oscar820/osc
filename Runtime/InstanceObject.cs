@@ -26,7 +26,7 @@ namespace QTool
 					var key = typeof(T).Name;
 
 					 _instance = Resources.Load<T>(key);
-					AddressableLoad(key);
+				//	AddressableLoad(key);
 #if UNITY_EDITOR
 					if (_instance==null)
                     {
@@ -43,12 +43,12 @@ namespace QTool
                 return _instance; 
             }
         }
-		static async void AddressableLoad(string key)
-		{
-#if Addressables
-			_instance = await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(key).Task;
-#endif
-		}
+//		static async void AddressableLoad(string key)
+//		{
+//#if Addressables
+//			_instance = await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(key).Task;
+//#endif
+//		}
 
 		public virtual void Awake()
         {
