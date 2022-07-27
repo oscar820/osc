@@ -71,17 +71,33 @@ namespace QTool.Test
 			}
 			
 		}
-        public byte[] scenebytes;  
-        //[ContextMenu("保存场景")]
-        //public void SaveAll()
-        //{
-        //    scenebytes=QId.InstanceIdList.SaveAllInstance();
-        //}
-        //[ContextMenu("读取场景")]
-        //public void LoadAll()
-        //{
-        //    QId.InstanceIdList.LoadAllInstance(scenebytes);
-        //}
+        public byte[] scenebytes;
+		//[ContextMenu("保存场景")]
+		//public void SaveAll()
+		//{
+		//    scenebytes=QId.InstanceIdList.SaveAllInstance();
+		//}
+		//[ContextMenu("读取场景")]
+		//public void LoadAll()
+		//{
+		//    QId.InstanceIdList.LoadAllInstance(scenebytes);
+		//}\
+		[ContextMenu("StringReader测试")]
+		public void StringReaderTest()
+		{
+			Task.Run(() =>
+			{
+				using (var reader = new StringReader(commandStr))
+				{
+					while (!reader.IsEnd())
+					{
+						Debug.LogError(reader.ReadCheckString("", " "));
+						while (!reader.IsEnd() && reader.NextIs(' ')) ;
+					}
+				}
+			});
+		
+		}
 		[ContextMenu("运算符测试")]
 		public void OperarterTest()
 		{

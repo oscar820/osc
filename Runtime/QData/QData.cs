@@ -623,7 +623,7 @@ namespace QTool
 				writer.Write("\"");
 			}
 		}
-		public static string ReadCheckString(this StringReader reader,string ignore="")
+		public static string ReadCheckString(this StringReader reader,string ignore="", string end = "")
 		{
 			if (reader.NextIs('\"'))
 			{
@@ -668,7 +668,7 @@ namespace QTool
 			}
 			else
 			{
-				return ReadValueString(reader, ignore);
+				return ReadValueString(reader, ignore, end);
 			}
 		}
 
