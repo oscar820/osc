@@ -17,7 +17,8 @@ namespace QTool
         public static bool Invoke(string commandStr) 
         {
             if (string.IsNullOrWhiteSpace(commandStr)) return false;
-			commandStr.ForeachBlockValue('\"', '\"',(value)=> { return value.Replace(" ", "@#&"); });
+			commandStr =commandStr.ForeachBlockValue('\"', '\"',(value)=> { return value.Replace(" ", "@#&"); });
+			commandStr = commandStr.ForeachBlockValue('“', '”', (value) => { return value.Replace(" ", "@#&"); });
 			List<string> commands = new List<string>();
 			commands.AddRange(commandStr.Split(' '));
 
