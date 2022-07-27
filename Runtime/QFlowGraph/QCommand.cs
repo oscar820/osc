@@ -17,25 +17,20 @@ namespace QTool
         public static bool Invoke(string commandStr) 
         {
             if (string.IsNullOrWhiteSpace(commandStr)) return false;
-
+			commandStr.ForeachBlockValue('\"', '\"',(value)=> { return value.Replace(" ", "@#&"); });
 			List<string> commands = new List<string>();
-			using (var reader=new System.IO.StringReader(commandStr))
-			{
-				while (!reader.IsEnd())
-				{
-					var cmd = reader.ReadValueString("", " ");
-					commands.Add(cmd);
-					while (reader.NextIs(' ')) ;
-				}
-			}
+			commands.AddRange(commandStr.Split(' '));
+
 			commands.RemoveSpace();
+			for (int i = 0; i < commands.Count; i++)
+			{
+				commands[i] = commands[i].Replace("@#&", " ");
+			}
             if (commands.Count > 0)
             {
                 var name = commands.Dequeue();
-				Debug.LogError("[" + name + "]" + NameDictionary.ContainsKey(name));
                 if (NameDictionary.ContainsKey(name))
 				{
-					Debug.LogError(commands.ToOneString());
 					if (!NameDictionary[name].Invoke(commands))
                     {
                         return false;

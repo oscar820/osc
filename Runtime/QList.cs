@@ -294,7 +294,8 @@ namespace QTool
 		{
 			if (string.IsNullOrEmpty(value)) { return value; }
 			var start = value.IndexOf(startChar);
-			var end = value.IndexOf(endChar);
+			if (start < 0) return value;
+			var end = value.IndexOf(endChar, start+1);
 			if (start < 0 || end < 0) return value;
 			while (start >= 0 && end >= 0)
 			{
@@ -303,7 +304,8 @@ namespace QTool
 				value = value.Substring(0, start) + result + value.Substring(end + 1);
 				end += result.Length - key.Length - 2;
 				start = value.IndexOf(startChar, end+1);
-				end = value.IndexOf(endChar, end+1);
+				if (start < 0) break;
+				end = value.IndexOf(endChar, start);
 			}
 			return value;
 		}
