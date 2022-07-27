@@ -17,6 +17,7 @@ namespace QTool
 
     public static partial class Tool
     {
+		public static CultureInfo RealyCulture= CultureInfo.CurrentCulture;
 #if UNITY_EDITOR
 		[UnityEditor.InitializeOnLoadMethod]
 #else
@@ -24,6 +25,7 @@ namespace QTool
 #endif
 		static void Init()  
 		{
+			RealyCulture = CultureInfo.CurrentCulture;
 			CultureInfo.CurrentCulture = new CultureInfo("en-US");
 			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
 			QTranslate.KeyReplace["版本号"] = Application.version;
