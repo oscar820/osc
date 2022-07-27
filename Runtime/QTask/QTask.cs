@@ -42,7 +42,7 @@ namespace QTool
 					var m_Seconds = (float)waitForSeconds.GetValue("m_Seconds");
 					if (Application.isPlaying)
 					{
-						if (!await Tool.Wait(m_Seconds))
+						if (!await QTask.Wait(m_Seconds))
 						{
 							return;
 						}

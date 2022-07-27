@@ -43,10 +43,10 @@ namespace QTool
             return KeyColor[colorKey];
         }
 
-		internal static Task<bool> Wait(float m_Seconds)
-		{
-			throw new NotImplementedException();
-		}
+		//internal static Task<bool> Wait(float m_Seconds)
+		//{
+		//	throw new NotImplementedException();
+		//}
 
 		public static Transform GetChild(this Transform transform,string childPath,bool autuCreate=false)
 		{

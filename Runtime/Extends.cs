@@ -9,10 +9,12 @@ namespace QTool
 {
     public static partial class Tool
     {
-        public static async void DelayInvoke(this float time,System.Action action)
+        public static async void DelayInvoke(this float time,System.Action action,bool ignoreGameTime=true)
         {
-            await Task.Delay((int)(time * 1000));
-            action?.Invoke();
+			if(await QTask.Wait(time, ignoreGameTime))
+			{
+				action?.Invoke();
+			}
         }
         public static Vector3 RayCastPlane(this Ray ray, Vector3 planeNormal, Vector3 planePoint)
         {

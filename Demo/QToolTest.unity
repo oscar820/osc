@@ -2389,6 +2389,7 @@ MonoBehaviour:
   value: "asdlk{\u6D4B\u8BD5\u6587\u672C}\u963F\u677E\u5927{\u7248\u672C\u53F7}dadaslkj"
   language: 
   translateResult: "asdlk\u7248\u672C\u53F7\u963F\u677E\u59270.22dadaslkj"
+  forceUpdate: 0
   OnValueChange:
     m_PersistentCalls:
       m_Calls: []
@@ -3066,6 +3067,7 @@ MonoBehaviour:
   value: "asdlk{\u6D4B\u8BD5\u6587\u672C}\u963F\u677E\u5927{\u7248\u672C\u53F7}dadaslkj"
   language: 
   translateResult: "asdlk\u7248\u672C\u53F7\u963F\u677E\u59270.22dadaslkj"
+  forceUpdate: 0
   OnValueChange:
     m_PersistentCalls:
       m_Calls: []
@@ -11935,6 +11937,10 @@ PrefabInstance:
     - target: {fileID: 1342849157534090733, guid: e3b8399edb6b7064e8f550458a54bdd3, type: 3}
       propertyPath: testTimes
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1342849157534090733, guid: e3b8399edb6b7064e8f550458a54bdd3, type: 3}
+      propertyPath: commandStr
+      value: "\u65E5\u5FD7\u963F\u677E\u5927 \"\u963F\u677E\u5927 asd\""
       objectReference: {fileID: 0}
     - target: {fileID: 1342849157534090733, guid: e3b8399edb6b7064e8f550458a54bdd3, type: 3}
       propertyPath: testBytes.Array.size
