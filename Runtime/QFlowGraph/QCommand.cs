@@ -17,14 +17,26 @@ namespace QTool
         public static bool Invoke(string commandStr) 
         {
             if (string.IsNullOrWhiteSpace(commandStr)) return false;
-            List<string> commands =new List<string>( commandStr.Split(' '));
-            commands.RemoveSpace();
+
+			List<string> commands = new List<string>();
+			using (var reader=new System.IO.StringReader(commandStr))
+			{
+				while (!reader.IsEnd())
+				{
+					var cmd = reader.ReadValueString("", " ");
+					commands.Add(cmd);
+					while (reader.NextIs(' ')) ;
+				}
+			}
+			commands.RemoveSpace();
             if (commands.Count > 0)
             {
                 var name = commands.Dequeue();
+				Debug.LogError("[" + name + "]" + NameDictionary.ContainsKey(name));
                 if (NameDictionary.ContainsKey(name))
-                {
-                    if(!NameDictionary[name].Invoke(commands))
+				{
+					Debug.LogError(commands.ToOneString());
+					if (!NameDictionary[name].Invoke(commands))
                     {
                         return false;
                     }
@@ -153,7 +165,15 @@ namespace QTool
                 {
                     try
                     {
-                        paramObjs[i] = commands[i].ParseQDataType(pInfo.ParameterType);
+						if (pInfo.ParameterType == typeof(object))
+						{
+							paramObjs[i] = commands[i];
+						}
+						else
+						{
+							paramObjs[i] = commands[i].ParseQDataType(pInfo.ParameterType);
+						}
+
                     }
                     catch (Exception e)
                     {

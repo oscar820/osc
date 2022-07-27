@@ -540,8 +540,9 @@ namespace QTool
 		const string BlockStart = "<{[\"";
 		const string BlockEnd = ">}]\",;=:";
 		static Stack<char> BlockStack = new Stack<char>();
-		public static string ReadValueString(this StringReader reader,string ignore="")
+		public static string ReadValueString(this StringReader reader,string ignore="",string end="")
 		{
+			string checkEnd = BlockEnd + end;
 			return Tool.BuildString((writer) =>
 			{
 				int index = -1;
@@ -551,13 +552,13 @@ namespace QTool
 					var c = (char)reader.Peek();
 					if (BlockStack.Count == 0)
 					{
-						if (ignore.IndexOf(c) < 0 && BlockEnd.IndexOf(c) >= 0)
+						if (ignore.IndexOf(c) < 0 && checkEnd.IndexOf(c) >= 0)
 						{
 							break;
 						}
 						else if ((index = BlockStart.IndexOf(c)) >= 0)
 						{
-							BlockStack.Push(BlockEnd[index]);
+							BlockStack.Push(checkEnd[index]);
 						}
 					}
 					else
@@ -568,7 +569,7 @@ namespace QTool
 						}
 						else if ((index = BlockStart.IndexOf(c)) >= 0)
 						{
-							BlockStack.Push(BlockEnd[index]);
+							BlockStack.Push(checkEnd[index]);
 						}
 					}
 					reader.Read();
