@@ -207,7 +207,7 @@ namespace QTool.Asset
 #else
 			obj= Resources.Load<TObj>(DirectoryPath + "/" + key);
 #endif
-			if (obj != null && !Cache.ContainsKey(key))
+			if (obj != null && (!Cache.ContainsKey(key)||Cache[key]==null))
 			{
 				Cache[key] = obj;
 			}
