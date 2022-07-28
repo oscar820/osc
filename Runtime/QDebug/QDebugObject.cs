@@ -6,7 +6,7 @@ public class QDebugObject : MonoBehaviour
 {
 	private void Awake()
 	{
-#if QDebug
+#if !QDebug
 		gameObject.SetActive(false);
 #endif
 	}
