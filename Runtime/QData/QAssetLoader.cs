@@ -310,14 +310,14 @@ namespace QTool.Asset
 				return null;
 			}
 		}
-		public static bool PoolPush(string key, GameObject obj)
+		public static bool PoolPush(string key, GameObject obj,bool release=true)
 		{
 			if (key.Contains(" "))
 			{
 				key = key.Substring(0, key.IndexOf(" "));
 			}
 			var boolValue= QPoolManager.Push(DirectoryPath + "_" + key, obj);
-			if (boolValue)
+			if (boolValue&& release)
 			{
 				AddressablesRelease(key);
 			}
@@ -338,7 +338,7 @@ namespace QTool.Asset
 				}
 				if (await QTask.Wait(0.1f, true))
 				{
-					PoolPush(key,previewObj);
+					PoolPush(key,previewObj,false);
 				}
 			}
 		}
