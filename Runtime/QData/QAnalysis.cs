@@ -102,7 +102,7 @@ namespace QTool
 					bool sendEvent = false;
 					foreach (var eventData in EventList)
 					{
-						if(eventData.eventKey!= nameof(QAnalysisEventName.游戏_暂离))
+						if(eventData.eventKey!= nameof(QAnalysisEventName.游戏_暂离).Replace("_","/"))
 						{
 							sendEvent = true;
 							break;
