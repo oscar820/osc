@@ -216,9 +216,17 @@ namespace QTool.Asset
 #if Addressables
 		public static void AddressablesRelease(string key)
 		{
-			if (!Cache.ContainsKey(key))
+			if (!Cache.ContainsKey(key)||Cache[key]==null)
 			{
-				Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 " + key);
+				if (Cache.ContainsKey(key))
+				{
+					Debug.LogWarning(typeof(QAssetLoader<TPath, TObj>) + " 资源为空 [" + key+"]");
+					Cache.Remove(key);
+				}
+				else
+				{
+					Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 [" + key+"]");
+				}
 				return;
 			}
 			Addressables.Release(Cache[key]);
