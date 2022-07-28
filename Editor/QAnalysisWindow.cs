@@ -63,6 +63,8 @@ namespace QTool
 					}
 				}
 				QAnalysisData.Setting.StartVersion = EditorGUILayout.TextField(QAnalysisData.Setting.StartVersion,GUILayout.Width(100));
+				GUILayout.Label("事件：" + QAnalysisData.EventList.Count);
+				GUILayout.Label("玩家：" + QAnalysisData.Instance.PlayerDataList.Count);
 				if (DrawButton("刷新数据"))
 				{
 					FreshData();
