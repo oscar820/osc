@@ -472,7 +472,7 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static void AddNewEventList()
+		static async Task AddNewEventList()
 		{
 			QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 			var start = DateTime.Now;
@@ -493,6 +493,15 @@ namespace QTool
 					AddEvent(eventData);
 					EditorUtility.DisplayProgressBar("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
 				}
+			}
+			Task[] tasks = new Task[Instance.PlayerDataList.Count];
+			for (int i = 0; i < tasks.Length; i++)
+			{
+				tasks[i] = Instance.PlayerDataList[i]?.ParseDataAsync();
+			}
+			for (int i = 0; i < tasks.Length; i++)
+			{
+				await tasks[i];
 			}
 			EditorUtility.ClearProgressBar();
 			QDebug.Log("添加事件" + NewEventList.Count + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
@@ -528,7 +537,7 @@ namespace QTool
 					}
 					Instance.LastMail = mailInfo;
 				}, Instance.LastMail);
-				AddNewEventList();
+				await AddNewEventList();
 				SaveData();
 				QDebug.Log("保存完成");
 			}
@@ -567,37 +576,15 @@ namespace QTool
 		public static void AddEvent(QAnalysisEvent eventData)
 		{
 			if (EventList.ContainsKey(eventData.Key)) return;
-			if (eventData.eventKey.Contains("_"))
-			{
-				eventData.eventKey = eventData.eventKey.Replace("_", "/");
-			}
-			if (eventData.eventKey.Contains("开始")&&!eventData.eventKey.Contains("/开始"))
-			{
-				eventData.eventKey = eventData.eventKey.Replace("开始", "/开始");
-			}
-			if (eventData.eventKey.Contains("结束") && !eventData.eventKey.Contains("/结束"))
-			{
-				eventData.eventKey = eventData.eventKey.Replace("结束", "/结束");
-			}
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
 			CheckTitle(eventData.eventKey, eventData.eventValue);
-	
-			if (eventData.eventValue != null)
-			{
-				foreach (var memeberInfo in QSerializeType.Get(eventData.eventValue.GetType()).Members)
-				{
-					var key = eventData.eventKey + "/" + memeberInfo.Key;
-					Instance.DataKeyList.AddCheckExist(key);
-					CheckTitle(key, eventData.eventValue == null ? null : memeberInfo.Get(eventData.eventValue));
-	
-				}
-			}
 			EventList.Add(eventData);
 			Instance.PlayerDataList[eventData.playerId].Add(eventData);
 		}
 		static void CheckTitle(string key,object value)
 		{
+			if (TitleList.ContainsKey(key)) return;
 			var title = TitleList[key];
 			if (title.DataSetting.mode== QAnalysisMode.更新时间)
 			{
@@ -631,7 +618,18 @@ namespace QTool
 				}
 				tKey = end;
 			}
-		
+
+			if (value != null)
+			{
+				foreach (var memeberInfo in QSerializeType.Get(value.GetType()).Members)
+				{
+					var memeberKey = key + "/" + memeberInfo.Key;
+					Instance.DataKeyList.AddCheckExist(memeberKey);
+					CheckTitle(memeberKey,value== null ? null : memeberInfo.Get(value));
+
+				}
+			}
+
 		}
 	}
 	public class QTitleInfo:IKey<string>
@@ -1027,40 +1025,45 @@ namespace QTool
 		public string Key { get; set; }
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
+		[QIgnore]
+		List<QAnalysisEvent> eventBuffer = new List<QAnalysisEvent>();
 		public void Add(QAnalysisEvent eventData)
 		{
-			UpdateTime = eventData.eventTime;
-			EventList.AddCheckExist(eventData.eventId);
-			foreach (var title in QAnalysisData.TitleList)
+			eventBuffer.Add(eventData);
+		}
+		public async Task ParseDataAsync()
+		{
+			await Task.Run(() =>
 			{
-				if (title.DataSetting.EventKey == eventData.eventKey)
+				try
 				{
-					AnalysisData[title.Key].AddEvent(eventData);
-					//AnalysisData[title.Key].changed = true;
+					for (int i = 0; i < eventBuffer.Count; i++)
+					{
+						var eventData = eventBuffer[i];
+						EditorUtility.DisplayProgressBar("["+Key+"]解析事件", i + "/" + eventBuffer.Count + " " + eventData.eventKey, i * 1f / eventBuffer.Count);
+						UpdateTime = eventData.eventTime;
+						EventList.AddCheckExist(eventData.eventId);
+						foreach (var title in QAnalysisData.TitleList)
+						{
+							if (title.DataSetting.EventKey == eventData.eventKey)
+							{
+								AnalysisData[title.Key].AddEvent(eventData);
+							}
+							else if (title.DataSetting.mode == QAnalysisMode.更新时间 && eventData.eventKey.StartsWith(title.Key))
+							{
+								AnalysisData[title.Key].AddEvent(eventData);
+							}
+						}
+					}
+					eventBuffer.Clear();
 				}
-				else if(title.DataSetting.mode== QAnalysisMode.更新时间&&eventData.eventKey.StartsWith(title.Key))
+				catch (Exception e)
 				{
-					AnalysisData[title.Key].AddEvent(eventData);
+					Debug.LogError(Key + "添加事件出错 ：" + e);
 				}
-				//else if(title.DataSetting.TargetKey == eventData.eventKey)
-				//{
-				////	AnalysisData[title.Key].changed = true;
-				//}
-				//else if (eventData.eventKey == nameof(QAnalysis.QAnalysisEventName.游戏暂离))
-				//{
-				//	switch (title.DataSetting.mode)
-				//	{
-				//		case QAnalysisMode.总时长:
-				//		case QAnalysisMode.最新时长:
-				//			{
-				//			//	AnalysisData[title.Key].changed = true;
-				//			}
-				//			break;
-				//		default:
-				//			break;
-				//	}
-				//}
-			}
+			
+			});
+			
 		}
 		public void FreshKey(string titleKey)
 		{
