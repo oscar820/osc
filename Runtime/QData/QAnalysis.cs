@@ -28,7 +28,7 @@ namespace QTool
 				return true;
 			}
 		}
-		//public static int AutoSendCount { get; set; } =100;
+		public static int AutoSendCount { get; set; } =3000;
 		public static void Start(string playerId)
 		{
 			try
@@ -220,10 +220,10 @@ namespace QTool
 						PlayerPrefs.SetString(EventListKey, EventList.ToQData());
 					//}
 					QDebug.Log(StartKey + " 触发事件 " + eventData);
-					//if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
-					//{
-					//	sendTask=SendAndClear();
-					//}
+					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
+					{
+						sendTask=SendAndClear();
+					}
 
 				}
 				catch (Exception e)
