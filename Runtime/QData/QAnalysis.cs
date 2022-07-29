@@ -28,7 +28,7 @@ namespace QTool
 				return true;
 			}
 		}
-		public static int AutoSendCount { get; set; } =100;
+		//public static int AutoSendCount { get; set; } =100;
 		public static void Start(string playerId)
 		{
 			try
@@ -97,22 +97,22 @@ namespace QTool
 			if (!focus)
 			{
 				Trigger(nameof(QAnalysisEventName.游戏_暂离));
-				if (!Application.isEditor)
-				{
-					bool sendEvent = false;
-					foreach (var eventData in EventList)
-					{
-						if(eventData.eventKey!= nameof(QAnalysisEventName.游戏_暂离).Replace("_","/"))
-						{
-							sendEvent = true;
-							break;
-						}
-					}
-					if (sendEvent)
-					{
-						sendTask = SendAndClear();
-					}
-				}
+				//if (!Application.isEditor)
+				//{
+				//	bool sendEvent = false;
+				//	foreach (var eventData in EventList)
+				//	{
+				//		if(eventData.eventKey!= nameof(QAnalysisEventName.游戏_暂离).Replace("_","/"))
+				//		{
+				//			sendEvent = true;
+				//			break;
+				//		}
+				//	}
+				//	if (sendEvent)
+				//	{
+				//		sendTask = SendAndClear();
+				//	}
+				//}
 			}
 		}
 		static bool OnWantsQuit()
@@ -220,10 +220,10 @@ namespace QTool
 						PlayerPrefs.SetString(EventListKey, EventList.ToQData());
 					//}
 					QDebug.Log(StartKey + " 触发事件 " + eventData);
-					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
-					{
-						sendTask=SendAndClear();
-					}
+					//if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
+					//{
+					//	sendTask=SendAndClear();
+					//}
 
 				}
 				catch (Exception e)
