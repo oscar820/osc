@@ -28,6 +28,7 @@ namespace QTool
 				return true;
 			}
 		}
+		public static int MinSendCount { get; set; } = 100;
 		public static int AutoSendCount { get; set; } =5000;
 		public static void Start(string playerId)
 		{
@@ -97,22 +98,6 @@ namespace QTool
 			if (!focus)
 			{
 				Trigger(nameof(QAnalysisEventName.游戏_暂离));
-				//if (!Application.isEditor)
-				//{
-				//	bool sendEvent = false;
-				//	foreach (var eventData in EventList)
-				//	{
-				//		if(eventData.eventKey!= nameof(QAnalysisEventName.游戏_暂离).Replace("_","/"))
-				//		{
-				//			sendEvent = true;
-				//			break;
-				//		}
-				//	}
-				//	if (sendEvent)
-				//	{
-				//		sendTask = SendAndClear();
-				//	}
-				//}
 			}
 		}
 		static bool OnWantsQuit()
@@ -164,7 +149,7 @@ namespace QTool
 			if (PlayerPrefs.HasKey(EventListKey))
 			{
 				var count = EventList.Count;
-				if (count > 0)
+				if (count > MinSendCount)
 				{
 					List<QAnalysisEvent> tempList = new List<QAnalysisEvent>();
 					var data = "";
