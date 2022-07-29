@@ -185,7 +185,11 @@ namespace QTool
 			{
 				return timeSpan.ToString("hh\\:mm\\:ss");
 			}
-			else
+			else if(obj is DateTime dateTime&& dateTime.Ticks ==0)
+			{
+				return "";
+			}
+			else 
 			{
 				return obj.ToString();
 			}
