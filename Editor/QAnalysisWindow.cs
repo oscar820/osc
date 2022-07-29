@@ -92,7 +92,7 @@ namespace QTool
 				if (QAnalysisData.IsLoading)
 				{
 					GUI.enabled = true;
-					GUILayout.Label("加载中..", QGUITool.BackStyle);
+					GUILayout.Label("加载中.."+QAnalysisData.loadingInfo, QGUITool.BackStyle);
 				}
 			}
 			GridView.DoLayout(Repaint);
@@ -261,7 +261,6 @@ namespace QTool
 		public async void FreshData()
 		{
 			await QAnalysisData.FreshData();
-			Repaint();
 		}
 		Stack<string> ViewInfoStack = new Stack<string>();
 		Stack<string> ViewPlayerStack = new Stack<string>();
@@ -455,6 +454,11 @@ namespace QTool
 			}
 		}
 		public static bool IsLoading { get; private set; } = false;
+		public static string loadingInfo;
+		public static void LoadingInfo(string title,string info,float rate)
+		{
+			loadingInfo =title+" "+ info;
+		}
 		public void AddTitle(QTitleInfo newTitle)
 		{
 			TitleList.Add(newTitle);
@@ -491,7 +495,7 @@ namespace QTool
 				if(playerVersion[eventData.playerId] >= startV)
 				{
 					AddEvent(eventData);
-					EditorUtility.DisplayProgressBar("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
+					LoadingInfo("添加事件", i + "/" + NewEventList.Count + " " + eventData.eventKey, i * 1f / NewEventList.Count);
 				}
 			}
 			Task[] tasks = new Task[Instance.PlayerDataList.Count];
@@ -503,7 +507,6 @@ namespace QTool
 			{
 				await tasks[i];
 			}
-			EditorUtility.ClearProgressBar();
 			QDebug.Log("添加事件" + NewEventList.Count + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
 			NewEventList.Clear();
 		}
@@ -518,7 +521,7 @@ namespace QTool
 				return;
 			}
 			IsLoading = true;
-
+			loadingInfo = "";
 			try
 			{
 				NewEventList.Clear();
@@ -1033,13 +1036,14 @@ namespace QTool
 		}
 		public async Task ParseDataAsync()
 		{
-			for (int i = 0; i < eventBuffer.Count; i++)
+			await Task.Run(() =>
 			{
-				var eventData = eventBuffer[i];
-				EditorUtility.DisplayProgressBar("[" + Key + "]解析事件", i + "/" + eventBuffer.Count + " " + eventData.eventKey, i * 1f / eventBuffer.Count);
-				UpdateTime = eventData.eventTime;
-				await Task.Run(() =>
+				for (int i = 0; i < eventBuffer.Count; i++)
 				{
+					var eventData = eventBuffer[i];
+					QAnalysisData.LoadingInfo("[" + Key + "]解析事件", i + "/" + eventBuffer.Count + " " + eventData.eventKey, i * 1f / eventBuffer.Count);
+					UpdateTime = eventData.eventTime;
+
 					try
 					{
 						EventList.AddCheckExist(eventData.eventId);
@@ -1057,13 +1061,14 @@ namespace QTool
 					}
 					catch (Exception e)
 					{
-						Debug.LogError(Key + "添加事件出错 ：" + e);
+						Debug.LogError(Key + "解析事件出错事件出错 ：" + e);
 					}
-				});
-				
-			}
-			eventBuffer.Clear();
-			
+
+
+				}
+				eventBuffer.Clear();
+			});
+
 		}
 		public void FreshKey(string titleKey)
 		{
