@@ -1033,15 +1033,15 @@ namespace QTool
 		}
 		public async Task ParseDataAsync()
 		{
-			await Task.Run(() =>
+			for (int i = 0; i < eventBuffer.Count; i++)
 			{
-				try
+				var eventData = eventBuffer[i];
+				EditorUtility.DisplayProgressBar("[" + Key + "]解析事件", i + "/" + eventBuffer.Count + " " + eventData.eventKey, i * 1f / eventBuffer.Count);
+				UpdateTime = eventData.eventTime;
+				await Task.Run(() =>
 				{
-					for (int i = 0; i < eventBuffer.Count; i++)
+					try
 					{
-						var eventData = eventBuffer[i];
-						EditorUtility.DisplayProgressBar("["+Key+"]解析事件", i + "/" + eventBuffer.Count + " " + eventData.eventKey, i * 1f / eventBuffer.Count);
-						UpdateTime = eventData.eventTime;
 						EventList.AddCheckExist(eventData.eventId);
 						foreach (var title in QAnalysisData.TitleList)
 						{
@@ -1055,14 +1055,14 @@ namespace QTool
 							}
 						}
 					}
-					eventBuffer.Clear();
-				}
-				catch (Exception e)
-				{
-					Debug.LogError(Key + "添加事件出错 ：" + e);
-				}
-			
-			});
+					catch (Exception e)
+					{
+						Debug.LogError(Key + "添加事件出错 ：" + e);
+					}
+				});
+				
+			}
+			eventBuffer.Clear();
 			
 		}
 		public void FreshKey(string titleKey)
