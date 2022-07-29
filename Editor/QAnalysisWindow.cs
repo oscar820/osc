@@ -660,7 +660,7 @@ namespace QTool
 			}
 			else
 			{
-				var index = Key.IndexOf(viewInfo) ;
+				var index = Key.IndexOf(viewInfo+"/") ;
 				if (index == 0 && !Key.Substring(index + viewInfo.Length+1).Contains("/"))
 				{
 					return true;
