@@ -64,7 +64,7 @@ namespace QTool
 					}
 				}
 				QAnalysisData.Setting.StartVersion = EditorGUILayout.TextField(QAnalysisData.Setting.StartVersion,GUILayout.Width(100));
-				GUILayout.Label("事件：" + QAnalysisData.EventList.Count, GUILayout.Width(80));
+				GUILayout.Label("事件：" + QAnalysisData.EventList.Count, GUILayout.Width(120));
 				GUILayout.Label("玩家：" + QAnalysisData.Instance.PlayerDataList.Count, GUILayout.Width(80));
 				if (DrawButton("刷新数据"))
 				{
@@ -93,11 +93,13 @@ namespace QTool
 				if (QAnalysisData.IsLoading)
 				{
 					GUI.enabled = true;
-					GUILayout.Label("加载中.."+QAnalysisData.LoadingInfo, QGUITool.BackStyle);
+					GUILayout.Label("", QGUITool.BackStyle);
 					lastRect = GUILayoutUtility.GetLastRect();
-					lastRect.width *=QAnalysisData.LoadingRate;
-					GUI.Box(lastRect, "", QGUITool.BackStyle);
-					GUI.Box(lastRect, "", QGUITool.BackStyle); ;
+					var rateRect = lastRect;
+					rateRect.width *=QAnalysisData.LoadingRate;
+					GUI.Box(rateRect, "", QGUITool.BackStyle); 
+					GUI.Label(lastRect,"加载中.." + QAnalysisData.LoadingInfo, QGUITool.BackStyle);
+					
 				}
 			}
 			GridView.DoLayout(Repaint);
