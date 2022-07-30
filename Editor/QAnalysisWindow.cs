@@ -580,13 +580,13 @@ namespace QTool
 					}
 					Instance.LastMail = mailInfo;
 				}, Instance.LastMail);
+				EditorUtility.ClearProgressBar();
 				foreach (var task in PlayerTasks)
 				{
 					if (task.Value == null) continue;
 					await task.Value;
 				}
 				PlayerTasks.Clear();
-				EditorUtility.ClearProgressBar();
 				SaveData();
 				QDebug.Log("保存完成");
 			}
