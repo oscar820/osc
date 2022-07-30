@@ -560,15 +560,16 @@ namespace QTool
 								for (int i = 0; i < list.Count; i++)
 								{
 									var eventData = list[i];
+									lock(Instance.PlayerDataList)
+									{
+										var playerData = Instance.PlayerDataList[eventData.playerId];
+									}
 									SetLoadingInfo("解析玩家数据["+playerKey+"]", i + "/" + list.Count + " "+eventData.eventKey, i * 1f / list.Count);
 									var version = playerVersion[eventData.playerId];
 									if ("游戏/开始".Equals(eventData.eventKey))
 									{
 										version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
-										lock (playerVersion)
-										{
-											playerVersion[eventData.playerId] = version;
-										}
+										playerVersion[eventData.playerId] = version;
 									}
 									if (version >= startV)
 									{
@@ -631,10 +632,7 @@ namespace QTool
 			{
 				EventList.Add(eventData);
 			}
-			lock (Instance.PlayerDataList)
-			{
-				Instance.PlayerDataList[eventData.playerId].Add(eventData);
-			}
+			Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
 			CheckTitle(eventData.eventKey, eventData.eventValue);
