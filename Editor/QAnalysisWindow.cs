@@ -483,16 +483,13 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static async Task AddNewEventList()
+		static void AddNewEventList()
 		{
 			QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 			var start = DateTime.Now;
 			QDebug.Log("对新事件排序" + NewEventList.Count);
 			QAnalysisData.SetLoadingInfo("事件排序", "数量" + NewEventList.Count, 0);
-			await Task.Run(() =>
-			{
-				NewEventList.Sort(QAnalysisEvent.SortMethod);
-			});
+			NewEventList.Sort(QAnalysisEvent.SortMethod);
 			QDebug.Log("排序完成" + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + "开始添加事件" + NewEventList.Count);
 			Queue<QAnalysisEvent> queue = new Queue<QAnalysisEvent>(NewEventList);
 			NewEventList.Clear();
@@ -553,7 +550,7 @@ namespace QTool
 					}
 					Instance.LastMail = mailInfo;
 				}, Instance.LastMail);
-				await AddNewEventList();
+				AddNewEventList();
 				SaveData();
 				QDebug.Log("保存完成");
 			}
