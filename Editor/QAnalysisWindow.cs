@@ -92,7 +92,11 @@ namespace QTool
 				if (QAnalysisData.IsLoading)
 				{
 					GUI.enabled = true;
-					GUILayout.Label("加载中..", QGUITool.BackStyle);
+					GUILayout.Label("加载中.."+QAnalysisData.LoadingInfo, QGUITool.BackStyle);
+					lastRect = GUILayoutUtility.GetLastRect();
+					lastRect.width *=QAnalysisData.LoadingRate;
+					GUI.Box(lastRect, "", QGUITool.BackStyle);
+					GUI.Box(lastRect, "", QGUITool.BackStyle); ;
 				}
 			}
 			GridView.DoLayout(Repaint);
@@ -455,9 +459,11 @@ namespace QTool
 		}
 		public static bool IsLoading { get; private set; } = false;
 		public static string LoadingInfo { get; private set; } = "";
+		public static float LoadingRate { get; private set; } = 0;
 		public static void SetLoadingInfo(string title,string info,float rate)
 		{
 			LoadingInfo = title + " " + info;
+			LoadingRate = rate;
 		}
 		public void AddTitle(QTitleInfo newTitle)
 		{
@@ -527,6 +533,7 @@ namespace QTool
 			}
 			IsLoading = true;
 			LoadingInfo = "";
+			LoadingRate = 0;
 			try
 			{
 				NewEventList.Clear();
