@@ -463,8 +463,10 @@ namespace QTool
 		public static float LoadingRate { get; private set; } = 0;
 		public static void SetLoadingInfo(string title, string info, float rate)
 		{
+
 			LoadingInfo = title + " " + info;
 			LoadingRate = rate;
+			EditorUtility.DisplayProgressBar(title, info, rate);
 		}
 		public void AddTitle(QTitleInfo newTitle)
 		{
@@ -550,7 +552,7 @@ namespace QTool
 			startV = Setting.StartVersion.ToComputeFloat();
 			try
 			{
-				await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,async (mailInfo) =>
+				await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,async (mailInfo,endIndex) =>
 				{
 					if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 					{
@@ -572,6 +574,14 @@ namespace QTool
 					}
 					Instance.LastMail = mailInfo;
 				}, Instance.LastMail);
+				var index = 0;
+				foreach (var task in PlayerTasks)
+				{
+					SetLoadingInfo("玩家数据总数： " + PlayerTasks.Count + "", index + "/" + PlayerTasks.Count+" 解析玩家数据["+task.Key+"]", index * 1f / PlayerTasks.Count);
+					await task.Value;
+					index ++;
+				}
+				EditorUtility.ClearProgressBar();
 				SaveData();
 				QDebug.Log("保存完成");
 			}

@@ -96,7 +96,7 @@ namespace QTool
 			}
 		}
 		
-		public static async Task ReceiveRemailAsync(QMailAccount account, int startIndex, int endIndex, Action<QMailInfo> callBack,int threadCount=5)
+		public static async Task ReceiveRemailAsync(QMailAccount account, int startIndex, int endIndex, Action<QMailInfo,int> callBack,int threadCount=5)
 		{
 			QDictionary<int, QMailInfo> mailList = new QDictionary<int, QMailInfo>();
 			var startTime = DateTime.Now;
@@ -143,7 +143,7 @@ namespace QTool
 					{
 						throw new Exception("邮件为空");
 					}
-					callBack(mail);
+					callBack(mail,endIndex);
 				}
 				catch (Exception e)
 				{
@@ -181,10 +181,7 @@ namespace QTool
 								for (var i = startIndex; i <= endIndex; i+=threadCount)
 								{
 									var mail = await ReceiveEmail(writer, reader, i, endIndex);
-									lock (mailList)
-									{
-										mailList[i] = mail;
-									}
+									mailList[i] = mail;
 #if UNITY_EDITOR
 									if (!Application.isPlaying)
 									{
@@ -205,7 +202,7 @@ namespace QTool
 				clientSocket.Close();
 			}
 		}
-		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo> callBack, QMailInfo lastMail)
+		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo,int> callBack, QMailInfo lastMail)
 		{
 			using (TcpClient clientSocket = new TcpClient())
 			{
