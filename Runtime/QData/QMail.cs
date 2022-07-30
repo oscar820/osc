@@ -142,7 +142,7 @@ namespace QTool
 #if UNITY_EDITOR
 					if (!Application.isPlaying)
 					{
-						UnityEditor.EditorUtility.DisplayProgressBar("解析邮件 线程" + startIndex, i + "/" + endIndex + " " + mail.Subject, (i - startIndex) * 1f / (endIndex - startIndex));
+						UnityEditor.EditorUtility.DisplayProgressBar("解析邮件", i + "/" + endIndex + " " + mail.Subject, (i - startIndex) * 1f / (endIndex - startIndex));
 					}
 #endif
 					callBack(mail,endIndex);
