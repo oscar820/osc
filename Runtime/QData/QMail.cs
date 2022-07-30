@@ -211,7 +211,7 @@ namespace QTool
 				clientSocket.Close();
 			}
 		}
-		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo,int> callBack, QMailInfo lastMail)
+		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo,int> callBack, QMailInfo lastMail,int maxCount=0)
 		{
 			using (TcpClient clientSocket = new TcpClient())
 			{
@@ -269,6 +269,10 @@ namespace QTool
 											}
 										}
 									}
+								}
+								if (maxCount > 0&&endIndex-startIndex>maxCount)
+								{
+									endIndex = startIndex + maxCount;
 								}
 #if UNITY_EDITOR
 								if (!Application.isPlaying)

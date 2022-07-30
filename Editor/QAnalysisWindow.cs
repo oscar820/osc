@@ -559,10 +559,7 @@ namespace QTool
 								for (int i = 0; i < list.Count; i++)
 								{
 									var eventData = list[i];
-									lock(Instance.PlayerDataList)
-									{
-										var playerData = Instance.PlayerDataList[eventData.playerId];
-									}
+									var playerData = Instance.PlayerDataList[eventData.playerId];
 									SetLoadingInfo("解析玩家数据["+playerKey+"]", i + "/" + list.Count + " "+eventData.eventKey, i * 1f / list.Count);
 									var version = playerVersion[eventData.playerId];
 									if ("游戏/开始".Equals(eventData.eventKey))
@@ -581,16 +578,16 @@ namespace QTool
 						}
 					}
 					Instance.LastMail = mailInfo;
-				}, Instance.LastMail);
+				}, Instance.LastMail,500);
 				EditorUtility.ClearProgressBar();
 				foreach (var task in PlayerTasks)
 				{
 					if (task.Value == null) continue;
 					await task.Value;
 					action();
-					SaveData();
 				}
 				PlayerTasks.Clear();
+				SaveData();
 				QDebug.Log("保存完成");
 			}
 			catch (Exception e)
@@ -628,10 +625,8 @@ namespace QTool
 		public static void AddEvent(QAnalysisEvent eventData)
 		{
 			if (EventList.ContainsKey(eventData.Key)) return;
-			lock (EventList)
-			{
-				EventList.Add(eventData);
-			}
+
+			EventList.Add(eventData);
 			Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
@@ -641,10 +636,8 @@ namespace QTool
 		{
 			if (TitleList.ContainsKey(key)) return;
 			var title = new QTitleInfo();
-			lock (TitleList)
-			{
-				TitleList.Set(key, title);
-			}
+
+			TitleList.Set(key, title);
 			if (title.DataSetting.mode== QAnalysisMode.更新时间)
 			{
 				title.DataSetting.DataKey = key;
@@ -671,11 +664,8 @@ namespace QTool
 				}
 				if (!TitleList.ContainsKey(startKey))
 				{
-					var spaceTitle = new QTitleInfo(); 
-					lock (TitleList)
-					{
-						TitleList.Set(startKey, spaceTitle);
-					}
+					var spaceTitle = new QTitleInfo();
+					TitleList.Set(startKey, spaceTitle);
 					spaceTitle.DataSetting.DataKey = "";
 					spaceTitle.DataSetting.mode = QAnalysisMode.更新时间;
 				}
