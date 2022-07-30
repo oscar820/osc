@@ -37,16 +37,17 @@ namespace QTool
 
 			using (new GUILayout.HorizontalScope())
 			{
-				if (QAnalysisData.IsLoading)
-				{
-					GUI.enabled = false;
-				}
+			
 				if (ViewInfoStack.Count > 0)
 				{
 					if (DrawButton("返回"))
 					{
 						ViewBack();
 					}
+				}
+				if (QAnalysisData.IsLoading)
+				{
+					GUI.enabled = false;
 				}
 				var editorTest = PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest");
 

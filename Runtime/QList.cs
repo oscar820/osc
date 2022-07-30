@@ -528,6 +528,7 @@ namespace QTool
 			for (int i = 0; i < array.Count; i++)
 			{
 				var value = array[i];
+				if (value == null) continue;
 				if (key.Equals(keyGetter(value)))
                 {
                     return true;

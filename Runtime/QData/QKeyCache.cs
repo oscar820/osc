@@ -16,9 +16,13 @@ namespace QTool
 			this.GetCheckInfo = GetCheckInfo;
 		}
 		public void Set(KeyT key,T value) {
-			var checkInfo = GetCheckInfo(key);
-			Cache.CheckSet(key, value);
-			CheckInfo.CheckSet(key, checkInfo);
+			
+			lock (Cache)
+			{
+				var checkInfo = GetCheckInfo(key);
+				Cache.CheckSet(key, value);
+				CheckInfo.CheckSet(key, checkInfo);
+			}
 		}
 		public T Get(KeyT key, Func<KeyT, T> GetValueFunc)
 		{
