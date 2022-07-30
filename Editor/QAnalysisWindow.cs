@@ -464,6 +464,7 @@ namespace QTool
 		{
 			LoadingInfo = title + " " + info;
 			LoadingRate = rate;
+			EditorUtility.DisplayProgressBar(title, info, rate);
 		}
 		public void AddTitle(QTitleInfo newTitle)
 		{
@@ -487,6 +488,7 @@ namespace QTool
 			QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 			var start = DateTime.Now;
 			QDebug.Log("对新事件排序" + NewEventList.Count);
+			QAnalysisData.SetLoadingInfo("事件排序", "数量" + NewEventList.Count, 0);
 			await Task.Run(() =>
 			{
 				NewEventList.Sort(QAnalysisEvent.SortMethod);
@@ -520,6 +522,7 @@ namespace QTool
 			}
 			QDebug.Log("添加事件" + length + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
 			action?.Invoke();
+			EditorUtility.ClearProgressBar();
 		}
 		public static List<QAnalysisEvent> NewEventList { get; private set; } = new List<QAnalysisEvent>();
 		public static float AutoFreshTime { get; set; } = 120f;
