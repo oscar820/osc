@@ -512,7 +512,7 @@ namespace QTool
 				if (version >= startV)
 				{
 					AddEvent(eventData);
-					SetLoadingInfo("添加事件", i + "/" + startV + " " + eventData.eventKey, i * 1f / startV);
+					SetLoadingInfo("添加事件", i + "/" + length + " " + eventData.eventKey, i * 1f / length);
 				}
 				if (i % 10000 == 0)
 				{
