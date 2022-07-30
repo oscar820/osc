@@ -124,25 +124,27 @@ namespace QTool
 			{
 				await task;
 			}
-#if UNITY_EDITOR
-			if (!Application.isPlaying)
-			{
-				UnityEditor.EditorUtility.ClearProgressBar();
-			}
-#endif
+
 			QDebug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
 			QDebug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
 			startTime = DateTime.Now;
-			await Task.Delay(100);
+			await Task.Delay(10);
 			for (var i = startIndex; i <= endIndex; i++)
 			{
 				var mail = mailList[i];
 				try
 				{
+
 					if (mail == null)
 					{
 						throw new Exception("邮件为空");
 					}
+#if UNITY_EDITOR
+					if (!Application.isPlaying)
+					{
+						UnityEditor.EditorUtility.DisplayProgressBar("解析邮件 线程" + startIndex, i + "/" + endIndex + " " + mail.Subject, (i - startIndex) * 1f / (endIndex - startIndex));
+					}
+#endif
 					callBack(mail,endIndex);
 				}
 				catch (Exception e)
@@ -150,7 +152,13 @@ namespace QTool
 					Debug.LogError("读取邮件出错" + i + "/" + endIndex + "：\n" + e);
 				}
 			}
-			await Task.Delay(100);
+			await Task.Delay(10);
+#if UNITY_EDITOR
+			if (!Application.isPlaying)
+			{
+				UnityEditor.EditorUtility.ClearProgressBar();
+			}
+#endif
 			QDebug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
 
 		}
@@ -181,7 +189,10 @@ namespace QTool
 								for (var i = startIndex; i <= endIndex; i+=threadCount)
 								{
 									var mail = await ReceiveEmail(writer, reader, i, endIndex);
-									mailList[i] = mail;
+									lock (mailList)
+									{
+										mailList[i] = mail;
+									}
 #if UNITY_EDITOR
 									if (!Application.isPlaying)
 									{
