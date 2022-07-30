@@ -6,6 +6,7 @@ namespace QTool
 	public class QToolSetting : InstanceScriptable<QToolSetting>
 	{
 		public QMailAccount QAnalysisMail;
+		public string QAnalysisProject;
 		public string danmuRoomId= "55336";
 
 		private void OnValidate()
