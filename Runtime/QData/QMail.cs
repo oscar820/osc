@@ -270,7 +270,7 @@ namespace QTool
 									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件信息", "获取起始邮件索引成功", 0.3f);
 								}
 #endif
-								await ReceiveRemailAsync(account, startIndex, endIndex, callBack,25);
+								await ReceiveRemailAsync(account, startIndex, endIndex, callBack,24);
 #if UNITY_EDITOR
 								if (!Application.isPlaying)
 								{
