@@ -189,10 +189,8 @@ namespace QTool
 								for (var i = startIndex; i <= endIndex; i+=threadCount)
 								{
 									var mail = await ReceiveEmail(writer, reader, i, endIndex);
-									lock (mailList)
-									{
-										mailList[i] = mail;
-									}
+
+									mailList[i] = mail;
 #if UNITY_EDITOR
 									if (!Application.isPlaying)
 									{
