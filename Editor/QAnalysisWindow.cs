@@ -467,7 +467,7 @@ namespace QTool
 
 			LoadingInfo = title + " " + info;
 			LoadingRate = rate;
-			EditorUtility.DisplayProgressBar(title, info, rate);
+			//EditorUtility.DisplayProgressBar(title, info, rate);
 		}
 		public void AddTitle(QTitleInfo newTitle)
 		{
@@ -555,13 +555,14 @@ namespace QTool
 							}
 							var task = Task.Run(() =>
 							{
-								foreach (var eventData in list)
+								for (int i = 0; i < list.Count; i++)
 								{
+									var eventData = list[i];
+									SetLoadingInfo("解析玩家数据["+playerKey+"]", i + "/" + list.Count + " "+eventData.eventKey, i * 1f / list.Count);
 									var version = playerVersion[eventData.playerId];
 									if ("游戏/开始".Equals(eventData.eventKey))
 									{
 										version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
-
 										lock (playerVersion)
 										{
 											playerVersion[eventData.playerId] = version;
@@ -579,14 +580,12 @@ namespace QTool
 					}
 					Instance.LastMail = mailInfo;
 				}, Instance.LastMail);
-				var index = 0;
 				foreach (var task in PlayerTasks)
 				{
 					if (task.Value == null) continue;
-					SetLoadingInfo("玩家数据总数： " + PlayerTasks.Count + "", index + "/" + PlayerTasks.Count+" 解析玩家数据["+task.Key+"]", index * 1f / PlayerTasks.Count);
 					await task.Value;
-					index ++;
 				}
+				PlayerTasks.Clear();
 				EditorUtility.ClearProgressBar();
 				SaveData();
 				QDebug.Log("保存完成");
