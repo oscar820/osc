@@ -267,8 +267,7 @@ namespace QTool
 		}
 		public async void FreshData()
 		{
-			await QAnalysisData.FreshData();
-			Repaint();
+			await QAnalysisData.FreshData(Repaint);
 		}
 		Stack<string> ViewInfoStack = new Stack<string>();
 		Stack<string> ViewPlayerStack = new Stack<string>();
@@ -528,7 +527,7 @@ namespace QTool
 		//}
 		 //static Queue<QAnalysisEvent> NewEventList { get;  set; } = new Queue<QAnalysisEvent>();
 		 static QDictionary<string, Task> PlayerTasks = new QDictionary<string, Task>();
-		public static async Task FreshData() 
+		public static async Task FreshData(Action action) 
 		{
 			if (IsLoading) return;
 			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
@@ -588,9 +587,10 @@ namespace QTool
 				{
 					if (task.Value == null) continue;
 					await task.Value;
+					action();
+					SaveData();
 				}
 				PlayerTasks.Clear();
-				SaveData();
 				QDebug.Log("保存完成");
 			}
 			catch (Exception e)
