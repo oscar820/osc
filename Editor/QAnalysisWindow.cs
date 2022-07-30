@@ -413,7 +413,7 @@ namespace QTool
 	public class QAnalysisDataSetting
 	{
 		public string StartVersion = "0.1";
-		public QAutoList<string, QTitleInfo> TitleList = new QAutoList<string, QTitleInfo>();
+		public QList<string, QTitleInfo> TitleList = new QList<string, QTitleInfo>();
 	}
 	public class QAnalysisData
 	{
@@ -421,7 +421,7 @@ namespace QTool
 		static public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
 		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
 		public static QAnalysisDataSetting Setting = new QAnalysisDataSetting();
-		public static QAutoList<string, QTitleInfo> TitleList => Setting.TitleList;
+		public static QList<string, QTitleInfo> TitleList => Setting.TitleList;
 		public List<string> EventKeyList = new List<string>();
 		public List<string> DataKeyList = new List<string>();
 		public QMailInfo LastMail = null;
@@ -630,7 +630,8 @@ namespace QTool
 		static void CheckTitle(string key,object value)
 		{
 			if (TitleList.ContainsKey(key)) return;
-			var title = TitleList[key];
+			var title = new QTitleInfo();
+			TitleList.Set(key, title);
 			if (title.DataSetting.mode== QAnalysisMode.更新时间)
 			{
 				title.DataSetting.DataKey = key;
@@ -657,7 +658,8 @@ namespace QTool
 				}
 				if (!TitleList.ContainsKey(startKey))
 				{
-					var spaceTitle = TitleList[startKey];
+					var spaceTitle = new QTitleInfo();
+					TitleList.Set(startKey, spaceTitle);
 					spaceTitle.DataSetting.DataKey = "";
 					spaceTitle.DataSetting.mode = QAnalysisMode.更新时间;
 				}
