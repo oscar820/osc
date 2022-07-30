@@ -560,7 +560,11 @@ namespace QTool
 									if ("游戏/开始".Equals(eventData.eventKey))
 									{
 										version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
-										playerVersion[eventData.playerId] = version;
+
+										lock (playerVersion)
+										{
+											playerVersion[eventData.playerId] = version;
+										}
 									}
 									if (version >= startV)
 									{
@@ -568,7 +572,10 @@ namespace QTool
 									}
 								}
 							});
-							PlayerTasks[playerKey] = task;
+							lock (PlayerTasks)
+							{
+								PlayerTasks[playerKey] = task;
+							}
 							await task;
 						}
 					}
@@ -621,8 +628,14 @@ namespace QTool
 		public static void AddEvent(QAnalysisEvent eventData)
 		{
 			if (EventList.ContainsKey(eventData.Key)) return;
-			EventList.Add(eventData);
-			Instance.PlayerDataList[eventData.playerId].Add(eventData);
+			lock (EventList)
+			{
+				EventList.Add(eventData);
+			}
+			lock (Instance.PlayerDataList)
+			{
+				Instance.PlayerDataList[eventData.playerId].Add(eventData);
+			}
 			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
 			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
 			CheckTitle(eventData.eventKey, eventData.eventValue);
@@ -631,7 +644,10 @@ namespace QTool
 		{
 			if (TitleList.ContainsKey(key)) return;
 			var title = new QTitleInfo();
-			TitleList.Set(key, title);
+			lock (TitleList)
+			{
+				TitleList.Set(key, title);
+			}
 			if (title.DataSetting.mode== QAnalysisMode.更新时间)
 			{
 				title.DataSetting.DataKey = key;
@@ -658,8 +674,11 @@ namespace QTool
 				}
 				if (!TitleList.ContainsKey(startKey))
 				{
-					var spaceTitle = new QTitleInfo();
-					TitleList.Set(startKey, spaceTitle);
+					var spaceTitle = new QTitleInfo(); 
+					lock (TitleList)
+					{
+						TitleList.Set(startKey, spaceTitle);
+					}
 					spaceTitle.DataSetting.DataKey = "";
 					spaceTitle.DataSetting.mode = QAnalysisMode.更新时间;
 				}
