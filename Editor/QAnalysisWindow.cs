@@ -577,6 +577,7 @@ namespace QTool
 				var index = 0;
 				foreach (var task in PlayerTasks)
 				{
+					if (task.Value == null) continue;
 					SetLoadingInfo("玩家数据总数： " + PlayerTasks.Count + "", index + "/" + PlayerTasks.Count+" 解析玩家数据["+task.Key+"]", index * 1f / PlayerTasks.Count);
 					await task.Value;
 					index ++;
