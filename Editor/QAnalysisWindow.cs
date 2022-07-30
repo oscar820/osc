@@ -513,7 +513,10 @@ namespace QTool
 				{
 					AddEvent(eventData);
 				}
-				SetLoadingInfo("添加事件", i + "/" + length + " " + eventData.eventKey, i * 1f / length);
+				if (i % QAnalysis.AutoSendCount == 0)
+				{
+					SetLoadingInfo("添加事件", i + "/" + length + " " + eventData.eventKey, i * 1f / length);
+				}
 				i++;
 			}
 			QDebug.Log("添加事件" + length + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
@@ -590,13 +593,10 @@ namespace QTool
 		{
 			if (EventList.ContainsKey(eventData.Key)) return;
 			EventList.Add(eventData);
-			Task.Run(() =>
-			{
-				Instance.PlayerDataList[eventData.playerId].Add(eventData);
-				Instance.EventKeyList.AddCheckExist(eventData.eventKey);
-				Instance.DataKeyList.AddCheckExist(eventData.eventKey);
-				CheckTitle(eventData.eventKey, eventData.eventValue);
-			});
+			Instance.PlayerDataList[eventData.playerId].Add(eventData);
+			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
+			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
+			CheckTitle(eventData.eventKey, eventData.eventValue);
 		}
 		static void CheckTitle(string key,object value)
 		{
