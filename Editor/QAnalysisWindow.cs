@@ -1094,8 +1094,9 @@ namespace QTool
 			EventList.AddCheckExist(eventData.eventId);
 			try
 			{
-				foreach (var title in QAnalysisData.TitleList)
+				for (int i = 0; i < QAnalysisData.TitleList.Count; i++)
 				{
+					var title = QAnalysisData.TitleList[i];
 					if (title.DataSetting.EventKey == eventData.eventKey)
 					{
 						AnalysisData[title.Key].AddEvent(eventData);
