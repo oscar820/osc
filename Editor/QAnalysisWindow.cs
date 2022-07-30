@@ -488,19 +488,6 @@ namespace QTool
 		static QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 		static float _startV = 0;
 		static float startV;
-		static async Task AddEventAsync(QAnalysisEvent eventData)
-		{
-			var version = playerVersion[eventData.playerId];
-			if ("游戏/开始".Equals(eventData.eventKey))
-			{
-				version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
-				playerVersion[eventData.playerId] = version;
-			}
-			if (version >= startV)
-			{
-				AddEvent(eventData);
-			}
-		}
 		//static void AddNewEventList()
 		//{
 		//	QDictionary<string, float> playerVersion = new QDictionary<string, float>();
@@ -556,20 +543,33 @@ namespace QTool
 				{
 					if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 					{
-						var playerKey = mailInfo.Subject.SplitEndString("_");
 						if (!string.IsNullOrWhiteSpace(mailInfo.Body))
 						{
 							var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
+							
+							var playerKey = list.QueuePeek().playerId;
 							if (PlayerTasks[playerKey] != null)
 							{
 								await PlayerTasks[playerKey];
 							}
-							foreach (var item in list)
+							var task = Task.Run(() =>
 							{
-							 	var task= AddEventAsync(item);
-								PlayerTasks[playerKey] = task;
-								await task;
-							}
+								foreach (var eventData in list)
+								{
+									var version = playerVersion[eventData.playerId];
+									if ("游戏/开始".Equals(eventData.eventKey))
+									{
+										version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
+										playerVersion[eventData.playerId] = version;
+									}
+									if (version >= startV)
+									{
+										AddEvent(eventData);
+									}
+								}
+							});
+							PlayerTasks[playerKey] = task;
+							await task;
 						}
 					}
 					Instance.LastMail = mailInfo;
