@@ -154,7 +154,7 @@ namespace QTool
 					List<QAnalysisEvent> tempList = new List<QAnalysisEvent>();
 					var data = "";
 					var id = EventList.QueuePeek()?.eventId;
-					//lock (EventList)
+					lock (EventList)
 					{
 						tempList.AddRange(EventList);
 						data = PlayerPrefs.GetString(EventListKey);
@@ -163,7 +163,7 @@ namespace QTool
 					}
 					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName +"_"+ id, data))
 					{
-						//lock (EventList)
+						lock (EventList)
 						{
 							EventList.AddRange(tempList);
 							PlayerPrefs.SetString(EventListKey, EventList.ToQData());

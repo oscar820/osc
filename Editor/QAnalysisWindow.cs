@@ -572,10 +572,7 @@ namespace QTool
 									}
 								}
 							});
-							lock (PlayerTasks)
-							{
-								PlayerTasks[playerKey] = task;
-							}
+							PlayerTasks[playerKey] = task;
 							await task;
 						}
 					}

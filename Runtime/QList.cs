@@ -504,7 +504,7 @@ namespace QTool
             return list;
 
         }
-        public static bool ContainsKey<T, KeyType>(this ICollection<T> array, KeyType key) where T : IKey<KeyType>
+        public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
         {
             return array.ContainsKey(key, (item) => item.Key);
         }
@@ -519,15 +519,16 @@ namespace QTool
 				dic.Add(key, value);
 			}
 		}
-		public static bool ContainsKey<T, KeyType>(this ICollection<T> array, KeyType key, Func<T, KeyType> keyGetter)
+		public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)
         {
             if (key == null)
             {
                 return false;
             }
-            foreach (var value in array)
-            {
-                if (key.Equals(keyGetter(value)))
+			for (int i = 0; i < array.Count; i++)
+			{
+				var value = array[i];
+				if (key.Equals(keyGetter(value)))
                 {
                     return true;
                 }
@@ -539,19 +540,20 @@ namespace QTool
             if (index < 0 || index >= array.Count) return default;
             return array[index];
         }
-        public static T Get<T, KeyType>(this ICollection<T> array, KeyType key) where T : IKey<KeyType>
+        public static T Get<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
         {
             return array.Get(key, (item) => item.Key);
         }
-        public static T Get<T, KeyType>(this ICollection<T> array, KeyType key, Func<T, KeyType> keyGetter)
+        public static T Get<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)
         {
             if (key == null)
             {
                 return default;
             }
-            foreach (var value in array)
-            {
-                if (value == null) continue;
+			for (int i = 0; i < array.Count; i++)
+			{
+				var value = array[i];
+				if (value == null) continue;
                 if (key.Equals(keyGetter(value)))
                 {
                     return value;
@@ -559,16 +561,18 @@ namespace QTool
             }
             return default;
         }
-        public static List<T> GetList<T, KeyType>(this ICollection<T> array, KeyType key, List<T> tempList = null) where T : IKey<KeyType>
+        public static List<T> GetList<T, KeyType>(this IList<T> array, KeyType key, List<T> tempList = null) where T : IKey<KeyType>
         {
             var list = tempList == null ? new List<T>() : tempList;
-            foreach (var value in array)
-            {
-                if (key.Equals(value.Key))
-                {
-                    list.Add(value);
-                }
-            }
+			for (int i = 0; i < array.Count; i++)
+			{
+				var value = array[i];
+				if (key.Equals(value.Key))
+				{
+					list.Add(value);
+				}
+			}
+          
             return list;
         }
         public static T StackPeek<T>(this IList<T> array)
@@ -634,7 +638,7 @@ namespace QTool
                 }
             }
         }
-        public static void RemoveKey<T, KeyType>(this ICollection<T> array, KeyType key) where T : IKey<KeyType>
+        public static void RemoveKey<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
         {
             var old = array.Get(key);
             if (old != null)
@@ -642,14 +646,14 @@ namespace QTool
                 array.Remove(old);
             }
         }
-        public static void Set<T, KeyType>(this ICollection<T> array, KeyType key, T value) where T : IKey<KeyType>
+        public static void Set<T, KeyType>(this IList<T> array, KeyType key, T value) where T : IKey<KeyType>
         {
             array.RemoveKey(key);
             value.Key = key;
             array.Add(value);
         }
 
-        public static T GetAndCreate<T, KeyType>(this ICollection<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
+        public static T GetAndCreate<T, KeyType>(this IList<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
         {
             var value = array.Get(key);
             if (value != null)
