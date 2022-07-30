@@ -783,8 +783,9 @@ namespace QTool
 			else
 			{
 				var eventKey = "";
-				foreach (var eventKeyValue in QAnalysisData.Instance.EventKeyList)
+				for (int i = 0; i < QAnalysisData.Instance.EventKeyList.Count; i++)
 				{
+					var eventKeyValue = QAnalysisData.Instance.EventKeyList[i];
 					if (_dataKey.StartsWith(eventKeyValue))
 					{
 						if (eventKey.Length < eventKeyValue.Length)
