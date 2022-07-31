@@ -528,7 +528,14 @@ namespace QTool
 			}
 			else
 			{
-				dic.Add(key, value);
+				try
+				{
+					dic.Add(key, value);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("添加[" + key + ":" + value + "]出错");
+				}
 			}
 		}
 		public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)
