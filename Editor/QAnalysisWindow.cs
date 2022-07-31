@@ -64,6 +64,8 @@ namespace QTool
 					}
 				}
 				QAnalysisData.Setting.StartVersion = EditorGUILayout.TextField(QAnalysisData.Setting.StartVersion,GUILayout.Width(100));
+
+				GUILayout.Label("邮件：" + QAnalysisData.Instance.LastMail.Index, GUILayout.Width(60));
 				GUILayout.Label("事件：" + QAnalysisData.EventList.Count, GUILayout.Width(120));
 				GUILayout.Label("玩家：" + QAnalysisData.Instance.PlayerDataList.Count, GUILayout.Width(80));
 				if (DrawButton("刷新数据"))
@@ -278,9 +280,9 @@ namespace QTool
 			var loading = true;
 			while (loading&&!await QAnalysisData.FreshData(Repaint, count))
 			{
-				for (int t = 0; t < 30; t++)
+				for (int t = 0; t < 10; t++)
 				{
-					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * count + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
+					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * count + "条邮件完成 等待 " + (10 - t) + " 秒后继续", t * 1f / 30))
 					{
 						loading = false;
 						break;
