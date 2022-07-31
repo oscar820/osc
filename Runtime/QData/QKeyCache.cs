@@ -17,17 +17,12 @@ namespace QTool
 		}
 		public void Set(KeyT key,T value) {
 
-			try
+			lock (Cache)
 			{
 				var checkInfo = GetCheckInfo(key);
 				Cache.CheckSet(key, value);
 				CheckInfo.CheckSet(key, checkInfo);
 			}
-			catch (Exception e)
-			{
-				Debug.LogError(e);
-			}
-			
 		}
 		public T Get(KeyT key, Func<KeyT, T> GetValueFunc)
 		{
