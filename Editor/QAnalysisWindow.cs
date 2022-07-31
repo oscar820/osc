@@ -275,14 +275,15 @@ namespace QTool
 			var count = 50;
 			var startTime = DateTime.Now;
 			var i = 1;
-			while (!await QAnalysisData.FreshData(Repaint, count))
+			var loading = true;
+			while (loading&&!await QAnalysisData.FreshData(Repaint, count))
 			{
 				for (int t = 0; t < 30; t++)
 				{
 					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * count + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
 					{
-						EditorUtility.ClearProgressBar();
-						return;
+						loading = false;
+						break;
 					}
 					await Task.Delay(1000);
 				}i++;
