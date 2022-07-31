@@ -557,7 +557,7 @@ namespace QTool
 		//	EditorUtility.ClearProgressBar();
 		//}
 		//static Queue<QAnalysisEvent> NewEventList { get;  set; } = new Queue<QAnalysisEvent>();
-		static QDictionary<string, Task> Tasks = new QDictionary<string, Task>();
+		static List<Task> TaskList = new List<Task>();
 		//static QDictionary<string, List< Task>> PlayerTasks = new QDictionary<string,List< Task>>();
 		static DateTime loadingStartTime;
 		public static async Task<bool> FreshData(Action action,int blockCount) 
@@ -575,7 +575,7 @@ namespace QTool
 			startV = Setting.StartVersion.ToComputeFloat();
 			try
 			{
-				Tasks.Clear();
+				TaskList.Clear();
 
 				var loadOver= await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,(mailInfo) =>
 				{
@@ -586,7 +586,7 @@ namespace QTool
 						{
 							var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
 							var playerData = Instance.PlayerDataList[list.StackPeek().playerId];
-							Tasks[mailInfo.Id] = Task.Run(() =>
+							TaskList.Add(Task.Run(() =>
 							{
 								try
 								{
@@ -616,27 +616,37 @@ namespace QTool
 									Debug.LogError("添加玩家数据出错 " + e);
 								}
 								
-							});
+							}));
 						}
 					}
 				}, Instance.LastMail, blockCount);
 
-				foreach (var task in Tasks)
+				foreach (var task in TaskList)
 				{
-					await task.Value;// QTask.Wait(() => { action(); return task.Value.IsCompleted; });
+					await task;// QTask.Wait(() => { action(); return task.Value.IsCompleted; });
+					if (task.Status != TaskStatus.RanToCompletion)
+					{
+						Debug.LogError("错误状态 " + task.Status + "  " + task.Exception);
+					}
+					action();
 				}
-				Tasks.Clear();
+				TaskList.Clear();
 
 				QDebug.Log("添加玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				foreach (var player in Instance.PlayerDataList)
 				{
-					Tasks[player.Key] = Task.Run(player.ParseEventBuffer);
+					TaskList.Add( Task.Run(player.ParseEventBuffer));
 				}
-				foreach (var task in Tasks)
+				foreach (var task in TaskList)
 				{
-					await task.Value; //QTask.Wait(() => { action(); return task.Value.IsCompleted; });
+					await task; //QTask.Wait(() => { action(); return task.Value.IsCompleted; });
+					if(task.Status!= TaskStatus.RanToCompletion)
+					{
+						Debug.LogError("错误状态 " + task.Status+"  "+ task.Exception);
+					}
+					action();
 				}
-				Tasks.Clear();
+				TaskList.Clear();
 				QDebug.Log("解析玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				action();
 				return loadOver;
