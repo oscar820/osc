@@ -1127,17 +1127,21 @@ namespace QTool
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
 
-		public List<QAnalysisEvent> EventBuffer = new List<QAnalysisEvent>();
-		public int BufferCount = 0;
+		List<QAnalysisEvent> EventBuffer = new List<QAnalysisEvent>();
 		public void ParseEventBuffer()
 		{
 			EventBuffer.Sort(QAnalysisEvent.SortMethod);
-			BufferCount = EventBuffer.Count;
-			while (EventBuffer.Count>0)
+			for (int t = 0; t < EventBuffer.Count; t++)
 			{
+				if (!QAnalysisData.IsLoading)
+				{
+					Debug.LogError("加载已结束 [" + Key + "]解析数据数据还在进行");
+				}
+				
 				try
 				{
-					var eventData = EventBuffer.Dequeue();
+					var eventData = EventBuffer[t];
+					QAnalysisData.SetLoadingInfo("解析玩家数据[" + Key + "]", t + "/" + EventBuffer.Count + " " + eventData.eventKey, t * 1f / EventBuffer.Count);
 					UpdateTime = eventData.eventTime;
 					EventList.AddCheckExist(eventData.eventId);
 					for (int i = 0; i < QAnalysisData.TitleList.Count; i++)
