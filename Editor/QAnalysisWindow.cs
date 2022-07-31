@@ -623,7 +623,7 @@ namespace QTool
 
 				foreach (var task in Tasks)
 				{
-					await QTask.Wait(() => { action(); return task.Value.IsCompleted; });
+					await task.Value;// QTask.Wait(() => { action(); return task.Value.IsCompleted; });
 				}
 				Tasks.Clear();
 
@@ -634,7 +634,7 @@ namespace QTool
 				}
 				foreach (var task in Tasks)
 				{
-					await QTask.Wait(() => { action(); return task.Value.IsCompleted; });
+					await task.Value; //QTask.Wait(() => { action(); return task.Value.IsCompleted; });
 				}
 				Tasks.Clear();
 				QDebug.Log("解析玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
