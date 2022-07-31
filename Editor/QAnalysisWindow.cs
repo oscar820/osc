@@ -272,13 +272,14 @@ namespace QTool
 		}
 		public async void FreshData()
 		{
+			var count = 50;
 			var startTime = DateTime.Now;
 			var i = 1;
-			while (!await QAnalysisData.FreshData(Repaint))
+			while (!await QAnalysisData.FreshData(Repaint, count))
 			{
 				for (int t = 0; t < 30; t++)
 				{
-					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * 100 + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
+					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * count + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
 					{
 						EditorUtility.ClearProgressBar();
 						return;
@@ -555,10 +556,10 @@ namespace QTool
 		//	EditorUtility.ClearProgressBar();
 		//}
 		//static Queue<QAnalysisEvent> NewEventList { get;  set; } = new Queue<QAnalysisEvent>();
-		static List<Task> taskList = new List<Task>();
+		static QDictionary<string, Task> Tasks = new QDictionary<string, Task>();
 		//static QDictionary<string, List< Task>> PlayerTasks = new QDictionary<string,List< Task>>();
 		static DateTime loadingStartTime;
-		public static async Task<bool> FreshData(Action action) 
+		public static async Task<bool> FreshData(Action action,int blockCount) 
 		{
 			if (IsLoading) return true;
 			loadingStartTime = DateTime.Now;
@@ -573,7 +574,8 @@ namespace QTool
 			startV = Setting.StartVersion.ToComputeFloat();
 			try
 			{
-				taskList.Clear();
+				Tasks.Clear();
+
 				var loadOver= await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,(mailInfo) =>
 				{
 					Instance.LastMail = mailInfo;
@@ -583,7 +585,7 @@ namespace QTool
 						{
 							var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
 							var playerData = Instance.PlayerDataList[list.StackPeek().playerId];
-							var task = Task.Run(() =>
+							Tasks[mailInfo.Id] = Task.Run(() =>
 							{
 								try
 								{
@@ -614,29 +616,28 @@ namespace QTool
 								}
 								
 							});
-							taskList.Add(task);
 						}
 					}
-				}, Instance.LastMail,100);
-				foreach (var task in taskList)
+				}, Instance.LastMail, blockCount);
+
+				foreach (var task in Tasks)
 				{
-					await QTask.Wait(() => { action(); return task.IsCompleted; });
+					await QTask.Wait(() => { action(); return task.Value.IsCompleted; });
 				}
-				taskList.Clear();
+				Tasks.Clear();
 
 				QDebug.Log("添加玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				foreach (var player in Instance.PlayerDataList)
 				{
-					taskList.Add(Task.Run(player.ParseEventBuffer));
+					Tasks[player.Key] = Task.Run(player.ParseEventBuffer);
 				}
-				foreach (var task in taskList)
+				foreach (var task in Tasks)
 				{
-					await QTask.Wait(() => { action(); return task.IsCompleted; });
+					await QTask.Wait(() => { action(); return task.Value.IsCompleted; });
 				}
-				taskList.Clear();
+				Tasks.Clear();
 				QDebug.Log("解析玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				action();
-			
 				return loadOver;
 			}
 			catch (Exception e)
