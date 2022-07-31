@@ -262,7 +262,19 @@ namespace QTool
 		}
 		public async void FreshData()
 		{
-			for (int i = 0; i < 4 && !await QAnalysisData.FreshData(Repaint); i++) ;
+			var i = 1;
+			while (!await QAnalysisData.FreshData(Repaint))
+			{
+				for (int t = 0; t < 30; t++)
+				{
+					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" + i++ * 100 + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
+					{
+						break;
+					}
+					await Task.Delay(1000);
+				}
+				EditorUtility.ClearProgressBar();
+			}
 		}
 		Stack<string> ViewInfoStack = new Stack<string>();
 		Stack<string> ViewPlayerStack = new Stack<string>();
@@ -563,7 +575,12 @@ namespace QTool
 								{
 									for (int i = 0; i < list.Count; i++)
 									{
+									
 										var eventData = list[i];
+										if (!IsLoading)
+										{
+											Debug.LogError("加载已经结束 ["+ eventData.playerId + "]添加玩家数据线程还在继续");
+										}
 										var version = playerVersion[eventData.playerId];
 										SetLoadingInfo("添加玩家数据[" + eventData.playerId + "]", i + "/" + list.Count + " " + eventData.eventKey, i * 1f / list.Count);
 										if ("游戏/开始".Equals(eventData.eventKey))
@@ -586,7 +603,7 @@ namespace QTool
 							taskList.Add(task);
 						}
 					}
-				}, Instance.LastMail,500);
+				}, Instance.LastMail,100);
 				foreach (var task in taskList)
 				{
 					await QTask.Wait(() => { action(); return task.IsCompleted; });
