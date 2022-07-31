@@ -269,6 +269,7 @@ namespace QTool
 				{
 					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * 100 + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
 					{
+						EditorUtility.ClearProgressBar();
 						return;
 					}
 					await Task.Delay(1000);
