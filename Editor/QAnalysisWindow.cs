@@ -262,6 +262,7 @@ namespace QTool
 		}
 		public async void FreshData()
 		{
+			var startTime = DateTime.Now;
 			var i = 1;
 			while (!await QAnalysisData.FreshData(Repaint))
 			{
@@ -276,6 +277,10 @@ namespace QTool
 				}i++;
 				EditorUtility.ClearProgressBar();
 			}
+			var saveStartTime = DateTime.Now;
+			QAnalysisData.SaveData();
+			QDebug.Log("保存数据完成  用时: " + (DateTime.Now - saveStartTime).ToString("hh\\:mm\\:ss"));
+			QDebug.Log("刷新数据总用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss"));
 		}
 		Stack<string> ViewInfoStack = new Stack<string>();
 		Stack<string> ViewPlayerStack = new Stack<string>();
@@ -623,8 +628,7 @@ namespace QTool
 				taskList.Clear();
 				QDebug.Log("解析玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				action();
-				SaveData();
-				QDebug.Log("刷新并保存数据完成  用时: " + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
+			
 				return loadOver;
 			}
 			catch (Exception e)
