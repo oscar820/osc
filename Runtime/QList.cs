@@ -497,22 +497,15 @@ namespace QTool
         }
 		public static void CheckSet<TKey,TValue>(this IDictionary<TKey,TValue> dic, TKey key,TValue value) 
 		{
-			if (dic.ContainsKey(key))
+			lock (dic)
 			{
-				dic[key] = value;
-			}
-			else
-			{
-				try
+				if (dic.ContainsKey(key))
 				{
-					lock (dic)
-					{
-						dic.Add(key, value);
-					}
+					dic[key] = value;
 				}
-				catch (Exception e)
+				else
 				{
-					Debug.LogError("添加[" + key + ":" + value + "]出错 "+e);
+					dic.Add(key, value);
 				}
 			}
 		}
