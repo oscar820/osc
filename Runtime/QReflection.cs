@@ -213,12 +213,16 @@ namespace QTool.Reflection
         public static Dictionary<Type, T> table = new Dictionary<Type, T>();
         public static T Get(Type type)
         {
-            if (!table.ContainsKey(type))
-            {
-                var info = new T();
-                info.Init(type);
-                table.Add(type, info);
-            }
+			lock (table)
+			{
+				if (!table.ContainsKey(type))
+				{
+
+					var info = new T();
+					info.Init(type);
+					table.Add(type, info);
+				}
+			}
             return table[type];
         }
         public override string ToString()

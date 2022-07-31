@@ -96,7 +96,7 @@ namespace QTool
 			}
 		}
 		
-		public static async Task ReceiveRemailAsync(QMailAccount account, int startIndex, int endIndex, Action<QMailInfo,int> callBack,int threadCount=5)
+		public static async Task ReceiveRemailAsync(QMailAccount account, int startIndex, int endIndex, Action<QMailInfo> callBack,int threadCount=5)
 		{
 			QDictionary<int, QMailInfo> mailList = new QDictionary<int, QMailInfo>();
 			var startTime = DateTime.Now;
@@ -127,8 +127,8 @@ namespace QTool
 
 			QDebug.Log("接收邮件" + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now-startTime).ToString("hh\\:mm\\:ss") );
 			QDebug.Log("开始读取邮件" + startIndex + " -> " + endIndex + " ...");
+			await Task.Delay(100);
 			startTime = DateTime.Now;
-			await Task.Delay(10);
 			for (var i = startIndex; i <= endIndex; i++)
 			{
 				var mail = mailList[i];
@@ -145,14 +145,13 @@ namespace QTool
 						UnityEditor.EditorUtility.DisplayProgressBar("解析邮件", i + "/" + endIndex + " " + mail.Subject, (i - startIndex) * 1f / (endIndex - startIndex));
 					}
 #endif
-					callBack(mail,endIndex);
+					callBack(mail);
 				}
 				catch (Exception e)
 				{
 					Debug.LogError("读取邮件出错" + i + "/" + endIndex + "：\n" + e);
 				}
 			}
-			await Task.Delay(10);
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
@@ -160,7 +159,7 @@ namespace QTool
 			}
 #endif
 			QDebug.Log("读取邮件 " + startIndex + " -> " + endIndex+ " 完成 用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss") );
-
+			await Task.Delay(100);
 		}
 		static async Task ReceiveRemail(QMailAccount account, int startIndex, int endIndex, QDictionary<int, QMailInfo> mailList, int threadCount =1)
 		{
@@ -189,8 +188,10 @@ namespace QTool
 								for (var i = startIndex; i <= endIndex; i+=threadCount)
 								{
 									var mail = await ReceiveEmail(writer, reader, i, endIndex);
-
-									mailList[i] = mail;
+									lock (mailList)
+									{
+										mailList[i] = mail;
+									}
 #if UNITY_EDITOR
 									if (!Application.isPlaying)
 									{
@@ -211,8 +212,9 @@ namespace QTool
 				clientSocket.Close();
 			}
 		}
-		public static async Task FreshEmails(QMailAccount account, Action<QMailInfo,int> callBack, QMailInfo lastMail,int maxCount=0)
+		public static async Task<bool> FreshEmails(QMailAccount account, Action<QMailInfo> callBack, QMailInfo lastMail,int maxCount=0)
 		{
+			bool loadOver = true;
 			using (TcpClient clientSocket = new TcpClient())
 			{
 				clientSocket.Connect(account.popServer, 995);
@@ -270,9 +272,10 @@ namespace QTool
 										}
 									}
 								}
-								if (maxCount > 0&&endIndex-startIndex>maxCount)
+								if (maxCount > 0 && endIndex - startIndex > maxCount - 1)
 								{
-									endIndex = startIndex + maxCount;
+									loadOver = false;
+									endIndex = startIndex + maxCount - 1;
 								}
 #if UNITY_EDITOR
 								if (!Application.isPlaying)
@@ -280,7 +283,7 @@ namespace QTool
 									UnityEditor.EditorUtility.DisplayProgressBar("接收邮件信息", "获取起始邮件索引成功", 0.3f);
 								}
 #endif
-								await ReceiveRemailAsync(account, startIndex, endIndex, callBack,24);
+								await ReceiveRemailAsync(account, startIndex, endIndex, callBack,20);
 #if UNITY_EDITOR
 								if (!Application.isPlaying)
 								{
@@ -290,7 +293,6 @@ namespace QTool
 							}
 							catch (Exception e)
 							{
-
 								Debug.LogError("邮件读取出错：" + e);
 							}
 							clientSocket.Close();
@@ -298,6 +300,7 @@ namespace QTool
 					}
 				}
 			}
+			return loadOver;
 		}
 		public static async Task<bool> IdCheck(this StreamWriter writer ,long index,string Id, StreamReader reader)
 		{

@@ -159,7 +159,11 @@ namespace QTool
             if (Cache.Cache.ContainsKey(key) && Cache.Cache[key] != null)
             {
                 return true;
-            }
+			}
+			else if(Cache.Cache.Count==Count)
+			{
+				return false;
+			}
             else
             {
                 return this.ContainsKey<T, TKey>(key);
@@ -183,8 +187,16 @@ namespace QTool
             {
                 Debug.LogError("key is null");
             }
-			Cache.Remove(key);
-            this.Set<T, TKey>(key, value);
+			Cache.Set(key, value);
+			if (ContainsKey(key))
+			{
+				this.Set<T, TKey>(key, value);
+			}
+			else
+			{
+				value.Key = key;
+				base.Add(value);
+			}
         }
         public void Remove(TKey key)
         {
@@ -525,7 +537,7 @@ namespace QTool
             {
                 return false;
             }
-			for (int i = 0; i < array.Count; i++)
+			for (int i = array.Count-1; i>=0; i--)
 			{
 				var value = array[i];
 				if (value == null) continue;

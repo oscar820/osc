@@ -34,7 +34,7 @@ namespace QTool
 			if (Cache.ContainsKey(key)&&Cache[key]!=null)
 			{
 				var newInfo = GetCheckInfo(key);
-				if (!CheckInfo[key].Equals(newInfo))
+				if (!CheckInfo.ContainsKey(key)||!CheckInfo[key].Equals(newInfo))
 				{
 					Cache.CheckSet(key, GetValueFunc(key));
 					CheckInfo.CheckSet(key, newInfo);

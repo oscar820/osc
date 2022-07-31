@@ -93,12 +93,7 @@ namespace QTool
 				if (QAnalysisData.IsLoading)
 				{
 					GUI.enabled = true;
-					GUILayout.Label("", QGUITool.BackStyle);
-					lastRect = GUILayoutUtility.GetLastRect();
-					var rateRect = lastRect;
-					rateRect.width *=QAnalysisData.LoadingRate;
-					GUI.Box(rateRect, "", QGUITool.BackStyle); 
-					GUI.Label(lastRect,"加载中.." + QAnalysisData.LoadingInfo, QGUITool.BackStyle);
+					QGUITool.ProgressBar("加载中..   " + QAnalysisData.LoadingInfo, QAnalysisData.LoadingRate);
 					
 				}
 			}
@@ -439,15 +434,23 @@ namespace QTool
 		}
 		public static void Load()
 		{
+			EditorUtility.DisplayProgressBar("数据读取", "读取解析数据 QTool/" + QAnalysis.StartKey, 0.2f);
 			QFileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
+			EditorUtility.DisplayProgressBar("数据读取","读取事件表 "+"QTool/" + QAnalysis.StartKey, 0.5f);
 			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList)).ParseQData(EventList);
+			EditorUtility.DisplayProgressBar("数据读取", "读取解析数据设置 "+ "QTool/" + QAnalysis.StartKey, 0.9f);
 			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting)).ParseQData(Setting);
+			EditorUtility.ClearProgressBar();
 		}
 		public static void SaveData()
 		{
+			EditorUtility.DisplayProgressBar("数据储存", "储存解析数据 QTool/" + QAnalysis.StartKey, 0.2f);
 			QFileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
+			EditorUtility.DisplayProgressBar("数据储存", "储存事件表 " + "QTool/" + QAnalysis.StartKey, 0.5f);
 			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
+			EditorUtility.DisplayProgressBar("数据储存", "储存解析数据设置 " + "QTool/" + QAnalysis.StartKey, 0.9f);
 			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting), Setting.ToQData());
+			EditorUtility.ClearProgressBar();
 		}
 		public static void ForeachTitle(Action<QTitleInfo> action)
 		{
@@ -525,15 +528,18 @@ namespace QTool
 		//	QDebug.Log("添加事件" + length + "完成 " + (DateTime.Now - start).ToString("hh\\:mm\\:ss") + " 总数" + QAnalysisData.EventList.Count);
 		//	EditorUtility.ClearProgressBar();
 		//}
-		 //static Queue<QAnalysisEvent> NewEventList { get;  set; } = new Queue<QAnalysisEvent>();
-		 static QDictionary<string, Task> PlayerTasks = new QDictionary<string, Task>();
-		public static async Task FreshData(Action action) 
+		//static Queue<QAnalysisEvent> NewEventList { get;  set; } = new Queue<QAnalysisEvent>();
+		static List<Task> ParseTasks = new List<Task>();
+		//static QDictionary<string, List< Task>> PlayerTasks = new QDictionary<string,List< Task>>();
+		static DateTime loadingStartTime;
+		public static async Task<bool> FreshData(Action action) 
 		{
-			if (IsLoading) return;
+			if (IsLoading) return true;
+			loadingStartTime = DateTime.Now;
 			if (!QToolSetting.Instance.QAnalysisMail.InitOver)
 			{
 				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
-				return;
+				return true;
 			}
 			IsLoading = true;
 			LoadingInfo = "";
@@ -541,54 +547,62 @@ namespace QTool
 			startV = Setting.StartVersion.ToComputeFloat();
 			try
 			{
-				await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,async (mailInfo,endIndex) =>
+				var loadOver= await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,(mailInfo) =>
 				{
+					Instance.LastMail = mailInfo;
 					if (mailInfo.Subject.StartsWith(QAnalysis.StartKey))
 					{
 						if (!string.IsNullOrWhiteSpace(mailInfo.Body))
 						{
 							var list = mailInfo.Body.ParseQData<List<QAnalysisEvent>>();
-							
-							var playerKey = list.QueuePeek().playerId;
-							if (PlayerTasks[playerKey] != null)
-							{
-								await PlayerTasks[playerKey];
-							}
+							var playerData = Instance.PlayerDataList[list.StackPeek().playerId];
 							var task = Task.Run(() =>
 							{
-								for (int i = 0; i < list.Count; i++)
+								try
 								{
-									var eventData = list[i];
-									var playerData = Instance.PlayerDataList[eventData.playerId];
-									SetLoadingInfo("解析玩家数据["+playerKey+"]", i + "/" + list.Count + " "+eventData.eventKey, i * 1f / list.Count);
-									var version = playerVersion[eventData.playerId];
-									if ("游戏/开始".Equals(eventData.eventKey))
+									for (int i = 0; i < list.Count; i++)
 									{
-										version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
-										playerVersion[eventData.playerId] = version;
-									}
-									if (version >= startV)
-									{
-										AddEvent(eventData);
+										var eventData = list[i];
+										var version = playerVersion[eventData.playerId];
+										SetLoadingInfo("添加玩家数据[" + eventData.playerId + "]", i + "/" + list.Count + " " + eventData.eventKey, i * 1f / list.Count);
+										if ("游戏/开始".Equals(eventData.eventKey))
+										{
+											version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
+											playerVersion[eventData.playerId] = version;
+										}
+										if (version >= startV)
+										{
+											AddEvent(eventData);
+										}
 									}
 								}
+								catch (Exception e)
+								{
+									Debug.LogError("添加玩家数据出错 " + e);
+								}
+								
 							});
-							PlayerTasks[playerKey] = task;
-							await task;
+							ParseTasks.Add(task);
 						}
 					}
-					Instance.LastMail = mailInfo;
 				}, Instance.LastMail,500);
-				EditorUtility.ClearProgressBar();
-				foreach (var task in PlayerTasks)
+				foreach (var task in ParseTasks)
 				{
-					if (task.Value == null) continue;
-					await task.Value;
-					action();
+					await QTask.Wait(() => { action(); return task.IsCompleted; });
 				}
-				PlayerTasks.Clear();
+				ParseTasks.Clear();
+				foreach (var player in Instance.PlayerDataList)
+				{
+					_=Task.Run(player.ParseEventBuffer);
+				}
+				foreach (var player in Instance.PlayerDataList)
+				{
+					await QTask.Wait(() => { if (player.EventBuffer.Count > 0) { action(); SetLoadingInfo("解析玩家数据[" + player.Key + "]", player.EventBuffer.Count + "/" + player.BufferCount + " " + player.EventBuffer.QueuePeek().eventKey, player.EventBuffer.Count * 1f / player.BufferCount); } return player.EventBuffer.Count == 0; });
+				}
+				action();
 				SaveData();
-				QDebug.Log("保存完成");
+				QDebug.Log("刷新数据完成 保存数据 用时: " + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
+				return loadOver;
 			}
 			catch (Exception e)
 			{
@@ -598,7 +612,8 @@ namespace QTool
 			{
 				IsLoading = false;
 			}
-		
+			return true;
+
 		}
 		
 	
@@ -621,22 +636,22 @@ namespace QTool
 			EventList.Clear();
 			Instance = Activator.CreateInstance<QAnalysisData>();
 		}
-	
 		public static void AddEvent(QAnalysisEvent eventData)
 		{
 			if (EventList.ContainsKey(eventData.Key)) return;
-
 			EventList.Add(eventData);
 			Instance.PlayerDataList[eventData.playerId].Add(eventData);
-			Instance.EventKeyList.AddCheckExist(eventData.eventKey);
-			Instance.DataKeyList.AddCheckExist(eventData.eventKey);
-			CheckTitle(eventData.eventKey, eventData.eventValue);
+			if (!Instance.EventKeyList.Contains(eventData.eventKey))
+			{
+				Instance.EventKeyList.Add(eventData.eventKey);
+				Instance.DataKeyList.Add(eventData.eventKey);
+				CheckTitle(eventData.eventKey, eventData.eventValue);
+			}
 		}
 		static void CheckTitle(string key,object value)
 		{
 			if (TitleList.ContainsKey(key)) return;
 			var title = new QTitleInfo();
-
 			TitleList.Set(key, title);
 			if (title.DataSetting.mode== QAnalysisMode.更新时间)
 			{
@@ -814,7 +829,6 @@ namespace QTool
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
 		public void AddEvent(QAnalysisEvent eventData)
 		{
-
 			var setting = QAnalysisData.TitleList[Key].DataSetting;
 			switch (setting.mode)
 			{
@@ -838,7 +852,7 @@ namespace QTool
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (int)BufferData[BufferData.Count-1].Value +1;
+						BufferData[eventData.eventId] = (int)BufferData[BufferData.Count - 1].Value + 1;
 					}
 					break;
 				case QAnalysisMode.最小值:
@@ -846,7 +860,7 @@ namespace QTool
 					{
 						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else if ((float)BufferData[BufferData.Count - 1].Value>eventData.GetValue(setting.DataKey).ToComputeFloat())
+					else if ((float)BufferData[BufferData.Count - 1].Value > eventData.GetValue(setting.DataKey).ToComputeFloat())
 					{
 						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
@@ -873,10 +887,10 @@ namespace QTool
 					if (BufferData.Count == 0)
 					{
 						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
-					} 
+					}
 					else
-					{   
-						BufferData[eventData.eventId]= ((float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat())/ 2;
+					{
+						BufferData[eventData.eventId] = ((float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat()) / 2;
 					}
 					break;
 				case QAnalysisMode.求和:
@@ -905,6 +919,7 @@ namespace QTool
 				case QAnalysisMode.最新时长:
 					{
 						BufferData[eventData.eventId] = GetTimeSpan(eventData);
+						EventList.AddCheckExist(eventData.Key);
 					}
 					break;
 				case QAnalysisMode.总时长:
@@ -914,8 +929,9 @@ namespace QTool
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (TimeSpan)BufferData[BufferData.Count-1].Value + GetTimeSpan(eventData);
+						BufferData[eventData.eventId] = (TimeSpan)BufferData[BufferData.Count - 1].Value + GetTimeSpan(eventData);
 					}
+					EventList.AddCheckExist(eventData.Key);
 					break;
 				default:
 					UpdateTime = eventData.eventTime;
@@ -923,7 +939,6 @@ namespace QTool
 			}
 
 			UpdateTime = eventData.eventTime;
-			EventList.AddCheckExist(eventData.Key);
 		}
 		TimeSpan GetTimeSpan(QAnalysisEvent eventData)
 		{
@@ -1049,10 +1064,13 @@ namespace QTool
 			
 			if (string.IsNullOrWhiteSpace(eventId))
 			{
-				eventId = EventList.StackPeek();
-				if (string.IsNullOrWhiteSpace(eventId))
+				if (BufferData.Count==0)
 				{
 					return QAnalysisData.TitleList[Key].DataSetting.mode== QAnalysisMode.更新时间? (object)UpdateTime: null;
+				}
+				else
+				{
+					return BufferData.StackPeek().Value;
 				}
 			}
 		
@@ -1079,29 +1097,42 @@ namespace QTool
 		public string Key { get; set; }
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
-		public void Add(QAnalysisEvent eventData)
+
+		public List<QAnalysisEvent> EventBuffer = new List<QAnalysisEvent>();
+		public int BufferCount = 0;
+		public void ParseEventBuffer()
 		{
-			UpdateTime = eventData.eventTime;
-			EventList.AddCheckExist(eventData.eventId);
-			try
+			EventBuffer.Sort(QAnalysisEvent.SortMethod);
+			BufferCount = EventBuffer.Count;
+			while (EventBuffer.Count>0)
 			{
-				for (int i = 0; i < QAnalysisData.TitleList.Count; i++)
+				try
 				{
-					var title = QAnalysisData.TitleList[i];
-					if (title.DataSetting.EventKey == eventData.eventKey)
+					var eventData = EventBuffer.Dequeue();
+					UpdateTime = eventData.eventTime;
+					EventList.AddCheckExist(eventData.eventId);
+					for (int i = 0; i < QAnalysisData.TitleList.Count; i++)
 					{
-						AnalysisData[title.Key].AddEvent(eventData);
-					}
-					else if (title.DataSetting.mode == QAnalysisMode.更新时间 && eventData.eventKey.StartsWith(title.Key))
-					{
-						AnalysisData[title.Key].AddEvent(eventData);
+						var title = QAnalysisData.TitleList[i];
+						if (title.DataSetting.EventKey == eventData.eventKey)
+						{
+							AnalysisData[title.Key].AddEvent(eventData);
+						}
+						else if (title.DataSetting.mode == QAnalysisMode.更新时间 && eventData.eventKey.StartsWith(title.Key))
+						{
+							AnalysisData[title.Key].AddEvent(eventData);
+						}
 					}
 				}
+				catch (Exception e)
+				{
+					Debug.LogError(Key + "添加事件出错 ：" + e);
+				}
 			}
-			catch (Exception e)
-			{
-				Debug.LogError(Key + "添加事件出错 ：" + e);
-			}
+		}
+		public void Add(QAnalysisEvent eventData)
+		{
+			EventBuffer.Enqueue(eventData);
 		}
 		public void FreshKey(string titleKey)
 		{
@@ -1130,6 +1161,20 @@ namespace QTool
 		public static void RevertColor()
 		{
 			GUI.color = colorStack.Pop();
+		}
+		public static void ProgressBar(string info, float progress)
+		{
+			GUILayout.Box("", BackStyle);
+			var lastRect = GUILayoutUtility.GetLastRect();
+			var rateRect = lastRect;
+			rateRect.width *= QAnalysisData.LoadingRate;
+			if (progress > 0)
+			{
+				SetColor(Color.green);
+				GUI.Box(rateRect, "", CellStyle);
+				RevertColor();
+			}
+			GUI.Label(lastRect, info, CenterLable);
 		}
 		public static GUIStyle TitleLable => _titleLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
 		static GUIStyle _titleLabel;
