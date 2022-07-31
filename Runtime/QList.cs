@@ -130,21 +130,6 @@ namespace QTool
                 Set(value.Key, value);
             }
         }
-        public new void Sort(Comparison<T> comparison)
-        {
-			Cache.Clear();
-			base.Sort(comparison);
-        }
-        public new void Sort(int index, int count, IComparer<T> comparer)
-        {
-			Cache.Clear();
-            base.Sort(index, count, comparer);
-        }
-        public new void Sort()
-        {
-			Cache.Clear();
-            base.Sort();
-        }
         public new bool Contains(T value)
         {
             return base.Contains(value);
@@ -249,16 +234,6 @@ namespace QTool
         {
 			Cache.Clear();
             base.Clear();
-        }
-        public new void Reverse(int index, int count)
-        {
-			Cache.Clear();
-            base.Reverse(index, count);
-        }
-        public new void Reverse()
-        {
-			Cache.Clear();
-            base.Reverse();
         }
     }
     public class QAutoList<TKey, T> : QList<TKey, T> where T : IKey<TKey>, new()
