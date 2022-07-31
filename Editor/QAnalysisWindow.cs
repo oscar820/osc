@@ -1132,7 +1132,10 @@ namespace QTool
 		}
 		public void Add(QAnalysisEvent eventData)
 		{
-			EventBuffer.Enqueue(eventData);
+			lock (EventBuffer)
+			{
+				EventBuffer.Enqueue(eventData);
+			}
 		}
 		public void FreshKey(string titleKey)
 		{
