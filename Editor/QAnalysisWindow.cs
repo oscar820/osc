@@ -278,11 +278,12 @@ namespace QTool
 			var startTime = DateTime.Now;
 			var i = 1;
 			var loading = true;
+			var waitTime = 10;
 			while (loading&&!await QAnalysisData.FreshData(Repaint, count))
 			{
-				for (int t = 0; t < 10; t++)
+				for (int t = 0; t < waitTime; t++)
 				{
-					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * count + "条邮件完成 等待 " + (10 - t) + " 秒后继续", t * 1f / 30))
+					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * count + "条邮件完成 等待 " + (waitTime - t) + " 秒后继续", t * 1f / waitTime))
 					{
 						loading = false;
 						break;
