@@ -83,6 +83,10 @@ namespace QTool
 						FreshData();
 					}
 				}
+				if (DrawButton("保存数据"))
+				{
+					SaveData();
+				}
 				if (DrawButton("复制表格数据"))
 				{
 					GUIUtility.systemCopyBuffer = GridView.Copy();
@@ -260,6 +264,12 @@ namespace QTool
 			}
 			return size;
 		}
+		public void SaveData()
+		{
+			var saveStartTime = DateTime.Now;
+			QAnalysisData.SaveData();
+			QDebug.Log("保存数据完成  用时: " + (DateTime.Now - saveStartTime).ToString("hh\\:mm\\:ss"));
+		}
 		public async void FreshData()
 		{
 			var startTime = DateTime.Now;
@@ -277,9 +287,7 @@ namespace QTool
 				}i++;
 				EditorUtility.ClearProgressBar();
 			}
-			var saveStartTime = DateTime.Now;
-			QAnalysisData.SaveData();
-			QDebug.Log("保存数据完成  用时: " + (DateTime.Now - saveStartTime).ToString("hh\\:mm\\:ss"));
+			SaveData();
 			QDebug.Log("刷新数据总用时: " + (DateTime.Now - startTime).ToString("hh\\:mm\\:ss"));
 		}
 		Stack<string> ViewInfoStack = new Stack<string>();
