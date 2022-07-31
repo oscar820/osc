@@ -639,7 +639,10 @@ namespace QTool
 		public static void AddEvent(QAnalysisEvent eventData)
 		{
 			if (EventList.ContainsKey(eventData.Key)) return;
-			EventList.Add(eventData);
+			lock (EventList)
+			{
+				EventList.Add(eventData);
+			}
 			Instance.PlayerDataList[eventData.playerId].Add(eventData);
 			if (!Instance.EventKeyList.Contains(eventData.eventKey))
 			{
