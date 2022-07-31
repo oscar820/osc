@@ -267,12 +267,12 @@ namespace QTool
 			{
 				for (int t = 0; t < 30; t++)
 				{
-					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" + i++ * 100 + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
+					if (EditorUtility.DisplayCancelableProgressBar("分段刷新数据", "接收" +i * 100 + "条邮件完成 等待 " + (30 - t) + " 秒后继续", t * 1f / 30))
 					{
-						break;
+						return;
 					}
 					await Task.Delay(1000);
-				}
+				}i++;
 				EditorUtility.ClearProgressBar();
 			}
 		}
