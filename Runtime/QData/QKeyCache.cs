@@ -44,13 +44,14 @@ namespace QTool
 					Cache.CheckSet(key, GetValueFunc(key));
 					CheckInfo.CheckSet(key, newInfo);
 				}
+				return Cache[key];
 			}
 			else
 			{
 				Cache.CheckSet(key, GetValueFunc(key));
 				CheckInfo.CheckSet(key, GetCheckInfo(key));
+				return Cache[key];
 			}
-			return Cache[key];
 		}
 		public T Get(KeyT key)
 		{
