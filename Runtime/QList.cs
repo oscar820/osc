@@ -505,7 +505,10 @@ namespace QTool
 			{
 				try
 				{
-					dic.Add(key, value);
+					lock (dic)
+					{
+						dic.Add(key, value);
+					}
 				}
 				catch (Exception e)
 				{
