@@ -262,7 +262,7 @@ namespace QTool
 		}
 		public async void FreshData()
 		{
-			await QAnalysisData.FreshData(Repaint);
+			for (int i = 0; i < 4 && !await QAnalysisData.FreshData(Repaint); i++) ;
 		}
 		Stack<string> ViewInfoStack = new Stack<string>();
 		Stack<string> ViewPlayerStack = new Stack<string>();
@@ -529,7 +529,7 @@ namespace QTool
 		//	EditorUtility.ClearProgressBar();
 		//}
 		//static Queue<QAnalysisEvent> NewEventList { get;  set; } = new Queue<QAnalysisEvent>();
-		static List<Task> ParseTasks = new List<Task>();
+		static List<Task> taskList = new List<Task>();
 		//static QDictionary<string, List< Task>> PlayerTasks = new QDictionary<string,List< Task>>();
 		static DateTime loadingStartTime;
 		public static async Task<bool> FreshData(Action action) 
@@ -547,6 +547,7 @@ namespace QTool
 			startV = Setting.StartVersion.ToComputeFloat();
 			try
 			{
+				taskList.Clear();
 				var loadOver= await QMailTool.FreshEmails(QToolSetting.Instance.QAnalysisMail,(mailInfo) =>
 				{
 					Instance.LastMail = mailInfo;
@@ -582,26 +583,30 @@ namespace QTool
 								}
 								
 							});
-							ParseTasks.Add(task);
+							taskList.Add(task);
 						}
 					}
 				}, Instance.LastMail,500);
-				foreach (var task in ParseTasks)
+				foreach (var task in taskList)
 				{
 					await QTask.Wait(() => { action(); return task.IsCompleted; });
 				}
-				ParseTasks.Clear();
+				taskList.Clear();
+
+				QDebug.Log("添加玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				foreach (var player in Instance.PlayerDataList)
 				{
-					_=Task.Run(player.ParseEventBuffer);
+					taskList.Add(Task.Run(player.ParseEventBuffer));
 				}
-				foreach (var player in Instance.PlayerDataList)
+				foreach (var task in taskList)
 				{
-					await QTask.Wait(() => { if (player.EventBuffer.Count > 0) { action(); SetLoadingInfo("解析玩家数据[" + player.Key + "]", player.EventBuffer.Count + "/" + player.BufferCount + " " + player.EventBuffer.QueuePeek().eventKey, player.EventBuffer.Count * 1f / player.BufferCount); } return player.EventBuffer.Count == 0; });
+					await QTask.Wait(() => { action(); return task.IsCompleted; });
 				}
+				taskList.Clear();
+				QDebug.Log("解析玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				action();
 				SaveData();
-				QDebug.Log("刷新数据完成 保存数据 用时: " + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
+				QDebug.Log("刷新并保存数据完成  用时: " + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
 				return loadOver;
 			}
 			catch (Exception e)
