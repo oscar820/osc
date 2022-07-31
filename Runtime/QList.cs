@@ -509,7 +509,7 @@ namespace QTool
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("添加[" + key + ":" + value + "]出错");
+					Debug.LogError("添加[" + key + ":" + value + "]出错 "+e);
 				}
 			}
 		}
