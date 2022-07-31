@@ -573,8 +573,9 @@ namespace QTool
 				return true;
 			}
 			IsLoading = true;
-			LoadingInfo = "";
+			LoadingInfo = "接收邮件";
 			LoadingRate = 0;
+			action();
 			startV = Setting.StartVersion.ToComputeFloat();
 			try
 			{
@@ -636,6 +637,7 @@ namespace QTool
 				TaskList.Clear();
 
 				QDebug.Log("添加玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
+				await Task.Delay(100);
 				foreach (var player in Instance.PlayerDataList)
 				{
 					TaskList.Add( Task.Run(player.ParseEventBuffer));
@@ -651,6 +653,7 @@ namespace QTool
 				}
 				TaskList.Clear();
 				QDebug.Log("解析玩家数据完成  用时" + (DateTime.Now - loadingStartTime).ToString("hh\\:mm\\:ss"));
+				await Task.Delay(100);
 				action();
 				return loadOver;
 			}
