@@ -470,17 +470,17 @@ namespace QTool
 			EditorUtility.DisplayProgressBar("数据读取", "读取解析数据 QTool/" + QAnalysis.StartKey, 0.2f);
 			QFileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
 			EditorUtility.DisplayProgressBar("数据读取","读取事件表 "+"QTool/" + QAnalysis.StartKey, 0.5f);
-			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList),"[]").ParseQData<List<QAnalysisEvent>>().ToDictionary(EventList);
+			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList),"[]").ParseQData(EventList);
 			EditorUtility.DisplayProgressBar("数据读取", "读取解析数据设置 "+ "QTool/" + QAnalysis.StartKey, 0.9f);
 			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting),"[]").ParseQData(Setting);
 			EditorUtility.ClearProgressBar();
-		}
+		} 
 		public static void SaveData()
 		{
 			EditorUtility.DisplayProgressBar("数据储存", "储存解析数据 QTool/" + QAnalysis.StartKey, 0.2f);
 			QFileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
 			EditorUtility.DisplayProgressBar("数据储存", "储存事件表 " + "QTool/" + QAnalysis.StartKey, 0.5f);
-			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToList().ToQData());
+			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());
 			EditorUtility.DisplayProgressBar("数据储存", "储存解析数据设置 " + "QTool/" + QAnalysis.StartKey, 0.9f);
 			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting), Setting.ToQData());
 			EditorUtility.ClearProgressBar();
