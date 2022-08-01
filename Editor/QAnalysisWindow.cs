@@ -470,9 +470,9 @@ namespace QTool
 			EditorUtility.DisplayProgressBar("数据读取", "读取解析数据 QTool/" + QAnalysis.StartKey, 0.2f);
 			QFileManager.Load("QTool/" + QAnalysis.StartKey, "{}").ParseQData(Instance);
 			EditorUtility.DisplayProgressBar("数据读取","读取事件表 "+"QTool/" + QAnalysis.StartKey, 0.5f);
-			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList)).ParseQData<List<QAnalysisEvent>>().ToDictionary(EventList);
+			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList),"[]").ParseQData<List<QAnalysisEvent>>().ToDictionary(EventList);
 			EditorUtility.DisplayProgressBar("数据读取", "读取解析数据设置 "+ "QTool/" + QAnalysis.StartKey, 0.9f);
-			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting)).ParseQData(Setting);
+			QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(Setting),"[]").ParseQData(Setting);
 			EditorUtility.ClearProgressBar();
 		}
 		public static void SaveData()
@@ -884,7 +884,7 @@ namespace QTool
 			switch (setting.mode)
 			{
 				case QAnalysisMode.最新数据:
-					BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey);
+					BufferData[eventData.eventId] =lastData= eventData.GetValue(setting.DataKey);
 					break;
 				case QAnalysisMode.起始数据:
 					if (lastData==null)
@@ -949,9 +949,9 @@ namespace QTool
 					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.最新时间:
-					BufferData[eventData.eventId] = eventData.eventTime;
+					BufferData[eventData.eventId] =lastData= eventData.eventTime;
 					break;
-				case QAnalysisMode.起始时间:
+				case QAnalysisMode.起始时间: 
 					if (lastData == null)
 					{
 						lastData = eventData.eventTime;
@@ -960,7 +960,7 @@ namespace QTool
 					break;
 				case QAnalysisMode.最新时长:
 					{
-						BufferData[eventData.eventId] = GetTimeSpan(eventData);
+						BufferData[eventData.eventId] =lastData= GetTimeSpan(eventData);
 						EventList.AddCheckExist(eventData.Key);
 					}
 					break;
