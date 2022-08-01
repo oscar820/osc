@@ -829,10 +829,9 @@ namespace QTool
 	{
 		public static QDictionary<Type, List<string>> TypeMembers = new QDictionary<Type, List<string>>()
 		{
-			new QKeyValue<Type, List<string>>
 			{
-				 Key=typeof(Rect),
-				 Value=new List<string>
+				 typeof(Rect),
+				 new List<string>
 				 {
 					 "position",
 					 "size",

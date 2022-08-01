@@ -434,7 +434,7 @@ namespace QTool
                 return (DateTime.Now - new DateTime()).TotalSeconds;
             }
         }
-		
+		static List<double> buffer = new List<double>();
 		public void Push(float value)
         {
             if (StartTime<0)
@@ -442,7 +442,7 @@ namespace QTool
                 StartTime = CurTime;
             }
             AllSum += value;
-            list.RemoveAll((kv) => (CurTime - kv.Key) > 1);
+            list.RemoveAll((kv) => (CurTime - kv.Key) > 1, buffer);
             list[CurTime] = value;
             EndTime = CurTime;
             Value = SecondeSum/list.Count;

@@ -8,82 +8,72 @@ using QTool.Inspector;
 using QTool.Reflection;
 namespace QTool
 {
-    public interface IKey<KeyType>
+	[System.Serializable]
+	public struct QKeyValue<TKey, T> : IKey<TKey>
+	{
+		public TKey Key { get; set; }
+		public T Value { get; set; }
+		public QKeyValue(TKey key, T value)
+		{
+			Key = key;
+			Value = value;
+		}
+		public override string ToString()
+		{
+			return "{" + Key + ":" + Value + "}";
+		}
+	}
+	public interface IKey<KeyType>
     {
         KeyType Key { get; set; }
 	}
-	[System.Serializable]
-    public struct QKeyValue<TKey, T> : IKey<TKey>
-    {
-        public TKey Key { get; set; }
-        public T Value { get; set; }
-        public QKeyValue(TKey key, T value)
-        {
-            Key = key;
-            Value = value;
-        }
-        public override string ToString()
-        {
-            return "{" + Key + ":" + Value + "}";
-        }
-    }
-    public class QDictionary<TKey, T> : QAutoList<TKey, QKeyValue<TKey, T>>
+
+	public class QDictionary<TKey, T> : Dictionary<TKey,T>
     {
         public new T this[TKey key]
         {
             get
             {
-                var keyValue = base[key];
-                return keyValue.Value;
-            }
+				if (!ContainsKey(key))
+				{
+					if (AutoCreateFunc != null)
+					{
+						Add(key, AutoCreateFunc(key));
+					}
+					else
+					{
+						Add(key, DefaultValue);
+					}
+				}
+				return base[key];
+			}
             set
             {
-                base[key] =new QKeyValue<TKey, T>(key, value);
+				if (ContainsKey(key))
+				{
+					base[key] = value;
+				}
+				else
+				{
+					Add(key,value);
+				}
             }
         }
-        public QDictionary()
+		public Func<TKey, T> AutoCreateFunc { protected set; get; }
+		public T DefaultValue { protected set; get; } = default;
+		public QDictionary(T defaultValue=default)
         {
-
+            this.DefaultValue = defaultValue;
 		}
-		public Func<TKey, T> createAction { private set; get; }
-		public T defaultValue { private set; get; } = default;
-        public QDictionary(T defaultValue)
-        {
-            this.defaultValue = defaultValue;
-		}
-		public QDictionary( Func<TKey,T> createAction)
+		public new void Add(TKey key,T value)
 		{
-			this.createAction = createAction;
+			this.Set(key, value);
 		}
-		public void Add(TKey key, T value)
-        {
-            this[key] = value;
-        }
-		public void Set(TKey key, T value)
+		public QDictionary(Func<TKey,T> autoCreateFunc)
 		{
-			this[key] = value;
+			this.AutoCreateFunc = autoCreateFunc;
 		}
-		public T Get(TKey key,T defaultValue)
-		{
-			if (!ContainsKey(key))
-			{
-				Add(key, defaultValue);
-;			}
-			return this[key];
-		}
-		public override void OnCreate(QKeyValue<TKey, T> obj)
-        {
-			if (createAction != null)
-			{
-				obj.Value = createAction(obj.Key);
-			}
-			else
-			{
-				obj.Value = defaultValue;
-			}
-            base.OnCreate(obj);
-        }
-    }
+	}
     public class QList<T> : List<T>
     {
         public new T this[int index]
@@ -108,9 +98,9 @@ namespace QTool
                 base[index] = value;
             }
         }
-    }
-    public class QList<TKey, T> : QList<T> where T : IKey<TKey>
-    {
+	}
+	public class QList<TKey, T> : QList<T> where T : IKey<TKey>
+	{
 		[NonSerialized]
 		[XmlIgnore]
 		public QKeyCache<TKey, T, int> Cache = new QKeyCache<TKey, T, int>();
@@ -118,56 +108,56 @@ namespace QTool
 		{
 			Cache.GetCheckInfo = (Key) => Count;
 		}
-		
+
 		public new void Add(T value)
-        {
-            if (value != null)
-            {
-                Set(value.Key, value);
-            }
-        }
-        public new bool Contains(T value)
-        {
-            return base.Contains(value);
-        }
-        public bool ContainsKey(TKey key)
-        {
-            if (key == null)
-            {
-                Debug.LogError("key is null");
-                return false;
-            }
-            if (Cache.Cache.ContainsKey(key) && Cache.Cache[key] != null)
-            {
-                return true;
+		{
+			if (value != null)
+			{
+				Set(value.Key, value);
 			}
-			else if(Cache.Cache.Count==Count)
+		}
+		public new bool Contains(T value)
+		{
+			return base.Contains(value);
+		}
+		public bool ContainsKey(TKey key)
+		{
+			if (key == null)
+			{
+				Debug.LogError("key is null");
+				return false;
+			}
+			if (Cache.Cache.ContainsKey(key) && Cache.Cache[key] != null)
+			{
+				return true;
+			}
+			else if (Cache.Cache.Count == Count)
 			{
 				return false;
 			}
-            else
-            {
-                return this.ContainsKey<T, TKey>(key);
-            }
-        }
-        public virtual T Get(TKey key)
-        {
-            if (key == null)
-            {
-                Debug.LogError("key is null");
-                return default;
-            }
-			return Cache.Get(key,(key) =>
+			else
 			{
-				return this.Get<T, TKey>(key); 
+				return this.ContainsKey<T, TKey>(key);
+			}
+		}
+		public virtual T Get(TKey key)
+		{
+			if (key == null)
+			{
+				Debug.LogError("key is null");
+				return default;
+			}
+			return Cache.Get(key, (key) =>
+			{
+				return this.Get<T, TKey>(key);
 			});
-        }
-        public virtual void Set(TKey key, T value)
-        {
-            if (key == null)
-            {
-                Debug.LogError("key is null");
-            }
+		}
+		public virtual void Set(TKey key, T value)
+		{
+			if (key == null)
+			{
+				Debug.LogError("key is null");
+			}
 			Cache.Set(key, value);
 			if (ContainsKey(key))
 			{
@@ -178,77 +168,77 @@ namespace QTool
 				value.Key = key;
 				base.Add(value);
 			}
-        }
-        public void Remove(TKey key)
-        {
-            RemoveKey(key);
-        }
-        List<TKey> keyList = new List<TKey>();
-        public new void RemoveAll(Predicate<T> match)
-        {
-            keyList.Clear();
-            if (match != null)
-            {
-                foreach (var item in this)
-                {
-                    if (item == null) return;
-                    if (match(item))
-                    {
-                        keyList.Add(item.Key);
-                    }
-                }
-            }
-            foreach (var key in keyList)
-            {
-                RemoveKey(key);
-            }
-        }
-        public T this[TKey key]
-        {
-            get
-            {
-                return Get(key);
-            }
-            set
-            {
-                Set(key, value);
-            }
-        }
-        public new void Remove(T obj)
-        {
-            if (obj != null)
+		}
+		public void Remove(TKey key)
+		{
+			RemoveKey(key);
+		}
+		List<TKey> keyList = new List<TKey>();
+		public new void RemoveAll(Predicate<T> match)
+		{
+			keyList.Clear();
+			if (match != null)
+			{
+				foreach (var item in this)
+				{
+					if (item == null) return;
+					if (match(item))
+					{
+						keyList.Add(item.Key);
+					}
+				}
+			}
+			foreach (var key in keyList)
+			{
+				RemoveKey(key);
+			}
+		}
+		public T this[TKey key]
+		{
+			get
+			{
+				return Get(key);
+			}
+			set
+			{
+				Set(key, value);
+			}
+		}
+		public new void Remove(T obj)
+		{
+			if (obj != null)
 			{
 				Cache.Remove(obj.Key);
 				base.Remove(obj);
-            }
-        }
-        public void RemoveKey(TKey key)
-        {
-            Remove(this[key]);
-        }
-        public new void Clear()
-        {
+			}
+		}
+		public void RemoveKey(TKey key)
+		{
+			Remove(this[key]);
+		}
+		public new void Clear()
+		{
 			Cache.Clear();
-            base.Clear();
-        }
-    }
-    public class QAutoList<TKey, T> : QList<TKey, T> where T : IKey<TKey>, new()
-    {
+			base.Clear();
+		}
+	}
+	public class QAutoList<TKey, T> : QList<TKey, T> where T : IKey<TKey>, new()
+	{
 
-        public override T Get(TKey key)
-        {
+		public override T Get(TKey key)
+		{
 			return Cache.Get(key, (key) =>
 			{
 				return this.GetAndCreate<T, TKey>(key, OnCreate);
 			});
-        }
-        public virtual void OnCreate(T obj)
-        {
-            creatCallback?.Invoke(obj);
-        }
-        public event System.Action<T> creatCallback;
-    }
-    public static class ArrayTool
+		}
+		public virtual void OnCreate(T obj)
+		{
+			creatCallback?.Invoke(obj);
+		}
+		public event System.Action<T> creatCallback;
+	}
+	public static class ArrayTool
     {
         public static string SplitEndString(this string str,string splitStart)
         {
@@ -491,7 +481,33 @@ namespace QTool
         {
             return array.ContainsKey(key, (item) => item.Key);
         }
-
+		public static void RemoveKey<TKey, TValue>(this IDictionary<TKey, TValue> dic,TKey key)
+		{
+			dic.Remove(key);
+		}
+		public static void RemoveAll<TKey, TValue>(this IDictionary<TKey, TValue> dic,Func<KeyValuePair<TKey,TValue>,bool> keyFunc,IList<TKey> buffer)
+		{
+			buffer.Clear();
+			foreach (var kv in dic)
+			{
+				if (keyFunc(kv))
+				{
+					buffer.Add(kv.Key);
+				}
+			}
+			foreach (var key in buffer)
+			{
+				dic.Remove(key);
+			}
+		}
+		public static void Add<TKey, TValue>(this IDictionary<TKey, TValue> dic, TValue value) where TValue : IKey<TKey>
+		{
+			Set(dic, value);
+		}
+		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TValue value)where TValue:IKey<TKey>
+		{
+			Set(dic, value);
+		}
 		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
 		{
 			lock (dic)
@@ -506,9 +522,16 @@ namespace QTool
 				}
 			}
 		}
-		public static List<ObjT> ToList<KeyT, ObjT>(this IDictionary<KeyT, ObjT> dic)
+		public static List<ObjT> ToList<KeyT, ObjT>(this IDictionary<KeyT, ObjT> dic,List<ObjT> list=null)
 		{
-			var list = new List<ObjT>();
+			if (list == null)
+			{
+				list = new List<ObjT>();
+			}
+			else
+			{
+				list.Clear();
+			}
 			foreach (var kv in dic)
 			{
 				list.Add(kv.Value);
@@ -586,7 +609,23 @@ namespace QTool
             }
             return default;
         }
-        public static List<T> GetList<T, KeyType>(this IList<T> array, KeyType key, List<T> tempList = null) where T : IKey<KeyType>
+		public static T Get<T, KeyType>(this IDictionary<KeyType,T> array, KeyType key, Func<T, KeyType> keyGetter)
+		{
+			if (key == null)
+			{
+				return default;
+			}
+			foreach (var kv in array)
+			{
+				if (kv.Value == null) continue;
+				if (key.Equals(keyGetter(kv.Value)))
+				{
+					return kv.Value;
+				}
+			}
+			return default;
+		}
+		public static List<T> GetList<T, KeyType>(this IList<T> array, KeyType key, List<T> tempList = null) where T : IKey<KeyType>
         {
             var list = tempList == null ? new List<T>() : tempList;
 			for (int i = 0; i < array.Count; i++)
@@ -691,7 +730,8 @@ namespace QTool
                 creatCallback?.Invoke(t);
                 array.Add(t);
                 return t;
-            }
-        }
     }
 }
+
+            }
+        }

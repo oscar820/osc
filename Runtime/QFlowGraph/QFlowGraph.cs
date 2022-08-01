@@ -548,10 +548,9 @@ namespace QTool.FlowGraph
         }
         public static QDictionary<Type, List<Type>> CanConnectList = new QDictionary<Type, List<Type>>()
         {
-            new QKeyValue<Type, List<Type>>
             {
-                 Key= typeof(int),
-                 Value=new List<Type>{typeof(float),typeof(double)}
+                 typeof(int),
+                 new List<Type>{typeof(float),typeof(double)}
             }
         };
         public bool CanConnect(Type type)

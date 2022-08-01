@@ -876,6 +876,7 @@ namespace QTool
 		public string Key { get; set; }
 		public DateTime UpdateTime;
 		public QList<string> EventList = new QList<string>();
+		public object lastData = null;
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
 		public void AddEvent(QAnalysisEvent eventData)
 		{
@@ -886,85 +887,76 @@ namespace QTool
 					BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey);
 					break;
 				case QAnalysisMode.起始数据:
-					if (BufferData.Count == 0)
+					if (lastData==null)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey);
+						lastData = eventData.GetValue(setting.DataKey);
 					}
-					else
-					{
-						BufferData[eventData.eventId] = BufferData[0].Value;
-					}
+					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.次数:
-					if (BufferData.Count == 0)
+					if (lastData == null)
 					{
-						BufferData[eventData.eventId] = 1;
+						lastData = 1;
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (int)BufferData[BufferData.Count - 1].Value + 1;
+						lastData = (int)lastData + 1;
 					}
+					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.最小值:
-					if (BufferData.Count == 0)
+					if (lastData ==null)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else if ((float)BufferData[BufferData.Count - 1].Value > eventData.GetValue(setting.DataKey).ToComputeFloat())
+					else if ((float)lastData > eventData.GetValue(setting.DataKey).ToComputeFloat())
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else
-					{
-						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value;
-					}
+						BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.最大值:
-					if (BufferData.Count == 0)
+					if (lastData == null)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else if ((float)BufferData[BufferData.Count - 1].Value < eventData.GetValue(setting.DataKey).ToComputeFloat())
+					else if ((float)lastData < eventData.GetValue(setting.DataKey).ToComputeFloat())
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
-					else
-					{
-						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value;
-					}
+					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.平均值:
-					if (BufferData.Count == 0)
+					if (lastData == null)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					else
 					{
-						BufferData[eventData.eventId] = ((float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat()) / 2;
+						lastData = ((float)lastData + eventData.GetValue(setting.DataKey).ToComputeFloat()) / 2;
 					}
+					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.求和:
-					if (BufferData.Count == 0)
+					if (lastData == null)
 					{
-						BufferData[eventData.eventId] = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (float)BufferData[BufferData.Count - 1].Value + eventData.GetValue(setting.DataKey).ToComputeFloat();
+						lastData = (float)lastData + eventData.GetValue(setting.DataKey).ToComputeFloat();
 					}
+					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.最新时间:
 					BufferData[eventData.eventId] = eventData.eventTime;
 					break;
 				case QAnalysisMode.起始时间:
-					if (BufferData.Count == 0)
+					if (lastData == null)
 					{
-						BufferData[eventData.eventId] = eventData.eventTime;
+						lastData = eventData.eventTime;
 					}
-					else
-					{
-						BufferData[eventData.eventId] = BufferData[0].Value;
-					}
+					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.最新时长:
 					{
@@ -973,14 +965,15 @@ namespace QTool
 					}
 					break;
 				case QAnalysisMode.总时长:
-					if (BufferData.Count == 0)
+					if (lastData == null)
 					{
-						BufferData[eventData.eventId] = GetTimeSpan(eventData);
+						lastData = GetTimeSpan(eventData);
 					}
 					else
 					{
-						BufferData[eventData.eventId] = (TimeSpan)BufferData[BufferData.Count - 1].Value + GetTimeSpan(eventData);
+						lastData = (TimeSpan)lastData + GetTimeSpan(eventData);
 					}
+					BufferData[eventData.eventId] = lastData;
 					EventList.AddCheckExist(eventData.Key);
 					break;
 				default:
@@ -1114,13 +1107,13 @@ namespace QTool
 			
 			if (string.IsNullOrWhiteSpace(eventId))
 			{
-				if (BufferData.Count==0)
+				if (lastData==null)
 				{
 					return QAnalysisData.TitleList[Key].DataSetting.mode== QAnalysisMode.更新时间? (object)UpdateTime: null;
 				}
 				else
 				{
-					return BufferData.StackPeek().Value;
+					return lastData;
 				}
 			}
 		
