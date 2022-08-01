@@ -189,6 +189,7 @@ namespace QTool
 		public string CheckToString(object obj)
 		{
 			if (obj == null) return "";
+			if (obj is string) return " " + obj + ' ';
 			if(obj is TimeSpan timeSpan)
 			{
 				return timeSpan.ToString("hh\\:mm\\:ss");
@@ -274,7 +275,7 @@ namespace QTool
 		}
 		public async void FreshData()
 		{
-			var count = 50;
+			var count = 500;
 			var startTime = DateTime.Now;
 			var i = 1;
 			var loading = true;
@@ -686,7 +687,6 @@ namespace QTool
 				EditorUtility.DisplayProgressBar("刷新数据列[" + titleKey + "]", "玩家" + i + "/" + PlayerDataList.Count + ":" + PlayerDataList[i].Key, i * 1f / PlayerDataList.Count);
 			}
 			EditorUtility.ClearProgressBar();
-			SaveData();
 		}
 		public static void Clear(bool clearAll=false)
 		{
