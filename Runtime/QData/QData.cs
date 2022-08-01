@@ -200,7 +200,7 @@ namespace QTool
 										WriteType(writer, kv.Value, typeInfo.ElementType, hasName);
 										writer.Write('}');
 										if (i < dic.Count - 1)
-										{
+										{ 
 											writer.Write(',');
 										}
 									}
