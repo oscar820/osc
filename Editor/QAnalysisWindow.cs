@@ -446,7 +446,7 @@ namespace QTool
 	public class QAnalysisData
 	{
 		public static QAnalysisData Instance { get; private set; } = Activator.CreateInstance<QAnalysisData>();
-		static public QList<string, QAnalysisEvent> EventList = new QList<string, QAnalysisEvent>();
+		static public List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
 		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
 		public static QAnalysisDataSetting Setting = new QAnalysisDataSetting();
 		public static QList<string, QTitleInfo> TitleList => Setting.TitleList;
@@ -457,7 +457,7 @@ namespace QTool
 		public static QAnalysisEvent GetEvent(string eventId)
 		{
 			if (string.IsNullOrEmpty(eventId)) return null;
-			return EventList[eventId];
+			return EventList.Get(eventId);
 		}
 
 		static QAnalysisData()
@@ -597,7 +597,7 @@ namespace QTool
 									for (int i = 0; i < list.Count; i++)
 									{
 										var eventData = list[i];
-										if (!IsLoading)
+										if (!IsLoading) 
 										{
 											Debug.LogError("加载已经结束 ["+ eventData.playerId + "]添加玩家数据线程还在继续");
 										}
@@ -1199,7 +1199,7 @@ namespace QTool
 			var setting = QAnalysisData.TitleList[titleKey].DataSetting;
 			foreach (var eventId in EventList)
 			{
-				var eventData = QAnalysisData.EventList[eventId];
+				var eventData = QAnalysisData.EventList.Get(eventId);
 				if (eventData.eventKey == setting.EventKey)
 				{
 					info.AddEvent(eventData);
