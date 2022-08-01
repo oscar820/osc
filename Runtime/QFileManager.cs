@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace QTool
 {
@@ -179,7 +180,7 @@ namespace QTool
 		}
 		public static bool Exists(string path,bool checkDirectory=false)
 		{
-			if (Application.isPlaying&&path.StartsWith(ResourcesRoot))
+			if (path.StartsWith(ResourcesRoot))
 			{
 				
 #if UNITY_EDITOR
@@ -193,6 +194,10 @@ namespace QTool
 				return File.Exists(path) || (checkDirectory && Directory.Exists(path.SplitStartString(".")));
 			}
         }
+		//public static async Task<string> LoadAsync(string path, string defaultValue = "")
+		//{
+		//	return await Task.Run(() => Load(path, defaultValue));
+		//}
         public static string Load(string path,string defaultValue="")
         {
             if (!Exists(path))

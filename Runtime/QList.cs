@@ -527,6 +527,7 @@ namespace QTool
 			}
 			foreach (var item in list)
 			{
+				if (item == null) continue;
 				dic.Add(item.Key, item);
 			}
 			return dic;
