@@ -65,7 +65,7 @@ namespace QTool
 				}
 				QAnalysisData.Setting.StartVersion = EditorGUILayout.TextField(QAnalysisData.Setting.StartVersion,GUILayout.Width(100));
 
-				GUILayout.Label("邮件：" + QAnalysisData.Instance.LastMail?.Index, GUILayout.Width(80));
+				GUILayout.Label("邮件：" + QAnalysisData.Instance.LastMail?.Index +" "+QAnalysisData.Instance.UpdateTime, GUILayout.Width(160));
 				GUILayout.Label("事件：" + QAnalysisData.EventList.Count, GUILayout.Width(120));
 				GUILayout.Label("玩家：" + QAnalysisData.Instance.PlayerDataList.Count, GUILayout.Width(80));
 				if (DrawButton("刷新数据"))
@@ -453,6 +453,7 @@ namespace QTool
 		public List<string> EventKeyList = new List<string>();
 		public List<string> DataKeyList = new List<string>();
 		public QMailInfo LastMail = null;
+		public DateTime UpdateTime;
 		public static QAnalysisEvent GetEvent(string eventId)
 		{
 			if (string.IsNullOrEmpty(eventId)) return null;
@@ -521,7 +522,6 @@ namespace QTool
 				SaveData();
 			}
 		}
-		static QDictionary<string, float> playerVersion = new QDictionary<string, float>();
 		static float _startV = 0;
 		static float startV;
 		//static void AddNewEventList()
@@ -596,22 +596,30 @@ namespace QTool
 								{
 									for (int i = 0; i < list.Count; i++)
 									{
-									
 										var eventData = list[i];
 										if (!IsLoading)
 										{
 											Debug.LogError("加载已经结束 ["+ eventData.playerId + "]添加玩家数据线程还在继续");
 										}
-										var version = playerVersion[eventData.playerId];
 										SetLoadingInfo("添加玩家数据[" + eventData.playerId + "]", i + "/" + list.Count + " " + eventData.eventKey, i * 1f / list.Count);
 										if ("游戏/开始".Equals(eventData.eventKey))
 										{
-											version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
-											playerVersion[eventData.playerId] = version;
+											playerData.Version = ((StartInfo)eventData.eventValue).version.ToComputeFloat();
 										}
-										if (version >= startV)
+										if (playerData.Version >= startV)
 										{
-											AddEvent(eventData);
+											if (!EventList.ContainsKey(eventData.Key))
+											{
+												Instance.UpdateTime = eventData.eventTime;
+												EventList.Add(eventData);
+												playerData.Add(eventData);
+												if (!Instance.EventKeyList.Contains(eventData.eventKey))
+												{
+													Instance.EventKeyList.Add(eventData.eventKey);
+													Instance.DataKeyList.Add(eventData.eventKey);
+													CheckTitle(eventData.eventKey, eventData.eventValue);
+												}
+											}
 										}
 									}
 								}
@@ -689,25 +697,7 @@ namespace QTool
 			EventList.Clear();
 			Instance = Activator.CreateInstance<QAnalysisData>();
 		}
-		public static void AddEvent(QAnalysisEvent eventData)
-		{
-			if (EventList.ContainsKey(eventData.Key)) return;
-			try
-			{
-				EventList.Add(eventData);
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("添加事件 [" + eventData + "]出错 " + e);
-			}
-			Instance.PlayerDataList[eventData.playerId].Add(eventData);
-			if (!Instance.EventKeyList.Contains(eventData.eventKey))
-			{
-				Instance.EventKeyList.Add(eventData.eventKey);
-				Instance.DataKeyList.Add(eventData.eventKey);
-				CheckTitle(eventData.eventKey, eventData.eventValue);
-			}
-		}
+	
 		static void CheckTitle(string key,object value)
 		{
 			if (TitleList.ContainsKey(key)) return;
@@ -1157,7 +1147,7 @@ namespace QTool
 		public string Key { get; set; }
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
-
+		public float Version=0;
 		List<QAnalysisEvent> EventBuffer = new List<QAnalysisEvent>();
 		public void ParseEventBuffer()
 		{
