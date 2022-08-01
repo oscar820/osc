@@ -477,7 +477,7 @@ namespace QTool
 		} 
 		public static void SaveData()
 		{
-			EditorUtility.DisplayProgressBar("数据储存", "储存解析数据 QTool/" + QAnalysis.StartKey, 0.2f);
+			EditorUtility.DisplayProgressBar("数据储存", "储存解析数据 QTool/" + QAnalysis.StartKey, 0.2f); 
 			QFileManager.Save("QTool/" + QAnalysis.StartKey, Instance.ToQData());
 			EditorUtility.DisplayProgressBar("数据储存", "储存事件表 " + "QTool/" + QAnalysis.StartKey, 0.5f);
 			QFileManager.Save("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), EventList.ToQData());

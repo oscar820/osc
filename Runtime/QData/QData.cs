@@ -189,6 +189,7 @@ namespace QTool
 									var dic = obj as IDictionary;
 									if (dic == null) break;
 									writer.Write('[');
+									var i = 0;
 									foreach (DictionaryEntry kv in dic)
 									{
 										writer.Write('{');
@@ -198,6 +199,10 @@ namespace QTool
 										writer.Write("\"Value\":");
 										WriteType(writer, kv.Value, typeInfo.ElementType, hasName);
 										writer.Write('}');
+										if (i < dic.Count - 1)
+										{
+											writer.Write(',');
+										}
 									}
 									writer.Write(']');
 								}
