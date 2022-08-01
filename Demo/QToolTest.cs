@@ -194,7 +194,12 @@ namespace QTool.Test
                 }
             });
 			//QDebug.Log("QData类型更改反序列化测试：" + "{newKey:asldkj,rect:{position:{x:1,z:2}}".ParseQData<TTestClass>().rect.ToQData());
-        }
+			QDebug.Log("QData QDictionary序列化测试：" +
+				new QDictionary<string, string>{ new QKeyValue<string, string> {Key="a1",Value="1" },
+				new QKeyValue<string, string> {Key="a2",Value="2" }
+				}.ToQData().ParseQData<Dictionary<string, string>>().ToQData());
+			//QDebug.Log("QData Dictionary序列化测试：" + new Dictionary<string, string> { {"asd","askdj" } }.ToQData());
+		}
         public string commandStr;
         [ViewButton("命令测试")]
         public void CommandTest()

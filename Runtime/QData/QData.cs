@@ -184,6 +184,24 @@ namespace QTool
 									writer.Write(']');
 									break;
 								}
+							case QObjectType.Dictionary:
+								{
+									var dic = obj as IDictionary;
+									if (dic == null) break;
+									writer.Write('[');
+									foreach (DictionaryEntry kv in dic)
+									{
+										writer.Write('{');
+										writer.Write("\"Key\":");
+										WriteType(writer, kv.Key, typeInfo.KeyType, hasName);
+										writer.Write(",");
+										writer.Write("\"Value\":");
+										WriteType(writer, kv.Value, typeInfo.ElementType, hasName);
+										writer.Write('}');
+									}
+									writer.Write(']');
+								}
+								break;
 							case QObjectType.TimeSpan:
 								{
 									writer.Write(((TimeSpan)obj).Ticks);
@@ -256,7 +274,7 @@ namespace QTool
 
 							object result = null;
 
-							if (!(reader.NextIs(':') || reader.NextIs('=')))
+							if (!(reader.NextIs(':') ))
 							{
 								throw new Exception(name + " 后缺少分隔符 : 或 =\n" + reader.ReadLine());
 							}
@@ -279,7 +297,7 @@ namespace QTool
 								Debug.LogWarning("不存在成员" + typeInfo.Key + "." + name + ":" + reader.ReadCheckString());
 							}
 
-							if (!(reader.NextIs(';') || reader.NextIs(',')))
+							if (!( reader.NextIs(',')))
 							{
 								if (reader.NextIs('}'))
 								{
@@ -293,7 +311,7 @@ namespace QTool
 						foreach (var memeberInfo in typeInfo.Members)
 						{
 							memeberInfo.Set(target, reader.ReadType(memeberInfo.Type, hasName, memeberInfo.Get(target)));
-							if (!(reader.NextIs(';') || reader.NextIs(',')))
+							if (!(reader.NextIs(',')))
 							{
 								if (reader.NextIs('}'))
 								{
@@ -338,7 +356,7 @@ namespace QTool
 										}
 										var str = reader.ReadCheckString();
 										var runtimeType = QReflection.ParseType(str);
-										if (reader.NextIs(':') || reader.NextIs('='))
+										if (reader.NextIs(':') )
 										{
 											if (type == runtimeType)
 											{
@@ -406,7 +424,7 @@ namespace QTool
 												list.Add(reader.ReadType(typeInfo.ElementType, hasName));
 											}
 											count++;
-											if (!( reader.NextIs(';') || reader.NextIs(','))){
+											if (!(  reader.NextIs(','))){
 												if (reader.NextIs(']'))
 												{
 													break; 
@@ -424,6 +442,31 @@ namespace QTool
 									}
 									return list;
 								}
+							case QObjectType.Dictionary:
+								{
+									var dic = QReflection.CreateInstance(type, target) as IDictionary;
+									dic.Clear();
+									if (reader.NextIs('['))
+									{
+										while (!reader.IsEnd() && !reader.NextIs(']'))
+										{
+											var obj = reader.ReadType(typeInfo.KeyValueType, hasName) ;
+											dic.Add(obj.GetValue("Key"), obj.GetValue("Value"));
+											if (!( reader.NextIs(',')))
+											{
+												if (reader.NextIs(']'))
+												{
+													break;
+												}
+												else
+												{
+													throw new Exception("格式出错 缺少;或,"); ;
+												}
+											}
+										}
+									}
+									return dic;
+								}
 							case QObjectType.Array:
 								{
 									List<object> list = new List<object>();
@@ -432,7 +475,7 @@ namespace QTool
 										for (int i = 0; !reader.IsEnd() && !reader.NextIs(']'); i++)
 										{
 											list.Add(reader.ReadType(typeInfo.ElementType, hasName));
-											if (!(reader.NextIs(';') || reader.NextIs(',')))
+											if (!( reader.NextIs(',')))
 											{
 												if (reader.NextIs(']'))
 												{
@@ -778,6 +821,7 @@ namespace QTool
 		Object,
 		List,
 		Array,
+		Dictionary,
 		TimeSpan,
 		CantSerialize,
 	}
@@ -842,6 +886,10 @@ namespace QTool
 				else if (IsList)
 				{
 					objType = QObjectType.List;
+				}
+				else if(IsDictionary)
+				{
+					objType = QObjectType.Dictionary;
 				}
 				else if (type == typeof(TimeSpan))
 				{

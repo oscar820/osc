@@ -11,16 +11,12 @@ namespace QTool
     public interface IKey<KeyType>
     {
         KeyType Key { get; set; }
-    }
-    [System.Serializable]
-    public class QKeyValue<TKey, T> : IKey<TKey>
+	}
+	[System.Serializable]
+    public struct QKeyValue<TKey, T> : IKey<TKey>
     {
         public TKey Key { get; set; }
         public T Value { get; set; }
-        public QKeyValue()
-        {
-
-        }
         public QKeyValue(TKey key, T value)
         {
             Key = key;
@@ -42,7 +38,7 @@ namespace QTool
             }
             set
             {
-                base[key].Value = value;
+                base[key] =new QKeyValue<TKey, T>(key, value);
             }
         }
         public QDictionary()
@@ -495,7 +491,8 @@ namespace QTool
         {
             return array.ContainsKey(key, (item) => item.Key);
         }
-		public static void CheckSet<TKey,TValue>(this IDictionary<TKey,TValue> dic, TKey key,TValue value) 
+
+		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
 		{
 			lock (dic)
 			{
@@ -507,6 +504,42 @@ namespace QTool
 				{
 					dic.Add(key, value);
 				}
+			}
+		}
+		public static List<ObjT> ToList<KeyT, ObjT>(this IDictionary<KeyT, ObjT> dic)
+		{
+			var list = new List<ObjT>();
+			foreach (var kv in dic)
+			{
+				list.Add(kv.Value);
+			}
+			return list;
+		}
+		public static Dictionary<KeyT,ObjT> ToDictionary<KeyT, ObjT>(this IList<ObjT> list, Dictionary<KeyT, ObjT> dic=null) where ObjT:IKey<KeyT>
+		{
+			if (dic == null)
+			{
+				dic = new Dictionary<KeyT, ObjT>();
+			}
+			else
+			{
+				dic.Clear();
+			}
+			foreach (var item in list)
+			{
+				dic.Add(item.Key, item);
+			}
+			return dic;
+		}
+		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key)
+		{
+			if (dic.ContainsKey(key))
+			{
+				return dic[key];
+			}
+			else
+			{
+				return default;
 			}
 		}
 		public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)

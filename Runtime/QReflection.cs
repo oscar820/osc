@@ -109,7 +109,10 @@ namespace QTool.Reflection
         public QList<string, QMemeberInfo> Members = new QList<string, QMemeberInfo>();
         public QList<string, QFunctionInfo> Functions = new QList<string, QFunctionInfo>();
         public bool IsList;
-        public Type ElementType { get; private set; }
+		public bool IsDictionary;
+		public Type KeyType { get; private set; }
+		public Type ElementType { get; private set; }
+		public Type KeyValueType { get; private set; }
         public Type Type { get; private set; }
         public TypeCode Code { get; private set; }
 		public QMemeberInfo GetMemberInfo(string keyOrViewName)
@@ -170,8 +173,16 @@ namespace QTool.Reflection
                 {
                     ElementType = type.GetInterface(typeof(IList<>).FullName, true).GenericTypeArguments[0];
                     IsList = true;
-                }
-                if (Members != null)
+				}
+				else if (type.GetInterface(typeof(IDictionary<,>).FullName, true) != null)
+				{
+					var arges = type.GetInterface(typeof(IDictionary<,>).FullName, true).GenericTypeArguments;
+					KeyType = arges[0];
+					ElementType = arges[1];
+					KeyValueType = typeof(QKeyValue<,>).MakeGenericType(KeyType, ElementType);
+					IsDictionary = true;
+				}
+				if (Members != null)
                 {
                     QMemeberInfo memeber=null;
                     type.ForeachMemeber((info) =>
