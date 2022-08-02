@@ -102,11 +102,21 @@ namespace QTool
 			}
 			return str.RemveChars('{','}', '（','）','~','\n','\t','\r','、','|', '*', '“','”', '—','。', '…','=','#', ' ', ';', '；', '-', ',', '，', '<', '>', '【', '】', '[', ']', '{', '}', '!', '！', '?', '？', '.', '\'', '‘', '’', '\"', ':', '：');
 		}
-		
+
+		class QKeyParseData : QDataList<QKeyParseData>, IKey<string>
+		{
+			public string Key { get; set; }
+			public float Float;
+		}
 		public static float ToComputeFloat(this object value)
 		{
 			if (value == null) return 0;
-			if(value is string str)
+			var data= QKeyParseData.Get(value.ToString());
+			if (data != null)
+			{
+				return data.Float;
+			}
+			if (value is string str)
 			{
 				if (string.IsNullOrWhiteSpace(str)) return 0;
 				if(float.TryParse(str, out var newFloat))

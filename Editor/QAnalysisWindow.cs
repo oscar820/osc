@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using QTool.Reflection;
 namespace QTool
 {
 
@@ -882,6 +883,10 @@ namespace QTool
 		public QList<string> EventList = new QList<string>();
 		public object lastData = null;
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
+		static float GetFloat(object value)
+		{
+			return ((value != null && value.GetType().GetInterface(typeof(IList<>).FullName, true)!=null) ? value.GetValue("Key") : value).ToComputeFloat();
+		}
 		public void AddEvent(QAnalysisEvent eventData)
 		{
 			var setting = QAnalysisData.TitleList[Key].DataSetting;
@@ -909,26 +914,32 @@ namespace QTool
 					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.最小值:
-					if (lastData ==null)
 					{
-						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
-					}
-					else if ((float)lastData > eventData.GetValue(setting.DataKey).ToComputeFloat())
-					{
-						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
-					}
+						var value = eventData.GetValue(setting.DataKey);
+						if (lastData == null)
+						{
+							lastData = value;
+						}
+						else if (GetFloat(lastData) > GetFloat(value))
+						{
+							lastData = value;
+						}
 						BufferData[eventData.eventId] = lastData;
+					}
 					break;
 				case QAnalysisMode.最大值:
-					if (lastData == null)
 					{
-						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
+						var value = eventData.GetValue(setting.DataKey);
+						if (lastData == null)
+						{
+							lastData = value;
+						}
+						else if (GetFloat(lastData) < GetFloat(value))
+						{
+							lastData =value;
+						}
+						BufferData[eventData.eventId] = lastData;
 					}
-					else if ((float)lastData < eventData.GetValue(setting.DataKey).ToComputeFloat())
-					{
-						lastData = eventData.GetValue(setting.DataKey).ToComputeFloat();
-					}
-					BufferData[eventData.eventId] = lastData;
 					break;
 				case QAnalysisMode.平均值:
 					if (lastData == null)
