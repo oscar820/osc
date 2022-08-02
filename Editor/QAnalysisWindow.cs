@@ -885,7 +885,7 @@ namespace QTool
 		public QDictionary<string, object> BufferData = new QDictionary<string, object>();
 		static float GetFloat(object value)
 		{
-			return ((value != null && value.GetType().GetInterface(typeof(IList<>).FullName, true)!=null) ? value.GetValue("Key") : value).ToComputeFloat();
+			return ((value != null && value.GetType().GetInterface(typeof(IKey<>).FullName, true)!=null) ? value.GetValue("Key") : value).ToComputeFloat();
 		}
 		public void AddEvent(QAnalysisEvent eventData)
 		{
@@ -1021,53 +1021,15 @@ namespace QTool
 		enum TimeState
 		{
 			起止时长,
-			暂离时长,
 			更新结束时间,
 			更新起始时间
 		}
 		TimeSpan GetTimeSpan(QAnalysisEvent startData, QAnalysisEvent endData, out TimeState state, QAnalysisEvent nextData = null)
 		{
-			if (startData == null)
+			if (startData==null||endData == null|| endData.eventTime <= startData.eventTime)
 			{
 				state = TimeState.更新起始时间;
 				return TimeSpan.Zero;
-			}
-			if (endData == null|| endData.eventTime <= startData.eventTime)
-			{
-				var playerData = QAnalysisData.Instance.PlayerDataList[startData.playerId];
-				QAnalysisEvent LastPauseEvent = null;
-				var pauseCount = 0;
-				var pauseData = playerData.AnalysisData[nameof(QAnalysis.QAnalysisEventName.游戏_暂离)];
-				pauseData.ForeachEvent( (pauseEvent) =>
-				{
-					pauseCount++;
-					if (pauseEvent.eventTime > startData.eventTime)
-					{
-						if (nextData == null || pauseEvent.eventTime < nextData.eventTime)
-						{
-							LastPauseEvent = pauseEvent;
-						}
-						else
-						{
-							return;
-						}
-					}
-				});
-				if (LastPauseEvent != null)
-				{
-					state = TimeState.暂离时长;
-					return LastPauseEvent.eventTime - startData.eventTime;
-				}
-				else if (pauseCount == 0)
-				{
-					state = TimeState.暂离时长;
-					return GetPlayerData(startData==null?endData:startData).UpdateTime - startData.eventTime;
-				}
-				else
-				{
-					state = TimeState.更新起始时间;
-					return TimeSpan.Zero;
-				}
 			}
 			else
 			{

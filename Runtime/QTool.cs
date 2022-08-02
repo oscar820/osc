@@ -111,10 +111,11 @@ namespace QTool
 		public static float ToComputeFloat(this object value)
 		{
 			if (value == null) return 0;
-			var data= QKeyParseData.Get(value.ToString());
-			if (data != null)
+			var key = value.ToString();
+			if (QKeyParseData.ContainsKey(key))
 			{
-				return data.Float;
+				Debug.LogError("获取[" + key + "]:" + QKeyParseData.Get(key).Float);
+				return QKeyParseData.Get(key).Float;
 			}
 			if (value is string str)
 			{
@@ -155,7 +156,14 @@ namespace QTool
 					return sum;
 				}
 			}
-			return Convert.ToSingle(value);
+			if (value.GetType().IsValueType)
+			{
+				return Convert.ToSingle(value);
+			}
+			else
+			{
+				return 0;
+			}
 		}
 		public static void RunTimeCheck(string name, System.Action action, Func<int> getLength = null, Func<string> getInfo = null)
         {
