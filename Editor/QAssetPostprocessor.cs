@@ -110,7 +110,13 @@ namespace QTool
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
 
 
-				if (textureImporter.textureType != TextureImporterType.Sprite)
+				if (textureImporter.textureType == TextureImporterType.Sprite)
+				{
+					if (texture.width < 2048 && texture.height < 2048)
+					{
+						spriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
+					}
+				}else
 				{
 					textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
 				}
@@ -121,13 +127,7 @@ namespace QTool
 				textureImporter.compressionQuality = setting.compressionQuality;
 				textureImporter.SaveAndReimport();
 			}
-			if (textureImporter.textureType == TextureImporterType.Sprite)
-			{
-				if (texture.width < 2048 && texture.height < 2048)
-				{
-					spriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
-				}
-			}
+			
 		}
 
 		static void AutoSetAtlasContents(string path,List<string> textures)
