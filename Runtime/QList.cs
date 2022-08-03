@@ -508,6 +508,14 @@ namespace QTool
 		{
 			Set(dic, value);
 		}
+		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic,TKey key, TValue value) where TValue : IKey<TKey>
+		{
+			if (!dic.ContainsKey(key))
+			{
+				Set(dic,key, value);
+			}
+			return dic[key];
+		}
 		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
 		{
 			lock (dic)
