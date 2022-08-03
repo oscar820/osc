@@ -39,7 +39,7 @@ namespace QTool
 		};
 		[ViewName("图片压缩质量")]
 		[Range(0,100)]
-		public int compressionQuality = 0;
+		public int compressionQuality = 50;
 #endif
 		private void OnValidate()
 		{

@@ -117,7 +117,7 @@ namespace QTool
 				textureImporter.mipmapEnabled = false;
 				textureImporter.isReadable = false;
 				textureImporter.crunchedCompression = true;
-				textureImporter.textureCompression = TextureImporterCompression.CompressedLQ;
+				textureImporter.textureCompression = TextureImporterCompression.Compressed;
 				textureImporter.compressionQuality = setting.compressionQuality;
 				textureImporter.SaveAndReimport();
 			}
@@ -162,7 +162,7 @@ namespace QTool
 					maxTextureSize = 4096,
 					format = TextureImporterFormat.Automatic,
 					crunchedCompression = true,
-					textureCompression = TextureImporterCompression.CompressedLQ,
+					textureCompression = TextureImporterCompression.Compressed,
 					compressionQuality = QToolSetting.Instance.compressionQuality,
 				};
 				atlas.SetPlatformSettings(platformSetting);
