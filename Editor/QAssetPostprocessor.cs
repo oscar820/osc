@@ -77,9 +77,13 @@ namespace QTool
 			if (!textureImporter.crunchedCompression)
 			{
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
-				if(textureImporter.textureType== TextureImporterType.Sprite)
+				
+				if (textureImporter.textureType == TextureImporterType.Sprite)
 				{
-					spriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath);
+					if (texture.width < 2048 && texture.height < 2048)
+					{
+						spriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath);
+					}
 				}
 				else
 				{
