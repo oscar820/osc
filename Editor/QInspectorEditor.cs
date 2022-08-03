@@ -1115,7 +1115,17 @@ namespace QTool.Inspector
 
             foreach (var kv in typeInfo.initFunc)
             {
-                kv.Value.Invoke(target);
+                var result= kv.Value.Invoke(target);
+				if(result is Task task)
+				{
+					task.GetAwaiter().OnCompleted(() =>
+					{
+						if (task.Exception != null)
+						{
+							Debug.LogError(task.Exception);
+						}
+					});
+				}
             }
             EditorApplication.playModeStateChanged += EditorModeChanged;
         }

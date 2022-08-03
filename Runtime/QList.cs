@@ -91,13 +91,33 @@ namespace QTool
             }
             set
             {
-                for (int i = Count; i <= index; i++)
-                {
-                    Add(default);
-                }
+				if (CreateNew == null)
+				{
+					for (int i = Count; i <= index; i++)
+					{
+						Add(default);
+					}
+				}
+				else
+				{
+					for (int i = Count; i <= index; i++)
+					{
+						Add(CreateNew());
+					}
+				}
+               
                 base[index] = value;
             }
         }
+		Func<T> CreateNew;
+		public QList()
+		{
+
+		}
+		public QList(Func<T> CreateNew)
+		{
+			this.CreateNew = CreateNew;
+		}
 	}
 	public class QList<TKey, T> : QList<T> where T : IKey<TKey>
 	{
@@ -224,7 +244,6 @@ namespace QTool
 	}
 	public class QAutoList<TKey, T> : QList<TKey, T> where T : IKey<TKey>, new()
 	{
-
 		public override T Get(TKey key)
 		{
 			return Cache.Get(key, (key) =>
