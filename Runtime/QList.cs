@@ -508,7 +508,7 @@ namespace QTool
 		{
 			Set(dic, value);
 		}
-		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic,TKey key, TValue value) where TValue : IKey<TKey>
+		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic,TKey key, TValue value)
 		{
 			if (!dic.ContainsKey(key))
 			{
