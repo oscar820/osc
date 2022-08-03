@@ -1,15 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.U2D;
 using UnityEngine;
+using UnityEngine.U2D;
+
 namespace QTool
 {
 	public static  class QAssetImportManager
 	{
-
+		public static QDictionary<string, List<string>> spriteAtlas = new QDictionary<string, List<string>>((key)=>new List<string>());
 		[MenuItem("QTool/工具/批量设置资源格式")]
 		public static void FreshAllImporter()
 		{
+			spriteAtlas.Clear();
 			Application.dataPath.ForeachDirectoryFiles((path) =>
 			{
 				var assetPath = path.ToAssetPath();
@@ -24,7 +28,12 @@ namespace QTool
 					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(assetPath), textureImporter);
 				}
 			});
+			foreach (var kv in spriteAtlas)
+			{
+				AutoSetAtlasContents(kv.Key, kv.Value);
+			}
 			EditorUtility.ClearProgressBar();
+			AssetDatabase.SaveAssets();
 		}
 		public static void ReImportAudio(AudioClip audio, AudioImporter audioImporter)
 		{
@@ -52,7 +61,7 @@ namespace QTool
 				{
 					audioImporter.forceToMono = true;
 				}
-				Debug.LogError("重新导入音频[" + audioImporter.assetPath + "]");
+				Debug.Log("重新导入音频[" + audioImporter.assetPath + "]");
 				audioImporter.defaultSampleSettings = audioSetting;
 				//audioImporter.SetOverrideSampleSettings("Standalone", audioSetting);
 				//audioImporter.SetOverrideSampleSettings("iPhone", audioSetting);
@@ -67,16 +76,67 @@ namespace QTool
 			var setting = QToolSetting.Instance;
 			if (!textureImporter.crunchedCompression)
 			{
-				Debug.LogError("重新导入图片[" + textureImporter.assetPath + "]");
+				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
+				if(textureImporter.textureType== TextureImporterType.Sprite)
+				{
+					spriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath);
+				}
+				else
+				{
+					textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
+				}
 				textureImporter.mipmapEnabled = false;
 				textureImporter.isReadable = false;
-				textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
-				textureImporter.filterMode = FilterMode.Bilinear;
 				textureImporter.crunchedCompression = true;
-				textureImporter.compressionQuality = 50;
+				textureImporter.textureCompression = TextureImporterCompression.CompressedLQ;
+				textureImporter.compressionQuality = setting.compressionQuality;
 				textureImporter.SaveAndReimport();
 			}
 			
+		}
+
+		static void AutoSetAtlasContents(string path,List<string> textures)
+		{
+			path = path + "/AutoAtlas.spriteatlas";
+			SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
+			if (atlas == null)
+			{
+				Debug.LogError("创建图集[" + path + "]");
+				atlas = new SpriteAtlas();
+				// 设置参数 可根据项目具体情况进行设置
+				SpriteAtlasPackingSettings packSetting = new SpriteAtlasPackingSettings()
+				{
+					blockOffset = 1,
+					enableRotation = false,
+					enableTightPacking = false,
+					padding = 2,
+				};
+				atlas.SetPackingSettings(packSetting);
+
+				SpriteAtlasTextureSettings textureSetting = new SpriteAtlasTextureSettings()
+				{
+					readable = false,
+					generateMipMaps = false,
+					sRGB = true,
+					filterMode = FilterMode.Bilinear,
+				};
+				atlas.SetTextureSettings(textureSetting);
+
+				TextureImporterPlatformSettings platformSetting = new TextureImporterPlatformSettings()
+				{
+					maxTextureSize = 4096,
+					format = TextureImporterFormat.Automatic,
+					crunchedCompression = true,
+					textureCompression = TextureImporterCompression.Compressed,
+					compressionQuality = QToolSetting.Instance.compressionQuality,
+				};
+				atlas.SetPlatformSettings(platformSetting);
+				AssetDatabase.CreateAsset(atlas, path);
+			}
+			foreach (var texPath in textures)
+			{
+				atlas.Add(AssetDatabase.LoadAllAssetsAtPath(texPath));
+			}
 		}
 	}
 }
