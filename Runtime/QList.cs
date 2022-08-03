@@ -80,15 +80,19 @@ namespace QTool
         {
             get
             {
-                if (index < Count)
-                {
-                    return base[index];
+                if (index >= Count)
+				{
+					if (CreateNew == null)
+					{
+						return default;
+					}
+					else
+					{
+						this[index] = CreateNew();
+					}
                 }
-                else
-                {
-                    return default;
-                }
-            }
+				return base[index];
+			}
             set
             {
 				if (CreateNew == null)
@@ -105,7 +109,6 @@ namespace QTool
 						Add(CreateNew());
 					}
 				}
-               
                 base[index] = value;
             }
         }
