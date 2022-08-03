@@ -46,14 +46,13 @@ namespace QTool
 			});
 			var old = spriteAtlas;
 			spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
+			var end = 0;
 			foreach (var kv in old)
 			{
-				if (kv.Value.Count < 5)
+				if (kv.Value.Count < 5&& (end = kv.Key.IndexOf('\\'))>0)
 				{
-
-					var parentKey = kv.Key.Substring(0, kv.Key.IndexOf('\\'));
+					var parentKey = kv.Key.Substring(0,end);
 					spriteAtlas[parentKey].AddRange(kv.Value);
-
 				}
 				else
 				{
