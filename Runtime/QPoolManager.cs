@@ -7,25 +7,9 @@ namespace QTool
     public class QPoolManager:QToolManagerBase<QPoolManager>
     {
         
-        static QDictionary<string, PoolBase> poolDic = new QDictionary<string, PoolBase>();
-		public static GameObject Get(GameObject prefab)
-		{
-			return GetPool(prefab.name, prefab).Get();
-		}
-		public static GameObject Get(string poolKey ,GameObject prefab)
-        {
-            return GetPool(poolKey,prefab).Get() ;
-        }
-        public static ObjectPool<GameObject> GetPool(string poolKey,GameObject prefab)
-        {
-            return GetPool(poolKey, () => { var result = GameObject.Instantiate(prefab);
-				result.name = prefab.name;
-				return result; });
-        }
-        public static T Get<T>(string poolName, System.Func<T> newFunc = null) where T : class
-        {
-            return GetPool<T>(poolName, newFunc).Get();
-        }
+        public static QDictionary<string, PoolBase> Pools = new QDictionary<string, PoolBase>();
+	
+
         public static ObjectPool<T> GetPool<T>(string poolName, System.Func<T> newFunc = null) where T : class
         {
             var key = poolName;
@@ -33,11 +17,11 @@ namespace QTool
             {
                 key = typeof(T).ToString();
             }
-			if (poolDic.ContainsKey(key))
+			if (Pools.ContainsKey(key))
 			{
-				if (poolDic[key] is ObjectPool<T>)
+				if (Pools[key] is ObjectPool<T>)
 				{
-					var pool = poolDic[key] as ObjectPool<T>;
+					var pool = Pools[key] as ObjectPool<T>;
 					if (newFunc != null && pool.newFunc == null)
 					{
 						pool.newFunc = newFunc;
@@ -46,38 +30,70 @@ namespace QTool
 				}
 				else
 				{
-					throw new Exception("已存在重名不同类型对象池" + poolDic[key]);
+					throw new Exception("已存在重名不同类型对象池" + Pools[key]);
 				}
 
 			}
 			else
 			{
-
-				var pool = new ObjectPool<T>(key, newFunc);
-				lock (poolDic)
+				var pool = typeof(T)==typeof(GameObject)?new GameObjectPool(key,newFunc as Func<GameObject>) as ObjectPool<T>: new ObjectPool<T>(key, newFunc) ;
+				lock (Pools)
 				{
-					poolDic[key] = pool;
+					Pools[key] = pool;
 				}
 				return pool;
 			}
-		
         }
-        public static bool Push(GameObject gameObject)
-        {
-            return Push(gameObject.name, gameObject);
-        }
-        public static bool Push<T>(string poolName, T obj) where T : class
-        {
-			if (poolDic.ContainsKey(poolName))
+		public static T Get<T>(string poolName, System.Func<T> newFunc = null) where T : class
+		{
+			return GetPool<T>(poolName, newFunc).Get();
+		}
+		public static bool Push<T>(string poolName, T obj) where T : class
+		{
+			if (Pools.ContainsKey(poolName))
 			{
-				return (poolDic[poolName] as ObjectPool<T>).Push(obj);
+				return (Pools[poolName] as ObjectPool<T>).Push(obj);
 			}
 			else
 			{
 				Debug.LogError("不存在对象池 " + obj);
 				return false;
 			}
+		}
+
+
+		public static GameObjectPool GetPool(string poolKey, GameObject prefab)
+		{
+			return GetPool(poolKey, () => {
+				var result = GameObject.Instantiate(prefab);
+				result.name = prefab.name;
+				return result;
+			} ) as GameObjectPool;
+		}
+		public static GameObject Get(GameObject prefab)
+		{
+			return GetPool(prefab.name, prefab).Get();
+		}
+		public static TCom Get<TCom>(TCom prefab) where TCom:Component
+		{
+			return Get(prefab.gameObject).GetComponent<TCom>();
+		}
+		public static GameObject Get(GameObject prefab,Vector3 position, Quaternion rotation)
+		{
+			var obj= GetPool(prefab.name, prefab).Get();
+			obj.transform.position = position;
+			obj.transform.rotation = rotation;
+			return obj;
+		}
+		public static GameObject Get(string poolKey, GameObject prefab)
+		{
+			return GetPool(poolKey, prefab).Get();
+		}
+		public static bool Push(GameObject gameObject)
+        {
+            return Push(gameObject.name, gameObject);
         }
+       
     }
     public abstract class PoolObject<T>:IPoolObject where T : PoolObject<T>,new()
     {
@@ -120,6 +136,7 @@ namespace QTool
             return "对象池["+ Key + "](" + type.Name + (type.IsGenericType ? "<" + type.GenericTypeArguments[0] + ">":"")+")";
         }
     }
+
     public class ObjectPool<T> : PoolBase where T : class
     {
         public readonly List<T> UsingPool = new List<T>();
@@ -131,57 +148,28 @@ namespace QTool
                 return UsingPool.Count + CanUsePool.Count;
             }
         }
-        T CheckGet(T obj)
+        protected virtual T CheckGet(T obj)
         {
 
-            if (isCom || isGameObject)
-            {
-                if ((obj as T).Equals(null))
-                {
-					UsingPool.Remove(obj);
-					obj = PrivateGet();
-                }
-                var gameObj = GetGameObj(obj);
-                if (gameObj != null)
-                {
-                    gameObj.SetActive(true);
-                }
-            }
+            
+			OnGet?.Invoke(obj);
 			UsingPool.AddCheckExist(obj);
 			return obj;
         }
-		Transform _poolParent = null;	
-		public Transform PoolParent
-		{
-			get
-			{
-				if (_poolParent == null)
-				{
-					_poolParent=QPoolManager.Instance.transform.GetChild(Key, true);
-				}
-				return _poolParent;
-			}
-		}
-        T CheckPush(T obj)
+
+		public event Action<T> OnGet;
+		public event Action<T> OnPush;
+		protected virtual T CheckPush(T obj)
         {
-            var gameObj = GetGameObj(obj);
-            if (gameObj != null)
-            {
-                gameObj.SetActive(false);
-                gameObj.transform.SetParent(PoolParent, false);
-                foreach (var poolObj in gameObj.GetComponents<IPoolObject>())
-                {
-                    poolObj.OnPoolRecover();
-                }
-            }
-            else if (isPoolObj)
+			OnPush?.Invoke(obj);
+			if (isPoolObj)
             {
                 (obj as IPoolObject).OnPoolRecover();
             }
 			UsingPool.Remove(obj);
 			return obj;
         }
-        private T PrivateGet()
+        protected T PrivateGet()
         {
 			if (CanUsePool.Count > 0)
 			{
@@ -214,29 +202,20 @@ namespace QTool
 				return PrivateGet();
 			}
 		}
-        GameObject GetGameObj(T obj)
-        {
-            if (isGameObject)
-            {
-                return obj as GameObject;
-            }
-            else if (isCom)
-            {
-                return (obj as Component)?.gameObject;
-            }
-            return null;
-        }
 		public bool Push(T obj)
 		{
 
 			if (obj == null || CanUsePool.Contains(obj)) return false;
 			if (!UsingPool.Contains(obj))
 			{
-				var gameObj = GetGameObj(obj);
-				if (Application.isPlaying)
+				if(obj is GameObject gameObj&&Application.isPlaying)
 				{
-					Debug.LogWarning("物体[" + obj + "]对象池[" + Key + "]中并不存在 无法回收强制删除");
 					GameObject.Destroy(gameObj);
+					Debug.LogWarning("对象[" + obj + "]在对象池[" + Key + "]中并不存在 无法回收 强制删除");
+				}
+				else
+				{
+					Debug.LogWarning("对象[" + obj + "]在对象池[" + Key + "]中并不存在 无法回收");
 				}
 				return false;
 			}
@@ -262,17 +241,58 @@ namespace QTool
 
         public Func<T> newFunc;
         public bool isPoolObj = false;
-        public bool isCom = false;
-        public bool isGameObject = false;
         public ObjectPool(string poolName,Func<T> newFunc=null)
         {
             var type = typeof(T);
             isPoolObj = typeof(IPoolObject).IsAssignableFrom(type);
-            isCom = type.IsSubclassOf(typeof(Component));
-            isGameObject = type == typeof(GameObject);
             this.newFunc = newFunc;
             this.Key = poolName;
+			if (type.IsSubclassOf(typeof(UnityEngine.Object)))
+			{
+				Debug.LogError("错误的对象池类型[" + type + "][" + Key + "]");
+			}
 
         }
     }
+
+	public class GameObjectPool : ObjectPool<GameObject>
+	{
+		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
+		{
+			OnGet += (obj) =>
+			{
+				obj.SetActive(true);
+			};
+			OnPush += (obj) =>
+			{
+				obj.SetActive(false);
+				obj.transform.SetParent(PoolParent, false);
+				foreach (var poolObj in obj.GetComponents<IPoolObject>())
+				{
+					poolObj.OnPoolRecover();
+				}
+			};
+		}
+		Transform _poolParent = null;
+		public Transform PoolParent
+		{
+			get
+			{
+				if (_poolParent == null)
+				{
+					_poolParent = QPoolManager.Instance.transform.GetChild(Key, true);
+				}
+				return _poolParent;
+			}
+		}
+		protected override GameObject CheckGet(GameObject obj)
+		{
+			if (obj==null)
+			{
+				UsingPool.Remove(obj);
+				obj = PrivateGet();
+			}
+			return base.CheckGet(obj);
+		}
+	}
 }
