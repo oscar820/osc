@@ -58,14 +58,15 @@ namespace QTool
 #if UNITY_EDITOR
                 if (UnityEditor.EditorUtility.IsPersistent(obj))
                 {
-                    var objRef = QAssetObjectManager.Instance.objList.Get(obj, (item) => item.obj);
+					QAssetObjectManager.Instance.objList.RemoveNull();
+					var objRef = QAssetObjectManager.Instance.objList.Get(obj, (item) => item.obj);
                     if (objRef == null)
                     {
 						var id = UnityEditor.AssetDatabase.GetAssetPath(obj);
-						if (QAssetObjectManager.Instance.objList.ContainsKey(id))
-						{
-							id = UnityEditor.AssetDatabase.GetAssetPath(obj)+"_"+ QId.GetNewId();
-						}
+						//if (QAssetObjectManager.Instance.objList.ContainsKey(id))
+						//{
+						//	id = UnityEditor.AssetDatabase.GetAssetPath(obj)+"_"+ QId.GetNewId();
+						//}
                         objRef = new QAssetObjectReference
                         {
                             Key = id,
