@@ -36,7 +36,12 @@ namespace QTool
 			}
 			else
 			{
-				var pool = typeof(T)==typeof(GameObject)?new GameObjectPool(key,newFunc as Func<GameObject>) as ObjectPool<T>: new ObjectPool<T>(key, newFunc) ;
+				var type = typeof(T);
+				if (type.IsSubclassOf(typeof(UnityEngine.Object))&&type!=typeof( GameObject))
+				{
+					throw new Exception("错误的对象池类型[" + type + "][" + poolName + "]");
+				}
+				var pool = type == typeof(GameObject)?new GameObjectPool(key,newFunc as Func<GameObject>) as ObjectPool<T>: new ObjectPool<T>(key, newFunc) ;
 				lock (Pools)
 				{
 					Pools[key] = pool;
@@ -247,10 +252,6 @@ namespace QTool
             isPoolObj = typeof(IPoolObject).IsAssignableFrom(type);
             this.newFunc = newFunc;
             this.Key = poolName;
-			if (type.IsSubclassOf(typeof(UnityEngine.Object)))
-			{
-				Debug.LogError("错误的对象池类型[" + type + "][" + Key + "]");
-			}
 
         }
     }
