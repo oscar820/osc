@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.U2D;
 using UnityEngine;
@@ -9,6 +11,82 @@ namespace QTool
 {
 	public static  class QAssetImportManager
 	{
+		#region 引用查找
+		[MenuItem("QTool/资源管理/查找资源引用 %#&f")]
+		static void FindreAssetFerencesMenu()
+		{
+			if (Selection.assetGUIDs.Length == 0)
+			{
+				Debug.LogError("请先选择任意一个资源 再查找资源引用");
+				return;
+			}
+			Debug.LogError("开始查找资源["+Selection.objects.ToOneString(" ")+"]的引用");
+			var assetGUIDs = Selection.assetGUIDs;
+			var assetPaths = new string[assetGUIDs.Length];
+			for (int i = 0; i < assetGUIDs.Length; i++)
+			{
+				assetPaths[i] = AssetDatabase.GUIDToAssetPath(assetGUIDs[0]);
+			}
+			var allAssetPaths = AssetDatabase.GetAllAssetPaths();
+			Task.Run(async ()=>
+			{
+				List<Task> tasks = new List<Task>();
+
+				for (int i = 0; i < allAssetPaths.Length; i++)
+				{
+					var path = allAssetPaths[i];
+					tasks.Add(Task.Run(() =>
+					{
+						if (path.EndsWith(".prefab") || path.EndsWith(".asset") || path.EndsWith(".unity"))
+						{
+							string content = File.ReadAllText(path);
+							if (content == null)
+							{
+								return;
+							}
+
+							for (int j = 0; j < assetGUIDs.Length; j++)
+							{
+								if (content.IndexOf(assetGUIDs[j]) > 0)
+								{
+									Debug.LogError(path+" 引用 "+assetPaths[j] );
+								}
+							}
+						}
+
+					}));
+				}
+				foreach (var task in tasks)
+				{
+					await task;
+				}
+				Debug.LogError("查找完成");
+			});
+		}
+
+
+		[MenuItem("QTool/资源管理/通过粘贴版Id查找资源")]
+		public static void FindAsset()
+		{
+			try
+			{
+				var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(GUIUtility.systemCopyBuffer), typeof(UnityEngine.Object));
+
+				Debug.LogError("找到 " + obj);
+				Selection.activeObject = obj;
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError("查找出错：" + e);
+				throw;
+			}
+		}
+
+
+		#endregion
+		#region 资源格式
+
+
 		[MenuItem("QTool/资源管理/删除所有自动图集")]
 		public static void DeleteAllAtlas()
 		{
@@ -181,6 +259,7 @@ namespace QTool
 				atlas.Add(AssetDatabase.LoadAllAssetsAtPath(texPath));
 			}
 		}
+		#endregion
 	}
 }
 

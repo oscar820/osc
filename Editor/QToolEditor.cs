@@ -9,6 +9,7 @@ using System.IO;
 using QTool.Asset;
 using QTool.Reflection;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace QTool
 {
@@ -20,22 +21,7 @@ namespace QTool
 			Debug.LogError(QTool.QTranslate.LanguageData.ToString());
 			GUIUtility.systemCopyBuffer = QTool.QTranslate.LanguageData.ToString();
 		}
-		[MenuItem("QTool/工具/通过粘贴版Id查找资源")]
-		public static void FindAsset()
-		{
-			try
-			{
-				var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(GUIUtility.systemCopyBuffer), typeof(UnityEngine.Object));
-
-				Debug.LogError("找到 " + obj);
-				Selection.activeObject = obj;
-			}
-			catch (System.Exception e)
-			{
-				Debug.LogError("查找出错：" + e);
-				throw;
-			}
-		}
+	
 		[MenuItem("QTool/清空缓存/清空全部缓存")]
         public static void ClearMemery()
         {
@@ -183,6 +169,10 @@ namespace QTool
 				}
 			}
 		}
+
+
+
+	
 	}
 }
 
