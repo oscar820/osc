@@ -279,6 +279,7 @@ namespace QTool
 			};
 			OnPush += (obj) =>
 			{
+				if (obj == null) return;
 				obj.SetActive(false);
 				obj.transform.SetParent(PoolParent, false);
 				foreach (var poolObj in obj.GetComponents<IPoolObject>())
