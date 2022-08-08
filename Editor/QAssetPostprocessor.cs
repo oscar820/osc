@@ -20,7 +20,7 @@ namespace QTool
 				Debug.LogError("请先选择任意一个资源 再查找资源引用");
 				return;
 			}
-			Debug.LogError("开始查找资源["+Selection.objects.ToOneString(" ")+"]的引用");
+			Debug.LogError("开始查找引用[" + Selection.objects.ToOneString(" ")+"]的资源");
 			var assetGUIDs = Selection.assetGUIDs;
 			var assetPaths = new string[assetGUIDs.Length];
 			for (int i = 0; i < assetGUIDs.Length; i++)
@@ -63,8 +63,31 @@ namespace QTool
 				Debug.LogError("查找完成");
 			});
 		}
-
-
+		[MenuItem("QTool/资源管理/查找引用的资源")]
+		static void FindDependencies()
+		{
+			if (Selection.assetGUIDs.Length == 0)
+			{
+				Debug.LogError("请先选择任意一个资源 再查找引用的资源");
+				return;
+			}
+			Debug.LogError("开始查找资源[" + Selection.objects.ToOneString(" ") + "]的引用");
+			var assetGUIDs = Selection.assetGUIDs;
+			var assetPaths = new string[assetGUIDs.Length];
+			for (int i = 0; i < assetGUIDs.Length; i++)
+			{
+				assetPaths[i] = AssetDatabase.GUIDToAssetPath(assetGUIDs[i]);
+			}
+			for (int i = 0; i < assetPaths.Length; i++)
+			{
+				if (string.IsNullOrEmpty(assetPaths[i])) continue;
+				foreach (var path in AssetDatabase.GetDependencies(assetPaths))
+				{
+					Debug.LogError(path + " 被 " + assetPaths[i] + "引用");
+				}
+			}
+			Debug.LogError("查找完成");
+		}
 		[MenuItem("QTool/资源管理/通过粘贴版Id查找资源")]
 		public static void FindAsset()
 		{
