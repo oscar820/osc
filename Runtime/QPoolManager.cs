@@ -75,19 +75,14 @@ namespace QTool
 				return result;
 			} ) as GameObjectPool;
 		}
-		public static GameObject Get(GameObject prefab)
+		public static TCom Get<TCom>(TCom prefab,Vector3 position=default) where TCom : Component
 		{
-			return GetPool(prefab.name, prefab).Get();
+			return Get(prefab.gameObject,position).GetComponent<TCom>();
 		}
-		public static TCom Get<TCom>(TCom prefab) where TCom:Component
-		{
-			return Get(prefab.gameObject).GetComponent<TCom>();
-		}
-		public static GameObject Get(GameObject prefab,Vector3 position, Quaternion rotation)
+		public static GameObject Get(GameObject prefab,Vector3 position=default)
 		{
 			var obj= GetPool(prefab.name, prefab).Get();
 			obj.transform.position = position;
-			obj.transform.rotation = rotation;
 			return obj;
 		}
 		public static GameObject Get(string poolKey, GameObject prefab)
