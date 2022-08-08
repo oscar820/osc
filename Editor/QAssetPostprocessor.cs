@@ -9,7 +9,7 @@ namespace QTool
 {
 	public static  class QAssetImportManager
 	{
-		[MenuItem("QTool/工具/删除所有自动图集")]
+		[MenuItem("QTool/资源管理/删除所有自动图集")]
 		public static void DeleteAllAtlas()
 		{
 			spriteAtlas.Clear();
@@ -26,14 +26,19 @@ namespace QTool
 			AssetDatabase.SaveAssets();
 		}
 		public static QDictionary<string, List<string>> spriteAtlas = new QDictionary<string, List<string>>((key)=>new List<string>());
-		[MenuItem("QTool/工具/批量设置资源格式")]
+		[MenuItem("QTool/资源管理/批量设置资源格式")]
 		public static void FreshAllImporter()
 		{
+			bool flag = true;
 			spriteAtlas.Clear();
 			Application.dataPath.ForeachDirectoryFiles((path) =>
 			{
+				if (!flag) return;
 				var assetPath = path.ToAssetPath();
-				EditorUtility.DisplayProgressBar("批量设置资源导入格式", "设置文件 " + assetPath, 1);
+				if(!EditorUtility.DisplayCancelableProgressBar("批量设置资源导入格式", "设置文件 " + assetPath, 1))
+				{
+					flag = false;
+				}
 				AssetImporter assetImporter = AssetImporter.GetAtPath(assetPath);
 				if (assetImporter is AudioImporter audioImporter)
 				{
@@ -44,27 +49,30 @@ namespace QTool
 					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(assetPath), textureImporter);
 				}
 			});
-			var old = spriteAtlas;
-			spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
-			var end = 0;
-			foreach (var kv in old)
+			if (flag)
 			{
-				if (kv.Value.Count < 5&& (end = kv.Key.IndexOf('\\'))>0)
+				var old = spriteAtlas;
+				spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
+				var end = 0;
+				foreach (var kv in old)
 				{
-					var parentKey = kv.Key.Substring(0,end);
-					spriteAtlas[parentKey].AddRange(kv.Value);
+					if (kv.Value.Count < 5 && (end = kv.Key.IndexOf('\\')) > 0)
+					{
+						var parentKey = kv.Key.Substring(0, end);
+						spriteAtlas[parentKey].AddRange(kv.Value);
+					}
+					else
+					{
+						spriteAtlas[kv.Key].AddRange(kv.Value);
+					}
 				}
-				else
+				foreach (var kv in spriteAtlas)
 				{
-					spriteAtlas[kv.Key].AddRange(kv.Value);
+					AutoSetAtlasContents(kv.Key, kv.Value);
 				}
+				EditorUtility.ClearProgressBar();
+				AssetDatabase.SaveAssets();
 			}
-			foreach (var kv in spriteAtlas)
-			{
-				AutoSetAtlasContents(kv.Key, kv.Value);
-			}
-			EditorUtility.ClearProgressBar();
-			AssetDatabase.SaveAssets();
 		}
 		public static void ReImportAudio(AudioClip audio, AudioImporter audioImporter)
 		{
