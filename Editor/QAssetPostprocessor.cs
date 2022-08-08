@@ -37,7 +37,7 @@ namespace QTool
 					var path = allAssetPaths[i];
 					tasks.Add(Task.Run(() =>
 					{
-						if (path.EndsWith(".prefab") || path.EndsWith(".asset") || path.EndsWith(".unity"))
+						if (path.EndsWith(".prefab") || path.EndsWith(".asset") || path.EndsWith(".unity")|| path.EndsWith(".mat"))
 						{
 							string content = File.ReadAllText(path);
 							if (content == null)
