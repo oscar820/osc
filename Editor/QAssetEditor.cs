@@ -34,6 +34,7 @@ namespace QTool.Asset {
 				});
 				EditorUtility.ClearProgressBar();
 			});
+			AssetDatabase.SaveAssets();
 		}
 #endif
     }
