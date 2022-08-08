@@ -79,7 +79,7 @@ namespace QTool
 					throw new Exception("不支持快速打包 "+buildTarget+" 平台");
 			}
 		}
-		public static string Build(params string[] scenes)
+		public static string Build( string[] scenes,BuildOptions options= BuildOptions.None)
 		{
 			BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
 			if (!BuildPipeline.isBuildingPlayer)
@@ -99,13 +99,12 @@ namespace QTool
 					return "";
 				}
 #endif
-			
 				var buildOption = new BuildPlayerOptions
 				{
 					scenes = scenes,
 					locationPathName = GetBuildPath(),
 					target = buildTarget,
-					options = BuildOptions.None,
+					options = options,
 				};
 				var buildInfo = BuildPipeline.BuildPlayer(buildOption);
 				if (buildInfo.summary.result == BuildResult.Succeeded)
@@ -117,8 +116,11 @@ namespace QTool
 					{
 						versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
 					}
-					PlayerSettings.bundleVersion = versions.ToOneString(".");
-					QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
+					if(!options.HasFlag(BuildOptions.Development))
+					{
+						PlayerSettings.bundleVersion = versions.ToOneString(".");
+						QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
+					}
 					return buildOption.locationPathName;
 				}
 				else
@@ -129,8 +131,8 @@ namespace QTool
 			return "";
 		}
      
-        [MenuItem("QTool/打包/打包游戏")]
-        private static void BuildRandRun()
+        [MenuItem("QTool/打包/打包发布版")]
+        private static void BuildRun()
 		{
 			var sceneList = new List<string>();
 			foreach (var scene in EditorBuildSettings.scenes)
@@ -140,10 +142,21 @@ namespace QTool
 			PlayerPrefs.SetString("QToolBuildPath", Build(sceneList.ToArray()));
 			RunBuild();
 		}
+		[MenuItem("QTool/打包/打包开发版")]
+		private static void BuildDevelopmentRun()
+		{
+			var sceneList = new List<string>();
+			foreach (var scene in EditorBuildSettings.scenes)
+			{
+				sceneList.AddCheckExist(scene.path);
+			}
+			PlayerPrefs.SetString("QToolBuildPath", Build(sceneList.ToArray(), BuildOptions.Development));
+			RunBuild();
+		}
 		[MenuItem("QTool/打包/打包当前场景")]
 		private static void BuildRandRunScene()
 		{
-			PlayerPrefs.SetString("QToolBuildPath", Build(SceneManager.GetActiveScene().path));
+			PlayerPrefs.SetString("QToolBuildPath", Build(new string[] { SceneManager.GetActiveScene().path }, BuildOptions.Development));
 			RunBuild();
 		}
 		[MenuItem("QTool/打包/运行测试包")]
@@ -169,7 +182,6 @@ namespace QTool
 					var id= QIdObject.GetId(obj);
 				}
 			}
-			
 		}
 	}
 }
