@@ -25,7 +25,7 @@ namespace QTool
 			var assetPaths = new string[assetGUIDs.Length];
 			for (int i = 0; i < assetGUIDs.Length; i++)
 			{
-				assetPaths[i] = AssetDatabase.GUIDToAssetPath(assetGUIDs[0]);
+				assetPaths[i] = AssetDatabase.GUIDToAssetPath(assetGUIDs[i]);
 			}
 			var allAssetPaths = AssetDatabase.GetAllAssetPaths();
 			Task.Run(async ()=>
