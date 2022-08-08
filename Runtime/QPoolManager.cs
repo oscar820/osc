@@ -79,7 +79,20 @@ namespace QTool
 		{
 			return Get(prefab.gameObject,parent,position,rotation).GetComponent<TCom>();
 		}
-		public static GameObject Get(GameObject prefab, Transform parent = null, Vector3 position=default,Quaternion rotation=default)
+		public static TCom Get<TCom>(TCom prefab,Vector3 position = default, Quaternion rotation = default) where TCom : Component
+		{
+			return Get(prefab.gameObject, position, rotation).GetComponent<TCom>();
+		}
+		public static GameObject Get(GameObject prefab, Transform parent = null, Vector3 position = default, Quaternion rotation = default)
+		{
+			var obj= Get(prefab, position, rotation);
+			if (parent != null)
+			{
+				obj.transform.SetParent(parent, true);
+			}
+			return obj;
+		}
+		public static GameObject Get(GameObject prefab,Vector3 position=default,Quaternion rotation=default)
 		{
 			var obj= GetPool(prefab.name, prefab).Get();
 			obj.transform.position = position;
@@ -87,10 +100,7 @@ namespace QTool
 			{
 				obj.transform.rotation = rotation;
 			}
-			if (parent != null)
-			{
-				obj.transform.SetParent(parent, true);
-			}
+			
 			return obj;
 		}
 		public static GameObject Get(string poolKey, GameObject prefab,Transform parent=null)
