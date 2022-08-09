@@ -12,6 +12,17 @@ namespace QTool
 	public static  class QAssetImportManager
 	{
 		#region 引用查找
+		[MenuItem("QTool/资源管理/所有资源格式 %#&f")]
+		static void FindAllAssetExtension()
+		{
+			List<string> list = new List<string>();
+			foreach (var path in AssetDatabase.GetAllAssetPaths())
+			{
+				list.AddCheckExist(Path.GetExtension(path));
+				
+			}
+			Debug.LogError(list.ToOneString());
+		}
 		[MenuItem("QTool/资源管理/查找资源引用 %#&f")]
 		static void FindreAssetFerencesMenu()
 		{
@@ -37,23 +48,32 @@ namespace QTool
 					var path = allAssetPaths[i];
 					tasks.Add(Task.Run(() =>
 					{
-						if (path.EndsWith(".prefab") || path.EndsWith(".asset") || path.EndsWith(".unity")|| path.EndsWith(".mat"))
+						var end= path.SplitEndString(".");
+						switch (end)
 						{
-							string content = File.ReadAllText(path);
-							if (content == null)
-							{
-								return;
-							}
-
-							for (int j = 0; j < assetGUIDs.Length; j++)
-							{
-								if (content.IndexOf(assetGUIDs[j]) > 0)
+							case "prefab":
+							case "asset":
+							case "unity":
+							case "mat":
+							case "playable":
 								{
-									Debug.LogError(path+" 引用 "+assetPaths[j] );
-								}
-							}
-						}
+									string content = File.ReadAllText(path);
+									if (content == null)
+									{
+										return;
+									}
 
+									for (int j = 0; j < assetGUIDs.Length; j++)
+									{
+										if (content.IndexOf(assetGUIDs[j]) > 0)
+										{
+											Debug.LogError(path + " 引用 " + assetPaths[j]);
+										}
+									}
+								}break;
+							default:
+								break;
+						}
 					}));
 				}
 				foreach (var task in tasks)
@@ -114,7 +134,7 @@ namespace QTool
 		public static void DeleteAllAtlas()
 		{
 			spriteAtlas.Clear();
-			Application.dataPath.ForeachDirectoryFiles((path) =>
+			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
 				if (path.EndsWith("AutoAtlas.spriteatlas"))
 				{
@@ -122,7 +142,7 @@ namespace QTool
 					EditorUtility.DisplayProgressBar("删除自动图集", "删除 " + assetPath, 1);
 					AssetDatabase.DeleteAsset(assetPath);
 				}
-			});
+			};
 			EditorUtility.ClearProgressBar();
 			AssetDatabase.SaveAssets();
 		}
@@ -132,7 +152,7 @@ namespace QTool
 		{
 			bool flag = true;
 			spriteAtlas.Clear();
-			Application.dataPath.ForeachDirectoryFiles((path) =>
+			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
 				if (!flag) return;
 				var assetPath = path.ToAssetPath();
@@ -149,7 +169,7 @@ namespace QTool
 				{
 					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(assetPath), textureImporter);
 				}
-			});
+			};
 			if (flag)
 			{
 				var old = spriteAtlas;
