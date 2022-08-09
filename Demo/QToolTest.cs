@@ -292,7 +292,7 @@ namespace QTool.Test
         public string asdl;
         public float p2;
         public byte[] array = new byte[] { 123 };
-        [XmlIgnore]
+        [XmlIgnore] 
         public byte[,,] arrayTest = new byte[1, 2, 2] { { { 1, 2 }, { 3, 4 } } };
         public TestClass2 child; 
         [XmlIgnore]

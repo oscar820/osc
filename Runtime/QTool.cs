@@ -49,7 +49,17 @@ namespace QTool
 		//{
 		//	throw new NotImplementedException();
 		//}
-
+		public static string GetPath(this Transform transform)
+		{
+			if (transform.parent == null)
+			{
+				return transform.name;
+			}
+			else
+			{
+				return transform.parent.GetPath() + "." + transform.name;
+			}
+		}
 		public static Transform GetChild(this Transform transform,string childPath,bool autuCreate=false)
 		{
 			if (childPath.SplitTowString(".", out var start, out var end))

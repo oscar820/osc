@@ -11,7 +11,20 @@ namespace QTool
 {
 	public static  class QAssetImportManager
 	{
+		[MenuItem("QTool/资源管理/查找当前场景所有Mesh丢失")]
+		static void FindAllMeshNull()
+		{
+			var meshs= GameObject.FindObjectsOfType<MeshFilter>();
+			foreach (var mesh in meshs)
+			{
+				if (Application.isPlaying? mesh.mesh == null:mesh.sharedMesh==null)
+				{
+					Debug.LogError(mesh.transform.GetPath()+ " Mesh为null");
+				}
+			}
+		}
 		#region 引用查找
+
 		[MenuItem("QTool/资源管理/所有资源格式")]
 		static void FindAllAssetExtension()
 		{

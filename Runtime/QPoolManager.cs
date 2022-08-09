@@ -4,7 +4,7 @@ using UnityEngine;
 namespace QTool
 {
 
-    public class QPoolManager:QToolManagerBase<QPoolManager>
+    public class QPoolManager:InstanceBehaviour<QPoolManager>
     {
         
         public static QDictionary<string, PoolBase> Pools = new QDictionary<string, PoolBase>();

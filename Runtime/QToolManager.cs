@@ -5,7 +5,12 @@ namespace QTool
 {
     public class QToolManager:InstanceManager<QToolManager>
     {
-    }
+		protected override void Awake()
+		{
+			base.Awake();
+			DontDestroyOnLoad(gameObject);
+		}
+	}
     public abstract class QToolManagerBase<T>:MonoBehaviour where T : QToolManagerBase<T>
     {
         private static T _instance;
