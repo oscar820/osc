@@ -264,8 +264,14 @@ namespace QTool
 				{
 					textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
 				}
-				textureImporter.mipmapEnabled = false;
-				textureImporter.isReadable = false;
+				if(textureImporter.textureType== TextureImporterType.Default)
+				{
+					if(textureImporter.textureShape== TextureImporterShape.Texture2D)
+					{
+						textureImporter.isReadable = false;
+						textureImporter.mipmapEnabled = false;
+					}
+				}
 				textureImporter.crunchedCompression = true;
 				textureImporter.textureCompression = TextureImporterCompression.Compressed;
 				textureImporter.compressionQuality = setting.compressionQuality;
