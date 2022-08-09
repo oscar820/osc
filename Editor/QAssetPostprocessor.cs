@@ -60,7 +60,6 @@ namespace QTool
 				for (int i = 0; i < allAssetPaths.Length; i++)
 				{
 					var path = allAssetPaths[i];
-					if (!path.StartsWith("Assets/")) continue;
 					tasks.Add(Task.Run(() =>
 					{
 						var end = Path.GetExtension(path);
