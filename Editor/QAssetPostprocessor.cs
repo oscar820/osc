@@ -12,14 +12,14 @@ namespace QTool
 	public static  class QAssetImportManager
 	{
 		#region 引用查找
-		[MenuItem("QTool/资源管理/所有资源格式 %#&f")]
+		[MenuItem("QTool/资源管理/所有资源格式")]
 		static void FindAllAssetExtension()
 		{
-			List<string> list = new List<string>();
+
+			QDictionary<string, string> list = new QDictionary<string, string>();
 			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
-				list.AddCheckExist(Path.GetExtension(path));
-				
+				list[Path.GetExtension(path)] = path;
 			}
 			Debug.LogError(list.ToOneString());
 		}
@@ -48,14 +48,14 @@ namespace QTool
 					var path = allAssetPaths[i];
 					tasks.Add(Task.Run(() =>
 					{
-						var end= path.SplitEndString(".");
+						var end = Path.GetExtension(path);
 						switch (end)
 						{
-							case "prefab":
-							case "asset":
-							case "unity":
-							case "mat":
-							case "playable":
+							case ".prefab":
+							case ".asset":
+							case ".unity":
+							case ".mat":
+							case ".playable":
 								{
 									string content = File.ReadAllText(path);
 									if (content == null)
