@@ -12,6 +12,7 @@ using QTool.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.IO;
+using System.Runtime.ExceptionServices;
 
 namespace QTool.Test
 {
@@ -215,8 +216,8 @@ namespace QTool.Test
 			QTime.ChangeScale("测试时间", UnityEngine.Random.Range(0, 2));
 		}
 		[ViewButton("QDataList测试")]
-        public void QDataTest()
-        {
+        public async void QDataTest()
+		{
 			Debug.LogError("\"aslkdasdj,asldjl\"".ParseElement());
 			var enumValue = TestEnum.攻击 | TestEnum.死亡;
 
@@ -253,6 +254,23 @@ namespace QTool.Test
 			QDebug.Log("" + "  :  " + "".ToComputeFloat());
 			QDebug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
 			QDebug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
+		}
+	
+		[ViewButton("QTaskTest")]
+		public async void QTaskTest()
+		{
+			await Cysharp.Threading.Tasks.UniTask.Yield(Cysharp.Threading.Tasks.PlayerLoopTiming.Update);
+			Debug.LogError("开始10秒完成");
+			if (await QTask.Wait(10).IsCanceled())
+			{
+				Debug.LogError("取消运行");
+			}
+			else
+			{
+
+				Debug.LogError("等待10秒完成");
+			}
+			Debug.LogError(await Resources.LoadAsync<Texture2D>("NodeEditorBackground"));
 		}
 		public class QDataListTestType : QDataList<QDataListTestType>, IKey<string>
 		{

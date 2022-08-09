@@ -2,35 +2,75 @@ using QTool.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 namespace QTool
 {
+	public class QTaskCancelException : Exception
+	{
+		public override string ToString()
+		{
+			return "QTask 异步逻辑被取消运行";
+		}
+	}
 	public static class QTask
 	{
-		public static Action StopAllWait;
-		public static async Task<bool> Wait(float second, bool ignoreTimeScale = false)
+		public static int RunningFlag { get; private set; } = QId.GetNewId().GetHashCode();
+		public static void StopAllWait()
 		{
-			var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
-			return await Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
+			RunningFlag = QId.GetNewId().GetHashCode();
 		}
-		public static async Task<bool> Wait(Func<bool> flagFunc)
+		public static async Task Wait(float second, bool ignoreTimeScale = false)
 		{
-			var WaitStop = false;
-			if (flagFunc == null) return Application.isPlaying;
-			Action OnWaitStop = () => { WaitStop = true; };
-			StopAllWait += OnWaitStop;
+			if (Application.isPlaying)
+			{
+				var startTime = (ignoreTimeScale ? Time.unscaledTime : Time.time);
+				await Wait(() => startTime + second <= (ignoreTimeScale ? Time.unscaledTime : Time.time));
+			}
+			else
+			{
+				var startTime = DateTime.Now;
+				await Wait(() =>(DateTime.Now-startTime).TotalSeconds>second );
+			}
+		}
+		public static async Task Wait(Func<bool> flagFunc)
+		{
+			var flag = RunningFlag;
+			var playingFlag = Application.isPlaying;
+			if (flagFunc == null) return;
 			while (!flagFunc.Invoke())
 			{
 				await Task.Delay(100);
-				if (!Application.isPlaying || WaitStop)
+				if (!playingFlag.Equals(Application.isPlaying) || !RunningFlag.Equals(flag))
 				{
-					StopAllWait -= OnWaitStop;
-					return false;
+					throw new QTaskCancelException();
 				}
 			}
-			StopAllWait -= OnWaitStop;
-			return true;
+		}
+		public static async Task<bool> IsCanceled(this Task task)
+		{
+			Exception exception=null;
+			try
+			{
+				await task;
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+			if (exception != null)
+			{
+				if(exception is QTaskCancelException)
+				{
+					return true;
+				}
+				else
+				{
+					Debug.LogError(exception);
+				}
+			}
+			return false;
 		}
 
 		public static async Task TaskRunCoroutine(this IEnumerator enumerator)
@@ -40,16 +80,9 @@ namespace QTool
 				if (enumerator.Current is WaitForSeconds waitForSeconds)
 				{
 					var m_Seconds = (float)waitForSeconds.GetValue("m_Seconds");
-					if (Application.isPlaying)
+					if (!await Wait(m_Seconds).IsCanceled())
 					{
-						if (!await QTask.Wait(m_Seconds))
-						{
-							return;
-						}
-					}
-					else
-					{
-						await Task.Delay((int)(m_Seconds * 1000));
+						return;
 					}
 				}
 				else
@@ -69,7 +102,83 @@ namespace QTool
 
 		}
 
+
+
+
+		//public struct WaitTimeAwaiter : IAwaiter
+		//{
+		//	readonly float wait;
+		//	Action action;
+		//	public WaitTimeAwaiter(float wait)
+		//	{
+		//		this.wait = wait;
+		//		action = null;
+		//	}
+		//	public async void Start()
+		//	{
+		//		await QTask.Wait(wait);
+		//		IsCompleted = true;
+		//		action?.Invoke();
+		//		action = null;
+		//	}
+
+		//	public bool IsCompleted
+		//	{
+		//		get; set;
+		//	}
+
+		//	public void GetResult()
+		//	{
+		//	}
+
+
+		//	public void OnCompleted(Action continuation)
+		//	{
+		//		Debug.LogError(continuation);
+		//		action += continuation;
+		//	}
+
+		//}
+		public static ResourceRequestAwaiter GetAwaiter(this ResourceRequest resourceRequest)
+		{
+			return new ResourceRequestAwaiter(resourceRequest);
+		}
+		public struct ResourceRequestAwaiter : IAwaiter<UnityEngine.Object>
+		{
+			ResourceRequest resourceRequest;
+			public ResourceRequestAwaiter(ResourceRequest resourceRequest)
+			{
+				this.resourceRequest = resourceRequest;
+			}
+			public bool IsCompleted => resourceRequest.isDone;
+
+			public UnityEngine.Object GetResult()
+			{
+				return resourceRequest?.asset;
+			}
+
+			public void OnCompleted(Action continuation)
+			{
+				resourceRequest.completed += (resourceRequest) =>
+				{
+					continuation?.Invoke();
+				};
+			}
+		}
 	}
+	
+	public interface IAwaiter : INotifyCompletion
+	{
 
+		public bool IsCompleted { get; }
 
+		public void GetResult();
+	}
+	public interface IAwaiter<T>: INotifyCompletion
+	{
+
+		public bool IsCompleted { get; }
+
+		public T GetResult();
+	}
 }

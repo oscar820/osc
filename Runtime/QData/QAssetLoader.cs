@@ -336,7 +336,7 @@ namespace QTool.Asset
 					var pos = Camera.main.transform.forward * -100 + Camera.main.transform.position;
 					previewObj.transform.position = pos;
 				}
-				if (await QTask.Wait(0.1f, true))
+				if (!await QTask.Wait(0.1f, true).IsCanceled())
 				{
 					PoolPush(key,previewObj,false);
 				}
