@@ -255,11 +255,36 @@ namespace QTool.Test
 			QDebug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
 			QDebug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
 		}
-	
+		[ViewButton("PlayerLoop")]
+		public static void PlayerLoop()
+		{
+			var playerLoop = UnityEngine.LowLevel.PlayerLoop.GetCurrentPlayerLoop();
+
+			var sb = new System.Text.StringBuilder();
+			sb.AppendLine($"PlayerLoop List");
+			foreach (var header in playerLoop.subSystemList)
+			{
+				sb.AppendFormat("------{0}------", header.type.Name);
+				sb.AppendLine();
+				foreach (var subSystem in header.subSystemList)
+				{
+					sb.AppendFormat("{0}", subSystem.type.Name);
+					sb.AppendLine();
+
+					if (subSystem.subSystemList != null)
+					{
+						UnityEngine.Debug.LogWarning("More Subsystem:" + subSystem.subSystemList.Length);
+					}
+				}
+			}
+
+			UnityEngine.Debug.Log(sb.ToString());
+		}
 		[ViewButton("QTaskTest")]
 		public async void QTaskTest()
 		{
-			await Cysharp.Threading.Tasks.UniTask.Yield(Cysharp.Threading.Tasks.PlayerLoopTiming.Update);
+			//UnityEngine.LowLevel.PlayerLoop.GetDefaultPlayerLoop();
+			//await Cysharp.Threading.Tasks.UniTask.Yield(Cysharp.Threading.Tasks.PlayerLoopTiming.Update);
 			Debug.LogError("开始10秒完成");
 			if (await QTask.Wait(10).IsCanceled())
 			{
