@@ -19,6 +19,7 @@ namespace QTool
 			QDictionary<string, string> list = new QDictionary<string, string>();
 			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
+				if (!path.StartsWith("Assets/")) continue;
 				list[Path.GetExtension(path)] = path;
 			}
 			Debug.LogError(list.ToOneString());
@@ -46,6 +47,7 @@ namespace QTool
 				for (int i = 0; i < allAssetPaths.Length; i++)
 				{
 					var path = allAssetPaths[i];
+					if (!path.StartsWith("Assets/")) continue;
 					tasks.Add(Task.Run(() =>
 					{
 						var end = Path.GetExtension(path);
@@ -155,6 +157,7 @@ namespace QTool
 			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
 				if (!flag) return;
+				if (!path.StartsWith("Assets/")) continue;
 				var assetPath = path.ToAssetPath();
 				if(!EditorUtility.DisplayCancelableProgressBar("批量设置资源导入格式", "设置文件 " + assetPath, 1))
 				{
