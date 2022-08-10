@@ -289,10 +289,8 @@ namespace QTool
 				PullAndCommitPush(path,commit);
 			}
 			EditorUtility.ClearProgressBar();
-			if (CheckResult(resultInfo))
-			{
-				AssetDatabase.Refresh();
-			}
+
+			AssetDatabase.Refresh();
 		}
 	
 		public static string Status(string path)
