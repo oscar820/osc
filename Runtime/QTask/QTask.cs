@@ -48,7 +48,7 @@ namespace QTool
 				}
 			}
 		}
-		public static async Task<bool> IsCanceled(this Task task)
+		public static async Task<bool> IsCancel(this Task task)
 		{
 			Exception exception=null;
 			try
@@ -80,7 +80,7 @@ namespace QTool
 				if (enumerator.Current is WaitForSeconds waitForSeconds)
 				{
 					var m_Seconds = (float)waitForSeconds.GetValue("m_Seconds");
-					if (!await Wait(m_Seconds).IsCanceled())
+					if (!await Wait(m_Seconds).IsCancel())
 					{
 						return;
 					}

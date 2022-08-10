@@ -11,7 +11,7 @@ namespace QTool
     {
         public static async void DelayInvoke(this float time,System.Action action,bool ignoreGameTime=true)
         {
-			if(!await QTask.Wait(time, ignoreGameTime).IsCanceled())
+			if(!await QTask.Wait(time, ignoreGameTime).IsCancel())
 			{
 				action?.Invoke();
 			}
