@@ -53,25 +53,19 @@ namespace QTool
         {
 			return QDataListCache.Get(path, (key) =>
 			{
-				if (QFileManager.Exists(path, true))
+				try
 				{
-					try
+					var data = new QDataList();
+					data.LoadPath = path;
+					QFileManager.LoadAll(path, (fileValue, loadPath) =>
 					{
-						var data = new QDataList();
-						data.LoadPath = path;
-						QFileManager.LoadAll(path, (fileValue,loadPath) =>
-						{
-							data.Parse(fileValue, loadPath);
-						}, "{}");
-						return data;
-					}
-					catch (System.Exception e)
-					{
-						Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
-					}
+						data.Parse(fileValue, loadPath);
+					}, "{}");
+					return data;
 				}
-				else
+				catch (System.Exception e)
 				{
+					Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
 					if (autoCreate != null)
 					{
 						var qdataList = autoCreate();

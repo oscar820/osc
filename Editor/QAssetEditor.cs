@@ -28,7 +28,77 @@ namespace QTool.Asset {
 			}
 		}
 		#region 引用查找
+		[MenuItem("QTool/资源管理/复制Id")]
+		static void CopyID()
+		{
+			if (Selection.assetGUIDs.Length == 1)
+			{
+				if (Selection.activeObject!=null)
+				{
+					GUIUtility.systemCopyBuffer= Selection.assetGUIDs[0];
+					Debug.LogError("复制 " + Selection.activeObject.name + " Id[" + GUIUtility.systemCopyBuffer + "]");
+				}
+			}
+			else
+			{
+				Debug.LogError("选中过多");
+			}
+		}
+		[MenuItem("QTool/资源管理/使用粘贴板Id替换当前Id")]
+		static void RepleaceID()
+		{
+			if (Selection.assetGUIDs.Length == 1)
+			{
+				var target = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(GUIUtility.systemCopyBuffer), typeof(UnityEngine.Object));
 
+				if (Selection.activeObject!=null&&target!=null&&Selection.activeObject!=target)
+				{
+					if (Selection.activeObject.GetType() != target.GetType())
+					{
+						Debug.LogError(Selection.activeObject.name + " : " + target.name + " 类型不匹配");
+						return;
+					}
+					var oldPath = AssetDatabase.GetAssetPath(Selection.activeObject);
+					if (EditorUtility.DisplayDialog("资源替换","确定以" + oldPath + "替换为"+ AssetDatabase.GetAssetPath(target), "确定", "取消"))
+					{
+						Debug.LogError("以资源" + oldPath + "替换为" + AssetDatabase.GetAssetPath(target));
+						var oldId = Selection.assetGUIDs[0];
+						var newId = GUIUtility.systemCopyBuffer;
+						foreach (var path in AssetDatabase.GetAllAssetPaths())
+						{
+							if (!path.StartsWith("Assets/") || path == oldPath) continue;
+
+							var end = Path.GetExtension(path);
+							switch (end)
+							{
+								case ".prefab":
+								case ".asset":
+								case ".unity":
+								case ".mat":
+								case ".playable":
+									{
+										var text = QFileManager.Load(path);
+										if (text.Contains(oldId))
+										{
+											Debug.LogError("更改[" + path + "]引用资源");
+											QFileManager.Save(path, text.Replace(oldId, newId));
+										}
+									}
+									break;
+								default:
+									break;
+							}
+							
+						}
+					}
+					
+				}
+			}
+			else
+			{
+				Debug.LogError("选中过多");
+			}
+		}
 		[MenuItem("QTool/资源管理/所有资源格式")]
 		static void FindAllAssetExtension()
 		{
@@ -49,7 +119,7 @@ namespace QTool.Asset {
 				Debug.LogError("请先选择任意一个资源 再查找资源引用");
 				return;
 			}
-			Debug.LogError("开始查找引用[" + Selection.objects.ToOneString(" ") + "]的资源");
+			Debug.LogError("开始查找引用[" + Selection.objects.ToOneString(" ",(obj)=>obj.name) + "]的资源");
 			var assetGUIDs = Selection.assetGUIDs;
 			var assetPaths = new string[assetGUIDs.Length];
 			for (int i = 0; i < assetGUIDs.Length; i++)
@@ -111,7 +181,7 @@ namespace QTool.Asset {
 				Debug.LogError("请先选择任意一个资源 再查找引用的资源");
 				return;
 			}
-			Debug.LogError("开始查找资源[" + Selection.objects.ToOneString(" ") + "]的引用");
+			Debug.LogError("开始查找资源[" + Selection.objects.ToOneString(" ", (obj) => obj.name) + "]的引用");
 			var assetGUIDs = Selection.assetGUIDs;
 			var assetPaths = new string[assetGUIDs.Length];
 			for (int i = 0; i < assetGUIDs.Length; i++)

@@ -161,81 +161,64 @@ namespace QTool
 		public const string ResourcesRoot = "Assets/Resources/";
 		public static DateTime GetLastWriteTime(string path)
 		{
-			if (!Exists(path))
+			
+			try
 			{
-				return DateTime.MinValue;
-			}
-			if (Application.isPlaying && path.StartsWith(ResourcesRoot))
-			{
+				if (Application.isPlaying && path.StartsWith(ResourcesRoot))
+				{
 #if UNITY_EDITOR
-				return File.GetLastWriteTime(path);
+					return File.GetLastWriteTime(path);
 #else
 				return DateTime.MinValue;
 #endif
+				}
+				else
+				{
+					return File.GetLastWriteTime(path);
+				}
 			}
-			else
+			catch (Exception e)
 			{
-				return File.GetLastWriteTime(path);
+				Debug.LogError(e);
+				return DateTime.MinValue;
 			}
+	
 		}
-		public static bool Exists(string path,bool checkDirectory=false)
-		{
-			if (path.StartsWith(ResourcesRoot))
-			{
-				
-#if UNITY_EDITOR
-				return File.Exists(path)||(checkDirectory&&Directory.Exists(path.SplitStartString(".")));
-#else
-				return true;
-#endif
-			}
-			else
-			{
-				return File.Exists(path) || (checkDirectory && Directory.Exists(path.SplitStartString(".")));
-			}
-        }
-		//public static async Task<string> LoadAsync(string path, string defaultValue = "")
-		//{
-		//	return await Task.Run(() => Load(path, defaultValue));
-		//}
         public static string Load(string path,string defaultValue="")
         {
-            if (!Exists(path))
-            {
-				if (string.IsNullOrWhiteSpace(defaultValue))
-				{
-					Debug.LogError("不存在文件：" + path);
-				}
-				else
-				{
-					Debug.LogWarning("不存在文件：" + path);
-				}
-                return defaultValue;
-            }
-			if (path.StartsWith(ResourcesRoot))
+			try
 			{
+				if (path.StartsWith(ResourcesRoot))
+				{
 
-				var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesRoot).SplitStartString("."));
-				if (text == null)
-				{
-					return defaultValue;
+					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesRoot).SplitStartString("."));
+					if (text == null)
+					{
+						return defaultValue;
+					}
+					else
+					{
+						return text.text;
+					}
 				}
 				else
 				{
-					return text.text;
-				}
-			}
-			else
-			{
-				using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
-				{
-					using (var sw = new System.IO.StreamReader(file))
+					using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
 					{
-						var data = sw.ReadToEnd();
-						return data;
+						using (var sw = new System.IO.StreamReader(file))
+						{
+							var data = sw.ReadToEnd();
+							return data;
+						}
 					}
 				}
 			}
+			catch (Exception e)
+			{
+				Debug.LogError("加载文件出错[" + path + "]"+e);
+				return defaultValue;
+			}
+		
            
         }
 
@@ -349,7 +332,7 @@ namespace QTool
 			{
 				CheckFolder(path);
 
-				if (checkUpdate&&Exists(path) )
+				if (checkUpdate )
 				{
 					var oldData = Load(path);
 					if (!string.IsNullOrWhiteSpace(oldData)&&oldData.GetHashCode()==data.GetHashCode())
