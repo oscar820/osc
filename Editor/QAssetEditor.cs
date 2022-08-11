@@ -59,9 +59,9 @@ namespace QTool.Asset {
 						return;
 					}
 					var oldPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-					if (EditorUtility.DisplayDialog("资源替换","确定以" + oldPath + "替换为"+ AssetDatabase.GetAssetPath(target), "确定", "取消"))
+					if (EditorUtility.DisplayDialog("资源替换","确定将" + oldPath + "替换为"+ AssetDatabase.GetAssetPath(target), "确定", "取消"))
 					{
-						Debug.LogError("以资源" + oldPath + "替换为" + AssetDatabase.GetAssetPath(target));
+						Debug.LogError("将" + oldPath + "替换为" + AssetDatabase.GetAssetPath(target));
 						var oldId = Selection.assetGUIDs[0];
 						var newId = GUIUtility.systemCopyBuffer;
 						foreach (var path in AssetDatabase.GetAllAssetPaths())
