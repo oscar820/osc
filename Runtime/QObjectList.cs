@@ -12,7 +12,7 @@ namespace QTool
         {
             get=> _pool??= QPoolManager.GetPool(nameof(QObjectList)+"_"+prefab.name, prefab);
         }
-        List<GameObject> objList = new List<GameObject>();
+        public List<GameObject> objList{ get; private set; }= new List<GameObject>();
 
         public virtual GameObject this[string name]
         {
