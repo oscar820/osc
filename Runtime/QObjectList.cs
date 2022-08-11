@@ -6,9 +6,10 @@ namespace QTool
 {
     public class QObjectList : MonoBehaviour
     {
+		[UnityEngine.Serialization.FormerlySerializedAs("viewPrefab")]
         public GameObject prefab;
-		ObjectPool<GameObject> _pool;
-		public ObjectPool<GameObject> Pool
+		GameObjectPool _pool;
+		public GameObjectPool Pool
         {
             get=> _pool??= QPoolManager.GetPool(nameof(QObjectList)+"_"+prefab.name, prefab);
         }
