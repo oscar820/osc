@@ -96,7 +96,7 @@ namespace QTool
                         }
                         if (!Application.isPlaying&& !gameObj.activeSelf)
                         {
-                            QIdInitManager.Instance.qIdInitList.AddCheckExist(qId);
+                            QIdInitSetting.Instance.qIdInitList.AddCheckExist(qId);
                         }
                         return qId.InstanceId;
                     }

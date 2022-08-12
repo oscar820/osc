@@ -202,7 +202,20 @@ namespace QTool
             }
             Debug.LogError(checkInfo);
         }
-
+		public static Material GetInstanceMaterial(this UnityEngine.UI.Graphic graphic)
+		{
+			if (graphic.material == null) return null;
+			if (Application.isPlaying)
+			{
+				if (graphic.material.name != "Instance_" + graphic.GetHashCode())
+				{
+					var instance = new Material(graphic.material);
+					instance.name = "Instance_" + graphic.GetHashCode();
+					graphic.material = instance;
+				}
+			}
+			return graphic.material;
+		}
         public static bool PercentRandom(float percent)
         {
             var value = UnityEngine.Random.Range(0, 100);

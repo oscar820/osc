@@ -80,6 +80,10 @@ namespace QTool
         {
             get
             {
+				if (index < 0)
+				{
+					return default;
+				}
                 if (index >= Count)
 				{
 					if (CreateNew == null)

@@ -63,12 +63,18 @@ namespace QTool
         {
             get
             {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<T>(true);
-                }
-                return _instance;
-            }
+				if (_instance == null)
+				{
+					_instance = FindObjectOfType<T>(true);
+					if (_instance == null)
+					{
+						var obj = new GameObject(typeof(T).Name);
+						_instance = obj.AddComponent<T>();
+						_instance.SetDirty();
+					}
+				}
+				return _instance;
+			}
         }
         protected static T _instance;
         protected virtual void Awake()
@@ -77,25 +83,5 @@ namespace QTool
         }
     }
 
-	public abstract class InstanceManager<T> : InstanceBehaviour<T> where T : InstanceManager<T>
-	{
-		public new static T Instance
-		{
-			get
-			{
-				if (_instance == null)
-				{
-					_instance = GameObject.FindObjectOfType<T>(true);
-					if (_instance == null)
-					{
-						var obj = new GameObject(typeof(T).Name);
-						//GameObject.DontDestroyOnLoad(obj);
-						_instance = obj.AddComponent<T>();
-						_instance.SetDirty();
-					}
-				}
-				return _instance;
-			}
-		}
-	}
+
 }
