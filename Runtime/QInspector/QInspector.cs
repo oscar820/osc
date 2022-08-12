@@ -33,8 +33,16 @@ namespace QTool
         {
         }
     }
-  
-
+	[AttributeUsage(AttributeTargets.Field)]
+	public class GroupAttribute : Attribute
+	{
+		public bool start = true;
+		public GroupAttribute(bool start)
+		{
+			this.start = start;
+		}
+	}
+	
 }
 namespace QTool.Inspector
 {

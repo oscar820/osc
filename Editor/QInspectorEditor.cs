@@ -486,11 +486,16 @@ namespace QTool.Inspector
                 return null;
             }
             var changeCall = property.GetAttribute<ChangeCallAttribute>();
-            if (changeCall != null)
+			var group = property.GetAttribute<GroupAttribute>();
+			if (changeCall != null)
             {
                 EditorGUI.BeginChangeCheck(); ;
             }
             var readonlyAtt = property.GetAttribute<ReadOnlyAttribute>();
+			if (group != null && group.start)
+			{
+				GUILayout.BeginVertical(QGUITool.BackStyle);
+			}
             if (readonlyAtt != null)
             {
                 var last = GUI.enabled;
@@ -502,7 +507,11 @@ namespace QTool.Inspector
             {
                 property.Draw();
             }
-            if (changeCall != null)
+			if (group != null &&! group.start)
+			{
+				GUILayout.EndVertical();
+			}
+			if (changeCall != null)
             {
                 if (EditorGUI.EndChangeCheck())
                 {
