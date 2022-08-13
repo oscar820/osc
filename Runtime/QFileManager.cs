@@ -15,22 +15,6 @@ namespace QTool
         {
 			return target.ToQData().ParseQData<T>();
 		}
-		//public static T QXmlCopy<T>(this T target)
-		//{
-		//	return QXmlDeserialize<T>(QXmlSerialize(target));
-		//}
-		//public static string ToFullPath(this string path)
-		//{
-		//	if (Application.isPlaying)
-		//	{
-		//		if (path.StartsWith("Assets"))
-		//		{
-		//			return 
-		//		}
-		//	}
-			
-		//	return "Assets" + path.SplitEndString(Application.dataPath);
-		//}
 		public static string ToAssetPath(this string path)
         {
             return "Assets" + path.SplitEndString(Application.dataPath);
@@ -203,14 +187,7 @@ namespace QTool
 				}
 				else
 				{
-					using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
-					{
-						using (var sw = new System.IO.StreamReader(file))
-						{
-							var data = sw.ReadToEnd();
-							return data;
-						}
-					}
+					return File.ReadAllText(path);
 				}
 			}
 			catch (Exception e)
