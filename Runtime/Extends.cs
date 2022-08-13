@@ -15,14 +15,15 @@ namespace QTool
 		/// </summary>
 		public static void SetTime(this PlayableDirector playableDirector,float value)
 		{
-			playableDirector.time = value; playableDirector.playableGraph.Evaluate();
+			playableDirector.time = value;
+			playableDirector.Evaluate();
 		}
 		/// <summary>
 		/// 立即完成当前演出
 		/// </summary>
 		public static void Complete(this PlayableDirector playableDirector)
 		{
-			if (playableDirector.playableAsset != null&& playableDirector.time>0&&playableDirector.playableGraph.IsPlaying() )
+			if (playableDirector.playableAsset != null&& playableDirector.state== PlayState.Playing)
 			{
 				SetTime(playableDirector, (float)playableDirector.playableAsset.duration);
 			}
