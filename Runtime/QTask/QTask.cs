@@ -16,6 +16,29 @@ namespace QTool
 	}
 	public static class QTask
 	{
+		static Dictionary<string, Task> OnlyOneRun = new Dictionary<string, Task>();
+		/// <summary>
+		/// 保证只有一个相同Key的Task正在运行
+		/// </summary>
+		public static async Task RunOnlyOne(string onlyOneKey, Func<Task> taskFunc)
+		{
+			if (!OnlyOneRun.ContainsKey(onlyOneKey))
+			{
+				lock (OnlyOneRun)
+				{
+					OnlyOneRun.Add(onlyOneKey,taskFunc());
+				}
+				await OnlyOneRun[onlyOneKey];
+				lock (OnlyOneRun)
+				{
+					OnlyOneRun.RemoveKey(onlyOneKey);
+				}
+			}
+			else
+			{
+				await OnlyOneRun[onlyOneKey];
+			}
+		}
 		public static int RunningFlag { get; private set; } = QId.GetNewId().GetHashCode();
 		public static void StopAllWait()
 		{
