@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
+using UnityEngine.Playables;
 #if UNITY_EDITOR
 using UnityEditor;
 # endif
@@ -9,7 +10,35 @@ namespace QTool
 {
     public static partial class Tool
     {
-        public static async void DelayInvoke(this float time,System.Action action,bool ignoreGameTime=true)
+		/// <summary>
+		/// 设置时间并演出
+		/// </summary>
+		public static void SetTime(this PlayableDirector playableDirector,float value)
+		{
+			playableDirector.time = value; playableDirector.playableGraph.Evaluate();
+		}
+		/// <summary>
+		/// 立即完成当前演出
+		/// </summary>
+		public static void Complete(this PlayableDirector playableDirector)
+		{
+			if (playableDirector.playableAsset != null&& playableDirector.time>0&&playableDirector.playableGraph.IsPlaying() )
+			{
+				SetTime(playableDirector, (float)playableDirector.playableAsset.duration);
+			}
+		}
+		/// <summary>
+		/// 完成上一个演出并播放新的
+		/// </summary>
+		public static void CompleteAndPlay(this PlayableDirector playableDirector,PlayableAsset value)
+		{
+			if (playableDirector.playableAsset != value)
+			{
+				playableDirector.Complete();
+			}
+			playableDirector.Play(value);
+		}
+		public static async void DelayInvoke(this float time,System.Action action,bool ignoreGameTime=true)
         {
 			if(!await QTask.Wait(time, ignoreGameTime).IsCancel())
 			{

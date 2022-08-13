@@ -4,8 +4,13 @@ using UnityEngine;
 namespace QTool
 {
     public static class QLerp
-    {
-        public static float LerpTo(this float a, float b, float t)
+	{
+		public static double LerpTo(this double a, double b, float t)
+		{
+			var dir = b - a;
+			return a + dir * t;
+		}
+		public static float LerpTo(this float a, float b, float t)
         {
             var dir = b - a;
             return a + dir * t;
