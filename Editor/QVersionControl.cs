@@ -104,7 +104,7 @@ namespace QTool
 			return true;
 
 		}
-		static string Pull(string path)
+		public static string Pull(string path)
 		{
 
 			var rootPath =(CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
@@ -259,7 +259,7 @@ namespace QTool
 		{
 			return CheckPathRun("stash pop",path);
 		}
-		static void PullAndCommitPush(string path,bool commit=true)
+		public static void PullAndCommitPush(string path,bool commit=true)
 		{
 			EditorUtility.DisplayProgressBar("同步更新", "拉取远端更新中...", 0.2f);
 			var resultInfo =Pull(path);

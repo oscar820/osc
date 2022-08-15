@@ -118,7 +118,7 @@ namespace QTool
 		}
      
         [MenuItem("QTool/打包/打包发布版")]
-        private static void BuildRun()
+        public static void BuildRun()
 		{
 			var sceneList = new List<string>();
 			foreach (var scene in EditorBuildSettings.scenes)
@@ -129,7 +129,7 @@ namespace QTool
 			RunBuild();
 		}
 		[MenuItem("QTool/打包/打包开发版")]
-		private static void BuildDevelopmentRun()
+		public static void BuildDevelopmentRun()
 		{
 			var sceneList = new List<string>();
 			foreach (var scene in EditorBuildSettings.scenes)
@@ -140,7 +140,7 @@ namespace QTool
 			RunBuild();
 		}
 		[MenuItem("QTool/打包/打包当前场景")]
-		private static void BuildRandRunScene()
+		public static void BuildRandRunScene()
 		{
 			PlayerPrefs.SetString("QToolBuildPath", Build(new string[] { SceneManager.GetActiveScene().path }, BuildOptions.Development));
 			RunBuild();
