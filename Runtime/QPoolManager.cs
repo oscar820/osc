@@ -5,9 +5,13 @@ namespace QTool
 {
 	public static partial class Tool
 	{
-		public static void QPoolRecover(this GameObject poolObj)
+		/// <summary>
+		/// 对象池回收
+		/// </summary>
+		/// <param name="poolKey">对象池名</param>
+		public static void PoolRecover(this GameObject poolObj,string poolKey)
 		{
-			QPoolManager.Push(poolObj);
+			QPoolManager.Push(poolKey,poolObj);
 		}
 	}
     public class QPoolManager:InstanceBehaviour<QPoolManager>
@@ -77,7 +81,7 @@ namespace QTool
 		{
 			return GetPool(poolKey, () => {
 				var result = GameObject.Instantiate(prefab);
-				result.name = poolKey;
+				result.name = prefab.name;
 				return result;
 			} ) as GameObjectPool;
 		}
