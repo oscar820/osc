@@ -104,7 +104,7 @@ namespace QTool
 			return true;
 
 		}
-		public static string Pull(string path)
+		public static string Pull(string path,bool confim=true)
 		{
 
 			var rootPath =(CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
@@ -183,8 +183,10 @@ namespace QTool
 			}
 			else
 			{
-
-				EditorUtility.DisplayDialog("拉取更新完成 ", "拉取更新成功", "确认");
+				if (confim)
+				{
+					EditorUtility.DisplayDialog("拉取更新完成 ", "拉取更新成功", "确认");
+				}
 				return result;
 			}
 		}
