@@ -298,13 +298,13 @@ namespace QTool
 			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
 		}
 		[MenuItem("QTool/Git/全局拉取更新")]
-		static void AllPull()
+		public static void AllPull()
 		{
 			var path = Directory.GetCurrentDirectory();
 			PullAndCommitPush(path,false);
 		}
 		[MenuItem("QTool/Git/全局同步更新")]
-		static void AllPush()
+		public static void AllPush()
 		{
 			var path = Directory.GetCurrentDirectory();
 			PullAndCommitPush(path);
