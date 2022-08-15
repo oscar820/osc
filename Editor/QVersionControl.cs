@@ -16,8 +16,8 @@ namespace QTool
 	{
 		static UnityEditor.PackageManager.PackageInfo CurInfo;
 		static Button freshButton = new Button(()=> {
-			Client.Add(CurInfo.repository.url);
-			Debug.LogError("重新拉取完成： " +CurInfo.repository.url);
+			Debug.LogError("重新拉取Git包： " + CurInfo.registry?.url);
+			Client.Add(CurInfo.registry.url);
 		});
 		public VisualElement CreateExtensionUI()
 		{
