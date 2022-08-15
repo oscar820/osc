@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
 {
-
+	public static partial class Tool
+	{
+		public static void QPoolRecover(this GameObject poolObj)
+		{
+			QPoolManager.Push(poolObj);
+		}
+	}
     public class QPoolManager:InstanceBehaviour<QPoolManager>
     {
         
@@ -71,7 +77,7 @@ namespace QTool
 		{
 			return GetPool(poolKey, () => {
 				var result = GameObject.Instantiate(prefab);
-				result.name = prefab.name;
+				result.name = poolKey;
 				return result;
 			} ) as GameObjectPool;
 		}
