@@ -171,11 +171,39 @@ namespace QTool
 		//		action += continuation;
 		//	}
 
-		//}
+		//}UnityEditor.PackageManager.Requests
+		public static PackageRequestAwaiter GetAwaiter(this UnityEditor.PackageManager.Requests.Request request)
+		{
+			return new PackageRequestAwaiter(request);
+		}
+		public struct PackageRequestAwaiter : IAwaiter
+		{
+			UnityEditor.PackageManager.Requests.Request request;
+			public PackageRequestAwaiter(UnityEditor.PackageManager.Requests.Request request)
+			{
+				this.request = request;
+			}
+			public bool IsCompleted => request.IsCompleted;
+
+			public void GetResult()
+			{
+			}
+
+			public async void OnCompleted(Action continuation)
+			{
+				while (!request.IsCompleted)
+				{
+					await Task.Yield();
+				}
+				continuation?.Invoke();
+			}
+		}
 		public static ResourceRequestAwaiter GetAwaiter(this ResourceRequest resourceRequest)
 		{
 			return new ResourceRequestAwaiter(resourceRequest);
 		}
+		#region ResourceRequestAwaiter
+
 		public struct ResourceRequestAwaiter : IAwaiter<UnityEngine.Object>
 		{
 			ResourceRequest resourceRequest;
@@ -198,8 +226,9 @@ namespace QTool
 				};
 			}
 		}
+		#endregion
 	}
-	
+
 	public interface IAwaiter : INotifyCompletion
 	{
 

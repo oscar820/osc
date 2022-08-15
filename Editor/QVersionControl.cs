@@ -15,13 +15,15 @@ namespace QTool
 	public class QPackageManager : IPackageManagerExtension
 	{
 		static UnityEditor.PackageManager.PackageInfo CurInfo;
-		static Button freshButton = new Button(()=> {
-			Debug.LogError("重新拉取Git包： " + CurInfo.registry?.url);
-			Client.Add(CurInfo.registry.url);
+		static Button StaticButton = new Button(async ()=> {
+			var task= Client.Add(CurInfo.packageId);
+			await task;
+			Debug.LogError("拉取最新Git包完成[" + task.Result?.displayName+ "]");
+			Client.Resolve();
 		});
 		public VisualElement CreateExtensionUI()
 		{
-			return freshButton;
+			return StaticButton;
 		}
 
 		public void OnPackageAddedOrUpdated(UnityEditor.PackageManager.PackageInfo packageInfo)
@@ -35,8 +37,8 @@ namespace QTool
 		public void OnPackageSelectionChange(UnityEditor.PackageManager.PackageInfo packageInfo)
 		{
 			CurInfo = packageInfo;
-			freshButton.text = "重新拉取Git包 " + packageInfo.displayName;
-			freshButton.SetEnabled(packageInfo.git != null);
+			StaticButton.text = "拉取最新Git包[" + packageInfo.displayName+"]";
+			StaticButton.visible = packageInfo.source == PackageSource.Git;
 		}
 	}
 
