@@ -39,6 +39,16 @@ namespace QTool
 				await OnlyOneRun[onlyOneKey];
 			}
 		}
+		public static async Task Run(this Task task,Func<Task>  nextAction)
+		{
+			await task;
+			await nextAction();
+		}
+		public static async Task Run(this Task task, Action nextAction)
+		{
+			await task;
+			nextAction();
+		}
 		public static int RunningFlag { get; private set; } = QId.GetNewId().GetHashCode();
 		public static void StopAllWait()
 		{
