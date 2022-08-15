@@ -13,6 +13,10 @@ namespace QTool
 		{
 			QPoolManager.Push(poolKey,poolObj);
 		}
+		public static void PoolRecover(this GameObject poolObj)
+		{
+			QPoolManager.Push(poolObj);
+		}
 	}
     public class QPoolManager:InstanceBehaviour<QPoolManager>
     {
