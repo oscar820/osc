@@ -7,14 +7,45 @@ using QTool.Reflection;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using UnityEditor.PackageManager.UI;
+using UnityEditor.PackageManager;
+
 namespace QTool
 {
+	public class QPackageManager : IPackageManagerExtension
+	{
+		static UnityEditor.PackageManager.PackageInfo CurInfo;
+		static Button freshButton = new Button(()=> {
+			Debug.LogError("重新拉取 " + CurInfo.name);
+			Client.Add(CurInfo.git.revision);
+		});
+		public VisualElement CreateExtensionUI()
+		{
+			return freshButton;
+		}
+
+		public void OnPackageAddedOrUpdated(UnityEditor.PackageManager.PackageInfo packageInfo)
+		{
+		}
+
+		public void OnPackageRemoved(UnityEditor.PackageManager.PackageInfo packageInfo)
+		{
+		}
+
+		public void OnPackageSelectionChange(UnityEditor.PackageManager.PackageInfo packageInfo)
+		{
+			CurInfo = packageInfo;
+			freshButton.text = "重新拉取Git包 " + packageInfo.displayName;
+			freshButton.SetEnabled(packageInfo.git != null);
+		}
+	}
 
 	[InitializeOnLoad]
 	public static class QVersionControl
 	{
 		static QVersionControl()
 		{
+			PackageManagerExtensions.RegisterExtension(new QPackageManager());
 			UnityEditor.Editor.finishedDefaultHeaderGUI += AddHeaderGUI;
 		}
 		private static void AddHeaderGUI(Editor editor)
@@ -291,7 +322,7 @@ namespace QTool
 				PullAndCommitPush(path,commit);
 			}
 			EditorUtility.ClearProgressBar();
-
+			UnityEditor.PackageManager.Client.Resolve();
 			AssetDatabase.Refresh();
 		}
 	
