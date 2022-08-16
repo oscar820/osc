@@ -145,6 +145,7 @@ namespace QTool.Asset {
 							case ".unity":
 							case ".mat":
 							case ".playable":
+							case ".shadergraph":
 								{
 									string content = File.ReadAllText(path);
 									if (content == null)
