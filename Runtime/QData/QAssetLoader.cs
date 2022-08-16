@@ -330,15 +330,22 @@ namespace QTool.Asset
 			if (!Cache.ContainsKey(key))
 			{
 				Cache[key] = null;
-				var previewObj =await PoolGet(key, parent);
-				if (parent == null)
+				var previewObj = await PoolGet(key, parent);
+				try
 				{
-					var pos = Camera.main.transform.forward * -100 + Camera.main.transform.position;
-					previewObj.transform.position = pos;
+					if (parent == null)
+					{
+						var pos = Camera.main.transform.forward * -100 + Camera.main.transform.position;
+						previewObj.transform.position = pos;
+					}
+					if (!await QTask.Wait(0.1f, true).IsCancel())
+					{
+						PoolPush(key, previewObj, false);
+					}
 				}
-				if (!await QTask.Wait(0.1f, true).IsCancel())
+				catch (Exception e)
 				{
-					PoolPush(key,previewObj,false);
+					Debug.LogError("预加载[" + key + "]出错 "+e);
 				}
 			}
 		}
