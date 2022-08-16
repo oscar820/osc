@@ -155,23 +155,24 @@ namespace QTool
 		//		action = null;
 		//	}
 
-		//	public bool IsCompleted
-		//	{
-		//		get; set;
-		//	}
+//	public bool IsCompleted
+//	{
+//		get; set;
+//	}
 
-		//	public void GetResult()
-		//	{
-		//	}
+//	public void GetResult()
+//	{
+//	}
 
 
-		//	public void OnCompleted(Action continuation)
-		//	{
-		//		Debug.LogError(continuation);
-		//		action += continuation;
-		//	}
+//	public void OnCompleted(Action continuation)
+//	{
+//		Debug.LogError(continuation);
+//		action += continuation;
+//	}
 
-		//}UnityEditor.PackageManager.Requests
+//}UnityEditor.PackageManager.Requests
+#if UNITY_EDITOR
 		public static PackageRequestAwaiter GetAwaiter(this UnityEditor.PackageManager.Requests.Request request)
 		{
 			return new PackageRequestAwaiter(request);
@@ -198,11 +199,12 @@ namespace QTool
 				continuation?.Invoke();
 			}
 		}
+#endif
 		public static ResourceRequestAwaiter GetAwaiter(this ResourceRequest resourceRequest)
 		{
 			return new ResourceRequestAwaiter(resourceRequest);
 		}
-		#region ResourceRequestAwaiter
+#region ResourceRequestAwaiter
 
 		public struct ResourceRequestAwaiter : IAwaiter<UnityEngine.Object>
 		{
@@ -226,7 +228,7 @@ namespace QTool
 				};
 			}
 		}
-		#endregion
+#endregion
 	}
 
 	public interface IAwaiter : INotifyCompletion
