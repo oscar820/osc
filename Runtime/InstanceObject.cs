@@ -6,6 +6,9 @@ using System;
 
 namespace QTool
 {
+	/// <summary>
+	/// C#对象单例
+	/// </summary>
     public abstract class InstanceObject<T> where T : InstanceObject<T>
     {
         public static readonly T Instance = Activator.CreateInstance<T>();
@@ -14,6 +17,9 @@ namespace QTool
 
         }
     }
+	/// <summary>
+	/// SO文件单例 存储在Resouces文件夹下
+	/// </summary>
     public abstract class InstanceScriptable<T> : ScriptableObject where T : InstanceScriptable<T>
     {
         protected static T _instance;
@@ -43,12 +49,6 @@ namespace QTool
                 return _instance; 
             }
         }
-//		static async void AddressableLoad(string key)
-//		{
-//#if Addressables
-//			_instance = await UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(key).Task;
-//#endif
-//		}
 
 		public virtual void Awake()
         {
@@ -57,12 +57,37 @@ namespace QTool
             QDebug.Log("初始化单例【" + typeof(T).Name + "】");
         }
     }
+	/// <summary>
+	/// 不会自动创建的单例
+	/// </summary>
     public abstract class InstanceBehaviour<T> : MonoBehaviour where T : InstanceBehaviour<T>
     {
         public static T Instance
         {
             get
             {
+				if (_instance == null)
+				{
+					_instance = FindObjectOfType<T>(true);
+				}
+				return _instance;
+			}
+        }
+        protected static T _instance;
+        protected virtual void Awake()
+        {
+            _instance = this as T;
+        }
+    }
+	/// <summary>
+	/// 会自动创建对象的单例
+	/// </summary>
+	public abstract class InstanceManager<T> : MonoBehaviour where T : InstanceManager<T>
+	{
+		public static T Instance
+		{
+			get
+			{
 				if (_instance == null)
 				{
 					_instance = FindObjectOfType<T>(true);
@@ -75,13 +100,11 @@ namespace QTool
 				}
 				return _instance;
 			}
-        }
-        protected static T _instance;
-        protected virtual void Awake()
-        {
-            _instance = this as T;
-        }
-    }
-
-
+		}
+		protected static T _instance;
+		protected virtual void Awake()
+		{
+			_instance = this as T;
+		}
+	}
 }

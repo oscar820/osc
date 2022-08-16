@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace QTool
 {
-    public class QToolManager:InstanceBehaviour<QToolManager>
+    public class QToolManager:InstanceManager<QToolManager>
     {
 		protected override void Awake()
 		{

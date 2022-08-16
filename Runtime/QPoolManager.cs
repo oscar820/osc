@@ -18,7 +18,7 @@ namespace QTool
 			QPoolManager.Push(poolObj);
 		}
 	}
-    public class QPoolManager:InstanceBehaviour<QPoolManager>
+    public class QPoolManager: InstanceManager<QPoolManager>
     {
         
         public static QDictionary<string, PoolBase> Pools = new QDictionary<string, PoolBase>();
