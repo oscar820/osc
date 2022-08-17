@@ -1302,7 +1302,7 @@ namespace QTool.Inspector
             }
         }
 
-        QDictionary<int, int> tempIndex = new QDictionary<int, int>(-1);
+        QDictionary<int, int> tempIndex = new QDictionary<int, int>((key)=>-1);
         #region 将数组数据显示成工具栏
         public bool DrawToolbar(SerializedProperty property)
         {

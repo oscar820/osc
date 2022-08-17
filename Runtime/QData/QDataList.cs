@@ -59,7 +59,7 @@ namespace QTool
 					data.LoadPath = path;
 					QFileManager.LoadAll(path, (fileValue, loadPath) =>
 					{
-						data.Parse(fileValue, loadPath);
+						data.Add(new QDataList(fileValue) { LoadPath=loadPath });
 					}, "{}");
 					return data;
 				}
@@ -96,10 +96,19 @@ namespace QTool
             }
             QFileManager.Save(path, ToString(),true);
         }
-        public bool TryGetTitleIndex(string title,out int index)
+        public int GetTitleIndex(string title)
         {
-            index = TitleRow.IndexOf(title);
-            return index >= 0;
+            var index = TitleRow.IndexOf(title);
+			if (index >= 0)
+			{
+				return index;
+			}
+			else
+			{
+				Debug.LogWarning("不存在列名自动创建[" + title+"]");
+				TitleRow.Add(title);
+				return TitleRow.Count-1;
+			}
         }
         public QDataRow TitleRow
         {
@@ -123,17 +132,15 @@ namespace QTool
                 {
                     var line=new QDataRow();
                     line.OwnerData = this;
+					var list = new List<float>();
                     base[index] = line;
                 }
                 return base[index];
             }
         }
-       public void Parse(string dataStr,string addPath=null)
+       private void Parse(string dataStr)
         {
-			if (string.IsNullOrEmpty( addPath))
-			{
-				Clear();
-			}
+			Clear();
 			using (var keyInfo = new StringWriter())
 			{
 
@@ -151,23 +158,13 @@ namespace QTool
 						{
 							if (row.Count > 0)
 							{
-								if (!string.IsNullOrEmpty(addPath) && rowIndex == 0)
+								if (!string.IsNullOrEmpty(row.Key))
 								{
-									for (int i = 0; i < row.Count; i++)
+									if (ContainsKey(row.Key))
 									{
-										TitleRow[i] = row[i];
+										Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + LoadPath + "\n旧数据: " + this[row.Key] + "\n新数据: " + row);
 									}
-								}
-								else
-								{
-									if (!string.IsNullOrEmpty(row.Key))
-									{
-										if (ContainsKey(row.Key))
-										{
-											Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addPath + "\n旧数据: " + this[row.Key] + "\n新数据: " + row);
-										}
-										Add(row);
-									}
+									Add(row);
 								}
 								keyInfo.Write(row.Key);
 								keyInfo.Write('\t');
@@ -179,12 +176,27 @@ namespace QTool
 
 					}
 				}
-				QDebug.Log("加载" + nameof(QDataList) + ":" + addPath + "\n" + keyInfo.ToString());
 			}
         }
         public QDataList()
         {
         }
+		public void Add(QDataList addList)
+		{
+			for (int i = 1; i < addList.Count; i++)
+			{
+				var row = addList[i];
+				var newRow = this[row.Key];
+				if (ContainsKey(row.Key))
+				{
+					Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addList.LoadPath + "\n旧数据: " + newRow + "\n新数据: " + row);
+				}
+				foreach (var title in addList.TitleRow)
+				{
+					newRow[title] = row[title];
+				}
+			}
+		}
         public QDataList(string dataStr)
         {
             Parse(dataStr);
@@ -216,6 +228,11 @@ namespace QTool
                 base[0] = value;
             }
         }
+		public string this[string title]
+		{
+			get => base[OwnerData.GetTitleIndex(title)];
+			set => base[OwnerData.GetTitleIndex(title)] = value;
+		}
         public T GetValue<T>(int index=1)
         {
 			if (typeof(T) == typeof(string))
@@ -243,40 +260,18 @@ namespace QTool
         {
 			SetValueType(value, typeof(T), index);
         }
-        public T GetValue<T>(string title)
+	
+		public T GetValue<T>(string title)
 		{
-            if (OwnerData.TryGetTitleIndex(title, out var index))
-            {
-                return GetValue<T>(index);
-            }
-            else
-            {
-                throw new System.Exception("不存在的列名[" + title + "]");
-            }
-        }
+			return GetValue<T>(OwnerData.GetTitleIndex(title));
+		}
 		public bool HasValue(string title)
 		{
-			if (OwnerData.TryGetTitleIndex(title, out var index))
-			{
-				return Count > index;
-			}
-			else
-			{
-				throw new System.Exception("不存在的列名[" + title + "]");
-			}
+			return OwnerData.TitleRow.IndexOf(title) >= 0;
 		}
 		public QDataRow SetValueType(string title, object value,Type type)
 		{
-			if (OwnerData.TryGetTitleIndex(title, out var index))
-			{
-				SetValueType(value,type, index);
-			}
-			else
-			{
-				Debug.LogWarning("不存在的列名[" + title + "]自动创建");
-				OwnerData[0].Add(title);
-				SetValueType(title, value, type);
-			}
+			SetValueType(value, type, OwnerData.GetTitleIndex(title));
 			return this;
 		}
 		public QDataRow SetValue<T>(string title,T value)

@@ -42,7 +42,7 @@ namespace QTool
 					}
 					else
 					{
-						Add(key, DefaultValue);
+						Add(key, default);
 					}
 				}
 				return base[key];
@@ -60,10 +60,8 @@ namespace QTool
             }
         }
 		public Func<TKey, T> AutoCreateFunc { protected set; get; }
-		public T DefaultValue { protected set; get; } = default;
-		public QDictionary(T defaultValue=default)
+		public QDictionary()
         {
-            this.DefaultValue = defaultValue;
 		}
 		public new void Add(TKey key,T value)
 		{
@@ -621,8 +619,8 @@ namespace QTool
         {
             if (index < 0 || index >= array.Count) return default;
             return array[index];
-        }
-        public static T Get<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
+		}
+		public static T Get<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
         {
             return array.Get(key, (item) => item.Key);
         }
