@@ -190,11 +190,11 @@ namespace QTool
 			for (int i = 1; i < addList.Count; i++)
 			{
 				var row = addList[i];
-				var newRow = this[row.Key];
 				if (ContainsKey(row.Key))
 				{
-					Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addList.LoadPath + "\n旧数据: " + newRow + "\n新数据: " + row);
+					Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addList.LoadPath + "\n旧数据: " + this[row.Key] + "\n新数据: " + row);
 				}
+				var newRow = this[row.Key];
 				for (int j = 1; j < addList.TitleRow.Count; j++)
 				{
 					var title = addList.TitleRow[j];
