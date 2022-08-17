@@ -771,7 +771,10 @@ namespace QTool
 				{
 					Debug.LogError("读取 " + type.Name + "出错 不存在属性 " + title);
 				}
-				memeberList.Add(member);
+				else
+				{
+					memeberList.Add(member);
+				}
 			}
 			foreach (var row in qdataList)
 			{
