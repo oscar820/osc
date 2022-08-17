@@ -60,7 +60,7 @@ namespace QTool.FlowGraph
 						Members[i] = typeInfo.GetMemberInfo(qdataList.TitleRow[i]);
 						if (Members[i]==null)
 						{
-							Debug.LogError("列[" + qdataList.TitleRow[i] + "]需不需为空");
+							Debug.LogError("列[" + type + "]为空");
 						}
 					}
 				}
