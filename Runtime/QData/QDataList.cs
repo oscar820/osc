@@ -107,7 +107,7 @@ namespace QTool
 			{
 				Debug.LogWarning("不存在列名自动创建[" + title+"]");
 				TitleRow.Add(title);
-				return TitleRow.Count-1;
+				return TitleRow.IndexOf(title);
 			}
         }
         public QDataRow TitleRow
@@ -183,6 +183,10 @@ namespace QTool
         }
 		public void Add(QDataList addList)
 		{
+			if (TitleRow.Count == 0)
+			{
+				TitleRow[0] = addList.TitleRow[0];
+			}
 			for (int i = 1; i < addList.Count; i++)
 			{
 				var row = addList[i];
@@ -191,10 +195,12 @@ namespace QTool
 				{
 					Debug.LogWarning("加载覆盖 [" + row.Key + "] 来自文件 " + addList.LoadPath + "\n旧数据: " + newRow + "\n新数据: " + row);
 				}
-				foreach (var title in addList.TitleRow)
+				for (int j = 1; j < addList.TitleRow.Count; j++)
 				{
+					var title = addList.TitleRow[j];
 					newRow[title] = row[title];
 				}
+
 			}
 		}
         public QDataList(string dataStr)
