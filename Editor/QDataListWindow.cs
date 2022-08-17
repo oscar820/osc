@@ -60,7 +60,7 @@ namespace QTool.FlowGraph
 						Members[i] = typeInfo.GetMemberInfo(qdataList.TitleRow[i]);
 						if (Members[i]==null)
 						{
-							throw new Exception("错误列[" + qdataList.TitleRow[i] + "]");
+							Debug.LogError("列[" + qdataList.TitleRow[i] + "]需不需为空");
 						}
 					}
 				}
@@ -141,6 +141,7 @@ namespace QTool.FlowGraph
 			else
 			{
 				var member = Members[x];
+				if (member == null) return "";
 				var obj = objList[y - 1];
 				return member.Get(obj)?.ToQDataType(member.Type,false).Trim('\"');
 			}
@@ -154,6 +155,7 @@ namespace QTool.FlowGraph
 			else
 			{
 				var member = Members[x];
+				if (member == null) return;
 				var obj = objList[y - 1];
 				member.Set(obj, value.ParseQDataType(member.Type, false));
 			}
@@ -174,6 +176,7 @@ namespace QTool.FlowGraph
 				else
 				{
 					var member = Members[x];
+					if (member == null) return false;
 					var obj = objList[y - 1];
 					member.Set(obj, QEidtCellWindow.Show((obj as IKey<string>).Key + "." + member.ViewName, member.Get(obj), member.Type, out change, Members[x].MemeberInfo));
 				}
