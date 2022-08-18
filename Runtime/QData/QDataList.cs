@@ -63,7 +63,6 @@ namespace QTool
 					{
 						data.Add(new QDataList(fileValue) { LoadPath=loadPath });
 					}, "{}");
-					return data;
 				}
 				catch (System.Exception e)
 				{
@@ -74,14 +73,13 @@ namespace QTool
 				{
 					if (autoCreate != null)
 					{
-						var qdataList = autoCreate();
-						qdataList.LoadPath = path;
-						qdataList.Save();
-						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + qdataList);
-						return qdataList;
+						data = autoCreate();
+						data.LoadPath = path;
+						data.Save();
+						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + data);
 					}
 				}
-				return null;
+				return data;
 			});
 
 		}
