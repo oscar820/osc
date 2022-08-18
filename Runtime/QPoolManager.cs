@@ -296,6 +296,7 @@ namespace QTool
 				if (obj == null) return;
 				obj.SetActive(false);
 				obj.transform.SetParent(PoolParent, true);
+				obj.transform.localScale = Vector3.one;
 				foreach (var poolObj in obj.GetComponents<IPoolObject>())
 				{
 					poolObj.OnPoolRecover();
