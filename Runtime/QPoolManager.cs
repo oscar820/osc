@@ -295,7 +295,7 @@ namespace QTool
 			{
 				if (obj == null) return;
 				obj.SetActive(false);
-				obj.transform.SetParent(PoolParent, false);
+				obj.transform.SetParent(PoolParent, true);
 				foreach (var poolObj in obj.GetComponents<IPoolObject>())
 				{
 					poolObj.OnPoolRecover();
