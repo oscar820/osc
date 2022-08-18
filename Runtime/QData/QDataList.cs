@@ -53,9 +53,11 @@ namespace QTool
         {
 			return QDataListCache.Get(path, (key) =>
 			{
+				QDataList data = null;
+			;
 				try
 				{
-					var data = new QDataList();
+					data = new QDataList();
 					data.LoadPath = path;
 					QFileManager.LoadAll(path, (fileValue, loadPath) =>
 					{
@@ -66,6 +68,10 @@ namespace QTool
 				catch (System.Exception e)
 				{
 					Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
+					
+				}
+				if (data==null||data.Count <=1)
+				{
 					if (autoCreate != null)
 					{
 						var qdataList = autoCreate();
