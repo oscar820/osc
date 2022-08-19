@@ -417,7 +417,7 @@ namespace QTool
 				try
 				{
 #if UNITY_EDITOR
-					if (Application.isPlaying)
+					if (!Application.isPlaying)
 					{
 						UnityEditor.EditorUtility.DisplayProgressBar("运行命令", RunInfo.FileName + " " + RunInfo.Arguments + "\n" + RunInfo.WorkingDirectory, 0.5f);
 					}
@@ -428,7 +428,7 @@ namespace QTool
 					var info = process.StandardOutput.ReadToEnd();
 					var error = process.StandardError.ReadToEnd();
 #if UNITY_EDITOR
-					if (Application.isPlaying)
+					if (!Application.isPlaying)
 					{
 						UnityEditor.EditorUtility.ClearProgressBar();
 					}

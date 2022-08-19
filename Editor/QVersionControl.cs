@@ -66,7 +66,7 @@ namespace QTool
 			GUILayout.Space(10);
 		}
 
-		static string CheckPathRun(string commond, string path,bool window=false)
+		static string CheckPathRun(string commond, string path)
 		{
 			try
 			{
@@ -81,7 +81,7 @@ namespace QTool
 				Debug.LogError(path+" " +e.ToString());
 			}
 			
-			return Tool.ProcessCommand("git", commond,path,window);
+			return Tool.ProcessCommand("git", commond,path);
 		}
 		static string Add(string addPath,string folderPath)
 		{
@@ -156,7 +156,7 @@ namespace QTool
 			{
 				return "error 取消设置git基础信息";
 			}
-			var result =CheckPathRun(nameof(Pull).ToLower() + " origin", path,true);
+			var result =CheckPathRun(nameof(Pull).ToLower() + " origin", path);
 			var mergerTip = "Your local changes to the following files would be overwritten by merge:";
 			var untrackedTip = "error: The following untracked working tree files would be overwritten by merge:";
 			if (!CheckResult(result)||result.Contains(mergerTip))
