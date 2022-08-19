@@ -401,7 +401,7 @@ namespace QTool
 
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo()
 		{
-			CreateNoWindow = false,
+			CreateNoWindow = true,
 			RedirectStandardOutput = true,
 			RedirectStandardError = true,
 			UseShellExecute = false,
@@ -416,11 +416,23 @@ namespace QTool
 			{
 				try
 				{
+#if UNITY_EDITOR
+					if (Application.isPlaying)
+					{
+						UnityEditor.EditorUtility.DisplayProgressBar("运行命令", RunInfo.FileName + " " + RunInfo.Arguments + "\n" + RunInfo.WorkingDirectory, 0.5f);
+					}
+#endif
 					
 					QDebug.Log(RunInfo.FileName + " " + RunInfo.Arguments+"\n 运行路径"+ RunInfo.WorkingDirectory);
 					process.Start();
 					var info = process.StandardOutput.ReadToEnd();
 					var error = process.StandardError.ReadToEnd();
+#if UNITY_EDITOR
+					if (Application.isPlaying)
+					{
+						UnityEditor.EditorUtility.ClearProgressBar();
+					}
+#endif
 					if (!string.IsNullOrWhiteSpace(error))
 					{
 						Debug.LogError(error);
