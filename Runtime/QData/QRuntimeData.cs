@@ -10,7 +10,7 @@ namespace QTool
 	}
 	public class QRuntimeData<T> 
 	{
-		public QAutoList<string, QRuntimeValue<T>> Values = new QAutoList<string, QRuntimeValue<T>>();
+		public QList<string, QRuntimeValue<T>> Values = new QList<string, QRuntimeValue<T>>(()=>new QRuntimeValue<T>());
 		public T this[string key]
 		{
 			get

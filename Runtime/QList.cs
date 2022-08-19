@@ -8,96 +8,39 @@ using QTool.Inspector;
 using QTool.Reflection;
 namespace QTool
 {
-	[System.Serializable]
-	public struct QKeyValue<TKey, T> : IKey<TKey>
-	{
-		public TKey Key { get; set; }
-		public T Value { get; set; }
-		public QKeyValue(TKey key, T value)
-		{
-			Key = key;
-			Value = value;
-		}
-		public override string ToString()
-		{
-			return "{" + Key + ":" + Value + "}";
-		}
-	}
+
 	public interface IKey<KeyType>
-    {
-        KeyType Key { get; set; }
+	{
+		KeyType Key { get; set; }
 	}
 
-	public class QDictionary<TKey, T> : Dictionary<TKey,T>
-    {
-        public new T this[TKey key]
-        {
-            get
-            {
-				if (!ContainsKey(key))
-				{
-					if (AutoCreateFunc != null)
-					{
-						Add(key, AutoCreateFunc(key));
-					}
-					else
-					{
-						Add(key, default);
-					}
-				}
-				return base[key];
-			}
-            set
-            {
-				if (ContainsKey(key))
-				{
-					base[key] = value;
-				}
-				else
-				{
-					Add(key,value);
-				}
-            }
-        }
-		public Func<TKey, T> AutoCreateFunc { protected set; get; }
-		public QDictionary()
-        {
-		}
-		public new void Add(TKey key,T value)
+
+	public class QList<T> : List<T>
+	{
+		public new T this[int index]
 		{
-			this.Set(key, value);
-		}
-		public QDictionary(Func<TKey,T> autoCreateFunc)
-		{
-			this.AutoCreateFunc = autoCreateFunc;
-		}
-	}
-    public class QList<T> : List<T>
-    {
-        public new T this[int index]
-        {
-            get
-            {
+			get
+			{
 				if (index < 0)
 				{
 					return default;
 				}
-                if (index >= Count)
+				if (index >= Count)
 				{
-					if (CreateNew == null)
+					if (AutoCreate == null)
 					{
 						return default;
 					}
 					else
 					{
-						this[index] = CreateNew();
+						this[index] = AutoCreate();
 					}
-                }
+				}
 				return base[index];
 			}
-            set
-            {
-				if (CreateNew == null)
+			set
+			{
+				if (AutoCreate == null)
 				{
 					for (int i = Count; i <= index; i++)
 					{
@@ -108,20 +51,20 @@ namespace QTool
 				{
 					for (int i = Count; i <= index; i++)
 					{
-						Add(CreateNew());
+						Add(AutoCreate());
 					}
 				}
-                base[index] = value;
-            }
-        }
-		Func<T> CreateNew;
+				base[index] = value;
+			}
+		}
+		public Func<T> AutoCreate { get; protected set; }
 		public QList()
 		{
 
 		}
-		public QList(Func<T> CreateNew)
+		public QList(Func<T> AutoCreate)
 		{
-			this.CreateNew = CreateNew;
+			this.AutoCreate = AutoCreate;
 		}
 	}
 	public class QList<TKey, T> : QList<T> where T : IKey<TKey>
@@ -130,6 +73,10 @@ namespace QTool
 		[XmlIgnore]
 		public QKeyCache<TKey, T, int> Cache = new QKeyCache<TKey, T, int>();
 		public QList()
+		{
+			Cache.GetCheckInfo = (Key) => Count;
+		}
+		public QList(Func<T> AutoCreate):base(AutoCreate)
 		{
 			Cache.GetCheckInfo = (Key) => Count;
 		}
@@ -165,7 +112,7 @@ namespace QTool
 				return this.ContainsKey<T, TKey>(key);
 			}
 		}
-		public virtual T Get(TKey key)
+		public T Get(TKey key)
 		{
 			if (key == null)
 			{
@@ -174,10 +121,17 @@ namespace QTool
 			}
 			return Cache.Get(key, (key) =>
 			{
-				return this.Get<T, TKey>(key);
+				var value = this.Get<T,TKey>(key);
+				if (value == null&&AutoCreate!=null)
+				{
+					value = AutoCreate();
+					value.Key = key;
+					this.Add(value);
+				}
+				return value;
 			});
 		}
-		public virtual void Set(TKey key, T value)
+		public void Set(TKey key, T value)
 		{
 			if (key == null)
 			{
@@ -246,41 +200,90 @@ namespace QTool
 			Cache.Clear();
 			base.Clear();
 		}
-	}
-	public class QAutoList<TKey, T> : QList<TKey, T> where T : IKey<TKey>, new()
-	{
-		public override T Get(TKey key)
-		{
-			return Cache.Get(key, (key) =>
-			{
-				return this.GetAndCreate<T, TKey>(key, OnCreate);
-			});
-		}
-		public virtual void OnCreate(T obj)
-		{
-			creatCallback?.Invoke(obj);
-		}
-		public event System.Action<T> creatCallback;
-	}
-	public static class ArrayTool
-    {
-        public static string SplitEndString(this string str,string splitStart)
-        {
-            if (str.Contains(splitStart)){
 
-                return str.Substring(str.LastIndexOf(splitStart)+splitStart.Length);
-            }
-            else
-            {
-                return str;
-            }
+
+	}
+
+	public class QDictionary<TKey, T> : Dictionary<TKey, T>
+	{
+		public new T this[TKey key]
+		{
+			get
+			{
+				if (!ContainsKey(key))
+				{
+					if (AutoCreateFunc != null)
+					{
+						Add(key, AutoCreateFunc(key));
+					}
+					else
+					{
+						Add(key, default);
+					}
+				}
+				return base[key];
+			}
+			set
+			{
+				if (ContainsKey(key))
+				{
+					base[key] = value;
+				}
+				else
+				{
+					Add(key, value);
+				}
+			}
+		}
+		public Func<TKey, T> AutoCreateFunc { protected set; get; }
+		public QDictionary()
+		{
+		}
+		public new void Add(TKey key, T value)
+		{
+			this.Set(key, value);
+		}
+		public QDictionary(Func<TKey, T> autoCreateFunc)
+		{
+			this.AutoCreateFunc = autoCreateFunc;
+		}
+	}
+
+	[System.Serializable]
+	public struct QKeyValue<TKey, T> : IKey<TKey>
+	{
+		public TKey Key { get; set; }
+		public T Value { get; set; }
+		public QKeyValue(TKey key, T value)
+		{
+			Key = key;
+			Value = value;
+		}
+		public override string ToString()
+		{
+			return "{" + Key + ":" + Value + "}";
+		}
+	}
+	public static partial class Tool
+	{
+		public static string SplitEndString(this string str, string splitStart)
+		{
+			if (str.Contains(splitStart))
+			{
+
+				return str.Substring(str.LastIndexOf(splitStart) + splitStart.Length);
+			}
+			else
+			{
+				return str;
+			}
 		}
 		public static string SplitStartString(this string str, string splitStart)
 		{
 			if (str.Contains(splitStart))
 			{
 
-				return str.Substring(0,str.IndexOf(splitStart));
+				return str.Substring(0, str.IndexOf(splitStart));
 			}
 			else
 			{
@@ -292,7 +295,7 @@ namespace QTool
 			if (string.IsNullOrEmpty(value)) { return value; }
 			var start = value.IndexOf(startChar);
 			if (start < 0) return value;
-			var end = value.IndexOf(endChar, start+1);
+			var end = value.IndexOf(endChar, start + 1);
 			if (start < 0 || end < 0) return value;
 			while (start >= 0 && end >= 0)
 			{
@@ -300,7 +303,7 @@ namespace QTool
 				var result = action(key);
 				value = value.Substring(0, start) + result + value.Substring(end + 1);
 				end += result.Length - key.Length - 2;
-				start = value.IndexOf(startChar, end+1);
+				start = value.IndexOf(startChar, end + 1);
 				if (start < 0) break;
 				end = value.IndexOf(endChar, start);
 			}
@@ -308,8 +311,8 @@ namespace QTool
 		}
 		public static string GetBlockValue(this string value, char startChar, char endChar)
 		{
-			var start = value.IndexOf(startChar)+1;
-			var end = value.IndexOf(endChar,start);
+			var start = value.IndexOf(startChar) + 1;
+			var end = value.IndexOf(endChar, start);
 			if (end >= 0)
 			{
 				return value.Substring(start, end - start);
@@ -319,16 +322,16 @@ namespace QTool
 				return value.Substring(start);
 			}
 		}
-		public static string GetBlockValue(this string value,string startStr,string endStr)
+		public static string GetBlockValue(this string value, string startStr, string endStr)
 		{
 			var index = value.IndexOf(startStr);
 			if (index < 0)
 			{
 				return "";
 			}
-			var start =index+ startStr.Length;
-			
-			var end = value.IndexOf(endStr,start);
+			var start = index + startStr.Length;
+
+			var end = value.IndexOf(endStr, start);
 
 			if (end >= 0)
 			{
@@ -339,9 +342,9 @@ namespace QTool
 				return value.Substring(start);
 			}
 		}
-		public static bool SplitTowString(this string str, string splitStart,out string start,out string end)
+		public static bool SplitTowString(this string str, string splitStart, out string start, out string end)
 		{
-			
+
 			if (str.Contains(splitStart))
 			{
 				var startIndex = str.IndexOf(splitStart);
@@ -357,54 +360,54 @@ namespace QTool
 			}
 		}
 		public static string ToSizeString(this string array)
-        {
-            return array.Length.ToSizeString();
-        }
-        public static string ToSizeString(this IList array)
-        {
-            return array.Count.ToSizeString();
-        }
-        public static int RemoveNull<T>(this List<T> array)
-        {
-            return array.RemoveAll(obj => obj == null);
-        }
-        public static int RemoveSpace(this List<string> array)
-        {
-            return array.RemoveAll(obj => string.IsNullOrWhiteSpace(obj));
-        }
-        public static string ToSizeString(this float byteLength)
-        {
-            return ToSizeString((long)byteLength);
-        }
+		{
+			return array.Length.ToSizeString();
+		}
+		public static string ToSizeString(this IList array)
+		{
+			return array.Count.ToSizeString();
+		}
+		public static int RemoveNull<T>(this List<T> array)
+		{
+			return array.RemoveAll(obj => obj == null);
+		}
+		public static int RemoveSpace(this List<string> array)
+		{
+			return array.RemoveAll(obj => string.IsNullOrWhiteSpace(obj));
+		}
+		public static string ToSizeString(this float byteLength)
+		{
+			return ToSizeString((long)byteLength);
+		}
 
-        public static string ToSizeString(this int byteLength)
-        {
-            return ToSizeString((long)byteLength);
-        }
+		public static string ToSizeString(this int byteLength)
+		{
+			return ToSizeString((long)byteLength);
+		}
 
-        public static string ToSizeString(this long longLength)
-        {
-            string[] Suffix = { "Byte", "KB", "MB", "GB", "TB" };
-            int i = 0;
-            double dblSByte = longLength;
-            if (longLength > 1024)
-                for (i = 0; (longLength / 1024) > 0; i++, longLength /= 1024)
-                    dblSByte = longLength / 1024.0;
-            if (i == 0)
-            {
-                return dblSByte.ToString("f0") + "" + Suffix[i];
-            }
-            else
-            {
-                return dblSByte.ToString("f1") + "" + Suffix[i];
-            }
-        }
-        public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n",Func<T,string> toString=null)
-        {
-            if (array == null)
-            {
-                return "";
-            }
+		public static string ToSizeString(this long longLength)
+		{
+			string[] Suffix = { "Byte", "KB", "MB", "GB", "TB" };
+			int i = 0;
+			double dblSByte = longLength;
+			if (longLength > 1024)
+				for (i = 0; (longLength / 1024) > 0; i++, longLength /= 1024)
+					dblSByte = longLength / 1024.0;
+			if (i == 0)
+			{
+				return dblSByte.ToString("f0") + "" + Suffix[i];
+			}
+			else
+			{
+				return dblSByte.ToString("f1") + "" + Suffix[i];
+			}
+		}
+		public static string ToOneString<T>(this ICollection<T> array, string splitChar = "\n", Func<T, string> toString = null)
+		{
+			if (array == null)
+			{
+				return "";
+			}
 			return Tool.BuildString((writer) =>
 			{
 				int i = 0;
@@ -434,82 +437,82 @@ namespace QTool
 				}
 
 			});
-        }
-        public static IList<T> Replace<T>(this IList<T> array, int indexA, int indexB)
-        {
-            if (indexA == indexB) return array;
-            var temp = array[indexA];
-            array[indexA] = array[indexB];
-            array[indexB] = temp;
-            return array;
-        }
-        public static IList CreateAt(this IList list,QSerializeType typeInfo, int index=-1)
-        {
-			var newObj = typeInfo.ElementType.CreateInstance(index < 0 ? null : list[index],true);
+		}
+		public static IList<T> Replace<T>(this IList<T> array, int indexA, int indexB)
+		{
+			if (indexA == indexB) return array;
+			var temp = array[indexA];
+			array[indexA] = array[indexB];
+			array[indexB] = temp;
+			return array;
+		}
+		public static IList CreateAt(this IList list, QSerializeType typeInfo, int index = -1)
+		{
+			var newObj = typeInfo.ElementType.CreateInstance(index < 0 ? null : list[index], true);
 			if (index < 0)
 			{
 				index = 0;
 			}
-            if (list.IsFixedSize)
-            {
-                if (typeInfo.ArrayRank == 1)
-                {
-                    var newList= typeInfo.Type.CreateInstance(null,false, list.Count + 1) as IList;
-                 
-                    for (int i = 0; i < index; i++)
-                    {
-                        newList[i] = list[i];
-                    }
-                    newList[index] = newObj;
-                    for (int i = index+1; i < newList.Count; i++)
-                    {
-                        newList[i] = list[i-1];
-                    }
-                    return newList;
-                }
-            }
-            else
-            {
-                list.Add(newObj);
-            }
-            return list;
+			if (list.IsFixedSize)
+			{
+				if (typeInfo.ArrayRank == 1)
+				{
+					var newList = typeInfo.Type.CreateInstance(null, false, list.Count + 1) as IList;
 
-        }
-        public static IList RemoveAt(this IList list,QSerializeType typeInfo,  int index)
-        {
-            if (list.IsFixedSize)
-            {
-                if (typeInfo.ArrayRank == 1)
-                {
-                    var newList = typeInfo.Type.CreateInstance(null,false, list.Count -1) as IList;
+					for (int i = 0; i < index; i++)
+					{
+						newList[i] = list[i];
+					}
+					newList[index] = newObj;
+					for (int i = index + 1; i < newList.Count; i++)
+					{
+						newList[i] = list[i - 1];
+					}
+					return newList;
+				}
+			}
+			else
+			{
+				list.Add(newObj);
+			}
+			return list;
 
-                    for (int i = 0; i < index; i++)
-                    {
-                        newList[i] = list[i];
-                    }
-                    for (int i = index ; i < newList.Count; i++)
-                    {
-                        newList[i] = list[i +1];
-                    }
-                    return newList;
-                }
-            }
-            else
-            {
-                list.RemoveAt(index);
-            }
-            return list;
+		}
+		public static IList RemoveAt(this IList list, QSerializeType typeInfo, int index)
+		{
+			if (list.IsFixedSize)
+			{
+				if (typeInfo.ArrayRank == 1)
+				{
+					var newList = typeInfo.Type.CreateInstance(null, false, list.Count - 1) as IList;
 
-        }
-        public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
-        {
-            return array.ContainsKey(key, (item) => item.Key);
-        }
-		public static void RemoveKey<TKey, TValue>(this IDictionary<TKey, TValue> dic,TKey key)
+					for (int i = 0; i < index; i++)
+					{
+						newList[i] = list[i];
+					}
+					for (int i = index; i < newList.Count; i++)
+					{
+						newList[i] = list[i + 1];
+					}
+					return newList;
+				}
+			}
+			else
+			{
+				list.RemoveAt(index);
+			}
+			return list;
+
+		}
+		public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
+		{
+			return array.ContainsKey(key, (item) => item.Key);
+		}
+		public static void RemoveKey<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key)
 		{
 			dic.Remove(key);
 		}
-		public static void RemoveAll<TKey, TValue>(this IDictionary<TKey, TValue> dic,Func<KeyValuePair<TKey,TValue>,bool> keyFunc,IList<TKey> buffer)
+		public static void RemoveAll<TKey, TValue>(this IDictionary<TKey, TValue> dic, Func<KeyValuePair<TKey, TValue>, bool> keyFunc, IList<TKey> buffer)
 		{
 			buffer.Clear();
 			foreach (var kv in dic)
@@ -528,15 +531,15 @@ namespace QTool
 		{
 			Set(dic, value);
 		}
-		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TValue value)where TValue:IKey<TKey>
+		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TValue value) where TValue : IKey<TKey>
 		{
 			Set(dic, value);
 		}
-		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic,TKey key, TValue value)
+		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
 		{
 			if (!dic.ContainsKey(key))
 			{
-				Set(dic,key, value);
+				Set(dic, key, value);
 			}
 			return dic[key];
 		}
@@ -554,7 +557,7 @@ namespace QTool
 				}
 			}
 		}
-		public static List<ObjT> ToList<KeyT, ObjT>(this IDictionary<KeyT, ObjT> dic,List<ObjT> list=null)
+		public static List<ObjT> ToList<KeyT, ObjT>(this IDictionary<KeyT, ObjT> dic, List<ObjT> list = null)
 		{
 			if (list == null)
 			{
@@ -570,7 +573,7 @@ namespace QTool
 			}
 			return list;
 		}
-		public static Dictionary<KeyT,ObjT> ToDictionary<KeyT, ObjT>(this IList<ObjT> list, Dictionary<KeyT, ObjT> dic=null) where ObjT:IKey<KeyT>
+		public static Dictionary<KeyT, ObjT> ToDictionary<KeyT, ObjT>(this IList<ObjT> list, Dictionary<KeyT, ObjT> dic = null) where ObjT : IKey<KeyT>
 		{
 			if (dic == null)
 			{
@@ -599,49 +602,49 @@ namespace QTool
 			}
 		}
 		public static bool ContainsKey<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)
-        {
-            if (key == null)
-            {
-                return false;
-            }
-			for (int i = array.Count-1; i>=0; i--)
+		{
+			if (key == null)
+			{
+				return false;
+			}
+			for (int i = array.Count - 1; i >= 0; i--)
 			{
 				var value = array[i];
 				if (value == null) continue;
 				if (key.Equals(keyGetter(value)))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public static T Get<T>(this IList<T> array,int index) 
-        {
-            if (index < 0 || index >= array.Count) return default;
-            return array[index];
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		public static T Get<T>(this IList<T> array, int index)
+		{
+			if (index < 0 || index >= array.Count) return default;
+			return array[index];
 		}
 		public static T Get<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
-        {
-            return array.Get(key, (item) => item.Key);
-        }
-        public static T Get<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)
-        {
-            if (key == null)
-            {
-                return default;
-            }
+		{
+			return array.Get(key, (item) => item.Key);
+		}
+		public static T Get<T, KeyType>(this IList<T> array, KeyType key, Func<T, KeyType> keyGetter)
+		{
+			if (key == null)
+			{
+				return default;
+			}
 			for (int i = 0; i < array.Count; i++)
 			{
 				var value = array[i];
 				if (value == null) continue;
-                if (key.Equals(keyGetter(value)))
-                {
-                    return value;
-                }
-            }
-            return default;
-        }
-		public static T Get<T, KeyType>(this IDictionary<KeyType,T> array, KeyType key, Func<T, KeyType> keyGetter)
+				if (key.Equals(keyGetter(value)))
+				{
+					return value;
+				}
+			}
+			return default;
+		}
+		public static T Get<T, KeyType>(this IDictionary<KeyType, T> array, KeyType key, Func<T, KeyType> keyGetter)
 		{
 			if (key == null)
 			{
@@ -658,8 +661,8 @@ namespace QTool
 			return default;
 		}
 		public static List<T> GetList<T, KeyType>(this IList<T> array, KeyType key, List<T> tempList = null) where T : IKey<KeyType>
-        {
-            var list = tempList == null ? new List<T>() : tempList;
+		{
+			var list = tempList == null ? new List<T>() : tempList;
 			for (int i = 0; i < array.Count; i++)
 			{
 				var value = array[i];
@@ -668,102 +671,88 @@ namespace QTool
 					list.Add(value);
 				}
 			}
-          
-            return list;
-        }
-        public static T StackPeek<T>(this IList<T> array)
-        {
-            if (array == null || array.Count == 0)
-            {
-                return default;
-            }
-            return array[array.Count - 1];
-        }
-        public static T QueuePeek<T>(this IList<T> array)
-        {
-            if (array == null || array.Count == 0)
-            {
-                return default;
-            }
-            return array[0];
-        }
-        public static object[] ToObjects<T>(this IList<T> array)
-        {
-            var objs = new object[array.Count];
-            for (int i = 0; i < array.Count; i++)
-            {
-                objs[i] = array[i];
-            }
-            return objs;
-        }
-        public static void Enqueue<T>(this IList<T> array, T obj)
-        {
-            array.Add(obj);
-        }
-        public static void Push<T>(this IList<T> array, T obj)
-        {
-            array.Add(obj);
-        }
-        public static T Pop<T>(this IList<T> array)
-        {
-            if (array == null || array.Count == 0)
-            {
-                return default;
-            }
-            var obj = array.StackPeek();
-            array.RemoveAt(array.Count - 1);
-            return obj;
-        }
-        public static T Dequeue<T>(this IList<T> array)
-        {
-            if (array == null || array.Count == 0)
-            {
-                return default;
-            }
-            var obj = array.QueuePeek();
-            array.RemoveAt(0);
-            return obj;
-        }
-        public static void AddCheckExist<T>(this IList<T> array, params T[] objs)
-        {
-            foreach (var obj in objs)
-            {
-                if (!array.Contains(obj))
-                {
-                    array.Add(obj);
-                }
-            }
-        }
-        public static void RemoveKey<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
-        {
-            var old = array.Get(key);
-            if (old != null)
-            {
-                array.Remove(old);
-            }
-        }
-        public static void Set<T, KeyType>(this IList<T> array, KeyType key, T value) where T : IKey<KeyType>
-        {
-            array.RemoveKey(key);
-            value.Key = key;
-            array.Add(value);
-        }
 
-        public static T GetAndCreate<T, KeyType>(this IList<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
-        {
-            var value = array.Get(key);
-            if (value != null)
-            {
-                return value;
-            }
-            else
-            {
-                var t = new T { Key = key };
-                creatCallback?.Invoke(t);
-                array.Add(t);
-                return t;
-    }
+			return list;
+		}
+		public static T StackPeek<T>(this IList<T> array)
+		{
+			if (array == null || array.Count == 0)
+			{
+				return default;
+			}
+			return array[array.Count - 1];
+		}
+		public static T QueuePeek<T>(this IList<T> array)
+		{
+			if (array == null || array.Count == 0)
+			{
+				return default;
+			}
+			return array[0];
+		}
+		public static object[] ToObjects<T>(this IList<T> array)
+		{
+			var objs = new object[array.Count];
+			for (int i = 0; i < array.Count; i++)
+			{
+				objs[i] = array[i];
+			}
+			return objs;
+		}
+		public static void Enqueue<T>(this IList<T> array, T obj)
+		{
+			array.Add(obj);
+		}
+		public static void Push<T>(this IList<T> array, T obj)
+		{
+			array.Add(obj);
+		}
+		public static T Pop<T>(this IList<T> array)
+		{
+			if (array == null || array.Count == 0)
+			{
+				return default;
+			}
+			var obj = array.StackPeek();
+			array.RemoveAt(array.Count - 1);
+			return obj;
+		}
+		public static T Dequeue<T>(this IList<T> array)
+		{
+			if (array == null || array.Count == 0)
+			{
+				return default;
+			}
+			var obj = array.QueuePeek();
+			array.RemoveAt(0);
+			return obj;
+		}
+		public static void AddCheckExist<T>(this IList<T> array, params T[] objs)
+		{
+			foreach (var obj in objs)
+			{
+				if (!array.Contains(obj))
+				{
+					array.Add(obj);
+				}
+			}
+		}
+		public static void RemoveKey<T, KeyType>(this IList<T> array, KeyType key) where T : IKey<KeyType>
+		{
+			var old = array.Get(key);
+			if (old != null)
+			{
+				array.Remove(old);
+			}
+		}
+		public static void Set<T, KeyType>(this IList<T> array, KeyType key, T value) where T : IKey<KeyType>
+		{
+			array.RemoveKey(key);
+			value.Key = key;
+			array.Add(value);
+		}
+
+	
+
+	}
 }
-
-            }
-        }

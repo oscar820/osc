@@ -33,7 +33,7 @@ namespace QTool
 		}
 		public static QList<string, T> list { get; private set; } = new QList<string, T>();
     }
-    public class QDataList: QAutoList<string, QDataRow>
+    public class QDataList: QList<string, QDataRow>
 	{
 		public static string ResourcesPathRoot => QFileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
 		//public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
@@ -86,11 +86,7 @@ namespace QTool
 		public static QKeyCache<string,QDataList, DateTime> QDataListCache = new QKeyCache<string,QDataList, DateTime>((key)=> {
 			return QFileManager.GetLastWriteTime(key);
 		});
-        public override void OnCreate(QDataRow obj)
-        {
-            obj.OwnerData = this;
-            base.OnCreate(obj);
-        }
+     
         public string LoadPath { get; private set; }
         public void Save(string path = null)
         {
@@ -133,8 +129,7 @@ namespace QTool
             {
                 if (index >= Count)
                 {
-                    var line=new QDataRow();
-                    line.OwnerData = this;
+                    var line=new QDataRow(this);
 					var list = new List<float>();
                     base[index] = line;
                 }
@@ -182,8 +177,9 @@ namespace QTool
 			}
         }
         public QDataList()
-        {
-        }
+		{
+			AutoCreate = () => new QDataRow(this);
+		}
 		public void Add(QDataList addList)
 		{
 			if (TitleRow.Count == 0)

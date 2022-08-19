@@ -450,7 +450,7 @@ namespace QTool
 		public static QAnalysisData Instance { get; private set; } = Activator.CreateInstance<QAnalysisData>();
 		static Dictionary<string, QAnalysisEvent> _eventList = null;
 		static public Dictionary<string, QAnalysisEvent> EventList => _eventList ??= QFileManager.Load("QTool/" + QAnalysis.StartKey + "_" + nameof(EventList), "[]").ParseQData(_eventList);
-		public QAutoList<string, QPlayerData> PlayerDataList = new QAutoList<string, QPlayerData>();
+		public QList<string, QPlayerData> PlayerDataList = new QList<string, QPlayerData>(()=>new QPlayerData());
 		public static QAnalysisDataSetting Setting = new QAnalysisDataSetting();
 		public static QList<string, QTitleInfo> TitleList => Setting.TitleList;
 		public List<string> EventKeyList = new List<string>();
@@ -1113,7 +1113,7 @@ namespace QTool
 	}
 	public class QPlayerData : IKey<string>
 	{
-		public QAutoList<string, QAnalysisInfo> AnalysisData = new QAutoList<string, QAnalysisInfo>();
+		public QList<string, QAnalysisInfo> AnalysisData = new QList<string, QAnalysisInfo>(()=>new QAnalysisInfo());
 		public string Key { get; set; }
 		public DateTime UpdateTime;
 		public List<string> EventList = new List<string>();
