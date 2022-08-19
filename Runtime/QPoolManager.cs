@@ -297,6 +297,7 @@ namespace QTool
 		{
 			OnGet += (obj) =>
 			{
+				obj.transform.localScale = prefab.transform.localScale;
 				obj.transform.position = prefab.transform.position;
 				obj.transform.rotation = prefab.transform.rotation;
 				obj.SetActive(true);
@@ -306,7 +307,6 @@ namespace QTool
 				if (obj == null) return;
 				obj.SetActive(false);
 				obj.transform.SetParent(PoolParent, true);
-				obj.transform.localScale = Vector3.one;
 				foreach (var poolObj in obj.GetComponents<IPoolObject>())
 				{
 					poolObj.OnPoolRecover();
