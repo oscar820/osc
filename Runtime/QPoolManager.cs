@@ -83,11 +83,16 @@ namespace QTool
 
 		public static GameObjectPool GetPool(string poolKey, GameObject prefab)
 		{
-			return GetPool(poolKey, () => {
+			var pool= GetPool(poolKey, () => {
 				var result = GameObject.Instantiate(prefab);
 				result.name = prefab.name;
 				return result;
-			} ) as GameObjectPool;
+			}) as GameObjectPool;
+			if (pool.prefab == null)
+			{
+				pool.prefab = prefab;
+			}
+			return pool;
 		}
 		public static TCom Get<TCom>(TCom prefab, Transform parent, Vector3 position=default, Quaternion rotation = default) where TCom : Component
 		{
@@ -287,10 +292,13 @@ namespace QTool
 
 	public class GameObjectPool : ObjectPool<GameObject>
 	{
+		public GameObject prefab { get; internal set; }
 		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
 		{
 			OnGet += (obj) =>
 			{
+				obj.transform.position = prefab.transform.position;
+				obj.transform.rotation = prefab.transform.rotation;
 				obj.SetActive(true);
 			};
 			OnPush += (obj) =>
