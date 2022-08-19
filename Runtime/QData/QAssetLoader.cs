@@ -299,7 +299,7 @@ namespace QTool.Asset
 				}
 				if (parent != null)
 				{
-					obj.transform.SetParent(parent, false);
+					obj.transform.SetParent(parent, true);
 				}
 				obj.name = key;
 				return obj;
