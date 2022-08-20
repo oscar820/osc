@@ -48,25 +48,22 @@ namespace QTool
 
 		private float a;
 		private float b;
-		private float t;
 
 		public QValue(float value)
 		{
 			a = value * 0.5f;
 			b = value * 0.5f;
-			t = 0.5f;
 		}
 		public float Value
 		{
 			get
 			{
-				return a / t + b / (1 - t);
+				return a  + b;
 			}
 			set
 			{
 				if (value == Value) return;
-				t = Random.Range(0.2f, 0.8f);
-				a = value * t;
+				a = value * Random.Range(0.2f, 0.8f);
 				b = value - a;
 			}
 		}

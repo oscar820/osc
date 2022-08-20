@@ -207,7 +207,16 @@ namespace QTool.Test
         { 
             QCommand.Invoke(commandStr);
         }
-        [TextArea(5,10)]
+		[ViewButton("QRuntimeValue测试")]
+		public void QRuntimeValueTest()
+		{
+			QRuntimeValue testValue = new QRuntimeValue(10);
+			testValue.BaseValue += 90;
+			testValue.PercentValue = 1.5f;
+			testValue.PercentValue -= 0.2f;
+			Debug.LogError("150 : " + (testValue.Value+20));
+		}
+		[TextArea(5,10)]
         public string QDataStr;
 
 		[ViewButton("时间测试")]
