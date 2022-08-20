@@ -267,7 +267,6 @@ namespace QTool.Asset
 	}
 	public abstract class QPrefabLoader<TPath> : QAssetLoader<TPath, GameObject> where TPath : QPrefabLoader<TPath>
 	{
-#if Addressables
 		static async Task<ObjectPool<GameObject>> GetPool(string key)
 		{
 			var prefab = await LoadAsync(key);
@@ -310,17 +309,13 @@ namespace QTool.Asset
 				return null;
 			}
 		}
-		public static bool PoolPush(string key, GameObject obj,bool release=true)
+		public static bool PoolPush(string key, GameObject obj)
 		{
 			if (key.Contains(" "))
 			{
 				key = key.Substring(0, key.IndexOf(" "));
 			}
 			var boolValue= QPoolManager.Push(DirectoryPath + "_" + key, obj);
-			if (boolValue&& release)
-			{
-				AddressablesRelease(key);
-			}
 			return boolValue;
 		}
 
@@ -340,7 +335,7 @@ namespace QTool.Asset
 					}
 					if (!await QTask.Wait(0.1f, true).IsCancel())
 					{
-						PoolPush(key, previewObj, false);
+						PoolPush(key, previewObj);
 					}
 				}
 				catch (Exception e)
@@ -349,7 +344,6 @@ namespace QTool.Asset
 				}
 			}
 		}
-#endif
 	}
 }
 
