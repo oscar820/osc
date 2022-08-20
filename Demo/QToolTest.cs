@@ -210,11 +210,12 @@ namespace QTool.Test
 		[ViewButton("QRuntimeValue测试")]
 		public void QRuntimeValueTest()
 		{
-			QRuntimeValue testValue = new QRuntimeValue(10);
-			testValue.BaseValue += 90;
-			testValue.PercentValue = 1.5f;
-			testValue.PercentValue -= 0.2f;
-			Debug.LogError("150 : " + (testValue.Value+20));
+			QRuntimeData data = new QRuntimeData();
+			data.Values["test"] = new QRuntimeValue(10);
+			data.Values["test"].BaseValue += 90;
+			data.Values["test"].PercentValue = 1.5f;
+			data.Values["test"].PercentValue -= 0.2f;
+			Debug.LogError("150 : " + (data.Values["test"].Value+20));
 		}
 		[TextArea(5,10)]
         public string QDataStr;
