@@ -6,7 +6,7 @@ namespace QTool
 {
 	public class QRuntimeData
 	{
-		public QDictionary<string, QRuntimeValue> Values = new QDictionary<string, QRuntimeValue>();
+		public QDictionary<string, QRuntimeValue> Values = new QDictionary<string, QRuntimeValue>((key)=>new QRuntimeValue());
 		public float this[string key]
 		{
 			get
@@ -29,6 +29,10 @@ namespace QTool
 	
 	public class QRuntimeValue
 	{
+		public QRuntimeValue()
+		{
+
+		}
 		public QRuntimeValue(float value)
 		{
 			BaseValue = value;
