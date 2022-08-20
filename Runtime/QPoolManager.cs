@@ -249,8 +249,8 @@ namespace QTool
 			{
 				if(obj is GameObject gameObj&&Application.isPlaying)
 				{
-					GameObject.Destroy(gameObj);
 					Debug.LogWarning("对象[" + obj + "]在对象池[" + Key + "]中并不存在 无法回收 强制删除");
+					GameObject.Destroy(gameObj);
 				}
 				else
 				{

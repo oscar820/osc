@@ -139,7 +139,7 @@ namespace QTool
             return null;
 #endif
         }
-        public static void CheckDestory(this Object recordObj, Object obj)
+        public static void CheckDestory(this Object recordObj, GameObject obj)
         {
 #if UNITY_EDITOR
             if (obj != null)
