@@ -203,7 +203,10 @@ namespace QTool
 
 
 	}
+	public class QKeyValueList<TKey, T> : QList<TKey,QKeyValue<TKey,T>>
+	{
 
+	}
 	public class QDictionary<TKey, T> : Dictionary<TKey, T>
 	{
 		public new T this[TKey key]
