@@ -205,7 +205,7 @@ namespace QTool
 	}
 	public class QKeyValueList<TKey, T> : QList<TKey,QKeyValue<TKey,T>>
 	{
-		QKeyValueList()
+		public QKeyValueList()
 		{
 			AutoCreate = () => new QKeyValue<TKey, T>(); 
 		}
