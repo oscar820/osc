@@ -145,7 +145,15 @@ namespace QTool
 			var rootPath =(CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
 			if (rootPath.EndsWith( ".git"))
 			{
-				rootPath = path;
+				rootPath = Path.GetDirectoryName( path);
+			}
+			var packagePath = rootPath + "/package.json";
+			if (File.Exists(packagePath))
+			{
+				var text = QFileManager.Load(packagePath);
+				var version = text.GetBlockValue("\"version\"", ",");
+				text = text.Replace(version, ": \"" + DateTime.Now.ToQVersionString() + "\"");
+				QFileManager.Save(packagePath, text);
 			}
 			if (!CheckResult(path))
 			{

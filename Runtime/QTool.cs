@@ -259,8 +259,12 @@ namespace QTool
 		{
 			return time.ToString("yyyy-MM-dd HH:mm:ss.fff zzz"); 
 		}
-	
-        internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
+		public static string ToQVersionString(this DateTime time)
+		{
+			return time.ToString("yyyy.MM.dd."+(int)time.TimeOfDay.TotalSeconds);
+		}
+
+		internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
         {
             start?.Invoke();
             var length = array.GetLength(deep);
