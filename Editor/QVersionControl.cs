@@ -260,6 +260,7 @@ namespace QTool
 		}
 		static string Commit(string path)
 		{
+			
 			commitList.Clear();
 			AddCommitList(path);
 			//if (path.StartsWith("Assets"))
