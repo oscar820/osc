@@ -71,8 +71,15 @@ namespace QTool
         public float Time { get; protected set; }
         public float CurTime { get; protected set; }
 
+		public QWaitTime()
+		{
 
-        public void Clear()
+		}
+		public QWaitTime(float Time)
+		{
+			this.Time = Time;
+		}
+		public void Clear()
 		{
 			CurTime = 0;
 		}
