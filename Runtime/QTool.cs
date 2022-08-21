@@ -261,7 +261,7 @@ namespace QTool
 		}
 		public static string ToQVersionString(this DateTime time)
 		{
-			return time.ToString("yyyy.MM.dd");
+			return time.ToString("yy.MM.dd");
 		}
 
 		internal static void ForeachArray(this Array array, int deep, int[] indexArray, Action<int[]> Call, Action start = null, Action end = null, Action mid = null)
