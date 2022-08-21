@@ -146,10 +146,12 @@ namespace QTool
 			if (rootPath.EndsWith( ".git"))
 			{
 				rootPath =  path;
+				if(File.Exists(rootPath))
+				{
+					rootPath = Path.GetDirectoryName(rootPath);
+				}
 			}
 			var packagePath = rootPath + "/package.json";
-
-			Debug.LogError(packagePath);
 			if (File.Exists(packagePath))
 			{
 				var text = QFileManager.Load(packagePath);
