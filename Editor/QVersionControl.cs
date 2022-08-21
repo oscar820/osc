@@ -381,19 +381,7 @@ namespace QTool
 			GitIgnoreFile();
 			QDebug.Log(CheckPathRun(nameof(Add).ToLower() + " .", path));
 			QDebug.Log(CheckPathRun(nameof(Commit).ToLower() + " -m 初始化", path));
-			_ =Task.Run(() =>
-			{
-				Push(path);
-			});
-			//if (Directory.Exists(path+"\\.git"))
-			//{
-			//	Debug.LogError("Git已初始化");
-			//	return;
-			//}
-		
-			//Push(path);
-			//}
-
+			Push(path);
 		}
 		#region 忽略文件
 		public static void GitIgnoreFile()
