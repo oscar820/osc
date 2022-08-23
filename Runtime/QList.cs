@@ -76,7 +76,7 @@ namespace QTool
 		{
 			Cache.GetCheckInfo = (Key) => Count;
 		}
-		public QList(Func<T> AutoCreate):base(AutoCreate)
+		public QList(Func<T> AutoCreate) : base(AutoCreate)
 		{
 			Cache.GetCheckInfo = (Key) => Count;
 		}
@@ -121,8 +121,8 @@ namespace QTool
 			}
 			return Cache.Get(key, (key) =>
 			{
-				var value = this.Get<T,TKey>(key);
-				if (value == null&&AutoCreate!=null)
+				var value = this.Get<T, TKey>(key);
+				if (value == null && AutoCreate != null)
 				{
 					value = AutoCreate();
 					value.Key = key;
@@ -203,11 +203,11 @@ namespace QTool
 
 
 	}
-	public class QKeyValueList<TKey, T> : QList<TKey,QKeyValue<TKey,T>>
+	public class QKeyValueList<TKey, T> : QList<TKey, QKeyValue<TKey, T>>
 	{
 		public QKeyValueList()
 		{
-			AutoCreate = () => new QKeyValue<TKey, T>(); 
+			AutoCreate = () => new QKeyValue<TKey, T>();
 		}
 	}
 	public class QDictionary<TKey, T> : Dictionary<TKey, T>
@@ -757,8 +757,22 @@ namespace QTool
 			value.Key = key;
 			array.Add(value);
 		}
+		public static T GetAndCreate<T, KeyType>(this IList<T> array, KeyType key, System.Action<T> creatCallback = null) where T : IKey<KeyType>, new()
+		{
+			var value = array.Get(key);
+			if (value != null)
+			{
+				return value;
+			}
+			else
+			{
+				var t = new T { Key = key };
+				creatCallback?.Invoke(t);
+				array.Add(t);
+				return t;
+			}
 
-	
 
+		}
 	}
 }
