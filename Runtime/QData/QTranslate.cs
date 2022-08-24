@@ -121,7 +121,6 @@ namespace QTool
         public static string GlobalLanguage { get; private set; } = "schinese";
         public static void ChangeGlobalLanguage(string value)
         {
-			value = value.ToLower();
 			if (!TranslateKeys.ContainsKey(value))
 			{
 				var obj = TranslateKeys.Get(value, (item) => item.Name);
