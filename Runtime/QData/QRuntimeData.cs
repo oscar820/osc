@@ -43,6 +43,14 @@ namespace QTool
 				return value;
 			}
 		}
+		public void SetValue(string key,float value)
+		{
+			ValueList[key] = value;
+		}
+		public void RemoveValue(string key)
+		{
+			ValueList.Remove(key);
+		}
 	}
 	public class QRuntimeValue
 	{
