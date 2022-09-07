@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QTool.Reflection;
+using System.IO;
+
 namespace QTool
 {
 	public class QRuntimeData
@@ -26,7 +28,22 @@ namespace QTool
 			Values.Clear();
 		}
 	}
-	
+	public class QValueList
+	{
+		public QDictionary<string, QValue> ValueList = new QDictionary<string, QValue>();
+		public float Value
+		{
+			get
+			{
+				var value = 0f;
+				foreach (var kv in ValueList)
+				{
+					value += kv.Value;
+				}
+				return value;
+			}
+		}
+	}
 	public class QRuntimeValue
 	{
 		public QRuntimeValue()
@@ -47,7 +64,7 @@ namespace QTool
 			}
 		}
 	}
-	public struct QValue
+	public struct QValue:IQData
 	{
 
 		private float a;
@@ -71,6 +88,17 @@ namespace QTool
 				b = value - a;
 			}
 		}
+
+		public void ParseQData(StringReader reader)
+		{
+			Value = float.Parse(reader.ReadValueString());
+		}
+
+		public void ToQData(StringWriter writer)
+		{
+			writer.Write(Value);
+		}
+
 		public static implicit operator QValue(float value)
 		{
 			return new QValue(value);
