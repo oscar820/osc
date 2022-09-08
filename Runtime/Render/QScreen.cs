@@ -30,7 +30,7 @@ namespace QTool
 		{
 
 		}
-        public static void SetResolution(int width, int height, bool fullScreen,bool hasBorder=true)
+        public static async void SetResolution(int width, int height, bool fullScreen,bool hasBorder=true)
         {
 
 #if PLATFORM_STANDALONE_WIN
@@ -44,6 +44,7 @@ namespace QTool
 #endif
 
 #if PLATFORM_STANDALONE_WIN
+			await Task.Delay(10);
 			var style= GetWindowLong(window, GWL_STYLE);
 			SetWindowLong(window, GWL_STYLE, ( hasBorder?( style | WS_CAPTION) :( style & ~WS_CAPTION)));
 #endif
