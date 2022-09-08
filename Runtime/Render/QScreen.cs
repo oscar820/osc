@@ -43,7 +43,7 @@ namespace QTool
 			Screen.SetResolution(width, height, fullScreen);
 
 #if PLATFORM_STANDALONE_WIN
-			await Task.Yield();
+			await Task.Delay(5);
 			var style= GetWindowLong(window, GWL_STYLE);
 			SetWindowLong(window, GWL_STYLE, ( hasBorder?( style | WS_CAPTION) :( style & ~WS_CAPTION)));
 #endif
