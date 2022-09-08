@@ -41,13 +41,16 @@ namespace QTool
 			SetSize(width, height);
 #else
 			Screen.SetResolution(width, height, fullScreen);
-#endif
 
 #if PLATFORM_STANDALONE_WIN
 			await Task.Yield();
 			var style= GetWindowLong(window, GWL_STYLE);
 			SetWindowLong(window, GWL_STYLE, ( hasBorder?( style | WS_CAPTION) :( style & ~WS_CAPTION)));
 #endif
+
+#endif
+
+
 		}
 
 #if UNITY_EDITOR
