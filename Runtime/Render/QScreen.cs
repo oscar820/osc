@@ -44,7 +44,7 @@ namespace QTool
 #endif
 
 #if PLATFORM_STANDALONE_WIN
-			await Task.Delay(10);
+			await Task.Yield();
 			var style= GetWindowLong(window, GWL_STYLE);
 			SetWindowLong(window, GWL_STYLE, ( hasBorder?( style | WS_CAPTION) :( style & ~WS_CAPTION)));
 #endif
