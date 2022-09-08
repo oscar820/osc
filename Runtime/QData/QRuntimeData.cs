@@ -28,30 +28,6 @@ namespace QTool
 			Values.Clear();
 		}
 	}
-	public class QValueList
-	{
-		public QDictionary<string, QValue> ValueList = new QDictionary<string, QValue>();
-		public float Value
-		{
-			get
-			{
-				var value = 0f;
-				foreach (var kv in ValueList)
-				{
-					value += kv.Value;
-				}
-				return value;
-			}
-		}
-		public void SetValue(string key,float value)
-		{
-			ValueList[key] = value;
-		}
-		public void RemoveValue(string key)
-		{
-			ValueList.Remove(key);
-		}
-	}
 	public class QRuntimeValue
 	{
 		public QRuntimeValue()
@@ -60,15 +36,16 @@ namespace QTool
 		}
 		public QRuntimeValue(float value)
 		{
-			BaseValue = value;
+			OriginValue = value;
 		}
+		public float OriginValue { get; private set; } = 0f;
 		public QValue BaseValue { get; set; } = 0f;
 		public QValue PercentValue { get; set; } = 1;
 		public float Value
 		{
 			get
 			{
-				return BaseValue * PercentValue;
+				return (OriginValue+ BaseValue) * PercentValue;
 			}
 		}
 	}
