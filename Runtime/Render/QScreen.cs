@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using UnityEngine;
 using System.Threading.Tasks;
@@ -9,22 +9,36 @@ namespace QTool
 {
     public static class QScreen
     {
-        public static async Task<Texture> Capture()
+#if PLATFORM_STANDALONE_WIN
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		static extern IntPtr SetWindowLong(IntPtr hwnd, int _nIndex, int dwNewLong);
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		static extern IntPtr GetForegroundWindow();
+		[System.Runtime.InteropServices.DllImport("USER32.DLL")]
+		public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+#endif
+		public static async Task<Texture> Capture()
         {
             return await QCapture.Instance.Capture();
         }
-        public static void SetResolution(int width, int height, bool fullScreen)
+        public static void SetResolution(int width, int height, bool fullScreen,bool hasBorder=true)
         {
 #if UNITY_EDITOR
             SetSize(width, height);
 #else
-         Screen.SetResolution(width, height, fullScreen);
+			Screen.SetResolution(width, height, fullScreen);
 #endif
-        }
+
+#if PLATFORM_STANDALONE_WIN
+			var window = GetForegroundWindow();
+			var style= GetWindowLong(window, -16);
+			SetWindowLong(window, -16, ( hasBorder ? style |0x800000 : style & ~0x800000));
+#endif
+		}
 
 #if UNITY_EDITOR
 
-        static object gameViewSizesInstance;
+		static object gameViewSizesInstance;
         static MethodInfo getGroup;
 
         static QScreen()
