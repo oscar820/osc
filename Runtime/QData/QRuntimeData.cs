@@ -38,6 +38,12 @@ namespace QTool
 		{
 			OriginValue = value;
 		}
+		public void Reset(float value)
+		{
+			OriginValue = value;
+			BaseValue = 0;
+			PercentValue = 1;
+		}
 		[QName(nameof(OriginValue))]
 		public float OriginValue { get; private set; } = 0f;
 		public QValue BaseValue { get; set; } = 0f;
