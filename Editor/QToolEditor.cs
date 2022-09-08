@@ -107,7 +107,7 @@ namespace QTool
 						PlayerSettings.bundleVersion = versions.ToOneString(".");
 						QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
 					}
-					var tempPath = Application.productName + "_BackUpThisFolder_ButDontShipItWithYourGame";
+					var tempPath = buildOption.locationPathName.SplitStartString(".exe") + "_BackUpThisFolder_ButDontShipItWithYourGame";
 					if (Directory.Exists(tempPath))
 					{
 						Directory.Delete(tempPath, true); 

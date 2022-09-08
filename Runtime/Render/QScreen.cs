@@ -16,6 +16,11 @@ namespace QTool
 		static extern IntPtr GetForegroundWindow();
 		[System.Runtime.InteropServices.DllImport("USER32.DLL")]
 		public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+		public const int GWL_STYLE = -16;
+		public const int WS_CHILD = 0x40000000; //child window
+		public const int WS_BORDER = 0x00800000; //window with border
+		public const int WS_DLGFRAME = 0x00400000; //window with double border but no title
+		public const int WS_CAPTION = WS_BORDER | WS_DLGFRAME; //window with a title bar
 #endif
 		public static async Task<Texture> Capture()
         {
@@ -31,8 +36,8 @@ namespace QTool
 
 #if PLATFORM_STANDALONE_WIN
 			var window = GetForegroundWindow();
-			var style= GetWindowLong(window, -16);
-			SetWindowLong(window, -16, ( hasBorder ? style |0x800000 : style & ~0x800000));
+			var style= GetWindowLong(window, GWL_STYLE);
+			SetWindowLong(window, GWL_STYLE, ( hasBorder ? style | WS_CAPTION : style & ~WS_CAPTION));
 #endif
 		}
 
