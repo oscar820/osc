@@ -13,7 +13,7 @@ namespace QTool.Reflection
 	public class QMemeberInfo : IKey<string>
 	{
 		public string Key { get; set; }
-		public string ViewName { get; set; }
+		public string QName { get; set; }
 		public Type Type { get; private set; }
 		public Action<object, object> Set { get; private set; }
 		public Func<object, object> Get { get; private set; }
@@ -23,7 +23,7 @@ namespace QTool.Reflection
 		public QMemeberInfo(FieldInfo info)
 		{
 			MemeberInfo = info;
-			ViewName = info.ViewName();
+			QName = info.QName();
 			Key = info.Name;
 			Type = info.FieldType;
 			Set = info.SetValue;
@@ -33,7 +33,7 @@ namespace QTool.Reflection
 		public QMemeberInfo(PropertyInfo info)
 		{
 			MemeberInfo = info;
-			ViewName = info.ViewName();
+			QName = info.QName();
 			Key = info.Name;
 			Type = info.PropertyType;
 			IsPublic = true;
@@ -135,7 +135,7 @@ namespace QTool.Reflection
 			var info = Members[keyOrViewName];
 			if (info == null)
 			{
-				info= Members.Get(keyOrViewName, (obj) => obj.ViewName);
+				info= Members.Get(keyOrViewName, (obj) => obj.QName);
 			}
 			return info;
 			
@@ -342,7 +342,7 @@ namespace QTool.Reflection
             var array= info.GetCustomAttributes(typeof(T), true);
             return array.QueuePeek() as T;
         }
-        public static string ViewName(this MemberInfo type)
+        public static string QName(this MemberInfo type)
         {
             var att = type.GetCustomAttribute<QNameAttribute>();
             if (att != null && !string.IsNullOrWhiteSpace(att.name))
@@ -370,7 +370,7 @@ namespace QTool.Reflection
             }
             return type;
         }
-        public static string ViewName(this ParameterInfo info)
+        public static string QName(this ParameterInfo info)
         {
             var att = info.GetCustomAttribute<QNameAttribute>();
             if (att != null && !string.IsNullOrWhiteSpace(att.name))

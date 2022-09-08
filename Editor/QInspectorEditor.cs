@@ -260,7 +260,7 @@ namespace QTool.Inspector
 					}
 				}
 				UpdateList(property.stringValue);
-				EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), property.ViewName());
+				EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), property.QName());
 				if (att.CanWriteString)
                 {
                     property.stringValue = EditorGUI.TextField(position.HorizontalRect(0.4f, 0.7f), property.stringValue);
@@ -429,7 +429,7 @@ namespace QTool.Inspector
             }
         }
 
-        public static string ViewName(this SerializedProperty property, string parentName = "")
+        public static string QName(this SerializedProperty property, string parentName = "")
         {
             var att = property.GetAttribute<QNameAttribute>(parentName);
             if (att != null && !string.IsNullOrWhiteSpace(att.name))
@@ -916,22 +916,22 @@ namespace QTool.Inspector
                     {
                         if (rect == null)
                         {
-                            return EditorGUILayout.FloatField(cur.ViewName(parentKey), value);
+                            return EditorGUILayout.FloatField(cur.QName(parentKey), value);
                         }
                         else
                         {
-                            return EditorGUI.FloatField(rect.Value, cur.ViewName(parentKey), value);
+                            return EditorGUI.FloatField(rect.Value, cur.QName(parentKey), value);
                         }
                     }
                     else
                     {
                         if (rect == null)
                         {
-                            return EditorGUILayout.Slider(cur.ViewName(parentKey), value, range.min, range.max);
+                            return EditorGUILayout.Slider(cur.QName(parentKey), value, range.min, range.max);
                         }
                         else
                         {
-                            return EditorGUI.Slider(rect.Value, cur.ViewName(parentKey), value, range.min, range.max);
+                            return EditorGUI.Slider(rect.Value, cur.QName(parentKey), value, range.min, range.max);
                         }
                     }
                 });
@@ -945,8 +945,8 @@ namespace QTool.Inspector
                     {
                         rect = new Rect(rect.Value.position, new Vector2(rect.Value.width, cur.GetHeight(false)));
                     }
-                    var expanded = rect == null ? EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)), false)
-                        : EditorGUI.PropertyField(rect.Value, cur, new GUIContent(cur.ViewName(parentKey)), false);
+                    var expanded = rect == null ? EditorGUILayout.PropertyField(cur, new GUIContent(cur.QName(parentKey)), false)
+                        : EditorGUI.PropertyField(rect.Value, cur, new GUIContent(cur.QName(parentKey)), false);
                     parentKey = property.type;
                     if (expanded)
                     {
@@ -983,11 +983,11 @@ namespace QTool.Inspector
                 {
                     if (rect == null)
                     {
-                        return EditorGUILayout.PropertyField(cur, new GUIContent(cur.ViewName(parentKey)));
+                        return EditorGUILayout.PropertyField(cur, new GUIContent(cur.QName(parentKey)));
                     }
                     else
                     {
-                        return EditorGUI.PropertyField(rect.Value, cur, new GUIContent(cur.ViewName(parentKey)));
+                        return EditorGUI.PropertyField(rect.Value, cur, new GUIContent(cur.QName(parentKey)));
                     }
                 }
             }

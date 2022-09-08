@@ -742,10 +742,10 @@ namespace QTool
 			var typeInfo = QSerializeType.Get(type);
 			foreach (var member in typeInfo.Members)
 			{
-				qdataList.TitleRow.Add(member.ViewName);
+				qdataList.TitleRow.Add(member.QName);
 				for (int i = 0; i < list.Count; i++)
 				{
-					qdataList[i + 1].SetValueType(member.ViewName, member.Get(list[i]), member.Type);
+					qdataList[i + 1].SetValueType(member.QName, member.Get(list[i]), member.Type);
 				}
 			}
 			return qdataList;

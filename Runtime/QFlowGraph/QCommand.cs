@@ -85,12 +85,12 @@ namespace QTool
             type.ForeachFunction((methodInfo) =>
             {
                 var typeKey = type.Name; 
-                var typeName = type.ViewName();
+                var typeName = type.QName();
                 if (methodInfo.DeclaringType != typeof(object))
                 {
                     var info = new QCommandInfo(methodInfo);
                     KeyDictionary[typeKey + '/' + methodInfo.Name] = info;
-                    NameDictionary[methodInfo.ViewName().SplitEndString("/")] = info;
+                    NameDictionary[methodInfo.QName().SplitEndString("/")] = info;
 
                 }
             }, BindingFlags.Public | BindingFlags.Static);
@@ -137,14 +137,14 @@ namespace QTool
         public QCommandInfo(MethodInfo method)
         {
             Key = method.DeclaringType.Name + "/" + method.Name;
-            name = method.ViewName();
-            fullName = method.DeclaringType.ViewName() + '/' + name;
+            name = method.QName();
+            fullName = method.DeclaringType.QName() + '/' + name;
             this.method = method;
             paramInfos = method.GetParameters();
             foreach (var paramInfo in paramInfos)
             {
                 paramNames.Add(paramInfo.Name);
-                paramViewNames.Add(paramInfo.ViewName());
+                paramViewNames.Add(paramInfo.QName());
             }
         }
         public object Invoke(params object[] Params)
@@ -194,7 +194,7 @@ namespace QTool
         }
         public override string ToString()
         {
-            return method.ViewName() + " " + paramViewNames.ToOneString(" ");
+            return method.QName() + " " + paramViewNames.ToOneString(" ");
         }
     }
 

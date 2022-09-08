@@ -178,7 +178,7 @@ namespace QTool.FlowGraph
 					var member = Members[x];
 					if (member == null) return false;
 					var obj = objList[y - 1];
-					member.Set(obj, QEidtCellWindow.Show((obj as IKey<string>).Key + "." + member.ViewName, member.Get(obj), member.Type, out change, Members[x].MemeberInfo));
+					member.Set(obj, QEidtCellWindow.Show((obj as IKey<string>).Key + "." + member.QName, member.Get(obj), member.Type, out change, Members[x].MemeberInfo));
 				}
 			}
 			else
