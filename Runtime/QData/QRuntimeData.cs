@@ -41,18 +41,18 @@ namespace QTool
 		public void Reset(float value)
 		{
 			OriginValue = value;
-			BaseValue = 0;
+			OffsetValue = 0;
 			PercentValue = 1;
 		}
 		[QName(nameof(OriginValue))]
 		public float OriginValue { get; private set; } = 0f;
-		public QValue BaseValue { get; set; } = 0f;
+		public QValue OffsetValue { get; set; } = 0f;
 		public QValue PercentValue { get; set; } = 1;
 		public float Value
 		{
 			get
 			{
-				return (OriginValue+ BaseValue) * PercentValue;
+				return (OriginValue+ OffsetValue) * PercentValue;
 			}
 		}
 	}

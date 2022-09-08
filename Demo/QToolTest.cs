@@ -212,7 +212,7 @@ namespace QTool.Test
 		{
 			QRuntimeData data = new QRuntimeData();
 			data.Values["test"] = new QRuntimeValue(10);
-			data.Values["test"].BaseValue += 90;
+			data.Values["test"].OffsetValue += 90;
 			data.Values["test"].PercentValue = 1.5f;
 			data.Values["test"].PercentValue -= 0.2f;
 			Debug.LogError("130 : " + data.ToQData().ParseQData(data).Values["test"].ToQData()+"  :  "+data.Values["test"].Value);
