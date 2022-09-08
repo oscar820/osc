@@ -37,7 +37,7 @@ namespace QTool
 #if PLATFORM_STANDALONE_WIN
 			var window = GetForegroundWindow();
 			var style= GetWindowLong(window, GWL_STYLE);
-			SetWindowLong(window, GWL_STYLE, ( hasBorder ? style | WS_CAPTION : style & ~WS_CAPTION));
+			SetWindowLong(window, GWL_STYLE, ( hasBorder|| fullScreen ? style | WS_CAPTION : style & ~WS_CAPTION));
 #endif
 		}
 
