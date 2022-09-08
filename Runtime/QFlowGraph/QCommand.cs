@@ -104,22 +104,22 @@ namespace QTool
 	[QCommandType("基础")]
 	public static class BaseCommands
 	{
-		[ViewName("日志/普通日志")]
+		[QName("日志/普通日志")]
 		public static void Log(object obj)
 		{
 			QDebug.Log(obj);
 		}
-		[ViewName("日志/警告日志")] 
+		[QName("日志/警告日志")] 
 		public static void LogWarning(object obj)
 		{
 			Debug.LogWarning(obj);
 		}
-		[ViewName("日志/错误日志")]
+		[QName("日志/错误日志")]
 		public static void LogError(object obj)
 		{
 			Debug.LogError(obj);
 		}
-		[ViewName("时间/时间控制")]
+		[QName("时间/时间控制")]
 		public static void TimeScale(float timeScale, object flag)
 		{
 			QTime.ChangeScale(flag, timeScale);
@@ -203,7 +203,7 @@ namespace QTool
 	///  指定类型为命令类 其中的所有公开静态函数都会转换为 可以调用的命令
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-	public class QCommandType : ViewNameAttribute
+	public class QCommandType : QNameAttribute
 	{
 		public QCommandType(string viewName) : base(viewName)
 		{

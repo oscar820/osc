@@ -19,6 +19,7 @@ namespace QTool.Reflection
 		public Func<object, object> Get { get; private set; }
 		public Attribute Attribute { get; set; }
 		public MemberInfo MemeberInfo { get; private set; }
+		public bool IsPublic { get; private set; }
 		public QMemeberInfo(FieldInfo info)
 		{
 			MemeberInfo = info;
@@ -27,6 +28,7 @@ namespace QTool.Reflection
 			Type = info.FieldType;
 			Set = info.SetValue;
 			Get = info.GetValue;
+			IsPublic = info.IsPublic;
 		}
 		public QMemeberInfo(PropertyInfo info)
 		{
@@ -34,13 +36,30 @@ namespace QTool.Reflection
 			ViewName = info.ViewName();
 			Key = info.Name;
 			Type = info.PropertyType;
+			IsPublic = true;
 			if (info.SetMethod != null)
 			{
 				Set = info.SetValue;
+				if (!info.SetMethod.IsPublic)
+				{
+					IsPublic = false;
+				}
+			}
+			else
+			{
+				IsPublic = false;
 			}
 			if (info.GetMethod != null)
 			{
 				Get = info.GetValue;
+				if (! info.GetMethod.IsPublic)
+				{
+					IsPublic = false;
+				}
+			}
+			else
+			{
+				IsPublic = false;
 			}
 		}
 		public override string ToString()
@@ -95,16 +114,12 @@ namespace QTool.Reflection
 	}
 	public class QReflectionTypeInfo : QTypeInfo<QReflectionTypeInfo>
 	{
-		static QReflectionTypeInfo()
-		{
-			MemberFlags = BindingFlags.Instance | BindingFlags.Public| BindingFlags.NonPublic;
-			FunctionFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-		}
+	
 	}
     public class QTypeInfo<T>:IKey<string> where T:QTypeInfo<T> ,new()
 	{
-		public static BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public;
-		public static BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public;
+		public static BindingFlags MemberFlags = BindingFlags.Instance | BindingFlags.Public|BindingFlags.NonPublic;
+		public static BindingFlags FunctionFlags = BindingFlags.Instance | BindingFlags.Public|BindingFlags.NonPublic;
 		public string Key { get;  set; }
         public QList<string, QMemeberInfo> Members = new QList<string, QMemeberInfo>();
         public QList<string, QFunctionInfo> Functions = new QList<string, QFunctionInfo>();
@@ -329,7 +344,7 @@ namespace QTool.Reflection
         }
         public static string ViewName(this MemberInfo type)
         {
-            var att = type.GetCustomAttribute<ViewNameAttribute>();
+            var att = type.GetCustomAttribute<QNameAttribute>();
             if (att != null && !string.IsNullOrWhiteSpace(att.name))
             {
                 return att.name;
@@ -357,7 +372,7 @@ namespace QTool.Reflection
         }
         public static string ViewName(this ParameterInfo info)
         {
-            var att = info.GetCustomAttribute<ViewNameAttribute>();
+            var att = info.GetCustomAttribute<QNameAttribute>();
             if (att != null && !string.IsNullOrWhiteSpace(att.name))
             {
                 return att.name;

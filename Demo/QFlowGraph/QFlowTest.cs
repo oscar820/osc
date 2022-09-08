@@ -92,7 +92,7 @@ public static class QFlowNodeTest
         value = testEnum2.ToString();
         Debug.LogError(value + "  " + defaultTest1);
     }
-    public static void OutTest([ViewName("输入Bool")] bool inBool, [ViewName("输出Bool")] out bool outBool, int inInt, out int outInt, float inFloat, out float outFloat)
+    public static void OutTest([QName("输入Bool")] bool inBool, [QName("输出Bool")] out bool outBool, int inInt, out int outInt, float inFloat, out float outFloat)
     {
         outBool = inBool;
         outInt = inInt;
@@ -130,13 +130,13 @@ public static class QFlowNodeTest
     {
         This[nameof(result)] = a + b;
     }
-    [ViewName("异步测试")]
+    [QName("异步测试")]
     public static void AsyncTest(QFlowNode This, [QOutputPort]QFlow One, [QOutputPort] QFlow Tow)
     {
         This.SetNetFlowPort(nameof(One));
         This.RunPort(nameof( Tow));
     }
-    [ViewName("任务测试")]
+    [QName("任务测试")]
     public static IEnumerator TaskTest(QFlowNode This,List<QFlow> task, QFlow failureEvent, [QOutputPort,QFlowPort(showValue = true)] QFlow success, [QOutputPort, QFlowPort(showValue = true)] string failure)
     {
         List<int> taskList = new List<int> { };

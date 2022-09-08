@@ -81,17 +81,17 @@ namespace QTool
 
 		[HideInInspector]
         public string curValue;
-        [ViewName("文本")]
+        [QName("文本")]
         [SerializeField]
         private string value;
         [SerializeField]
-        [ViewName("固定翻译语言")]
+        [QName("固定翻译语言")]
         private string language = "";
         [SerializeField]
-        [ViewName("翻译结果")]
+        [QName("翻译结果")]
         [ReadOnly]
         private string translateResult = "";
-		[ViewName("强制刷新翻译")]
+		[QName("强制刷新翻译")]
 		public bool forceUpdate;
         public string Language
         {

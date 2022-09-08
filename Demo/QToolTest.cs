@@ -27,7 +27,7 @@ namespace QTool.Test
         public bool toggle;
         public List<string> tansList;
         [ReadOnly]
-        [ViewName(name ="索引"  )]
+        [QName(name ="索引"  )]
         public int index = 0;
         public int[] b;
 
@@ -215,7 +215,7 @@ namespace QTool.Test
 			data.Values["test"].BaseValue += 90;
 			data.Values["test"].PercentValue = 1.5f;
 			data.Values["test"].PercentValue -= 0.2f;
-			Debug.LogError("150 : " + (data.Values["test"].Value+20));
+			Debug.LogError("130 : " + data.ToQData().ParseQData(data).Values["test"].ToQData()+"  :  "+data.Values["test"].Value);
 		}
 		[TextArea(5,10)]
         public string QDataStr;
@@ -312,7 +312,7 @@ namespace QTool.Test
 		{
 			public TestEnum testEnum;
 			public string Key { get ; set ; }
-			[ViewName("数值")]
+			[QName("数值")]
 			[ViewEnum(nameof(QDataListTestType)+".get_list")]
 			public string value="";
 			public Vector3 v3;
@@ -342,7 +342,7 @@ namespace QTool.Test
 
         public List<float> list;
         public List<List<float>> list2Test = new List<List<float>> { new List<float>() { 1, 2, 3 } };
-        [ViewName("名字测试1")]
+        [QName("名字测试1")]
         public string asdl;
         public float p2;
         public byte[] array = new byte[] { 123 };
@@ -362,7 +362,7 @@ namespace QTool.Test
     public class TestClass2 :IQData
     {
         public List<float> list;
-        [ViewName("名字测试2")]
+        [QName("名字测试2")]
         public string asdl;
 
 		public void ParseQData(StringReader reader)

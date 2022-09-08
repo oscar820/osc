@@ -7,16 +7,16 @@ namespace QTool
     /// <summary>
     /// 更改显示的名字
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Parameter|AttributeTargets.Property)]
-    public class ViewNameAttribute : PropertyAttribute
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method|AttributeTargets.Interface | AttributeTargets.Parameter|AttributeTargets.Property)]
+    public class QNameAttribute : PropertyAttribute
     {
         public string name;
         public string control = "";
-        public ViewNameAttribute()
+        public QNameAttribute()
         {
             order = 10;
         }
-        public ViewNameAttribute(string name, string showControl = "") 
+        public QNameAttribute(string name, string showControl = "") 
         {
             order = 10;
             this.name = name;
@@ -200,7 +200,7 @@ namespace QTool.Inspector
         }
 
     }
-    public abstract class QHeightAttribute : ViewNameAttribute
+    public abstract class QHeightAttribute : QNameAttribute
     {
         public float height = 30;
         public QHeightAttribute(string name, float height = 30, string showControl=""):base(name,showControl)

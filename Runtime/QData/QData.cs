@@ -807,7 +807,11 @@ namespace QTool
 		void ToQData(StringWriter writer);
 		void ParseQData(StringReader reader);
 	}
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Interface)]
+	public class QValueAttribute : Attribute
+	{
 
+	}
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Interface)]
 	public class QIgnoreAttribute : Attribute
 	{
@@ -843,14 +847,7 @@ namespace QTool
 				 }
 			}
 		};
-		static bool IsQSValue(MemberInfo info)
-		{
-			if (info.GetCustomAttribute<QIgnoreAttribute>() != null)
-			{
-				return false;
-			}
-			return true;
-		}
+		
 		public QObjectType objType = QObjectType.Object;
 		public bool IsIQSerialize { private set; get; }
 		public bool IsIQData { private set; get; }
@@ -910,12 +907,11 @@ namespace QTool
 
 			Members.RemoveAll((member) =>
 			{
-
 				if (TypeMembers.ContainsKey(type))
 				{
 					return !TypeMembers[type].Contains(member.Key);
 				}
-				return !IsQSValue(member.MemeberInfo) || member.Key == "Item" || member.Set == null || member.Get == null || (member.Type.IsArray && member.Type.GetArrayRank() > 1);
+				return member.MemeberInfo.GetCustomAttribute<QIgnoreAttribute>() != null || (!member.IsPublic&&member.MemeberInfo.GetCustomAttribute<QNameAttribute>()==null) || member.Key == "Item" || member.Set == null || member.Get == null || (member.Type.IsArray && member.Type.GetArrayRank() > 1);
 			});
 
 		}

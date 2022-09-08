@@ -431,7 +431,7 @@ namespace QTool.Inspector
 
         public static string ViewName(this SerializedProperty property, string parentName = "")
         {
-            var att = property.GetAttribute<ViewNameAttribute>(parentName);
+            var att = property.GetAttribute<QNameAttribute>(parentName);
             if (att != null && !string.IsNullOrWhiteSpace(att.name))
             {
                 return att.name;
@@ -1021,7 +1021,7 @@ namespace QTool.Inspector
         // static QDictionary<object, QDictionary<string, bool>> tempBoolList = new QDictionary<object, QDictionary<string, bool>>();
  
    
-        public static bool Active(this ViewNameAttribute att, object target)
+        public static bool Active(this QNameAttribute att, object target)
         {
             if (string.IsNullOrWhiteSpace(att.control))
             {
@@ -1034,7 +1034,7 @@ namespace QTool.Inspector
         }
         public static bool IsShow(this SerializedProperty property)
         {
-            var att = property.GetAttribute<ViewNameAttribute>();
+            var att = property.GetAttribute<QNameAttribute>();
             if (att == null)
             {
                 return true;

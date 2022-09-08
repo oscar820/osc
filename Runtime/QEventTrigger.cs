@@ -118,7 +118,7 @@ namespace QTool
     [System.Serializable]
     public class QEventTrigger : MonoBehaviour
     {
-		[ViewName("注册全局事件")]
+		[QName("注册全局事件")]
 		public bool GlobalEvent = false;
         public List<ActionEventTrigger> actionEventList = new List<ActionEventTrigger>();
         public List<StringEventTrigger> stringEventList = new List<StringEventTrigger>();

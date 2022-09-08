@@ -12,9 +12,9 @@ namespace QTool
 		public string QAnalysisProject;
 		public string danmuRoomId= "55336";
 #if UNITY_EDITOR
-		[ViewName("音频强制单声道")]
+		[QName("音频强制单声道")]
 		public bool forceToMono = true;
-		[ViewName("音频导入设置(时长顺序为 [1s,3s,长音频])")]
+		[QName("音频导入设置(时长顺序为 [1s,3s,长音频])")]
 		public AudioImporterSampleSettings[] audioImporterSettings = new AudioImporterSampleSettings[]
 		{
 			new AudioImporterSampleSettings
@@ -37,7 +37,7 @@ namespace QTool
 				quality=0.8f,
 			}
 		};
-		[ViewName("图片压缩质量")]
+		[QName("图片压缩质量")]
 		[Range(0,100)]
 		public int compressionQuality = 50;
 #endif

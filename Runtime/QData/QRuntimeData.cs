@@ -38,6 +38,7 @@ namespace QTool
 		{
 			OriginValue = value;
 		}
+		[QName(nameof(OriginValue))]
 		public float OriginValue { get; private set; } = 0f;
 		public QValue BaseValue { get; set; } = 0f;
 		public QValue PercentValue { get; set; } = 1;
@@ -49,7 +50,7 @@ namespace QTool
 			}
 		}
 	}
-	public struct QValue:IQData
+	public struct QValue
 	{
 
 		private float a;
@@ -74,16 +75,7 @@ namespace QTool
 			}
 		}
 
-		public void ParseQData(StringReader reader)
-		{
-			Value = float.Parse(reader.ReadValueString());
-		}
-
-		public void ToQData(StringWriter writer)
-		{
-			writer.Write(Value);
-		}
-
+	
 		public static implicit operator QValue(float value)
 		{
 			return new QValue(value);
