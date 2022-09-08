@@ -13,7 +13,7 @@ namespace QTool
 		[System.Runtime.InteropServices.DllImport("user32.dll")]
 		static extern IntPtr SetWindowLong(IntPtr hwnd, int _nIndex, int dwNewLong);
 		[System.Runtime.InteropServices.DllImport("user32.dll")]
-		static extern IntPtr GetForegroundWindow();
+		static extern IntPtr GetActiveWindow();
 		[System.Runtime.InteropServices.DllImport("USER32.DLL")]
 		public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 		public const int GWL_STYLE = -16;
@@ -26,6 +26,10 @@ namespace QTool
         {
             return await QCapture.Instance.Capture();
         }
+		public static void SetScreen()
+		{
+
+		}
         public static void SetResolution(int width, int height, bool fullScreen,bool hasBorder=true)
         {
 #if UNITY_EDITOR
@@ -33,11 +37,12 @@ namespace QTool
 #else
 			Screen.SetResolution(width, height, fullScreen);
 #endif
+			
 
 #if PLATFORM_STANDALONE_WIN
-			var window = GetForegroundWindow();
+			var window = GetActiveWindow();
 			var style= GetWindowLong(window, GWL_STYLE);
-			SetWindowLong(window, GWL_STYLE, ( hasBorder|| fullScreen ? style | WS_CAPTION : style & ~WS_CAPTION));
+			SetWindowLong(window, GWL_STYLE, ( hasBorder?( style | WS_CAPTION) :( style & ~WS_CAPTION)));
 #endif
 		}
 
