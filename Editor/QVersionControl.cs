@@ -61,7 +61,7 @@ namespace QTool
 			GUILayout.Space(10);
 			if (GUILayout.Button(new GUIContent("同步更改")))
 			{
-				PullAndCommitPush(path);
+				PullAndCommitPush(RootPath(path));
 			}
 			GUILayout.Space(10);
 		}
@@ -139,18 +139,21 @@ namespace QTool
 			return true;
 
 		}
-		public static string Pull(string path,bool confim=true)
+		public static string RootPath(string path)
 		{
-
-			var rootPath =(CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
-			if (rootPath.EndsWith( ".git"))
+			var rootPath = (CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
+			if (rootPath.EndsWith(".git"))
 			{
-				rootPath =  path;
-				if(File.Exists(rootPath))
+				rootPath = path;
+				if (File.Exists(rootPath))
 				{
 					rootPath = Path.GetDirectoryName(rootPath);
 				}
 			}
+			return rootPath;
+		}
+		public static void UpdatePackageVersion(string rootPath)
+		{
 			var packagePath = rootPath + "/package.json";
 			if (File.Exists(packagePath))
 			{
@@ -159,11 +162,13 @@ namespace QTool
 				text = text.Replace(version, ": \"" + DateTime.Now.ToQVersionString() + "\"");
 				QFileManager.Save(packagePath, text);
 			}
+		}
+		public static string Pull(string path,bool confim=true)
+		{
 			if (!CheckResult(path))
 			{
 				return path;
 			}
-			
 			if (!CheckInit(path))
 			{
 				return "error 取消设置git基础信息";
@@ -197,7 +202,7 @@ namespace QTool
 					{
 						if (!info.select)
 						{
-							Debug.LogError("放弃本地更改 " + info + " " +(Checkout(info.path, rootPath)));
+							Debug.LogError("放弃本地更改 " + info + " " +(Checkout(info.path, path)));
 						}else
 						{
 							files += info + " ";
@@ -206,7 +211,7 @@ namespace QTool
 					}
 					if (useStash)
 					{
-						QDebug.Log("保留本地更改 " +(StashPush(files, rootPath)));
+						QDebug.Log("保留本地更改 " +(StashPush(files, path)));
 					}
 					var pullResult =Pull(path);
 					if (useStash)
@@ -215,10 +220,10 @@ namespace QTool
 						{
 							if (info.select)
 							{
-								Debug.LogError("放弃远端更改 " + info + " " + (Checkout(info.path, rootPath, version)));
+								Debug.LogError("放弃远端更改 " + info + " " + (Checkout(info.path, path, version)));
 							}
 						}
-						QDebug.Log("还原本地更改 " + (StashPop(rootPath)));
+						QDebug.Log("还原本地更改 " + (StashPop(path)));
 					} 
 					return pullResult;
 				}
@@ -351,13 +356,13 @@ namespace QTool
 		public static void AllPull()
 		{
 			var path = Directory.GetCurrentDirectory();
-			PullAndCommitPush(path,false);
+			PullAndCommitPush(RootPath( path),false);
 		}
 		[MenuItem("QTool/Git/全局同步更新")]
 		public static void AllPush()
 		{
 			var path = Directory.GetCurrentDirectory();
-			PullAndCommitPush(path);
+			PullAndCommitPush(RootPath(path));
 		}
 		[MenuItem("QTool/Git/以粘贴版信息初始化仓库")]
 		static  void AllInit()
