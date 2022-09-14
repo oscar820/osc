@@ -74,7 +74,7 @@ namespace QTool
 			if (flagFunc == null) return;
 			while (!flagFunc.Invoke())
 			{
-				await Task.Delay(100);
+				await Task.Delay(10);
 				if (!playingFlag.Equals(Application.isPlaying) || !RunningFlag.Equals(flag))
 				{
 					throw new QTaskCancelException();
