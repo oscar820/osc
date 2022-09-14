@@ -16,12 +16,14 @@ namespace QTool
 	{
 		static UnityEditor.PackageManager.PackageInfo CurInfo;
 		static Button StaticButton = new Button(async ()=> {
-			StaticButton.SetEnabled(false);
-			var task= Client.Add(CurInfo.packageId);
-			await task;
-			Debug.LogError("拉取最新Git包完成[" + task.Result?.displayName+ "]");
-			Client.Resolve();
-			StaticButton.SetEnabled(true);
+			if (CurInfo != null)
+			{
+				StaticButton.SetEnabled(false);
+				var task = Client.Add(CurInfo.packageId);
+				await task;
+				Client.Resolve();
+				StaticButton.SetEnabled(true);
+			}
 		});
 		public VisualElement CreateExtensionUI()
 		{
@@ -38,9 +40,12 @@ namespace QTool
 
 		public void OnPackageSelectionChange(UnityEditor.PackageManager.PackageInfo packageInfo)
 		{
-			CurInfo = packageInfo;
-			StaticButton.text = "拉取最新Git包[" + packageInfo.displayName+"]";
-			StaticButton.visible = packageInfo.source == PackageSource.Git;
+			if (packageInfo != null)
+			{
+				CurInfo = packageInfo;
+				StaticButton.text = "拉取最新Git包[" + packageInfo.displayName + "]";
+				StaticButton.visible = packageInfo.source == PackageSource.Git;
+			}
 		}
 	}
 
