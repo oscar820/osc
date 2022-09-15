@@ -298,6 +298,7 @@ namespace QTool
 			var directoryPath = Path.GetDirectoryName(path);
 			if (!string.IsNullOrWhiteSpace(directoryPath) && !System.IO.Directory.Exists(directoryPath))
 			{
+				Debug.LogWarning("自动创建文件夹 " + directoryPath);
 				Directory.CreateDirectory(directoryPath);
 			}
 			return path;
