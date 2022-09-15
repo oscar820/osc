@@ -170,6 +170,7 @@ namespace QTool
 		}
         public static string Load(string path,string defaultValue="")
         {
+
 			try
 			{
 				if (path.StartsWith(ResourcesRoot))
@@ -288,12 +289,14 @@ namespace QTool
         }
         public static string CheckFolder(this string path)
         {
-            var directoryPath = Path.GetDirectoryName(path);
-            if (!string.IsNullOrWhiteSpace(directoryPath) && !System.IO.Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-            return path;
+#if !UNITY_SWITCH
+			var directoryPath = Path.GetDirectoryName(path);
+			if (!string.IsNullOrWhiteSpace(directoryPath) && !System.IO.Directory.Exists(directoryPath))
+			{
+				Directory.CreateDirectory(directoryPath);
+			}
+#endif
+			return path;
         }
 		public static void SaveQData<T>(string path, T data)
 		{
