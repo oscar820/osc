@@ -148,9 +148,7 @@ namespace QTool
 			
 			try
 			{
-#if UNITY_SWITCH
-				return DateTime.MinValue;
-#else
+
 				if (Application.isPlaying && path.StartsWith(ResourcesRoot))
 				{
 #if UNITY_EDITOR
@@ -163,7 +161,6 @@ namespace QTool
 				{
 					return File.GetLastWriteTime(path);
 				}
-#endif
 			}
 			catch (Exception e)
 			{
@@ -295,13 +292,11 @@ namespace QTool
         }
         public static string CheckFolder(this string path)
         {
-#if !UNITY_SWITCH
 			var directoryPath = Path.GetDirectoryName(path);
 			if (!string.IsNullOrWhiteSpace(directoryPath) && !System.IO.Directory.Exists(directoryPath))
 			{
 				Directory.CreateDirectory(directoryPath);
 			}
-#endif
 			return path;
         }
 		public static void SaveQData<T>(string path, T data)
