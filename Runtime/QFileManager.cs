@@ -148,18 +148,22 @@ namespace QTool
 			
 			try
 			{
+#if UNITY_SWITCH
+				return DateTime.MinValue;
+#else
 				if (Application.isPlaying && path.StartsWith(ResourcesRoot))
 				{
 #if UNITY_EDITOR
 					return File.GetLastWriteTime(path);
 #else
-				return DateTime.MinValue;
+					return DateTime.MinValue;
 #endif
 				}
 				else
 				{
 					return File.GetLastWriteTime(path);
 				}
+#endif
 			}
 			catch (Exception e)
 			{
