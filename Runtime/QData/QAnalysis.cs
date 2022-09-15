@@ -34,9 +34,9 @@ namespace QTool
 		{
 			try
 			{
-				if (PlayerPrefs.HasKey(EventListKey))
+				if (QPlayerPrefs.HasKey(EventListKey))
 				{
-					PlayerPrefs.GetString(EventListKey).ParseQData(EventList);
+					QPlayerPrefs.GetString(EventListKey).ParseQData(EventList);
 				}
 			}
 			catch (Exception e)
@@ -147,7 +147,7 @@ namespace QTool
 				Debug.LogError(nameof(QToolSetting.Instance.QAnalysisMail) + " 未设置");
 				return;
 			}
-			if (PlayerPrefs.HasKey(EventListKey))
+			if (QPlayerPrefs.HasKey(EventListKey))
 			{
 				var count = EventList.Count;
 				if (count > MinSendCount)
@@ -158,16 +158,16 @@ namespace QTool
 					lock (EventList)
 					{
 						tempList.AddRange(EventList);
-						data = PlayerPrefs.GetString(EventListKey);
+						data = QPlayerPrefs.GetString(EventListKey);
 						EventList.Clear();
-						PlayerPrefs.DeleteKey(EventListKey);
+						QPlayerPrefs.DeleteKey(EventListKey);
 					}
 					if (!await QMailTool.SendAsync(QToolSetting.Instance.QAnalysisMail, QToolSetting.Instance.QAnalysisMail.account, StartKey + "_" + SystemInfo.deviceName +"_"+ id, data))
 					{
 						lock (EventList)
 						{
 							EventList.AddRange(tempList);
-							PlayerPrefs.SetString(EventListKey, EventList.ToQData());
+							QPlayerPrefs.SetString(EventListKey, EventList.ToQData());
 							Debug.LogWarning("还原信息：\n" + EventList.ToQData());
 						}	
 					}
@@ -182,7 +182,7 @@ namespace QTool
 		{
 
 #if UNITY_EDITOR
-			if (Application.isEditor&& !PlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))
+			if (Application.isEditor&& !QPlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))
 			{
 				return;
 			}
@@ -203,7 +203,7 @@ namespace QTool
 					};
 					//lock(EventList){
 						EventList.Add(eventData);
-						PlayerPrefs.SetString(EventListKey, EventList.ToQData());
+						QPlayerPrefs.SetString(EventListKey, EventList.ToQData());
 					//}
 					QDebug.Log(StartKey + " 触发事件 " + eventData);
 					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)

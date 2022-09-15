@@ -265,7 +265,14 @@ namespace QTool
         public static void Save(string path, byte[] bytes)
         {
             CheckFolder(path);
-            File.WriteAllBytes(path, bytes);
+			try
+			{
+				File.WriteAllBytes(path, bytes);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("向路径写入数据出错" + e);
+			}
         }
         public static void SavePng(Texture2D tex, string path)
         {
