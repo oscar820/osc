@@ -148,7 +148,9 @@ namespace QTool
 			
 			try
 			{
-
+#if UNITY_SWITCH
+				return DateTime.MinValue;
+#else
 				if (Application.isPlaying && path.StartsWith(ResourcesRoot))
 				{
 #if UNITY_EDITOR
@@ -161,6 +163,7 @@ namespace QTool
 				{
 					return File.GetLastWriteTime(path);
 				}
+#endif
 			}
 			catch (Exception e)
 			{
