@@ -265,11 +265,6 @@ namespace QTool
         public static void Save(string path, byte[] bytes)
         {
             CheckFolder(path);
-            var directoryPath = GetFolderPath(path);
-            if (!System.IO.Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
             File.WriteAllBytes(path, bytes);
         }
         public static void SavePng(Texture2D tex, string path)
