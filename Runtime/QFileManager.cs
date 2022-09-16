@@ -280,7 +280,8 @@ namespace QTool
 			rightPath = !path.StartsWith(Application.streamingAssetsPath);
 			if (rightPath)
 			{
-				path = nameof(QFileManager) + "/" + path.Replace('/', '_').Replace('\\', '_');
+				path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_');
+				Debug.LogError("转换路径 " + path);
 			}
 			else
 #endif
