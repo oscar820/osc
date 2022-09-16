@@ -447,7 +447,7 @@ namespace QTool
 				}
 				nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
 				result.abortUnlessSuccess();
-				result = nn.fs.SaveData.Mount(nameof(nn.fs.SaveData.Mount), userId);
+				result = nn.fs.SaveData.Mount(nameof(QFileManager), userId);
 				result.abortUnlessSuccess();
 				Debug.LogError("Init SwitchData Over");
 			}
