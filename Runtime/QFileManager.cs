@@ -439,6 +439,17 @@ namespace QTool
 			{
 				base.Awake();
 				DontDestroyOnLoad(gameObject);
+				nn.account.Account.Initialize();
+				nn.account.UserHandle userHandle = new nn.account.UserHandle();
+				if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
+				{
+					nn.Nn.Abort("Failed to open preselected user.");
+				}
+				nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
+				result.abortUnlessSuccess();
+				result = nn.fs.SaveData.Mount(nameof(nn.fs.SaveData.Mount), userId);
+				result.abortUnlessSuccess();
+				Debug.LogError("Init SwitchData Over");
 			}
 			public  byte[] LoadBytes(string path)
 			{
@@ -473,20 +484,6 @@ namespace QTool
 					result.abortUnlessSuccess();
 					Notification.LeaveExitRequestHandlingSection();
 				}
-			}
-			private void Start()
-			{
-				nn.account.Account.Initialize();
-				nn.account.UserHandle userHandle = new nn.account.UserHandle();
-				if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
-				{
-					nn.Nn.Abort("Failed to open preselected user.");
-				}
-				nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
-				result.abortUnlessSuccess();
-				result = nn.fs.SaveData.Mount(nameof(nn.fs.SaveData.Mount), userId);
-				result.abortUnlessSuccess();
-				Debug.LogError("Init SwitchData Over");
 			}
 			public bool ExistsFile( string path)
 			{
