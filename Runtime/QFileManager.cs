@@ -472,19 +472,22 @@ namespace QTool
 		private static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
 		[RuntimeInitializeOnLoadMethod]
 		public static void InitSwitch()
-		{
-
-			nn.account.Account.Initialize();
-			nn.account.UserHandle userHandle = new nn.account.UserHandle();
-			if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
+		{	
+			if(Application.platform== RuntimePlatform.Switch)
 			{
-				nn.Nn.Abort("Failed to open preselected user.");
+				nn.account.Account.Initialize();
+				nn.account.UserHandle userHandle = new nn.account.UserHandle();
+				if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
+				{
+					nn.Nn.Abort("Failed to open preselected user.");
+				}
+				nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
+				result.abortUnlessSuccess();
+				result = nn.fs.SaveData.Mount(nameof(nn.fs.SaveData.Mount), userId);
+				result.abortUnlessSuccess();
+				Debug.LogError("Init SwitchData Over");
 			}
-			nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
-			result.abortUnlessSuccess();
-			result = nn.fs.SaveData.Mount(nameof(nn.fs.SaveData.Mount), userId);
-			result.abortUnlessSuccess();
-			Debug.LogError("Init SwitchData Over");
+		
 		}
 #endif
 #endregion
