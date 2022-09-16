@@ -280,7 +280,16 @@ namespace QTool
 			if (rightPath = Application.platform== RuntimePlatform.Switch&&  !path.StartsWith(Application.streamingAssetsPath))
 			{
 				path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+				
 				Debug.LogError("转换路径 " + path);
+				if (!ExistsFile(path))
+				{
+					UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
+					var result = nn.fs.File.Create(path, 1024*1024*10);
+					result.abortUnlessSuccess();
+					UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
+					Debug.LogWarning("自动创建文件 " + path);
+				}
 			}
 			else
 #endif
@@ -470,7 +479,7 @@ namespace QTool
 #if UNITY_SWITCH
 		private static nn.account.Uid userId;
 		private static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
-		[RuntimeInitializeOnLoadMethod]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		public static void InitSwitch()
 		{	
 			if(Application.platform== RuntimePlatform.Switch)
