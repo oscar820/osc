@@ -90,7 +90,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("错误" + " 不存在文件夹" + rootPath);
+                Debug.LogError("错误" + " 不存在文件" + rootPath);
             }
         }
 
