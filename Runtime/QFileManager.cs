@@ -353,6 +353,7 @@ namespace QTool
 			}
 			else
 			{
+				CheckPath(ref path);
 				File.WriteAllText(path, data);
 				return true;
 			}
@@ -406,6 +407,7 @@ namespace QTool
 					}
 					else
 					{
+						CheckPath(ref path);
 						return File.ReadAllText(path);
 					}
 				}
