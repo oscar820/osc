@@ -254,6 +254,7 @@ namespace QTool.Test
 
 			Debug.LogError(QDataListTestType.list.ToOneString());
 			Debug.LogError(new List<TTestClass>() { new TTestClass { Key = "1" }, new TTestClass { Key = "2" } }.ToQDataList());
+			QFileManager.Save("saveTest.txt" , data.ToQData());
 		}
 		[ViewButton("ToComuteFloatTest")]
 		public void ToComuteFloatTest()

@@ -277,10 +277,9 @@ namespace QTool
 		{
 			bool rightPath = true;
 #if UNITY_SWITCH
-			rightPath = !path.StartsWith(Application.streamingAssetsPath);
-			if (rightPath)
+			if (Application.platform== RuntimePlatform.Switch&& (rightPath = !path.StartsWith(Application.streamingAssetsPath)))
 			{
-				path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_');
+				path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
 				Debug.LogError("转换路径 " + path);
 			}
 			else
@@ -301,34 +300,42 @@ namespace QTool
 			try
 			{
 #if UNITY_SWITCH
-				if (path.StartsWith(Application.streamingAssetsPath))
+				if(Application.platform== RuntimePlatform.Switch)
 				{
-					Debug.LogError("Switch不支持写入路径 " + path);
-				}
-				else
-				{
-					Notification.EnterExitRequestHandlingSection();;
-					nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
-					result.abortUnlessSuccess();
-					result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
-					result.abortUnlessSuccess();
-					nn.fs.File.Close(fileHandle);
-					result = nn.fs.FileSystem.Commit(nameof(QFileManager));
-					result.abortUnlessSuccess();
-					Notification.LeaveExitRequestHandlingSection();
-				}
-#else
-				if (checkUpdate)
-				{
-					var oldData = Load(path);
-					if (!string.IsNullOrWhiteSpace(oldData) && oldData.GetHashCode() == bytes.GetHashCode())
+					if (path.StartsWith(Application.streamingAssetsPath))
 					{
-						return false;
+						Debug.LogError("Switch不支持写入路径 " + path);
+					}
+					else
+					{
+						Notification.EnterExitRequestHandlingSection(); ;
+						nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
+						result.abortUnlessSuccess();
+						result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
+						result.abortUnlessSuccess();
+						nn.fs.File.Close(fileHandle);
+						result = nn.fs.FileSystem.Commit(nameof(QFileManager));
+						result.abortUnlessSuccess();
+						Notification.LeaveExitRequestHandlingSection();
 					}
 				}
+				else
+
+#endif
+				{
+					if (checkUpdate)
+					{
+						var oldData = Load(path);
+						if (!string.IsNullOrWhiteSpace(oldData) && oldData.GetHashCode() == bytes.GetHashCode())
+						{
+							return false;
+						}
+					}
+				}
+				
 
 				File.WriteAllBytes(path, bytes);
-#endif
+
 				return true;
 			}
 			catch (Exception e)
@@ -340,28 +347,40 @@ namespace QTool
 		}
 		public static bool Save(string path, string data, bool checkUpdate = false)
 		{
-			return Save(path, data.GetBytes(), checkUpdate);
+			if(Application.platform== RuntimePlatform.Switch)
+			{
+				return Save(path, data.GetBytes(), checkUpdate);
+			}
+			else
+			{
+				File.WriteAllText(path, data);
+				return true;
+			}
 		}
 		public static byte[] LoadBytes(string path)
 		{
 #if UNITY_SWITCH
+			if(Application.platform== RuntimePlatform.Switch)
+			{
+				CheckPath(ref path);
+				nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
+				result.abortUnlessSuccess();
+				long fileSize = 0;
+				result = nn.fs.File.GetSize(ref fileSize, fileHandle);
+				result.abortUnlessSuccess();
+				byte[] data = new byte[fileSize];
+				result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
+				result.abortUnlessSuccess();
 
-			CheckPath(ref path);
-
-			nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
-			result.abortUnlessSuccess();
-			long fileSize = 0;
-			result = nn.fs.File.GetSize(ref fileSize, fileHandle);
-			result.abortUnlessSuccess();
-			byte[] data = new byte[fileSize];
-			result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
-			result.abortUnlessSuccess();
-
-			nn.fs.File.Close(fileHandle);
-			return data;
-#else
-			return File.ReadAllBytes(path);
+				nn.fs.File.Close(fileHandle);
+				return data;
+			}
+			else	
 #endif
+			{
+				return File.ReadAllBytes(path);
+			}
+
 		}
 		public static string Load(string path, string defaultValue = "")
 		{
@@ -381,7 +400,14 @@ namespace QTool
 				}
 				else
 				{
-					return LoadBytes(path).GetString();
+					if(Application.platform== RuntimePlatform.Switch)
+					{
+						return LoadBytes(path).GetString();
+					}
+					else
+					{
+						return File.ReadAllText(path);
+					}
 				}
 			}
 			catch (Exception e)

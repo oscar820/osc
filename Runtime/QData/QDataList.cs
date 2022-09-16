@@ -202,7 +202,7 @@ namespace QTool
 
 			}
 		}
-        public QDataList(string dataStr)
+        public QDataList(string dataStr):this()
         {
             Parse(dataStr);
         }
