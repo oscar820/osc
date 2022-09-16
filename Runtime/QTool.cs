@@ -25,10 +25,10 @@ namespace QTool
 #endif
 		static void Init()  
 		{
-			RealyCulture = CultureInfo.CurrentCulture;
-			CultureInfo.CurrentCulture = new CultureInfo("en-US");
-			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
-			QTranslate.KeyReplace["版本号"] = Application.version;
+			//RealyCulture = CultureInfo.CurrentCulture;
+			//CultureInfo.CurrentCulture = new CultureInfo("en-US");
+			//CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+			//QTranslate.KeyReplace["版本号"] = Application.version;
 		}
 		public static string Version => Application.version; 
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
