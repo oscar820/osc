@@ -277,7 +277,7 @@ namespace QTool
 		{
 			bool rightPath = true;
 #if UNITY_SWITCH
-			if (Application.platform== RuntimePlatform.Switch&& (rightPath = !path.StartsWith(Application.streamingAssetsPath)))
+			if (rightPath = Application.platform== RuntimePlatform.Switch&&  !path.StartsWith(Application.streamingAssetsPath))
 			{
 				path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
 				Debug.LogError("转换路径 " + path);
