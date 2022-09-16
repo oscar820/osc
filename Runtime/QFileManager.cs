@@ -479,10 +479,9 @@ namespace QTool
 #if UNITY_SWITCH
 		private static nn.account.Uid userId;
 		private static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		public static void InitSwitch()
-		{	
-			if(Application.platform== RuntimePlatform.Switch)
+		{
+			if (Application.platform == RuntimePlatform.Switch)
 			{
 				nn.account.Account.Initialize();
 				nn.account.UserHandle userHandle = new nn.account.UserHandle();
@@ -496,7 +495,7 @@ namespace QTool
 				result.abortUnlessSuccess();
 				Debug.LogError("Init SwitchData Over");
 			}
-		
+
 		}
 #endif
 #endregion
