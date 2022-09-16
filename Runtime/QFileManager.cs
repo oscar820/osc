@@ -62,14 +62,7 @@ namespace QTool
 #if UNITY_SWITCH
 			if (CheckPath(ref path))
 			{
-				nn.fs.EntryType entryType = 0;
-				nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
-				if (nn.fs.FileSystem.ResultPathNotFound.Includes(result))
-				{
-					return false;
-				}
-				result.abortUnlessSuccess();
-				return true;
+				return QSwitchManager.Instance.ExistsFile(path);
 			}
 			else
 #endif
@@ -277,21 +270,7 @@ namespace QTool
 		{
 			bool rightPath = true;
 #if UNITY_SWITCH
-			if (rightPath = Application.platform== RuntimePlatform.Switch&&  !path.StartsWith(Application.streamingAssetsPath))
-			{
-				path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
-				
-				Debug.LogError("转换路径 " + path);
-				if (!ExistsFile(path))
-				{
-					UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
-					var result = nn.fs.File.Create(path, 1024*1024*10);
-					result.abortUnlessSuccess();
-					UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
-					Debug.LogWarning("自动创建文件 " + path);
-				}
-			}
-			else
+			if (!QSwitchManager.Instance.CheckPath(ref path))
 #endif
 			{
 				var directoryPath = Path.GetDirectoryName(path);
@@ -311,25 +290,9 @@ namespace QTool
 #if UNITY_SWITCH
 				if(Application.platform== RuntimePlatform.Switch)
 				{
-					if (path.StartsWith(Application.streamingAssetsPath))
-					{
-						Debug.LogError("Switch不支持写入路径 " + path);
-					}
-					else
-					{
-						Notification.EnterExitRequestHandlingSection(); ;
-						nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
-						result.abortUnlessSuccess();
-						result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
-						result.abortUnlessSuccess();
-						nn.fs.File.Close(fileHandle);
-						result = nn.fs.FileSystem.Commit(nameof(QFileManager));
-						result.abortUnlessSuccess();
-						Notification.LeaveExitRequestHandlingSection();
-					}
+					QSwitchManager.Instance.Save(path, bytes);
 				}
 				else
-
 #endif
 				{
 					if (checkUpdate)
@@ -372,18 +335,7 @@ namespace QTool
 #if UNITY_SWITCH
 			if(Application.platform== RuntimePlatform.Switch)
 			{
-				CheckPath(ref path);
-				nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
-				result.abortUnlessSuccess();
-				long fileSize = 0;
-				result = nn.fs.File.GetSize(ref fileSize, fileHandle);
-				result.abortUnlessSuccess();
-				byte[] data = new byte[fileSize];
-				result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
-				result.abortUnlessSuccess();
-
-				nn.fs.File.Close(fileHandle);
-				return data;
+				return QSwitchManager.Instance.LoadBytes(path);
 			}
 			else	
 #endif
@@ -477,12 +429,52 @@ namespace QTool
         }
 #region SwitchData
 #if UNITY_SWITCH
-		private static nn.account.Uid userId;
-		private static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
-		[RuntimeInitializeOnLoadMethod()]
-		public static void InitSwitch()
-		{	
-			if(Application.platform== RuntimePlatform.Switch)
+		
+		
+		public class QSwitchManager:InstanceManager<QSwitchManager>
+		{
+			public static nn.account.Uid userId;
+			public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
+			protected override void Awake()
+			{
+				base.Awake();
+				DontDestroyOnLoad(gameObject);
+			}
+			public  byte[] LoadBytes(string path)
+			{
+				CheckPath(ref path);
+				nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
+				result.abortUnlessSuccess();
+				long fileSize = 0;
+				result = nn.fs.File.GetSize(ref fileSize, fileHandle);
+				result.abortUnlessSuccess();
+				byte[] data = new byte[fileSize];
+				result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
+				result.abortUnlessSuccess();
+
+				nn.fs.File.Close(fileHandle);
+				return data;
+			}
+			public void Save(string path, byte[] bytes)
+			{
+				if (path.StartsWith(Application.streamingAssetsPath))
+				{
+					Debug.LogError("Switch不支持写入路径 " + path);
+				}
+				else
+				{
+					Notification.EnterExitRequestHandlingSection(); ;
+					nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
+					result.abortUnlessSuccess();
+					result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
+					result.abortUnlessSuccess();
+					nn.fs.File.Close(fileHandle);
+					result = nn.fs.FileSystem.Commit(nameof(QFileManager));
+					result.abortUnlessSuccess();
+					Notification.LeaveExitRequestHandlingSection();
+				}
+			}
+			private void Start()
 			{
 				nn.account.Account.Initialize();
 				nn.account.UserHandle userHandle = new nn.account.UserHandle();
@@ -496,7 +488,36 @@ namespace QTool
 				result.abortUnlessSuccess();
 				Debug.LogError("Init SwitchData Over");
 			}
-		
+			public bool ExistsFile( string path)
+			{
+				nn.fs.EntryType entryType = 0;
+				nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
+				if (nn.fs.FileSystem.ResultPathNotFound.Includes(result))
+				{
+					return false;
+				}
+				result.abortUnlessSuccess();
+				return true;
+			}
+			public  bool CheckPath(ref string path)
+			{
+				var rightPath = true;
+				if ( rightPath = Application.platform == RuntimePlatform.Switch && !path.StartsWith(Application.streamingAssetsPath))
+				{
+					path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+
+					Debug.LogError("转换路径 " + path);
+					if (!ExistsFile(path))
+					{
+						UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
+						var result = nn.fs.File.Create(path, 1024 * 1024 * 10);
+						result.abortUnlessSuccess();
+						UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
+						Debug.LogWarning("自动创建文件 " + path);
+					}
+				}
+				return rightPath;
+			}
 		}
 #endif
 #endregion
