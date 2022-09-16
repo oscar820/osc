@@ -38,7 +38,9 @@ namespace QTool
                     {
                         var obj = ScriptableObject.CreateInstance<T>();
                         _instance = obj;
-                        UnityEditor.AssetDatabase.CreateAsset(obj, ("Assets/Resources/" + key + ".asset").CheckFolder());
+						var path = ("Assets/Resources/" + key + ".asset");
+						QFileManager.CheckPath(ref path);
+						UnityEditor.AssetDatabase.CreateAsset(obj, path);
 						if (!Application.isPlaying)
 						{
 							UnityEditor.AssetDatabase.Refresh();

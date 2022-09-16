@@ -6,7 +6,10 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using QTool.Binary;
+#if UNITY_SWITCH
+using UnityEngine.Switch;
+#endif
 namespace QTool
 {
     public static class QFileManager
@@ -38,7 +41,7 @@ namespace QTool
         }
         public static int FileCount(this string rootPath)
         {
-            return Directory.Exists(rootPath) ? Directory.GetFiles(rootPath).Length / 2 : 0;
+            return ExistsDirectory(rootPath) ? Directory.GetFiles(rootPath).Length / 2 : 0;
         }
         public static void ForeachAllDirectoryWith(this string rootPath, string endsWith, Action<string> action)
         {
@@ -54,10 +57,35 @@ namespace QTool
                 }
             });
         }
+		public static bool ExistsFile(this string path)
+		{
+#if UNITY_SWITCH
+			if (CheckPath(ref path))
+			{
+				nn.fs.EntryType entryType = 0;
+				nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
+				if (nn.fs.FileSystem.ResultPathNotFound.Includes(result))
+				{
+					return false;
+				}
+				result.abortUnlessSuccess();
+				return true;
+			}
+			else
+#endif
+			{
+				return File.Exists(path);
+			}
+			
 
+		}
+		public static bool ExistsDirectory(this string path)
+		{
+			return Directory.Exists(path);
+		}
 		public static void ForeachDirectory(this string rootPath, Action<string> action)
         {
-            if (Directory.Exists(rootPath))
+            if (ExistsDirectory(rootPath))
             {
                 var paths = Directory.GetDirectories(rootPath);
                 foreach (var path in paths)
@@ -76,7 +104,7 @@ namespace QTool
         }
         public static void ForeachFiles(this string rootPath, Action<string> action)
         {
-            if (Directory.Exists(rootPath))
+            if (ExistsDirectory(rootPath))
             {
                 var paths = Directory.GetFiles(rootPath);
                 foreach (var path in paths)
@@ -172,38 +200,7 @@ namespace QTool
 			}
 	
 		}
-        public static string Load(string path,string defaultValue="")
-        {
-
-			try
-			{
-				if (path.StartsWith(ResourcesRoot))
-				{
-
-					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesRoot).SplitStartString("."));
-					if (text == null)
-					{
-						return defaultValue;
-					}
-					else
-					{
-						return text.text;
-					}
-				}
-				else
-				{
-					return File.ReadAllText(path);
-				}
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("加载文件出错[" + path + "]"+e);
-				return defaultValue;
-			}
-		
-           
-        }
-
+   
 		public static void LoadAll(string path,Action<string,string> action, string defaultValue = "")
 		{
 			if (path.StartsWith(ResourcesRoot))
@@ -231,7 +228,7 @@ namespace QTool
 			}
 			else
 			{
-				if (File.Exists(path))
+				if (ExistsFile(path))
 				{
 					action(Load(path, defaultValue), path);
 				}
@@ -244,15 +241,7 @@ namespace QTool
 				}
 			}
 		}
-        public static byte[] LoadBytes(string path)
-        {
-            if (!System.IO.File.Exists(path))
-            {
-                Debug.LogError("不存在文件：" + path);
-                return null;
-            }
-            return File.ReadAllBytes(path);
-        }
+   
         public static void ClearData(this string path)
         {
             var directoryPath = GetFolderPath(path);
@@ -266,43 +255,9 @@ namespace QTool
         {
             return Path.GetDirectoryName(path);
         }
-        public static void Save(string path, byte[] bytes)
-        {
-            CheckFolder(path);
-			try
-			{
-				File.WriteAllBytes(path, bytes);
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("向路径写入数据出错" + e);
-			}
-        }
-        public static void SavePng(Texture2D tex, string path)
-        {
-            var bytes = tex.EncodeToPNG();
-            if (bytes != null)
-            {
-                File.WriteAllBytes(path, bytes);
-            }
-        }
-        public static Texture2D LoadPng(string path, int width = 128, int height = 128)
-        {
-            var bytes = File.ReadAllBytes(path);
-            Texture2D tex = new Texture2D(width, height);
-            tex.LoadImage(bytes);
-            return tex;
-        }
-        public static string CheckFolder(this string path)
-        {
-			var directoryPath = Path.GetDirectoryName(path);
-			if (!string.IsNullOrWhiteSpace(directoryPath) && !System.IO.Directory.Exists(directoryPath))
-			{
-				Debug.LogWarning("自动创建文件夹 " + directoryPath);
-				Directory.CreateDirectory(directoryPath);
-			}
-			return path;
-        }
+    
+     
+   
 		public static void SaveQData<T>(string path, T data)
 		{
 			Save(path, data.ToQData());
@@ -311,42 +266,139 @@ namespace QTool
 		{
 			return Load(path).ParseQData<T>();
 		}
-		public static bool Save(string path, string data,bool checkUpdate=false)
-        {
+		public static Texture2D LoadPng(string path, int width = 128, int height = 128)
+		{
+			var bytes = File.ReadAllBytes(path);
+			Texture2D tex = new Texture2D(width, height);
+			tex.LoadImage(bytes);
+			return tex;
+		}
+		public static bool CheckPath(ref string path)
+		{
+			bool rightPath = true;
+#if UNITY_SWITCH
+			rightPath = !path.StartsWith(Application.streamingAssetsPath);
+			if (rightPath)
+			{
+				path = nameof(QFileManager) + "/" + path.Replace('/', '_').Replace('\\', '_');
+			}
+			else
+#endif
+			{
+				var directoryPath = Path.GetDirectoryName(path);
+				if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
+				{
+					Debug.LogWarning("自动创建文件夹 " + directoryPath);
+					Directory.CreateDirectory(directoryPath);
+				}
+			}
+			return rightPath;
+		}
+		public static bool Save(string path, byte[] bytes,bool checkUpdate=false)
+		{
+			CheckPath(ref path);
 			try
 			{
-				CheckFolder(path);
-
-				if (checkUpdate )
+#if UNITY_SWITCH
+				if (path.StartsWith(Application.streamingAssetsPath))
+				{
+					Debug.LogError("Switch不支持写入路径 " + path);
+				}
+				else
+				{
+					Notification.EnterExitRequestHandlingSection();;
+					nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
+					result.abortUnlessSuccess();
+					result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
+					result.abortUnlessSuccess();
+					nn.fs.File.Close(fileHandle);
+					result = nn.fs.FileSystem.Commit(nameof(QFileManager));
+					result.abortUnlessSuccess();
+					Notification.LeaveExitRequestHandlingSection();
+				}
+#else
+				if (checkUpdate)
 				{
 					var oldData = Load(path);
-					if (!string.IsNullOrWhiteSpace(oldData)&&oldData.GetHashCode()==data.GetHashCode())
+					if (!string.IsNullOrWhiteSpace(oldData) && oldData.GetHashCode() == bytes.GetHashCode())
 					{
 						return false;
 					}
 				}
 
-				using (var file = System.IO.File.Create(path))
-				{
-					using (var sw = new System.IO.StreamWriter(file))
-					{
-						sw.Write(data);
-					}
-				}
-#if UNITY_EDITOR
-				UnityEditor.AssetDatabase.Refresh();
+				File.WriteAllBytes(path, bytes);
 #endif
 				return true;
-
 			}
 			catch (Exception e)
 			{
+				Debug.LogError("向路径写入数据出错" + e);
 
-				Debug.LogError("保存失败【" + path + "】" + e);
+				return false;
 			}
+		}
+		public static bool Save(string path, string data, bool checkUpdate = false)
+		{
+			return Save(path, data.GetBytes(), checkUpdate);
+		}
+		public static byte[] LoadBytes(string path)
+		{
+#if UNITY_SWITCH
 
-            return false;
-        }
+			CheckPath(ref path);
+
+			nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
+			result.abortUnlessSuccess();
+			long fileSize = 0;
+			result = nn.fs.File.GetSize(ref fileSize, fileHandle);
+			result.abortUnlessSuccess();
+			byte[] data = new byte[fileSize];
+			result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
+			result.abortUnlessSuccess();
+
+			nn.fs.File.Close(fileHandle);
+			return data;
+#else
+			return File.ReadAllBytes(path);
+#endif
+		}
+		public static string Load(string path, string defaultValue = "")
+		{
+			try
+			{
+				if (path.StartsWith(ResourcesRoot))
+				{
+					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesRoot).SplitStartString("."));
+					if (text == null)
+					{
+						return defaultValue;
+					}
+					else
+					{
+						return text.text;
+					}
+				}
+				else
+				{
+					return LoadBytes(path).GetString();
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("加载文件出错[" + path + "]" + e);
+				return defaultValue;
+			}
+		}
+	
+		public static void SavePng(Texture2D tex, string path)
+		{
+			var bytes = tex.EncodeToPNG();
+			if (bytes != null)
+			{
+				File.WriteAllBytes(path, bytes);
+			}
+		}
+	
 
  
 
@@ -385,45 +437,71 @@ namespace QTool
             }
             return "";
         }
-    }
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    public class FileDialog
-    {
-        public int structSize = 0;
-        public IntPtr dlgOwner = IntPtr.Zero;
-        public IntPtr instance = IntPtr.Zero;
-        public String filter = null;
-        public String customFilter = null;
-        public int maxCustFilter = 0;
-        public int filterIndex = 0;
-        public String file = null;
-        public int maxFile = 0;
-        public String fileTitle = null;
-        public int maxFileTitle = 0;
-        public String initialDir = null;
-        public String title = null;
-        public int flags = 0;
-        public short fileOffset = 0;
-        public short fileExtension = 0;
-        public String defExt = null;
-        public IntPtr custData = IntPtr.Zero;
-        public IntPtr hook = IntPtr.Zero;
-        public String templateName = null;
-        public IntPtr reservedPtr = IntPtr.Zero;
-        public int reservedInt = 0;
-        public int flagsEx = 0;
-        public FileDialog()
-        {
-            structSize = Marshal.SizeOf(this);
-            file = new string(new char[256]);
-            maxFile = file.Length;
-            fileTitle = new string(new char[64]);
-            maxFileTitle = fileTitle.Length;
-            flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;
-        }
-        [DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
-        public static extern bool GetOpenFileName([In, Out] FileDialog ofd);
-        [DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
-        public static extern bool GetSaveFileName([In, Out] FileDialog ofd);
-    }
+#region SwitchData
+#if UNITY_SWITCH
+		private static nn.account.Uid userId;
+		private static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
+		[RuntimeInitializeOnLoadMethod]
+		public static void InitSwitch()
+		{
+			nn.account.Account.Initialize();
+			nn.account.UserHandle userHandle = new nn.account.UserHandle();
+			if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
+			{
+				nn.Nn.Abort("Failed to open preselected user.");
+			}
+			nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
+			result.abortUnlessSuccess();
+			result = nn.fs.SaveData.Mount(nameof(nn.fs.SaveData.Mount), userId);
+			result.abortUnlessSuccess();
+		}
+#endif
+#endregion
+	}
+
+
+
+#region WindowsData
+
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+	public class FileDialog
+	{
+		public int structSize = 0;
+		public IntPtr dlgOwner = IntPtr.Zero;
+		public IntPtr instance = IntPtr.Zero;
+		public String filter = null;
+		public String customFilter = null;
+		public int maxCustFilter = 0;
+		public int filterIndex = 0;
+		public String file = null;
+		public int maxFile = 0;
+		public String fileTitle = null;
+		public int maxFileTitle = 0;
+		public String initialDir = null;
+		public String title = null;
+		public int flags = 0;
+		public short fileOffset = 0;
+		public short fileExtension = 0;
+		public String defExt = null;
+		public IntPtr custData = IntPtr.Zero;
+		public IntPtr hook = IntPtr.Zero;
+		public String templateName = null;
+		public IntPtr reservedPtr = IntPtr.Zero;
+		public int reservedInt = 0;
+		public int flagsEx = 0;
+		public FileDialog()
+		{
+			structSize = Marshal.SizeOf(this);
+			file = new string(new char[256]);
+			maxFile = file.Length;
+			fileTitle = new string(new char[64]);
+			maxFileTitle = fileTitle.Length;
+			flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000200 | 0x00000008;
+		}
+		[DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
+		public static extern bool GetOpenFileName([In, Out] FileDialog ofd);
+		[DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
+		public static extern bool GetSaveFileName([In, Out] FileDialog ofd);
+	}
+#endregion
 }
