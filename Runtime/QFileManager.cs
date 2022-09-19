@@ -363,7 +363,7 @@ namespace QTool
 							{
 								Debug.LogError("不存在文件" + path);
 								UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
-								var t = nn.fs.File.Create(path, 1024 * 64);
+								var t = nn.fs.File.Create(path, bytes.LongLength);
 								t.abortUnlessSuccess();
 								UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
 								Debug.LogWarning("自动创建文件 " + path);
