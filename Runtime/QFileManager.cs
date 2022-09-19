@@ -371,7 +371,7 @@ namespace QTool
 								Debug.LogWarning("自动创建文件 " + path);
 							}
 							Notification.EnterExitRequestHandlingSection(); ;
-							nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
+							nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write| nn.fs.OpenFileMode.AllowAppend);
 							result.abortUnlessSuccess();
 							result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
 							result.abortUnlessSuccess();
