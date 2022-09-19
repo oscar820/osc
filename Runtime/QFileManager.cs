@@ -489,12 +489,15 @@ namespace QTool
 			{
 				nn.fs.EntryType entryType = 0;
 				nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
-				if (nn.fs.FileSystem.ResultPathNotFound.Includes(result))
+				if (result.IsSuccess())
 				{
-					return false;
+					return true;
 				}
-				result.abortUnlessSuccess();
-				return true;
+			 	if (!nn.fs.FileSystem.ResultPathNotFound.Includes(result))
+				{
+					result.abortUnlessSuccess();
+				}
+				return false;
 			}
 			public  bool CheckPath(ref string path)
 			{
