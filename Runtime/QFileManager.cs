@@ -270,7 +270,7 @@ namespace QTool
 		{
 			bool rightPath = true;
 #if UNITY_SWITCH
-			if (!QSwitchManager.Instance.CheckPath(ref path))
+			if (rightPath=!QSwitchManager.Instance.CheckPath(ref path))
 #endif
 			{
 				var directoryPath = Path.GetDirectoryName(path);
