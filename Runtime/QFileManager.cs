@@ -12,8 +12,22 @@ using UnityEngine.Switch;
 #endif
 namespace QTool
 {
-    public static class QFileManager
+	public static class QFileManager
 	{
+		public static string RootPath
+		{
+			get
+			{
+				switch (Application.platform)
+				{
+
+					case RuntimePlatform.Switch:
+						return nameof(QFileManager);
+					default:
+						return Application.persistentDataPath;
+				}
+			}
+		}
 #if UNITY_SWITCH
 		public static nn.account.Uid userId;
 		public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
@@ -33,7 +47,7 @@ namespace QTool
 						}
 						nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
 						result.abortUnlessSuccess();
-						result = nn.fs.SaveData.Mount(nameof(QFileManager), userId);
+						result = nn.fs.SaveData.Mount(nameof(QTool), userId);
 						result.abortUnlessSuccess();
 #endif
 					}
@@ -314,9 +328,9 @@ namespace QTool
 #if UNITY_SWITCH
 						if (!path.StartsWith(Application.streamingAssetsPath))
 						{
-							if (!path.StartsWith(nameof(QFileManager) + ":/"))
+							if (!path.StartsWith(nameof(QTool) + ":/"))
 							{
-								path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+								path = nameof(QTool) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
 								Debug.LogError("转换路径 " + path);
 							}
 						}
@@ -347,6 +361,7 @@ namespace QTool
 #if UNITY_SWITCH
 							if (!ExistsFile(path))
 							{
+								Debug.LogError("不存在文件" + path);
 								UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
 								var t = nn.fs.File.Create(path, 1024 * 64);
 								t.abortUnlessSuccess();
@@ -359,7 +374,7 @@ namespace QTool
 							result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
 							result.abortUnlessSuccess();
 							nn.fs.File.Close(fileHandle);
-							result = nn.fs.FileSystem.Commit(nameof(QFileManager));
+							result = nn.fs.FileSystem.Commit(nameof(QTool));
 							result.abortUnlessSuccess();
 							Notification.LeaveExitRequestHandlingSection();
 #endif
