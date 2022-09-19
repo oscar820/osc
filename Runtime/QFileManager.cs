@@ -502,15 +502,18 @@ namespace QTool
 			public  bool CheckPath(ref string path)
 			{
 				var rightPath = true;
-				if ( rightPath = Application.platform == RuntimePlatform.Switch && !path.StartsWith(Application.streamingAssetsPath))
+				if ( rightPath = (Application.platform == RuntimePlatform.Switch && !path.StartsWith(Application.streamingAssetsPath)))
 				{
-					path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+					if (!path.StartsWith(nameof(QFileManager) + ":/")){
 
-					Debug.LogError("转换路径 " + path);
+						path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+
+						Debug.LogError("转换路径 " + path);
+					}
 					if (!ExistsFile(path))
 					{
 						UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
-						var result = nn.fs.File.Create(path, 1024 * 1024 * 10);
+						var result = nn.fs.File.Create(path, 1024 *64);
 						result.abortUnlessSuccess();
 						UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
 						Debug.LogWarning("自动创建文件 " + path);
