@@ -12,7 +12,7 @@ namespace QTool
     public abstract class InstanceObject<T> where T : InstanceObject<T>
     {
         public static readonly T Instance = Activator.CreateInstance<T>();
-        protected InstanceObject()
+        public InstanceObject()
         {
 
         }

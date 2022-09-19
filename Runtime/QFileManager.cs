@@ -431,14 +431,12 @@ namespace QTool
 #if UNITY_SWITCH
 		
 		
-		public class QSwitchManager:InstanceManager<QSwitchManager>
+		public class QSwitchManager:InstanceObject<QSwitchManager>
 		{
 			public static nn.account.Uid userId;
 			public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
-			protected override void Awake()
+			public QSwitchManager() : base()
 			{
-				base.Awake();
-				DontDestroyOnLoad(gameObject);
 				nn.account.Account.Initialize();
 				nn.account.UserHandle userHandle = new nn.account.UserHandle();
 				if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
@@ -449,7 +447,6 @@ namespace QTool
 				result.abortUnlessSuccess();
 				result = nn.fs.SaveData.Mount(nameof(QFileManager), userId);
 				result.abortUnlessSuccess();
-				Debug.LogError("Init SwitchData Over");
 			}
 			public  byte[] LoadBytes(string path)
 			{
