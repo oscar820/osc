@@ -116,6 +116,8 @@ namespace QTool
 							result.abortUnlessSuccess();
 						}
 						return false;
+#else
+						return false;
 #endif
 					}
 				default:
@@ -377,6 +379,8 @@ namespace QTool
 							result = nn.fs.FileSystem.Commit(nameof(QTool));
 							result.abortUnlessSuccess();
 							Notification.LeaveExitRequestHandlingSection();
+#else
+							return false;
 #endif
 						}
 						break;
@@ -434,6 +438,8 @@ namespace QTool
 						result.abortUnlessSuccess();
 						nn.fs.File.Close(fileHandle);
 						return data;
+#else
+						return null;
 #endif
 					}
 				default:
@@ -468,6 +474,9 @@ namespace QTool
 							{
 #if UNITY_SWITCH
 								return LoadBytes(path).GetString();
+
+#else
+								return "";
 #endif
 							}
 						default:
