@@ -13,7 +13,33 @@ using UnityEngine.Switch;
 namespace QTool
 {
     public static class QFileManager
-    {
+	{
+#if UNITY_SWITCH
+		public static nn.account.Uid userId;
+		public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
+#endif
+		static QFileManager()
+		{
+			switch (Application.platform)
+			{
+				case RuntimePlatform.Switch:
+					{
+#if UNITY_SWITCH
+						nn.account.Account.Initialize();
+						nn.account.UserHandle userHandle = new nn.account.UserHandle();
+						if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
+						{
+							nn.Nn.Abort("Failed to open preselected user.");
+						}
+						nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
+						result.abortUnlessSuccess();
+						result = nn.fs.SaveData.Mount(nameof(QFileManager), userId);
+						result.abortUnlessSuccess();
+#endif
+					}
+					break;
+			}
+		}
         public static T QDataCopy<T>(this T target)
         {
 			return target.ToQData().ParseQData<T>();
@@ -59,17 +85,30 @@ namespace QTool
         }
 		public static bool ExistsFile(this string path)
 		{
+			CheckPath(ref path);
+			switch (Application.platform)
+			{
+				case RuntimePlatform.Switch:
+					{
 #if UNITY_SWITCH
-			if (CheckPath(ref path))
-			{
-				return QSwitchManager.Instance.ExistsFile(path);
-			}
-			else
+						nn.fs.EntryType entryType = 0;
+						nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
+						if (result.IsSuccess())
+						{
+							return true;
+						}
+						if (!nn.fs.FileSystem.ResultPathNotFound.Includes(result))
+						{
+							result.abortUnlessSuccess();
+						}
+						return false;
 #endif
-			{
-				return File.Exists(path);
+					}
+				default:
+					{
+						return File.Exists(path);
+					}
 			}
-			
 
 		}
 		public static bool ExistsDirectory(this string path)
@@ -266,48 +305,80 @@ namespace QTool
 			tex.LoadImage(bytes);
 			return tex;
 		}
-		public static bool CheckPath(ref string path)
+		public static void CheckPath(ref string path)
 		{
-			bool rightPath = true;
-#if UNITY_SWITCH
-			if (rightPath=!QSwitchManager.Instance.CheckPath(ref path))
-#endif
+			switch (Application.platform)
 			{
-				var directoryPath = Path.GetDirectoryName(path);
-				if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
-				{
-					Debug.LogWarning("自动创建文件夹 " + directoryPath);
-					Directory.CreateDirectory(directoryPath);
-				}
+				case RuntimePlatform.Switch:
+					{
+#if UNITY_SWITCH
+						if (!path.StartsWith(Application.streamingAssetsPath))
+						{
+							if (!path.StartsWith(nameof(QFileManager) + ":/"))
+							{
+								path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+								Debug.LogError("转换路径 " + path);
+							}
+						}
+#endif
+					}
+					break;
+				default:
+					{
+						var directoryPath = Path.GetDirectoryName(path);
+						if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
+						{
+							Debug.LogWarning("自动创建文件夹 " + directoryPath);
+							Directory.CreateDirectory(directoryPath);
+						}
+					}
+					break;
 			}
-			return rightPath;
 		}
 		public static bool Save(string path, byte[] bytes,bool checkUpdate=false)
 		{
 			CheckPath(ref path);
 			try
 			{
-#if UNITY_SWITCH
-				if(Application.platform== RuntimePlatform.Switch)
+				switch (Application.platform)
 				{
-					QSwitchManager.Instance.Save(path, bytes);
-				}
-				else
-#endif
-				{
-					if (checkUpdate)
-					{
-						var oldData = Load(path);
-						if (!string.IsNullOrWhiteSpace(oldData) && oldData.GetHashCode() == bytes.GetHashCode())
+					case RuntimePlatform.Switch:
 						{
-							return false;
+#if UNITY_SWITCH
+							if (!ExistsFile(path))
+							{
+								UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
+								var t = nn.fs.File.Create(path, 1024 * 64);
+								t.abortUnlessSuccess();
+								UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
+								Debug.LogWarning("自动创建文件 " + path);
+							}
+							Notification.EnterExitRequestHandlingSection(); ;
+							nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
+							result.abortUnlessSuccess();
+							result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
+							result.abortUnlessSuccess();
+							nn.fs.File.Close(fileHandle);
+							result = nn.fs.FileSystem.Commit(nameof(QFileManager));
+							result.abortUnlessSuccess();
+							Notification.LeaveExitRequestHandlingSection();
+#endif
 						}
-					}
+						break;
+					default:
+						{
+							if (checkUpdate)
+							{
+								var oldData = Load(path);
+								if (!string.IsNullOrWhiteSpace(oldData) && oldData.GetHashCode() == bytes.GetHashCode())
+								{
+									return false;
+								}
+								File.WriteAllBytes(path, bytes);
+							}
+						}
+						break;
 				}
-				
-
-				File.WriteAllBytes(path, bytes);
-
 				return true;
 			}
 			catch (Exception e)
@@ -332,16 +403,28 @@ namespace QTool
 		}
 		public static byte[] LoadBytes(string path)
 		{
+			switch (Application.platform)
+			{
+				case RuntimePlatform.Switch:
+					{
 #if UNITY_SWITCH
-			if(Application.platform== RuntimePlatform.Switch)
-			{
-				return QSwitchManager.Instance.LoadBytes(path);
-			}
-			else	
+						CheckPath(ref path);
+						nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
+						result.abortUnlessSuccess();
+						long fileSize = 0;
+						result = nn.fs.File.GetSize(ref fileSize, fileHandle);
+						result.abortUnlessSuccess();
+						var data = new byte[fileSize];
+						result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
+						result.abortUnlessSuccess();
+						nn.fs.File.Close(fileHandle);
+						return data;
 #endif
-			{
-				return File.ReadAllBytes(path);
+					}
+				default:
+					return File.ReadAllBytes(path);
 			}
+
 
 		}
 		public static string Load(string path, string defaultValue = "")
@@ -362,14 +445,19 @@ namespace QTool
 				}
 				else
 				{
-					if(Application.platform== RuntimePlatform.Switch)
+
+
+					switch (Application.platform)
 					{
-						return LoadBytes(path).GetString();
-					}
-					else
-					{
-						CheckPath(ref path);
-						return File.ReadAllText(path);
+						case RuntimePlatform.Switch:
+							{
+#if UNITY_SWITCH
+								return LoadBytes(path).GetString();
+#endif
+							}
+						default:
+							CheckPath(ref path);
+							return File.ReadAllText(path);
 					}
 				}
 			}
@@ -427,100 +515,6 @@ namespace QTool
             }
             return "";
         }
-#region SwitchData
-#if UNITY_SWITCH
-		
-		
-		public class QSwitchManager:InstanceObject<QSwitchManager>
-		{
-			public static nn.account.Uid userId;
-			public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
-			public QSwitchManager() : base()
-			{
-				nn.account.Account.Initialize();
-				nn.account.UserHandle userHandle = new nn.account.UserHandle();
-				if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
-				{
-					nn.Nn.Abort("Failed to open preselected user.");
-				}
-				nn.Result result = nn.account.Account.GetUserId(ref userId, userHandle);
-				result.abortUnlessSuccess();
-				result = nn.fs.SaveData.Mount(nameof(QFileManager), userId);
-				result.abortUnlessSuccess();
-			}
-			public  byte[] LoadBytes(string path)
-			{
-				CheckPath(ref path);
-				nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
-				result.abortUnlessSuccess();
-				long fileSize = 0;
-				result = nn.fs.File.GetSize(ref fileSize, fileHandle);
-				result.abortUnlessSuccess();
-				byte[] data = new byte[fileSize];
-				result = nn.fs.File.Read(fileHandle, 0, data, fileSize);
-				result.abortUnlessSuccess();
-
-				nn.fs.File.Close(fileHandle);
-				return data;
-			}
-			public void Save(string path, byte[] bytes)
-			{
-				if (path.StartsWith(Application.streamingAssetsPath))
-				{
-					Debug.LogError("Switch不支持写入路径 " + path);
-				}
-				else
-				{
-					Notification.EnterExitRequestHandlingSection(); ;
-					nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Write);
-					result.abortUnlessSuccess();
-					result = nn.fs.File.Write(fileHandle, 0, bytes, bytes.LongLength, nn.fs.WriteOption.Flush);
-					result.abortUnlessSuccess();
-					nn.fs.File.Close(fileHandle);
-					result = nn.fs.FileSystem.Commit(nameof(QFileManager));
-					result.abortUnlessSuccess();
-					Notification.LeaveExitRequestHandlingSection();
-				}
-			}
-			public bool ExistsFile( string path)
-			{
-				nn.fs.EntryType entryType = 0;
-				nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
-				if (result.IsSuccess())
-				{
-					return true;
-				}
-			 	if (!nn.fs.FileSystem.ResultPathNotFound.Includes(result))
-				{
-					result.abortUnlessSuccess();
-				}
-				return false;
-			}
-			public  bool CheckPath(ref string path)
-			{
-				var rightPath = true;
-				if ( rightPath = (Application.platform == RuntimePlatform.Switch && !path.StartsWith(Application.streamingAssetsPath)))
-				{
-					if (!path.StartsWith(nameof(QFileManager) + ":/")){
-
-						path = nameof(QFileManager) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
-
-						Debug.LogError("转换路径 " + path);
-					}
-					if (!ExistsFile(path))
-					{
-						UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
-						var result = nn.fs.File.Create(path, 1024 *64);
-						result.abortUnlessSuccess();
-						UnityEngine.Switch.Notification.LeaveExitRequestHandlingSection();
-						Debug.LogWarning("自动创建文件 " + path);
-					}
-				}
-				return rightPath;
-			}
-		}
-#endif
-#endregion
 	}
 
 
