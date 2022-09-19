@@ -69,7 +69,7 @@ namespace QTool
 					Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
 					
 				}
-				if (data==null||data.Count <=1)
+				if (data==null)
 				{
 					if (autoCreate != null)
 					{
