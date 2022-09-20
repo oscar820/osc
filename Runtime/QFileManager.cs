@@ -333,7 +333,7 @@ namespace QTool
 							if (!path.StartsWith(nameof(QTool) + ":/"))
 							{
 								path = nameof(QTool) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
-								Debug.LogError("转换路径 " + path);
+								Debug.Log("转换路径 " + path);
 							}
 						}
 #endif
