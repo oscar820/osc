@@ -66,43 +66,45 @@ namespace QTool
 			GUILayout.Space(10);
 			if (GUILayout.Button(new GUIContent("同步更改")))
 			{
-				PullAndCommitPush(RootPath(path));
+				PullAndCommitPush(path);
 			}
 			GUILayout.Space(10);
 		}
-
-		static string CheckPathRun(string commond, string path)
+		static QDictionary<string, string> pathCache = new QDictionary<string, string>();
+		static string PathRun(string commond, string path,bool rootPath=true)
 		{
-			try
+			if (rootPath)
 			{
-				path = Path.GetFullPath(path);
-				if (Path.HasExtension(path))
+				if (!pathCache.ContainsKey(path))
+				{
+					pathCache[path] = RootPath(path);
+				}
+				path = pathCache[path];
+			}
+			else
+			{
+				if (File.Exists(path))
 				{
 					path = Path.GetDirectoryName(path);
 				}
 			}
-			catch (Exception e)
-			{
-				Debug.LogError(path+" " +e.ToString());
-			}
-			
-			return Tool.ProcessCommand("git", commond,path);
+			return Tool.ProcessCommand("git", commond, path);
 		}
 		static string Add(string addPath,string folderPath)
 		{
-			return CheckPathRun(nameof(Add).ToLower() + " \"" + addPath + "\"", folderPath);
+			return PathRun(nameof(Add).ToLower() + " \"" + addPath + "\"", folderPath);
 		}
 		static string Checkout(string path,string folderPath, string version = null)
 		{
 			string result = "";
 			if (string.IsNullOrEmpty(version))
 			{
-				result=CheckPathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
+				result=PathRun(nameof(Checkout).ToLower() + " -- \"" + path + "\"", folderPath);
 				
 			}
 			else
 			{
-				result= CheckPathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
+				result= PathRun(nameof(Checkout).ToLower() + " " + version + " -- \"" +path+ "\"", folderPath);
 
 				return result;
 			}
@@ -112,12 +114,12 @@ namespace QTool
 			}
 			else
 			{
-				return CheckPathRun("clean -f \"" +path + "\"", folderPath);
+				return PathRun("clean -f \"" +path + "\"", folderPath);
 			}
 		}
 		static string GetCurrentVersion(string path)
 		{
-			return (CheckPathRun("log -1 --pretty=oneline", path)).SplitStartString(" ");
+			return (PathRun("log -1 --pretty=oneline", path)).SplitStartString(" ");
 
 		}
 		static bool CheckInit(string path)
@@ -127,8 +129,8 @@ namespace QTool
 			if (!PlayerPrefs.HasKey(nameof(CheckInit)))
 			{
 			
-				var result = CheckPathRun("config --global core.quotepath false", path);
-				var name =CheckPathRun("config user.name", path);
+				var result = PathRun("config --global core.quotepath false", path);
+				var name =PathRun("config user.name", path);
 				if (string.IsNullOrWhiteSpace(name))
 				{
 					EditorUtility.ClearProgressBar();
@@ -136,7 +138,7 @@ namespace QTool
 					{
 						return false;
 					}
-					CheckPathRun("config --global user.name \"" + name + "\"", path);
+					PathRun("config --global user.name \"" + name + "\"", path);
 				}
 				PlayerPrefs.SetInt(nameof(CheckInit), 1);
 			}
@@ -146,7 +148,7 @@ namespace QTool
 		}
 		public static string RootPath(string path)
 		{
-			var rootPath = (CheckPathRun("rev-parse --git-dir", path)).Trim().SplitStartString("/.git");
+			var rootPath = (PathRun("rev-parse --git-dir", path,false)).Trim().SplitStartString("/.git");
 			if (rootPath.EndsWith(".git"))
 			{
 				rootPath = path;
@@ -178,7 +180,7 @@ namespace QTool
 			{
 				return "error 取消设置git基础信息";
 			}
-			var result =CheckPathRun(nameof(Pull).ToLower() + " origin", path);
+			var result =PathRun(nameof(Pull).ToLower() + " origin", path);
 			var mergerTip = "Your local changes to the following files would be overwritten by merge:";
 			var untrackedTip = "error: The following untracked working tree files would be overwritten by merge:";
 			if (!CheckResult(result)||result.Contains(mergerTip))
@@ -257,11 +259,11 @@ namespace QTool
 		}
 		static string Push(string path)
 		{
-			return CheckPathRun(nameof(Push).ToLower() + " origin master", path);
+			return PathRun(nameof(Push).ToLower() + " origin master", path);
 		}
 
 		static List<QFileState> commitList = new List<QFileState>();
-		static async Task AddCommitList(string path)
+		static  void AddCommitList(string path)
 		{
 			var statusInfo =Status(path);
 			if (statusInfo.StartsWith("fatal")) return;
@@ -304,7 +306,7 @@ namespace QTool
 			EditorUtility.ClearProgressBar();
 			if (commitList.Count > 0)
 			{
-				return CheckPathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo + '\"', path);
+				return PathRun(nameof(Commit).ToLower() + " " + commitList.ToOneString(" ") + " -m \"" + commitInfo + '\"', path);
 			}
 			else
 			{
@@ -313,11 +315,11 @@ namespace QTool
 		}
 		static string StashPush(string files,string path)
 		{
-			return CheckPathRun("stash push " + files.Trim() + " -a", path);
+			return PathRun("stash push " + files.Trim() + " -a", path);
 		}
 		static string StashPop(string path)
 		{
-			return CheckPathRun("stash pop",path);
+			return PathRun("stash pop",path);
 		}
 		public static void PullAndCommitPush(string path,bool commit=true)
 		{
@@ -356,19 +358,19 @@ namespace QTool
 	
 		public static string Status(string path)
 		{
-			return CheckPathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
+			return PathRun(nameof(Status).ToLower() + " -s "+"\""+Path.GetFullPath( path)+"\"", path);
 		}
 		[MenuItem("QTool/Git/全局拉取更新")]
 		public static void AllPull()
 		{
 			var path = Directory.GetCurrentDirectory();
-			PullAndCommitPush(RootPath( path),false);
+			PullAndCommitPush(path,false);
 		}
 		[MenuItem("QTool/Git/全局同步更新")]
 		public static void AllPush()
 		{
 			var path = Directory.GetCurrentDirectory();
-			PullAndCommitPush(RootPath(path));
+			PullAndCommitPush(path);
 		}
 		[MenuItem("QTool/Git/以粘贴版信息初始化仓库")]
 		static  void AllInit()
@@ -387,11 +389,11 @@ namespace QTool
 				}
 			}
 			var path = Directory.GetCurrentDirectory();
-			QDebug.Log(CheckPathRun("init", path));
-			QDebug.Log(CheckPathRun("remote add origin \"" + GUIUtility.systemCopyBuffer + "\"", path));
+			QDebug.Log(PathRun("init", path));
+			QDebug.Log(PathRun("remote add origin \"" + GUIUtility.systemCopyBuffer + "\"", path));
 			GitIgnoreFile();
-			QDebug.Log(CheckPathRun(nameof(Add).ToLower() + " .", path));
-			QDebug.Log(CheckPathRun(nameof(Commit).ToLower() + " -m 初始化", path));
+			QDebug.Log(PathRun(nameof(Add).ToLower() + " .", path));
+			QDebug.Log(PathRun(nameof(Commit).ToLower() + " -m 初始化", path));
 			Push(path);
 		}
 		#region 忽略文件

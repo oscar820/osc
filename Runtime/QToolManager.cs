@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +10,12 @@ namespace QTool
 		{
 			base.Awake();
 			DontDestroyOnLoad(gameObject);
+		}
+		public event Action OnUpdate=null;
+		private void Update()
+		{
+			Debug.LogError("update");
+			OnUpdate?.Invoke();
 		}
 	}
     public abstract class QToolManagerBase<T>:MonoBehaviour where T : QToolManagerBase<T>
