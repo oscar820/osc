@@ -26,6 +26,7 @@ namespace QTool
 		static void Init()  
 		{
 			RealyCulture = CultureInfo.CurrentCulture;
+			QDebug.Log("系统语言环境"+RealyCulture);
 			CultureInfo.CurrentCulture = new CultureInfo("en-US");
 			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
 			QTranslate.KeyReplace["版本号"] = Application.version;
