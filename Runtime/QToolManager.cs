@@ -14,7 +14,6 @@ namespace QTool
 		public event Action OnUpdate=null;
 		private void Update()
 		{
-			Debug.LogError("update");
 			OnUpdate?.Invoke();
 		}
 	}
