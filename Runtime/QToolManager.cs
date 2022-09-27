@@ -8,6 +8,11 @@ namespace QTool
     {
 		protected override void Awake()
 		{
+			if (!Application.isPlaying)
+			{
+				Destroy(gameObject);
+				return;
+			}
 			base.Awake();
 			DontDestroyOnLoad(gameObject);
 		}
