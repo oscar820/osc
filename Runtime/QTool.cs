@@ -103,6 +103,7 @@ namespace QTool
 		}
 		public static string RemveChars(this string str,params char[] exceptchars)
 		{
+			if (str.IsNullOrEmpty()) return str;
 			foreach (var c in exceptchars)
 			{
 				str = str.Replace(c.ToString(), "");
