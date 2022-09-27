@@ -44,12 +44,10 @@ namespace QTool
 				Debug.LogError("读取记录信息出错：\n" + e);
 			}
 			sendTask =SendAndClear();
-#if UNITY_EDITOR
-			if (!playerId.StartsWith("Editor"))
+			if (Application.isEditor&& !playerId.StartsWith("Editor"))
 			{
 				playerId = "Editor_" + playerId;
 			}
-#endif
 			if (playerId == PlayerId)
 			{
 				Debug.LogError(StartKey+" 已登录" + playerId);
@@ -182,7 +180,7 @@ namespace QTool
 		{
 
 #if UNITY_EDITOR
-			if (Application.isEditor&& !QPlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))
+			if ((Application.isEditor&& !QPlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))||Application.platform!= RuntimePlatform.WindowsPlayer)
 			{
 				return;
 			}
