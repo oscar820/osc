@@ -166,7 +166,7 @@ namespace QTool
 						{
 							EventList.AddRange(tempList);
 							QPlayerPrefs.SetString(EventListKey, EventList.ToQData());
-							Debug.LogWarning("还原信息：\n" + EventList.ToQData());
+							Debug.Log("还原信息：\n" + EventList.ToQData());
 						}	
 					}
 				}
