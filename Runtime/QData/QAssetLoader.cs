@@ -285,14 +285,21 @@ namespace QTool.Asset
 				return null;
 			}
 		}
-		public static bool PoolPush(string key,ref GameObject obj)
+		public static bool PoolPush(string key, GameObject obj)
 		{
 			if (key.Contains(" "))
 			{
 				key = key.Substring(0, key.IndexOf(" "));
 			}
-			var boolValue= QPoolManager.Push(DirectoryPath + "_" + key, obj);
-			Release(ref obj);
+			var pool= QPoolManager.GetPool<GameObject>(DirectoryPath + "_" + key) as GameObjectPool;
+			if (pool == null)
+			{
+				Debug.LogError("不存在对象池【" + DirectoryPath + "_" + key + "】");
+				return false;
+			}
+			var boolValue = pool.Push(obj);
+			var prefab = pool.prefab;
+			Release(ref prefab);
 			return boolValue;
 		}
 
@@ -309,7 +316,7 @@ namespace QTool.Asset
 				}
 				if (!await QTask.Wait(0.1f, true).IsCancel())
 				{
-					PoolPush(key,ref previewObj);
+					PoolPush(key,previewObj);
 				}
 			}
 			catch (Exception e)
