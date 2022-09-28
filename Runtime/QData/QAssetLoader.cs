@@ -15,8 +15,9 @@ namespace QTool.Asset
     using UnityEditor.AddressableAssets;
     using UnityEditor;
     using System.IO;
+	using UnityEngine.ResourceManagement.AsyncOperations;
 
-    public static  class AddressableTool
+	public static  class AddressableTool
     {
         public static QDictionary<string, List<AddressableAssetEntry>> labelDic = new QDictionary<string, List<AddressableAssetEntry>>();
         public static QDictionary<string, AddressableAssetGroup> groupDic = new QDictionary<string, AddressableAssetGroup>();
@@ -133,6 +134,9 @@ namespace QTool.Asset
 			}
 		}
 		static QDictionary<TObj,int> ResoucesList = new QDictionary<TObj, int>();
+#if Addressables
+		static QDictionary<TObj, int> AddressableList = new QDictionary<TObj, int>();
+#endif
 		public static async Task BothLoadAllAsync(List<TObj> assetList)
 		{
 			assetList.Clear();
@@ -167,6 +171,11 @@ namespace QTool.Asset
 					}
 					var loaderTask = loader.Task;
 					var list = await loaderTask;
+					AddressableList.Clear();
+					foreach (var obj in list)
+					{
+						AddressableList[obj]++;
+					}
 					if (loaderTask.Exception != null)
 					{
 						throw loaderTask.Exception;
@@ -208,6 +217,7 @@ namespace QTool.Asset
 						Debug.LogError("异步加载" + DirectoryPath + "/" + key + "出错" + loader.OperationException);
 					}
 				}
+				AddressableList[obj]++;
 			}
 #else
 			obj= Resources.Load<TObj>(DirectoryPath + "/" + key);
@@ -216,6 +226,7 @@ namespace QTool.Asset
 			return obj;
 		}
 
+		
 		public static void Release(ref TObj obj)
 		{
 			if (ResoucesList.ContainsKey(obj))
@@ -232,8 +243,13 @@ namespace QTool.Asset
 				obj = null;
 			}
 #if Addressables
-			else
+			else if(AddressableList.ContainsKey(obj))
 			{
+				AddressableList[obj]--;
+				if (AddressableList[obj] <= 0)
+				{
+					AddressableList.Remove(obj);
+				}
 				Addressables.Release(obj);
 				obj = null;
 			}
