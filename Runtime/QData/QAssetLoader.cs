@@ -135,7 +135,7 @@ namespace QTool.Asset
 		}
 		static QDictionary<TObj,int> ResoucesList = new QDictionary<TObj, int>();
 #if Addressables
-		static QDictionary<TObj, int> AddressableList = new QDictionary<TObj, int>();
+		static AsyncOperationHandle<IList<TObj>> loader = default;
 #endif
 		public static async Task BothLoadAllAsync(List<TObj> assetList)
 		{
@@ -164,24 +164,18 @@ namespace QTool.Asset
 			{
 				try
 				{
-					var loader = Addressables.LoadAssetsAsync<TObj>(DirectoryPath, null); ;
+					loader = Addressables.LoadAssetsAsync<TObj>(DirectoryPath, null); ;
 					if (loader.OperationException != null)
 					{
 						throw loader.OperationException;
 					}
 					var loaderTask = loader.Task;
 					var list = await loaderTask;
-					AddressableList.Clear();
-					foreach (var obj in list)
-					{
-						AddressableList[obj]++;
-					}
 					if (loaderTask.Exception != null)
 					{
 						throw loaderTask.Exception;
 					}
 					assetList.AddRange( list);
-					Addressables.Release(loader);
 				}
 				catch (Exception e)
 				{
@@ -217,7 +211,6 @@ namespace QTool.Asset
 						Debug.LogError("异步加载" + DirectoryPath + "/" + key + "出错" + loader.OperationException);
 					}
 				}
-				AddressableList[obj]++;
 			}
 #else
 			obj= Resources.Load<TObj>(DirectoryPath + "/" + key);
@@ -226,7 +219,22 @@ namespace QTool.Asset
 			return obj;
 		}
 
-		
+		public static void ReleaseAll()
+		{
+			foreach (var kv in ResoucesList)
+			{
+				var obj = kv.Key;
+				Release(ref obj);
+			}
+			ResoucesList.Clear();
+#if Addressables
+			if (!loader.Equals(default))
+			{
+				Addressables.Release(loader);
+			}
+#endif
+
+		}
 		public static void Release(ref TObj obj)
 		{
 			if (ResoucesList.ContainsKey(obj))
@@ -243,13 +251,8 @@ namespace QTool.Asset
 				obj = null;
 			}
 #if Addressables
-			else if(AddressableList.ContainsKey(obj))
+			else
 			{
-				AddressableList[obj]--;
-				if (AddressableList[obj] <= 0)
-				{
-					AddressableList.Remove(obj);
-				}
 				Addressables.Release(obj);
 				obj = null;
 			}
