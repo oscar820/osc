@@ -30,8 +30,10 @@ namespace QTool
 		}
 		public static int MinSendCount { get; set; } = 100;
 		public static int AutoSendCount { get; set; } =5000;
+		public static bool Active => Application.platform == RuntimePlatform.WindowsPlayer || Application.platform==RuntimePlatform.WindowsEditor;
 		public static void Start(string playerId)
 		{
+			if (!Active) return;
 			try
 			{
 				if (QPlayerPrefs.HasKey(EventListKey))
@@ -114,6 +116,7 @@ namespace QTool
 		static Task sendTask = null;
 		public static async Task Stop()
 		{
+			if (!Active) return;
 			if (sendTask != null)
 			{
 				await sendTask;
@@ -136,6 +139,7 @@ namespace QTool
 	
 		static async Task SendAndClear()
 		{
+			if (!Active) return;
 			if (sendTask != null)
 			{
 				await sendTask;
@@ -166,7 +170,7 @@ namespace QTool
 						{
 							EventList.AddRange(tempList);
 							QPlayerPrefs.SetString(EventListKey, EventList.ToQData());
-							Debug.Log("还原信息：\n" + EventList.ToQData());
+							Debug.LogWarning("还原信息：\n" + EventList.ToQData());
 						}	
 					}
 				}
@@ -180,7 +184,7 @@ namespace QTool
 		{
 
 #if UNITY_EDITOR
-			if ((Application.isEditor&& !QPlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest"))||Application.platform!= RuntimePlatform.WindowsPlayer)
+			if ((Application.isEditor&& !QPlayerPrefs.HasKey(nameof(QAnalysis) + "_EditorTest")))
 			{
 				return;
 			}
@@ -194,19 +198,17 @@ namespace QTool
 						eventKey = eventKey.Replace("_", "/");
 					}
 					var eventData = new QAnalysisEvent
-					{ 
+					{
 						playerId = PlayerId,
-						eventKey = eventKey, 
-						eventValue = value, 
+						eventKey = eventKey,
+						eventValue = value,
 					};
-					//lock(EventList){
-						EventList.Add(eventData);
-						QPlayerPrefs.SetString(EventListKey, EventList.ToQData());
-					//}
+					EventList.Add(eventData);
+					QPlayerPrefs.SetString(EventListKey, EventList.ToQData());
 					QDebug.Log(StartKey + " 触发事件 " + eventData);
 					if (AutoSendCount >= 1 && EventList.Count >= AutoSendCount)
 					{
-						sendTask=SendAndClear();
+						sendTask = SendAndClear();
 					}
 
 				}
@@ -214,7 +216,7 @@ namespace QTool
 				{
 					Debug.LogError(nameof(QAnalysis) + "触发事件 " + eventKey + " " + value + " 出错：\n" + e);
 				}
-				
+
 			}
 		}
 		public static void Trigger(string eventKey,string key, object value)
