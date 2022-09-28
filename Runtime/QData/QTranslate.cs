@@ -119,21 +119,39 @@ namespace QTool
         #endregion
         #region 全局翻译
         public static string GlobalLanguage { get; private set; } = "schinese";
-        public static void ChangeGlobalLanguage(string value)
-        {
-			if (!TranslateKeys.ContainsKey(value))
+		public static QTranslateKey GetTranslateKey(string key)
+		{
+			var data= TranslateKeys.Find((obj) =>
 			{
-				var obj = TranslateKeys.Get(value, (item) => item.Name);
-				if (obj != null)
+				if (obj.Name == key)
 				{
-					value = obj.Key;
+					return true;
 				}
-				else
+				else if(obj.Key==key)
 				{
-					Debug.LogError("不支持语言 [" + value + "]");
-					value = "english";
+					return true;
 				}
+				else if(obj.WebAPI==key)
+				{
+					return true;
+				}
+				else if(key.SplitStartString("-")==obj.WebAPI)
+				{
+					return true;
+				}
+				return false;
+			});
+			if (data == null)
+			{
+				Debug.LogError("不支持语言[" + key + "] 默认 english");
+				data = TranslateKeys["english"];
 			}
+			return data;
+		}
+
+		public static void ChangeGlobalLanguage(string value)
+        {
+			value = GetTranslateKey(value).Key;
 			if (GlobalLanguage == value)
 			{
 				QEventManager.Trigger(nameof(QTranslate) + "_语言",GlobalLanguage);
