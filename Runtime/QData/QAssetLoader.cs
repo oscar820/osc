@@ -125,7 +125,7 @@ namespace QTool.Asset
 	#endregion
 	public abstract class QAssetLoader<TPath, TObj> where TObj : UnityEngine.Object
 	{
-		public static QDictionary<string, TObj> Cache = new QDictionary<string, TObj>();
+		//public static List<TObj> ObjList = new List<TObj>();
 		public static string DirectoryPath
 		{
 			get
@@ -133,10 +133,10 @@ namespace QTool.Asset
 				return typeof(TPath).Name;
 			}
 		}
-		public static async Task<IList<TObj>> BothLoadAllAsync()
+		public static async Task BothLoadAllAsync(List<TObj> assetList)
 		{
-			List<TObj> objList = new List<TObj>();
-			objList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
+			assetList.Clear();
+			assetList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
 			#region Addressables
 #if Addressables
 #if UNITY_EDITOR
@@ -144,7 +144,7 @@ namespace QTool.Asset
 			{
 				try
 				{
-					objList.AddRange(AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/')));
+					assetList.AddRange(AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/')));
 				}
 				catch (Exception e)
 				{
@@ -167,7 +167,8 @@ namespace QTool.Asset
 					{
 						throw loaderTask.Exception;
 					}
-					objList.AddRange( list);
+					assetList.AddRange( list);
+					Addressables.Release(loader);
 				}
 				catch (Exception e)
 				{
@@ -176,8 +177,8 @@ namespace QTool.Asset
 			}
 #endif
 			#endregion
-			QDebug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + objList.ToOneString());
-			return objList;
+			QDebug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + assetList.ToOneString());
+		
 		}
 	
 		public static async Task<TObj> LoadAsync(string key)
@@ -207,62 +208,62 @@ namespace QTool.Asset
 #else
 			obj= Resources.Load<TObj>(DirectoryPath + "/" + key);
 #endif
-			if (obj != null && (!Cache.ContainsKey(key)||Cache[key]==null))
-			{
-				Cache[key] = obj;
-			}
+			//if (obj != null && (!Cache.ContainsKey(key)||Cache[key]==null))
+			//{
+			//	Cache[key] = obj;
+			//}
 			return obj;
 		}
 #if Addressables
-		public static void AddressablesRelease(string key)
-		{
-			if (!Cache.ContainsKey(key)||Cache[key]==null)
-			{
-				if (Cache.ContainsKey(key))
-				{
-					Debug.LogWarning(typeof(QAssetLoader<TPath, TObj>) + " 资源为空 [" + key+"]");
-					Cache.Remove(key);
-				}
-				else
-				{
-					Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 [" + key+"]");
-				}
-				return;
-			}
-			Addressables.Release(Cache[key]);
-		}
-		public static void AddressablesRelease(params TObj[] objs)
-		{
-			Addressables.Release(objs);
-		}
+		//public static void AddressablesRelease(string key)
+		//{
+		//	//if (!Cache.ContainsKey(key)||Cache[key]==null)
+		//	//{
+		//	//	if (Cache.ContainsKey(key))
+		//	//	{
+		//	//		Debug.LogWarning(typeof(QAssetLoader<TPath, TObj>) + " 资源为空 [" + key+"]");
+		//	//		Cache.Remove(key);
+		//	//	}
+		//	//	else
+		//	//	{
+		//	//		Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 [" + key+"]");
+		//	//	}
+		//	//	return;
+		//	//}
+		//	//Addressables.Release(Cache[key]);
+		//}
+		//public static void AddressablesRelease(params TObj[] objs)
+		//{
+		//	Addressables.Release(objs);
+		//}
 
 
 #endif
-		public static void ResourcesRelease(string key)
-		{
-			if (!Cache.ContainsKey(key))
-			{
-				Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 " + key);
-				return;
-			}
-			Resources.UnloadAsset(Cache[key]);
-		}
-		public static void ResourcesRelease(params TObj[] objs) 
-		{
-			foreach (var obj in objs)
-			{
-				if (obj == null) continue; ;
-				if (obj is GameObject)
-				{
-					UnityEngine.Object.Destroy(obj);
-				}
-				else
-				{
-					Resources.UnloadAsset(obj);
-				}
-			}
+		//public static void ResourcesRelease(string key)
+		//{
+		//	if (!Cache.ContainsKey(key))
+		//	{
+		//		Debug.LogError(typeof(QAssetLoader<TPath, TObj>) + " 不存在资源 " + key);
+		//		return;
+		//	}
+		//	Resources.UnloadAsset(Cache[key]);
+		//}
+		//public static void ResourcesRelease(params TObj[] objs) 
+		//{
+		//	foreach (var obj in objs)
+		//	{
+		//		if (obj == null) continue; ;
+		//		if (obj is GameObject)
+		//		{
+		//			UnityEngine.Object.Destroy(obj);
+		//		}
+		//		else
+		//		{
+		//			Resources.UnloadAsset(obj);
+		//		}
+		//	}
 			
-		}
+		//}
 
 	}
 	public abstract class QPrefabLoader<TPath> : QAssetLoader<TPath, GameObject> where TPath : QPrefabLoader<TPath>
@@ -281,7 +282,6 @@ namespace QTool.Asset
 		}
 		public static async Task<GameObject> PoolGet(string key, Transform parent = null)
 		{
-			await AddressablesPreviewLoad(key, parent);
 			var pool = await GetPool(key);
 			if (pool == null)
 			{
@@ -322,26 +322,22 @@ namespace QTool.Asset
 
 		public static async Task AddressablesPreviewLoad(string key, Transform parent = null)
 		{
-			if (!Cache.ContainsKey(key))
+			var previewObj = await PoolGet(key, parent);
+			try
 			{
-				Cache[key] = null;
-				var previewObj = await PoolGet(key, parent);
-				try
+				if (parent == null)
 				{
-					if (parent == null)
-					{
-						var pos = Camera.main.transform.forward * -100 + Camera.main.transform.position;
-						previewObj.transform.position = pos;
-					}
-					if (!await QTask.Wait(0.1f, true).IsCancel())
-					{
-						PoolPush(key, previewObj);
-					}
+					var pos = Camera.main.transform.forward * -100 + Camera.main.transform.position;
+					previewObj.transform.position = pos;
 				}
-				catch (Exception e)
+				if (!await QTask.Wait(0.1f, true).IsCancel())
 				{
-					Debug.LogError("预加载[" + key + "]出错 "+e);
+					PoolPush(key, previewObj);
 				}
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("预加载[" + key + "]出错 " + e);
 			}
 		}
 	}

@@ -10,6 +10,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using UnityEngine.SceneManagement;
 
 namespace QTool
 {
@@ -34,7 +35,22 @@ namespace QTool
 		public static string Version => Application.version; 
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
-        public static Color ToColor(this string key, float s = 0.5f, float v = 1f)
+
+		public static async Task LoadSceneAsync(this string sceneName,string loadingScene=null)
+		{
+			if (!loadingScene.IsNullOrEmpty())
+			{
+				await SceneManager.LoadSceneAsync(loadingScene);
+			}
+			GCCollect();
+			await SceneManager.LoadSceneAsync(sceneName);
+		}
+		public static void GCCollect()
+		{
+			Resources.UnloadUnusedAssets();
+			System.GC.Collect();
+		}
+		public static Color ToColor(this string key, float s = 0.5f, float v = 1f)
         {
             if (string.IsNullOrWhiteSpace(key)) return Color.white;
             var colorKey = key + s + v;

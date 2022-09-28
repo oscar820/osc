@@ -200,6 +200,33 @@ namespace QTool
 			}
 		}
 #endif
+		
+		public static AsyncOperationAwaiter GetAwaiter(this AsyncOperation asyncOperation)
+		{
+			return new AsyncOperationAwaiter(asyncOperation);
+		}
+		public struct AsyncOperationAwaiter : IAwaiter
+		{
+			AsyncOperation asyncOperation;
+			public AsyncOperationAwaiter(AsyncOperation asyncOperation)
+			{
+				this.asyncOperation = asyncOperation;
+			}
+			public bool IsCompleted => asyncOperation==null|| asyncOperation.isDone;
+
+			public void GetResult()
+			{
+				
+			}
+
+			public void OnCompleted(Action continuation)
+			{
+				asyncOperation.completed  += (asyncOperation) =>
+				{
+					continuation?.Invoke();
+				};
+			}
+		}
 		public static ResourceRequestAwaiter GetAwaiter(this ResourceRequest resourceRequest)
 		{
 			return new ResourceRequestAwaiter(resourceRequest);
