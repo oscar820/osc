@@ -10,13 +10,12 @@ namespace QTool.Asset
 
 #if Addressables
 	using UnityEngine.AddressableAssets;
+	using UnityEngine.ResourceManagement.AsyncOperations;
 #if UNITY_EDITOR
-    using UnityEditor.AddressableAssets.Settings;
+	using UnityEditor.AddressableAssets.Settings;
     using UnityEditor.AddressableAssets;
     using UnityEditor;
     using System.IO;
-	using UnityEngine.ResourceManagement.AsyncOperations;
-
 	public static  class AddressableTool
     {
         public static QDictionary<string, List<AddressableAssetEntry>> labelDic = new QDictionary<string, List<AddressableAssetEntry>>();
@@ -135,7 +134,7 @@ namespace QTool.Asset
 		}
 		static QDictionary<TObj,int> ResoucesList = new QDictionary<TObj, int>();
 #if Addressables
-		static AsyncOperationHandle<IList<TObj>> loader = default;
+		static AsyncOperationHandle<IList<TObj>> AllLoader = default;
 #endif
 		public static async Task LoadAllAsync(List<TObj> assetList)
 		{
@@ -164,12 +163,12 @@ namespace QTool.Asset
 			{
 				try
 				{
-					loader = Addressables.LoadAssetsAsync<TObj>(DirectoryPath, null); ;
-					if (loader.OperationException != null)
+					AllLoader = Addressables.LoadAssetsAsync<TObj>(DirectoryPath, null); ;
+					if (AllLoader.OperationException != null)
 					{
-						throw loader.OperationException;
+						throw AllLoader.OperationException;
 					}
-					var loaderTask = loader.Task;
+					var loaderTask = AllLoader.Task;
 					var list = await loaderTask;
 					if (loaderTask.Exception != null)
 					{
@@ -228,9 +227,9 @@ namespace QTool.Asset
 			}
 			ResoucesList.Clear();
 #if Addressables
-			if (!loader.Equals(default))
+			if (!AllLoader.Equals(default))
 			{
-				Addressables.Release(loader);
+				Addressables.Release(AllLoader);
 			}
 #endif
 
