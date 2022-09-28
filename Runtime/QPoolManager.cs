@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 namespace QTool
 {
 	public static partial class Tool
@@ -311,6 +313,11 @@ namespace QTool
 				{
 					poolObj.OnPoolRecover();
 				}
+			};
+			SceneManager.sceneUnloaded += (scene) =>
+			{
+				UsingPool.Clear();
+				CanUsePool.Clear();
 			};
 		}
 		Transform _poolParent = null;
