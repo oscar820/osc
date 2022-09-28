@@ -137,7 +137,7 @@ namespace QTool.Asset
 #if Addressables
 		static AsyncOperationHandle<IList<TObj>> loader = default;
 #endif
-		public static async Task BothLoadAllAsync(List<TObj> assetList)
+		public static async Task LoadAllAsync(List<TObj> assetList)
 		{
 			assetList.Clear();
 			assetList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
