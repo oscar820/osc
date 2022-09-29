@@ -222,21 +222,21 @@ namespace QTool.Asset {
 		#region 资源格式
 
 
-		[MenuItem("QTool/资源管理/删除所有自动图集")]
-		public static void DeleteAllAtlas()
-		{
-			foreach (var path in AssetDatabase.GetAllAssetPaths())
-			{
-				if (path.EndsWith("AutoAtlas.spriteatlas"))
-				{
-					var assetPath = path.ToAssetPath();
-					Debug.LogError("删除 " + assetPath);
-					AssetDatabase.DeleteAsset(assetPath);
-				}
-			};
-			EditorUtility.ClearProgressBar();
-			AssetDatabase.SaveAssets();
-		}
+		//[MenuItem("QTool/资源管理/删除所有自动图集")]
+		//public static void DeleteAllAtlas()
+		//{
+		//	foreach (var path in AssetDatabase.GetAllAssetPaths())
+		//	{
+		//		if (path.EndsWith("AutoAtlas.spriteatlas"))
+		//		{
+		//			var assetPath = path.ToAssetPath();
+		//			Debug.LogError("删除 " + assetPath);
+		//			AssetDatabase.DeleteAsset(assetPath);
+		//		}
+		//	};
+		//	EditorUtility.ClearProgressBar();
+		//	AssetDatabase.SaveAssets();
+		//}
 		//public static QDictionary<string, List<string>> spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
 		[MenuItem("QTool/资源管理/批量设置资源格式")]
 		public static void FreshAllImporter()
