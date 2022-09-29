@@ -222,7 +222,10 @@ namespace QTool.Asset
 		{
 			foreach (var kv in ResoucesList)
 			{
-				Resources.UnloadAsset(kv.Key);
+				if (!(kv.Key is GameObject))
+				{
+					Resources.UnloadAsset(kv.Key);
+				}
 			}
 			ResoucesList.Clear();
 #if Addressables
