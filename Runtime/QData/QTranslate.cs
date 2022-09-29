@@ -48,7 +48,7 @@ namespace QTool
 				WebAPI="ko",
 			},
 		};
-		public static QDataList LanguageData => GetQDataList();
+		public static QDataList LanguageData { get; private set; } = GetQDataList();
 		public static QDataList GetQDataList(string name=null)
 		{
 			if (string.IsNullOrEmpty(name))
