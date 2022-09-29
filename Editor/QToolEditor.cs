@@ -21,7 +21,12 @@ namespace QTool
 			Debug.LogError(QTool.QTranslate.LanguageData.ToString());
 			GUIUtility.systemCopyBuffer = QTool.QTranslate.LanguageData.ToString();
 		}
-	
+		[MenuItem("QTool/工具/查看基础信息")]
+		public static void BaseTest()
+		{
+			Debug.LogError(nameof(QPoolManager)+"信息 \n"+QPoolManager.Pools.ToOneString());
+			Debug.LogError(nameof(QId) + "信息 \n" + QId.InstanceIdList.ToOneString());
+		}
 		[MenuItem("QTool/清空缓存/清空全部缓存")]
         public static void ClearMemery()
         {

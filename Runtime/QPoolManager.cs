@@ -184,7 +184,11 @@ namespace QTool
 
     public class ObjectPool<T> : PoolBase where T : class
     {
-        public readonly List<T> UsingPool = new List<T>();
+		public override string ToString()
+		{
+			return base.ToString() + " using " + UsingPool.Count + "/" + (UsingPool.Count + CanUsePool.Count);
+		}
+		public readonly List<T> UsingPool = new List<T>();
         public readonly List<T> CanUsePool = new List<T>();
         public int AllCount
         {
@@ -294,6 +298,12 @@ namespace QTool
             this.Key = poolName;
 
         }
+		protected virtual void Destory()
+		{
+			this.newFunc = null;
+			this.OnGet = null;
+			this.OnPush = null;
+		}
     }
 
 	public class GameObjectPool : ObjectPool<GameObject>
@@ -327,13 +337,19 @@ namespace QTool
 			if (!DontDestroyOnLoad)
 			{
 				SceneManager.activeSceneChanged -= OnSceneChange;
-				Clear();
-				QPoolManager.Pools.Remove(Key);
-				OnDestory?.Invoke();
-				OnDestory = null;
-				prefab = null;
+				Destory();
 			}
 		}
+		protected override void Destory()
+		{
+			base.Destory();
+			Clear();
+			QPoolManager.Pools.Remove(Key);
+			OnDestory?.Invoke();
+			OnDestory = null;
+			prefab = null;
+		}
+
 		Transform _poolParent = null;
 		public Transform PoolParent
 		{
