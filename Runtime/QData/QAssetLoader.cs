@@ -264,15 +264,17 @@ namespace QTool.Asset
 	{
 		static async Task<ObjectPool<GameObject>> GetPool(string key)
 		{
-			var prefab = await LoadAsync(key);
-			if (prefab != null)
+			var poolKey = DirectoryPath + "_" + key;
+			var pool = QPoolManager.GetPool<GameObject>(key) as GameObjectPool;
+			if (pool == null)
 			{
-				return QPoolManager.GetPool(DirectoryPath + "_" + key, prefab);
+				var prefab = await LoadAsync(key);
+				if (prefab != null)
+				{
+					pool= QPoolManager.GetPool(poolKey, prefab);
+				}
 			}
-			else
-			{
-				return null;
-			}
+			return pool;
 		}
 		public static async Task<GameObject> PoolGet(string key, Transform parent = null)
 		{
@@ -284,7 +286,6 @@ namespace QTool.Asset
 			}
 			try
 			{
-
 				var obj = pool.Get();
 				if (obj == null)
 				{
@@ -315,10 +316,7 @@ namespace QTool.Asset
 				Debug.LogError("不存在对象池【" + DirectoryPath + "_" + key + "】");
 				return false;
 			}
-			var boolValue = pool.Push(obj);
-			var prefab = pool.prefab;
-			Release(ref prefab);
-			return boolValue;
+			return pool.Push(obj);
 		}
 
 

@@ -294,6 +294,7 @@ namespace QTool
 
 	public class GameObjectPool : ObjectPool<GameObject>
 	{
+		public bool DontDestroyOnLoad { get; private set; } = true;
 		public GameObject prefab { get; internal set; }
 		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
 		{
@@ -314,11 +315,16 @@ namespace QTool
 					poolObj.OnPoolRecover();
 				}
 			};
-			SceneManager.sceneUnloaded += (scene) =>
+			SceneManager.sceneUnloaded += Destory;
+		}
+		public void Destory(Scene scene)
+		{
+			if (!DontDestroyOnLoad)
 			{
-				UsingPool.Clear();
-				CanUsePool.Clear();
-			};
+				SceneManager.sceneUnloaded -= Destory;
+				Clear();
+				QPoolManager.Pools.Remove(Key);
+			}
 		}
 		Transform _poolParent = null;
 		public Transform PoolParent
