@@ -60,7 +60,8 @@ namespace QTool
 		}
 		public static string ToAssetPath(this string path)
         {
-            return "Assets" + path.SplitEndString(Application.dataPath);
+			if (path.StartsWith("Assets/")) return path;
+            return "Assets/" + path.SplitEndString(Application.dataPath);
         }
         public static void ForeachDirectoryFiles(this string rootPath, Action<string> action)
         {

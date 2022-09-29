@@ -13,8 +13,8 @@ using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
 #endif
 namespace QTool.Asset {
-    public static  class AddressableToolEditor
-    {
+	public static class AddressableToolEditor
+	{
 		[MenuItem("QTool/资源管理/查找当前场景所有Mesh丢失")]
 		static void FindAllMeshNull()
 		{
@@ -33,9 +33,9 @@ namespace QTool.Asset {
 		{
 			if (Selection.assetGUIDs.Length == 1)
 			{
-				if (Selection.activeObject!=null)
+				if (Selection.activeObject != null)
 				{
-					GUIUtility.systemCopyBuffer= Selection.assetGUIDs[0];
+					GUIUtility.systemCopyBuffer = Selection.assetGUIDs[0];
 					Debug.LogError("复制 " + Selection.activeObject.name + " Id[" + GUIUtility.systemCopyBuffer + "]");
 				}
 			}
@@ -51,7 +51,7 @@ namespace QTool.Asset {
 			{
 				var target = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(GUIUtility.systemCopyBuffer), typeof(UnityEngine.Object));
 
-				if (Selection.activeObject!=null&&target!=null&&Selection.activeObject!=target)
+				if (Selection.activeObject != null && target != null && Selection.activeObject != target)
 				{
 					if (Selection.activeObject.GetType() != target.GetType())
 					{
@@ -59,7 +59,7 @@ namespace QTool.Asset {
 						return;
 					}
 					var oldPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-					if (EditorUtility.DisplayDialog("资源替换","确定将" + oldPath + "替换为"+ AssetDatabase.GetAssetPath(target), "确定", "取消"))
+					if (EditorUtility.DisplayDialog("资源替换", "确定将" + oldPath + "替换为" + AssetDatabase.GetAssetPath(target), "确定", "取消"))
 					{
 						Debug.LogError("将" + oldPath + "替换为" + AssetDatabase.GetAssetPath(target));
 						var oldId = Selection.assetGUIDs[0];
@@ -88,10 +88,10 @@ namespace QTool.Asset {
 								default:
 									break;
 							}
-							
+
 						}
 					}
-					
+
 				}
 			}
 			else
@@ -119,7 +119,7 @@ namespace QTool.Asset {
 				Debug.LogError("请先选择任意一个资源 再查找资源引用");
 				return;
 			}
-			Debug.LogError("开始查找引用[" + Selection.objects.ToOneString(" ",(obj)=>obj.name) + "]的资源");
+			Debug.LogError("开始查找引用[" + Selection.objects.ToOneString(" ", (obj) => obj.name) + "]的资源");
 			var assetGUIDs = Selection.assetGUIDs;
 			var assetPaths = new string[assetGUIDs.Length];
 			for (int i = 0; i < assetGUIDs.Length; i++)
@@ -225,7 +225,6 @@ namespace QTool.Asset {
 		[MenuItem("QTool/资源管理/删除所有自动图集")]
 		public static void DeleteAllAtlas()
 		{
-			spriteAtlas.Clear();
 			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
 				if (path.EndsWith("AutoAtlas.spriteatlas"))
@@ -238,55 +237,27 @@ namespace QTool.Asset {
 			EditorUtility.ClearProgressBar();
 			AssetDatabase.SaveAssets();
 		}
-		public static QDictionary<string, List<string>> spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
+		//public static QDictionary<string, List<string>> spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
 		[MenuItem("QTool/资源管理/批量设置资源格式")]
 		public static void FreshAllImporter()
 		{
-			bool flag = true;
-			spriteAtlas.Clear();
-			foreach (var path in AssetDatabase.GetAllAssetPaths())
+			var paths = AssetDatabase.GetAllAssetPaths();
+			foreach (var path in paths)
 			{
-				if (!flag) return;
 				if (!path.StartsWith("Assets/")) continue;
-				var assetPath = path.ToAssetPath();
-				if (!EditorUtility.DisplayCancelableProgressBar("批量设置资源导入格式", "设置文件 " + assetPath, 1))
-				{
-					flag = false;
-				}
-				AssetImporter assetImporter = AssetImporter.GetAtPath(assetPath);
+				EditorUtility.DisplayDialog("批量设置资源导入格式", path, "ok");
+				AssetImporter assetImporter = AssetImporter.GetAtPath(path);
 				if (assetImporter is AudioImporter audioImporter)
 				{
-					ReImportAudio(AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath), audioImporter);
+					ReImportAudio(AssetDatabase.LoadAssetAtPath<AudioClip>(path), audioImporter);
 				}
 				else if (assetImporter is TextureImporter textureImporter)
 				{
-					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(assetPath), textureImporter);
+					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(path), textureImporter);
 				}
 			};
-			if (flag)
-			{
-				var old = spriteAtlas;
-				spriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
-				var end = 0;
-				foreach (var kv in old)
-				{
-					if (kv.Value.Count < 5 && (end = kv.Key.IndexOf('\\')) > 0)
-					{
-						var parentKey = kv.Key.Substring(0, end);
-						spriteAtlas[parentKey].AddRange(kv.Value);
-					}
-					else
-					{
-						spriteAtlas[kv.Key].AddRange(kv.Value);
-					}
-				}
-				foreach (var kv in spriteAtlas)
-				{
-					AutoSetAtlasContents(kv.Key, kv.Value);
-				}
-				EditorUtility.ClearProgressBar();
-				AssetDatabase.SaveAssets();
-			}
+			EditorUtility.ClearProgressBar();
+			AssetDatabase.SaveAssets();
 		}
 		public static void ReImportAudio(AudioClip audio, AudioImporter audioImporter)
 		{
@@ -322,27 +293,26 @@ namespace QTool.Asset {
 				audioImporter.SaveAndReimport();
 			}
 		}
-
+		public readonly static List<int> TextureSize = new List<int> { 32, 64,128,256,512,1024,2048,4096 };
 		public static void ReImportTexture(Texture texture, TextureImporter textureImporter)
 		{
 			if (texture == null) return;
 			var setting = QToolSetting.Instance;
-			if (!textureImporter.crunchedCompression)
+			if (!textureImporter.crunchedCompression||!TextureSize.Contains( textureImporter.maxTextureSize))
 			{
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
 
+				//for (int i = 0; i < TextureSize.Count - 1 && textureImporter.maxTextureSize > TextureSize[i]; i++)
+				{
+					Debug.LogError(texture + "  " + texture.texelSize);
+				} 
+				if (textureImporter.textureType != TextureImporterType.Sprite)
+				{
+					textureImporter.npotScale = TextureImporterNPOTScale.ToSmaller;
+				}
+			
+				
 
-				if (textureImporter.textureType == TextureImporterType.Sprite)
-				{
-					if (texture.width < 2048 && texture.height < 2048)
-					{
-						spriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
-					}
-				}
-				else
-				{
-					textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
-				}
 				if (textureImporter.textureType == TextureImporterType.Default)
 				{
 					if (textureImporter.textureShape == TextureImporterShape.Texture2D)
@@ -359,49 +329,49 @@ namespace QTool.Asset {
 
 		}
 
-		static void AutoSetAtlasContents(string path, List<string> textures)
-		{
-			path = path + "/AutoAtlas.spriteatlas";
-			SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
-			if (atlas == null)
-			{
-				Debug.LogError("创建图集[" + path + "]");
-				atlas = new SpriteAtlas();
-				// 设置参数 可根据项目具体情况进行设置
-				SpriteAtlasPackingSettings packSetting = new SpriteAtlasPackingSettings()
-				{
-					blockOffset = 1,
-					enableRotation = false,
-					enableTightPacking = false,
-					padding = 2,
-				};
-				atlas.SetPackingSettings(packSetting);
+		//static void AutoSetAtlasContents(string path, List<string> textures)
+		//{
+		//	path = path + "/AutoAtlas.spriteatlas";
+		//	SpriteAtlas atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
+		//	if (atlas == null)
+		//	{
+		//		Debug.LogError("创建图集[" + path + "]");
+		//		atlas = new SpriteAtlas();
+		//		// 设置参数 可根据项目具体情况进行设置
+		//		SpriteAtlasPackingSettings packSetting = new SpriteAtlasPackingSettings()
+		//		{
+		//			blockOffset = 1,
+		//			enableRotation = false,
+		//			enableTightPacking = false,
+		//			padding = 2,
+		//		};
+		//		atlas.SetPackingSettings(packSetting);
 
-				SpriteAtlasTextureSettings textureSetting = new SpriteAtlasTextureSettings()
-				{
-					readable = false,
-					generateMipMaps = false,
-					sRGB = true,
-					filterMode = FilterMode.Bilinear,
-				};
-				atlas.SetTextureSettings(textureSetting);
+		//		SpriteAtlasTextureSettings textureSetting = new SpriteAtlasTextureSettings()
+		//		{
+		//			readable = false,
+		//			generateMipMaps = false,
+		//			sRGB = true,
+		//			filterMode = FilterMode.Bilinear,
+		//		};
+		//		atlas.SetTextureSettings(textureSetting);
 
-				TextureImporterPlatformSettings platformSetting = new TextureImporterPlatformSettings()
-				{
-					maxTextureSize = 4096,
-					format = TextureImporterFormat.Automatic,
-					crunchedCompression = true,
-					textureCompression = TextureImporterCompression.Compressed,
-					compressionQuality = QToolSetting.Instance.compressionQuality,
-				};
-				atlas.SetPlatformSettings(platformSetting);
-				AssetDatabase.CreateAsset(atlas, path);
-			}
-			foreach (var texPath in textures)
-			{
-				atlas.Add(AssetDatabase.LoadAllAssetsAtPath(texPath));
-			}
-		}
+		//		TextureImporterPlatformSettings platformSetting = new TextureImporterPlatformSettings()
+		//		{
+		//			maxTextureSize = 4096,
+		//			format = TextureImporterFormat.Automatic,
+		//			crunchedCompression = true,
+		//			textureCompression = TextureImporterCompression.Compressed,
+		//			compressionQuality = QToolSetting.Instance.compressionQuality,
+		//		};
+		//		atlas.SetPlatformSettings(platformSetting);
+		//		AssetDatabase.CreateAsset(atlas, path);
+		//	}
+		//	foreach (var texPath in textures)
+		//	{
+		//		atlas.Add(AssetDatabase.LoadAllAssetsAtPath(texPath));
+		//	}
+		//}
 		#endregion
 #if Addressable
 
