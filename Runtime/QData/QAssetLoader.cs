@@ -218,7 +218,7 @@ namespace QTool.Asset
 			return obj;
 		}
 
-		public static void ReleaseAll()
+		public static async void ReleaseAll()
 		{
 			foreach (var kv in ResoucesList)
 			{
@@ -229,8 +229,15 @@ namespace QTool.Asset
 			}
 			ResoucesList.Clear();
 #if Addressables
+
 			if (!AllLoader.Equals(default))
 			{
+				var list= await AllLoader.Task;
+				foreach (var obj in list)
+				{
+					Addressables.Release(obj);
+				}
+				list.Clear();
 				Addressables.Release(AllLoader);
 			}
 #endif
