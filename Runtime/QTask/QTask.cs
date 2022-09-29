@@ -24,15 +24,9 @@ namespace QTool
 		{
 			if (!OnlyOneRun.ContainsKey(onlyOneKey))
 			{
-				lock (OnlyOneRun)
-				{
-					OnlyOneRun.Add(onlyOneKey,taskFunc());
-				}
+				OnlyOneRun.Add(onlyOneKey, taskFunc());
 				await OnlyOneRun[onlyOneKey];
-				lock (OnlyOneRun)
-				{
-					OnlyOneRun.RemoveKey(onlyOneKey);
-				}
+				OnlyOneRun.RemoveKey(onlyOneKey);
 			}
 			else
 			{
