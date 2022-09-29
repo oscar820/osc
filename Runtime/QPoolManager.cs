@@ -294,7 +294,7 @@ namespace QTool
 
 	public class GameObjectPool : ObjectPool<GameObject>
 	{
-		public bool DontDestroyOnLoad { get; private set; } = true;
+		public bool DontDestroyOnLoad { get;  set; } = true;
 		public GameObject prefab { get; internal set; }
 		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
 		{
@@ -319,7 +319,7 @@ namespace QTool
 		}
 		public void Destory(Scene scene)
 		{
-			if (!DontDestroyOnLoad)
+			if (DontDestroyOnLoad)
 			{
 				SceneManager.sceneUnloaded -= Destory;
 				Clear();
