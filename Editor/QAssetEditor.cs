@@ -245,7 +245,6 @@ namespace QTool.Asset {
 			foreach (var path in paths)
 			{
 				if (!path.StartsWith("Assets/")) continue;
-				EditorUtility.DisplayDialog("批量设置资源导入格式", path, "ok");
 				AssetImporter assetImporter = AssetImporter.GetAtPath(path);
 				if (assetImporter is AudioImporter audioImporter)
 				{
@@ -302,17 +301,24 @@ namespace QTool.Asset {
 			{
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
 
-				//for (int i = 0; i < TextureSize.Count - 1 && textureImporter.maxTextureSize > TextureSize[i]; i++)
+				for (int i = 0; i < TextureSize.Count - 1 && textureImporter.maxTextureSize > TextureSize[i]; i++)
 				{
-					Debug.LogError(texture + "  " + texture.texelSize);
+					var minSize = TextureSize[i];
+					var maxSize = TextureSize[i + 1];
+					if (texture.width >= minSize || texture.height >= minSize)
+					{
+						if (texture.width <= maxSize && texture.height <= maxSize)
+						{
+							textureImporter.maxTextureSize = minSize;
+							Debug.LogError(texture + "  " +nameof(textureImporter.maxTextureSize)+" : "+minSize);
+							break;
+						}
+					}
 				} 
 				if (textureImporter.textureType != TextureImporterType.Sprite)
 				{
 					textureImporter.npotScale = TextureImporterNPOTScale.ToSmaller;
 				}
-			
-				
-
 				if (textureImporter.textureType == TextureImporterType.Default)
 				{
 					if (textureImporter.textureShape == TextureImporterShape.Texture2D)
