@@ -50,7 +50,7 @@ namespace QTool
 				}
 
 			}
-			else
+			else if(newFunc !=null)
 			{
 				var type = typeof(T);
 				if (type.IsSubclassOf(typeof(UnityEngine.Object))&&type!=typeof( GameObject))
@@ -63,6 +63,10 @@ namespace QTool
 					Pools[key] = pool;
 				}
 				return pool;
+			}
+			else
+			{
+				return null;
 			}
         }
 		public static T Get<T>(string poolName, System.Func<T> newFunc = null) where T : class
