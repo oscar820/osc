@@ -69,16 +69,11 @@ namespace QTool
 	}
 	public class QList<TKey, T> : QList<T> where T : IKey<TKey>
 	{
-		[NonSerialized]
-		[XmlIgnore]
-		public QKeyCache<TKey, T, int> Cache = new QKeyCache<TKey, T, int>();
 		public QList()
 		{
-			Cache.GetCheckInfo = (Key) => Count;
 		}
 		public QList(Func<T> AutoCreate) : base(AutoCreate)
 		{
-			Cache.GetCheckInfo = (Key) => Count;
 		}
 
 		public new void Add(T value)
@@ -99,18 +94,7 @@ namespace QTool
 				Debug.LogError("key is null");
 				return false;
 			}
-			if (Cache.Cache.ContainsKey(key) && Cache.Cache[key] != null)
-			{
-				return true;
-			}
-			else if (Cache.Cache.Count == Count)
-			{
-				return false;
-			}
-			else
-			{
-				return this.ContainsKey<T, TKey>(key);
-			}
+			return this.ContainsKey<T, TKey>(key);
 		}
 		public T Get(TKey key)
 		{
@@ -119,17 +103,14 @@ namespace QTool
 				Debug.LogError("key is null");
 				return default;
 			}
-			return Cache.Get(key, (key) =>
+			var value = this.Get<T, TKey>(key);
+			if (value == null && AutoCreate != null)
 			{
-				var value = this.Get<T, TKey>(key);
-				if (value == null && AutoCreate != null)
-				{
-					value = AutoCreate();
-					value.Key = key;
-					this.Add(value);
-				}
-				return value;
-			});
+				value = AutoCreate();
+				value.Key = key;
+				this.Add(value);
+			}
+			return value;
 		}
 		public void Set(TKey key, T value)
 		{
@@ -137,7 +118,6 @@ namespace QTool
 			{
 				Debug.LogError("key is null");
 			}
-			Cache.Set(key, value);
 			if (ContainsKey(key))
 			{
 				this.Set<T, TKey>(key, value);
@@ -187,7 +167,6 @@ namespace QTool
 		{
 			if (obj != null)
 			{
-				Cache.Remove(obj.Key);
 				base.Remove(obj);
 			}
 		}
@@ -197,7 +176,6 @@ namespace QTool
 		}
 		public new void Clear()
 		{
-			Cache.Clear();
 			base.Clear();
 		}
 

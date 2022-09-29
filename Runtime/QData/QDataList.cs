@@ -49,43 +49,39 @@ namespace QTool
 		{
 			return GetData(GetResourcesDataPath(name),autoCreate);
 		}
+
 		public static QDataList GetData(string path,System.Func<QDataList> autoCreate=null)
         {
-			return QDataListCache.Get(path, (key) =>
-			{
-				QDataList data = null;
+			QDataList data = null;
 			;
-				try
+			try
+			{
+				data = new QDataList();
+				data.LoadPath = path;
+				QFileManager.LoadAll(path, (fileValue, loadPath) =>
 				{
-					data = new QDataList();
+					data.Add(new QDataList(fileValue) { LoadPath = loadPath });
+				}, "{}");
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
+
+			}
+			if (data == null)
+			{
+				if (autoCreate != null)
+				{
+					data = autoCreate();
 					data.LoadPath = path;
-					QFileManager.LoadAll(path, (fileValue, loadPath) =>
-					{
-						data.Add(new QDataList(fileValue) { LoadPath=loadPath });
-					}, "{}");
+					data.Save();
+					Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + data);
 				}
-				catch (System.Exception e)
-				{
-					Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
-					
-				}
-				if (data==null)
-				{
-					if (autoCreate != null)
-					{
-						data = autoCreate();
-						data.LoadPath = path;
-						data.Save();
-						Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + data);
-					}
-				}
-				return data;
-			});
+			}
+			return data;
 
 		}
-		public static QKeyCache<string,QDataList, DateTime> QDataListCache = new QKeyCache<string,QDataList, DateTime>((key)=> {
-			return QFileManager.GetLastWriteTime(key);
-		});
+	
      
         public string LoadPath { get; private set; }
         public void Save(string path = null)
