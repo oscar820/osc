@@ -300,6 +300,7 @@ namespace QTool
 	{
 		public bool DontDestroyOnLoad { get;  set; } = true;
 		public GameObject prefab { get; internal set; }
+		public event Action OnDestory;
 		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
 		{
 			OnGet += (obj) =>
@@ -328,6 +329,9 @@ namespace QTool
 				SceneManager.sceneUnloaded -= Destory;
 				Clear();
 				QPoolManager.Pools.Remove(Key);
+				OnDestory?.Invoke();
+				OnDestory = null;
+				prefab = null;
 			}
 		}
 		Transform _poolParent = null;

@@ -273,6 +273,11 @@ namespace QTool.Asset
 				{
 					pool= QPoolManager.GetPool(poolKey, prefab);
 					pool.DontDestroyOnLoad = false;
+					pool.OnDestory += () =>
+					{
+						var obj = pool.prefab;
+						Release(ref obj);
+					};
 				}
 			}
 			return pool;
