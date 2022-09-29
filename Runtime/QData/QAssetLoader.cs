@@ -222,8 +222,7 @@ namespace QTool.Asset
 		{
 			foreach (var kv in ResoucesList)
 			{
-				var obj = kv.Key;
-				Release(ref obj);
+				Resources.UnloadAsset(kv.Key);
 			}
 			ResoucesList.Clear();
 #if Addressables
