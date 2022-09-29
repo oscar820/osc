@@ -292,7 +292,7 @@ namespace QTool.Asset {
 				audioImporter.SaveAndReimport();
 			}
 		}
-		public readonly static List<int> TextureSize = new List<int> { 32, 64,128,256,512,1024,2048,4096 };
+		public readonly static List<int> TextureSize = new List<int> {8 ,32, 64,128,256,512,1024,2048,4096 };
 		public static void ReImportTexture(Texture texture, TextureImporter textureImporter)
 		{
 			if (texture == null) return;
