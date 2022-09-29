@@ -279,8 +279,7 @@ namespace QTool.Asset
 					pool.DontDestroyOnLoad = false;
 					pool.OnDestory += () =>
 					{
-						var obj = pool.prefab;
-						Release(ref obj);
+						Release(ref prefab);
 					};
 				}
 			}

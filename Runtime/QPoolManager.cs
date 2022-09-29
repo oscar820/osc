@@ -320,13 +320,13 @@ namespace QTool
 					poolObj.OnPoolRecover();
 				}
 			};
-			SceneManager.sceneUnloaded += Destory;
+			SceneManager.activeSceneChanged += OnSceneChange;
 		}
-		public void Destory(Scene scene)
+		protected void OnSceneChange(Scene scene, Scene next)
 		{
 			if (!DontDestroyOnLoad)
 			{
-				SceneManager.sceneUnloaded -= Destory;
+				SceneManager.activeSceneChanged -= OnSceneChange;
 				Clear();
 				QPoolManager.Pools.Remove(Key);
 				OnDestory?.Invoke();
