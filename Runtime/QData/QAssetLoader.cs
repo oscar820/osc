@@ -175,6 +175,7 @@ namespace QTool.Asset
 						throw loaderTask.Exception;
 					}
 					assetList.AddRange( list);
+					list.Clear();
 				}
 				catch (Exception e)
 				{
@@ -232,12 +233,6 @@ namespace QTool.Asset
 
 			if (!AllLoader.Equals(default))
 			{
-				var list= await AllLoader.Task;
-				foreach (var obj in list)
-				{
-					Addressables.Release(obj);
-				}
-				list.Clear();
 				Addressables.Release(AllLoader);
 			}
 #endif

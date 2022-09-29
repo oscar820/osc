@@ -54,10 +54,7 @@ public class AssetTest : MonoBehaviour
 			obj = null;
 			sView.sprite = null;
 			sprite = null;
-			foreach (var tobj in objList)
-			{
-				Addressables.Release(tobj);
-			}
+			ResourceTest.ReleaseAll();
 			objList.Clear();
 		}
 		
