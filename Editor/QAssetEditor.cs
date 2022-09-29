@@ -292,7 +292,7 @@ namespace QTool.Asset {
 				audioImporter.SaveAndReimport();
 			}
 		}
-		public readonly static List<int> TextureSize = new List<int> {8,16 ,32, 64,128,256,512,1024,2048,4096 };
+		public readonly static List<int> TextureSize = new List<int> {1,4,8,16 ,32, 64,128,256,512,1024,2048,4096 };
 		public static void ReImportTexture(Texture texture, TextureImporter textureImporter)
 		{
 			if (texture == null) return;
@@ -301,20 +301,24 @@ namespace QTool.Asset {
 			{
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
 
-				for (int i = 0; i < TextureSize.Count - 1 && textureImporter.maxTextureSize > TextureSize[i]; i++)
+				if(textureImporter.maxTextureSize > texture.width && textureImporter.maxTextureSize > texture.height)
 				{
-					var minSize = TextureSize[i];
-					var maxSize = TextureSize[i + 1];
-					if (texture.width >= minSize || texture.height >= minSize)
+					for (int i = 0; i < TextureSize.Count - 1 && textureImporter.maxTextureSize > TextureSize[i]; i++)
 					{
-						if (texture.width <= maxSize && texture.height <= maxSize)
+						var minSize = TextureSize[i];
+						var maxSize = TextureSize[i + 1];
+						if (texture.width >= minSize || texture.height >= minSize)
 						{
-							textureImporter.maxTextureSize = minSize;
-							Debug.LogError(texture + "  " +nameof(textureImporter.maxTextureSize)+" : "+minSize);
-							break;
+							if (texture.width <= maxSize && texture.height <= maxSize)
+							{
+								textureImporter.maxTextureSize = minSize;
+								Debug.LogError(texture + "  " + nameof(textureImporter.maxTextureSize) + " : " + minSize);
+								break;
+							}
 						}
 					}
-				} 
+				}
+				
 				if (textureImporter.textureType != TextureImporterType.Sprite)
 				{
 					textureImporter.npotScale = TextureImporterNPOTScale.ToSmaller;
