@@ -324,7 +324,7 @@ namespace QTool
 		}
 		public void Destory(Scene scene)
 		{
-			if (DontDestroyOnLoad)
+			if (!DontDestroyOnLoad)
 			{
 				SceneManager.sceneUnloaded -= Destory;
 				Clear();
