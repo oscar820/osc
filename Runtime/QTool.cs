@@ -36,14 +36,16 @@ namespace QTool
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
 
-		public static async Task LoadSceneAsync(this string sceneName,string loadingScene=null)
+		public static async Task LoadSceneAsync(this string sceneName,string loadingScene=null,float time=2f)
 		{
 			if (!loadingScene.IsNullOrEmpty())
 			{
 				await SceneManager.LoadSceneAsync(loadingScene);
 			}
 			GCCollect();
+			await QTask.Wait(time / 2);
 			await SceneManager.LoadSceneAsync(sceneName);
+			await QTask.Wait(time / 2);
 		}
 		public static void GCCollect()
 		{
