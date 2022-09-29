@@ -230,7 +230,7 @@ namespace QTool.Asset {
 				if (path.EndsWith("AutoAtlas.spriteatlas"))
 				{
 					var assetPath = path.ToAssetPath();
-					EditorUtility.DisplayProgressBar("删除自动图集", "删除 " + assetPath, 1);
+					Debug.LogError("删除 " + assetPath);
 					AssetDatabase.DeleteAsset(assetPath);
 				}
 			};
