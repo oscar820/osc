@@ -15,7 +15,7 @@ using UnityEditor.AddressableAssets;
 namespace QTool.Asset {
 	public static class AddressableToolEditor
 	{
-		[MenuItem("QTool/资源管理/查找当前场景所有Mesh丢失")]
+		[MenuItem("QTool/资源管理/资源Id/查找当前场景所有Mesh丢失")]
 		static void FindAllMeshNull()
 		{
 			var meshs = GameObject.FindObjectsOfType<MeshFilter>();
@@ -28,7 +28,7 @@ namespace QTool.Asset {
 			}
 		}
 		#region 引用查找
-		[MenuItem("QTool/资源管理/复制Id")]
+		[MenuItem("QTool/资源管理/资源Id/复制Id")]
 		static void CopyID()
 		{
 			if (Selection.assetGUIDs.Length == 1)
@@ -44,7 +44,7 @@ namespace QTool.Asset {
 				Debug.LogError("选中过多");
 			}
 		}
-		[MenuItem("QTool/资源管理/使用粘贴板Id替换当前Id")]
+		[MenuItem("QTool/资源管理/资源Id/使用粘贴板Id替换当前Id")]
 		static void RepleaceID()
 		{
 			if (Selection.assetGUIDs.Length == 1)
@@ -99,7 +99,7 @@ namespace QTool.Asset {
 				Debug.LogError("选中过多");
 			}
 		}
-		[MenuItem("QTool/资源管理/所有资源格式")]
+		[MenuItem("QTool/资源管理/批量处理/所有资源格式")]
 		static void FindAllAssetExtension()
 		{
 
@@ -111,7 +111,7 @@ namespace QTool.Asset {
 			}
 			Debug.LogError(list.ToOneString());
 		}
-		[MenuItem("QTool/资源管理/查找资源引用 %#&f")]
+		[MenuItem("QTool/资源管理/资源Id/查找资源引用 %#&f")]
 		static void FindreAssetFerencesMenu()
 		{
 			if (Selection.assetGUIDs.Length == 0)
@@ -175,7 +175,7 @@ namespace QTool.Asset {
 				Debug.LogError("查找完成");
 			});
 		}
-		[MenuItem("QTool/资源管理/查找引用的资源")]
+		[MenuItem("QTool/资源管理/资源Id/查找引用的资源")]
 		static void FindDependencies()
 		{
 			if (Selection.assetGUIDs.Length == 0)
@@ -200,7 +200,7 @@ namespace QTool.Asset {
 			}
 			Debug.LogError("查找完成");
 		}
-		[MenuItem("QTool/资源管理/通过粘贴版Id查找资源")]
+		[MenuItem("QTool/资源管理/资源Id/通过粘贴版Id查找资源")]
 		public static void FindAsset()
 		{
 			try
@@ -222,7 +222,7 @@ namespace QTool.Asset {
 		#region 资源格式
 
 
-		[MenuItem("QTool/资源管理/删除所有自动图集")]
+		[MenuItem("QTool/资源管理/批量处理/删除自动图集")]
 		public static void DeleteAllAtlas()
 		{
 			foreach (var path in AssetDatabase.GetAllAssetPaths())
@@ -238,13 +238,13 @@ namespace QTool.Asset {
 			AssetDatabase.SaveAssets();
 		}
 		public static QDictionary<string, List<string>> AutoAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
-		[MenuItem("QTool/资源管理/批量设置资源格式")]
+		[MenuItem("QTool/资源管理/批量处理/设置资源格式")]
 		public static void FreshAllImporter()
 		{
 			var paths = AssetDatabase.GetAllAssetPaths();
 			foreach (var path in paths)
 			{
-				if (!path.StartsWith("Assets/") ||  path.Contains(nameof(Resources)+"/") ) continue;
+				if (!path.StartsWith("Assets/") || path.Contains("/" + nameof(AddressableResources) + "/")|| path.Contains("/"+nameof(Resources)+"/") ) continue;
 				AssetImporter assetImporter = AssetImporter.GetAtPath(path);
 				if (assetImporter is AudioImporter audioImporter)
 				{
@@ -409,7 +409,7 @@ namespace QTool.Asset {
 #if Addressable
 
 		public const string AddressableResources = nameof(AddressableResources);
-		[MenuItem("QTool/资源管理/批量生成AddressableResources资源",false,11)]
+		[MenuItem("QTool/资源管理/批量处理/生成Addressables资源")]
 		public static void AutoAddressableResources()
 		{
 			var root = "Assets/" + AddressableResources;
