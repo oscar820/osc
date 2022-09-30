@@ -415,8 +415,10 @@ namespace QTool
 							case QObjectType.List:
 								{
 									var list = QReflection.CreateInstance(type, target) as IList;
+
 									if (reader.NextIs('['))
 									{
+										
 										var count = 0;
 										for (var i = 0; !reader.IsEnd() && !reader.NextIs(']'); i++)
 										{
@@ -429,20 +431,29 @@ namespace QTool
 												list.Add(reader.ReadType(typeInfo.ElementType, hasName));
 											}
 											count++;
-											if (!(  reader.NextIs(','))){
+											if (! reader.NextIs(',')){
 												if (reader.NextIs(']'))
 												{
 													break; 
 												}
 												else
 												{
-													throw new Exception("格式出错 缺少;或,"); ;
+													throw new Exception("数组格式出错 缺少[,]而不是["+ reader.ReadToEnd()+"]"); ;
 												}
 											}
 										}
 										for (int i = count; i < list.Count; i++)
 										{
 											list.RemoveAt(i);
+										}
+										
+									}
+									else
+									{
+										var str = reader.ReadCheckString();
+										if (str == "null")
+										{
+											list.Clear();
 										}
 									}
 									return list;

@@ -61,8 +61,9 @@ namespace QTool.Test
 
         }
         [ContextMenu("切换语言")]
-        public void ChangeLangua()
+        public async void ChangeLangua()
         {
+			Debug.LogError(await "中文".NetworkTranslateAsync());
             QTranslate.ChangeGlobalLanguage(QTranslate.GlobalLanguage == "schinese" ? "english" : "schinese");
 			for (int i = 0; i < 10; i++)
 			{

@@ -15,6 +15,7 @@ namespace QTool
 	}
 	public class QTranslate : MonoBehaviour
 	{
+
 		public static QList<string, QTranslateKey> TranslateKeys = new QList<string, QTranslateKey>
 		{
 			new QTranslateKey
@@ -49,6 +50,7 @@ namespace QTool
 			},
 		};
 		static QDataList _languageData;
+		
 		public static QDataList LanguageData =>_languageData??=GetQDataList();
 		public static QDataList GetQDataList(string name=null)
 		{

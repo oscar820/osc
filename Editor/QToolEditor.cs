@@ -15,13 +15,34 @@ namespace QTool
 {
     public static class QToolEditor
     {
-		[MenuItem("QTool/工具/查看翻译语言信息")]
+		[MenuItem("QTool/翻译/查看翻译语言信息")]
 		public static void LanguageTest()
 		{
 			Debug.LogError(QTool.QTranslate.LanguageData.ToString());
 			GUIUtility.systemCopyBuffer = QTool.QTranslate.LanguageData.ToString();
 		}
-		[MenuItem("QTool/工具/查看基础信息")]
+		[MenuItem("QTool/翻译/翻译语言文件")]
+		public static async void NetworkTranslate()
+		{
+			var newData = new QDataList();
+			newData.SetTitles(QTranslate.LanguageData.TitleRow.ToArray());
+			foreach (var data in QTranslate.LanguageData)
+			{
+				for (int i = 2; i < data.Count; i++)
+				{
+					var text= data[1];
+					var newLine = newData[data[0]];
+					newLine[1]= text;
+					if (!text.IsNullOrEmpty()&&data[i].IsNullOrEmpty())
+					{
+						newLine[i] = "*"+await text.NetworkTranslateAsync(QTranslate.GetTranslateKey(QTranslate.LanguageData.TitleRow[i]).WebAPI);
+					}
+				}
+			}
+			Debug.LogError(newData.ToString());
+			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.LanguageData),nameof(NetworkTranslate)));
+		}
+		[MenuItem("QTool/工具/运行时信息")]
 		public static void BaseTest()
 		{
 			Debug.LogError(nameof(QPoolManager)+"信息 \n"+QPoolManager.Pools.ToOneString());

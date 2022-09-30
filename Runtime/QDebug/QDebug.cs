@@ -10,7 +10,7 @@ namespace QTool
 		[System.Diagnostics.Conditional("QDebug")]
 		public static void Log(object obj)
 		{
-			Debug.Log(obj);
+	
 		}
 		public static QDictionary<string, ProfilerMarker> ProfilerMarkerList = new QDictionary<string, ProfilerMarker>((key)=> new ProfilerMarker(key));
 		[System.Diagnostics.Conditional("QDebug")]

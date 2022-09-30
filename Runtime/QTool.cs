@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
 
 namespace QTool
 {
@@ -35,7 +36,31 @@ namespace QTool
 		public static string Version => Application.version; 
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
         static QDictionary<string, Color> KeyColor = new QDictionary<string, Color>();
+		public static void RunURLWeb(string url)
+		{
+			QDebug.Log(nameof(RunURLWeb) + url);
+			Application.OpenURL(url);
+		}
+		const string NetworkTranslateURL = "https://translate.googleapis.com/translate_a/single?client=gtx&sl={2}&tl={1}&dt=t&q={0}";
 
+		static List<List<List<string>>> translateData = new List<List<List<string>>>();
+		public static async Task<string> NetworkTranslateAsync(this string chineseText, string toLanguage="en",string fromLanguage= "zh-CN")
+		{
+			var jsonStr= await Tool.RunURLAsync(string.Format(NetworkTranslateURL, chineseText, toLanguage,fromLanguage ));
+			jsonStr.ParseQData(translateData);
+			return translateData[0][0][0];
+		}
+		public static async Task<string> RunURLAsync(this string requestUrl)
+		{
+			UnityWebRequest req = UnityWebRequest.Get(requestUrl);
+			await req.SendWebRequest();
+			if(!req.error.IsNullOrEmpty())
+			{
+				throw new Exception(req.error);
+			}
+			QDebug.Log(nameof(RunURLAsync) + " url: " + requestUrl+"\n"+req.downloadHandler.text);
+			return req.downloadHandler.text;
+		}
 		public static async Task LoadSceneAsync(this string sceneName,string loadingScene=null,float time=2f)
 		{
 			if (!loadingScene.IsNullOrEmpty())
@@ -320,8 +345,8 @@ namespace QTool
 		public static bool NextIs(this StringReader reader, char value)
         {
             if (reader.Peek() == value)
-            {
-                reader.Read();
+			{
+				reader.Read();
                 return true;
             }
             return false;
@@ -329,8 +354,8 @@ namespace QTool
         public static void NextIgnore(this StringReader reader, char value)
         {
             if (reader.Peek() == value)
-            {
-                reader.Read();
+			{
+				reader.Read();
             }
         }
         public static bool IsEnd(this StringReader reader)

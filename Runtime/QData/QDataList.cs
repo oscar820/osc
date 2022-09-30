@@ -36,10 +36,16 @@ namespace QTool
     public class QDataList: QList<string, QDataRow>
 	{
 		public static string ResourcesPathRoot => QFileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
-		//public static string StreamingPathRoot => Application.streamingAssetsPath +'\\'+ nameof(QDataList)+'\\';
-		public static string GetResourcesDataPath(string name)
+		public static string GetResourcesDataPath(string name,string childFile=null)
 		{
-			return ResourcesPathRoot + name + ".txt";
+			if (childFile.IsNullOrEmpty())
+			{
+				return ResourcesPathRoot + name + ".txt";
+			}
+			else
+			{
+				return ResourcesPathRoot + name +"/"+childFile+ ".txt";
+			}
 		}
 		public static string GetAssetDataPath(string name)
 		{
