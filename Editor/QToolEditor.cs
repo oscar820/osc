@@ -31,10 +31,10 @@ namespace QTool
 				for (int i = 2; i < data.Count; i++)
 				{
 					var text= data[1];
-					var newLine = newData[data[0]];
-					newLine[1]= text;
 					if (!text.IsNullOrEmpty()&&data[i].IsNullOrEmpty())
 					{
+						var newLine = newData[data[0]];
+						newLine[1] = text;
 						newLine[i] = "*"+await text.NetworkTranslateAsync(QTranslate.GetTranslateKey(QTranslate.LanguageData.TitleRow[i]).WebAPI);
 					}
 				}
