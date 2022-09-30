@@ -227,11 +227,11 @@ namespace QTool.Asset {
 		{
 			foreach (var path in AssetDatabase.GetAllAssetPaths())
 			{
+				if (!path.StartsWith("Assets/") || path.Contains(nameof(Resources) + "/")) continue;
 				if (path.EndsWith("AutoAtlas.spriteatlas"))
 				{
-					var assetPath = path.ToAssetPath();
-					Debug.LogError("删除 " + assetPath);
-					AssetDatabase.DeleteAsset(assetPath);
+					Debug.LogError("删除 " + path);
+					AssetDatabase.DeleteAsset(path);
 				}
 			};
 			EditorUtility.ClearProgressBar();
