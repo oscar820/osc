@@ -324,10 +324,10 @@ namespace QTool.Asset {
 				}
 				if (textureImporter.textureType == TextureImporterType.Sprite)
 				{
-					if (texture.width < QToolSetting.Instance.AtlasSize && texture.height < QToolSetting.Instance.AtlasSize)
-					{
-						AutoAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
-					}
+					//if (texture.width < QToolSetting.Instance.AtlasSize && texture.height < QToolSetting.Instance.AtlasSize)
+					//{
+					//	AutoAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
+					//}
 				}
 				else 
 				{
@@ -346,7 +346,13 @@ namespace QTool.Asset {
 				textureImporter.compressionQuality = setting.compressionQuality;
 				textureImporter.SaveAndReimport();
 			}
-			
+			if (textureImporter.textureType == TextureImporterType.Sprite)
+			{
+				if (texture.width < QToolSetting.Instance.AtlasSize && texture.height < QToolSetting.Instance.AtlasSize)
+				{
+					AutoAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
+				}
+			}
 		}
 
 		static void AutoSetAtlasContents(string path, List<string> textures)
