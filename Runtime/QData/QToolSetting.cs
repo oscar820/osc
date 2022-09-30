@@ -41,7 +41,7 @@ namespace QTool
 		[Range(0,100)]
 		public int compressionQuality = 50;
 		[QName("图集大小")]
-		public int AtlasSize = 2048;
+		public int AtlasSize = 4096;
 #endif
 		private void OnValidate()
 		{

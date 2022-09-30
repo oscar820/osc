@@ -237,7 +237,7 @@ namespace QTool.Asset {
 			EditorUtility.ClearProgressBar();
 			AssetDatabase.SaveAssets();
 		}
-		public static QDictionary<string, List<string>> SpriteAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
+		public static QDictionary<string, List<string>> AutoAtlas = new QDictionary<string, List<string>>((key) => new List<string>());
 		[MenuItem("QTool/资源管理/批量设置资源格式")]
 		public static void FreshAllImporter()
 		{
@@ -255,7 +255,7 @@ namespace QTool.Asset {
 					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(path), textureImporter);
 				}
 			};
-			foreach (var kv in SpriteAtlas)
+			foreach (var kv in AutoAtlas)
 			{
 				AutoSetAtlasContents(kv.Key, kv.Value);
 			}
@@ -322,8 +322,14 @@ namespace QTool.Asset {
 						}
 					}
 				}
-				
-				if (textureImporter.textureType != TextureImporterType.Sprite)
+				if (textureImporter.textureType == TextureImporterType.Sprite)
+				{
+					if (texture.width < QToolSetting.Instance.AtlasSize && texture.height < QToolSetting.Instance.AtlasSize)
+					{
+						AutoAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
+					}
+				}
+				else 
 				{
 					textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
 				}
@@ -340,13 +346,7 @@ namespace QTool.Asset {
 				textureImporter.compressionQuality = setting.compressionQuality;
 				textureImporter.SaveAndReimport();
 			}
-			if (textureImporter.textureType == TextureImporterType.Sprite)
-			{
-				if (texture.width < 2048 && texture.height < 2048)
-				{
-					SpriteAtlas[textureImporter.assetPath.GetFolderPath()].AddCheckExist(textureImporter.assetPath.Replace('\\', '/'));
-				}
-			}
+			
 		}
 
 		static void AutoSetAtlasContents(string path, List<string> textures)
