@@ -321,7 +321,7 @@ namespace QTool.Asset {
 				
 				if (textureImporter.textureType != TextureImporterType.Sprite)
 				{
-					textureImporter.npotScale = TextureImporterNPOTScale.ToSmaller;
+					textureImporter.npotScale = TextureImporterNPOTScale.ToNearest;
 				}
 				if (textureImporter.textureType == TextureImporterType.Default)
 				{
