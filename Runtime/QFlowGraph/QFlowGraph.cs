@@ -40,18 +40,25 @@ namespace QTool.FlowGraph
 		[QName]
 		public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
 		public bool IsRunning => CoroutineList.Count > 0;
-        public T GetValue<T>(string key)
+        public T GetValue<T>(string key="")
         {
             var type = typeof(T);
-            var obj = Values[key];
+			if (key.IsNullOrEmpty())
+			{
+				key = type.Name;
+			}
+			var obj = Values[key];
             if (obj==null&& type.IsValueType)
             {
                 obj = type.CreateInstance();
             }
             return (T)obj;
         }
-
-        public void SetValue<T>(string key,T value)
+		public void SetValue<T>( T value)
+		{
+			SetValue(typeof(T).Name, value);
+		}
+		public void SetValue<T>(string key,T value)
         {
             Values[key] = value;
         }
