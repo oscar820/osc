@@ -5,37 +5,10 @@ using UnityEngine;
 
 namespace QTool
 {
-	public class QDataList<T>  where T : QDataList<T>, IKey<string>,new()
-	{
-		public static bool ContainsKey(string key)
-		{
-			return list.ContainsKey(key);
-		}
-		public static T Get(string key)
-		{
-			if (string.IsNullOrEmpty(key))
-			{
-				Debug.LogError("key 为空");
-				return null;
-			}
-			key = key.Trim();
-			var value= list[key]; ;
-			if (value == null)
-			{
-				Debug.LogError(typeof(T).Name + " 未找到[" + key + "]");
-			}
-			return value;
-		}
-		static QDataList(){ 
-
-			var qdataList=QDataList.GetResourcesData(typeof(T).Name, () => new List<T> { new T{Key="测试Key" }, }.ToQDataList());
-			qdataList.ParseQdataList(list);
-		}
-		public static QList<string, T> list { get; private set; } = new QList<string, T>();
-    }
+	
     public class QDataList: QList<string, QDataRow>
 	{
-		public static string ResourcesPathRoot => QFileManager.ResourcesRoot + nameof(QDataList) +"Assets"+ '/';
+		public static string ResourcesPathRoot => QFileManager.ResourcesRoot + nameof(QDataList) +"Asset"+ '/';
 		public static string GetResourcesDataPath(string name,string childFile=null)
 		{
 			if (childFile.IsNullOrEmpty())
@@ -226,8 +199,36 @@ namespace QTool
         }
 
     }
+	public class QDataList<T> where T : QDataList<T>, IKey<string>, new()
+	{
+		public static bool ContainsKey(string key)
+		{
+			return list.ContainsKey(key);
+		}
+		public static T Get(string key)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				Debug.LogError("key 为空");
+				return null;
+			}
+			key = key.Trim();
+			var value = list[key]; ;
+			if (value == null)
+			{
+				Debug.LogError(typeof(T).Name + " 未找到[" + key + "]");
+			}
+			return value;
+		}
+		static QDataList()
+		{
 
-    public class QDataRow:QList<string>,IKey<string>
+			var qdataList = QDataList.GetResourcesData(typeof(T).Name, () => new List<T> { new T { Key = "测试Key" }, }.ToQDataList());
+			qdataList.ParseQdataList(list);
+		}
+		public static QList<string, T> list { get; private set; } = new QList<string, T>();
+	}
+	public class QDataRow:QList<string>,IKey<string>
     {
         public string Key { get => base[0]; set
             {
