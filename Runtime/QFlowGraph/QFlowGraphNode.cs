@@ -24,6 +24,12 @@ namespace QTool.FlowGraph
 		{
 		}
 		[QStartNode]
+		[QName("事件/Stop")]
+		public static void Stop(QFlowNode This)
+		{
+			This.Graph.Stop();
+		}
+		[QStartNode]
 		[QName("起点/Event")]
 		public static void Event([QNodeKeyName] string eventKey = "事件名")
 		{
