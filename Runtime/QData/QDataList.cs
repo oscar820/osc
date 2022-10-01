@@ -22,7 +22,7 @@ namespace QTool
 		}
 		public static string GetAssetDataPath(string name)
 		{
-			return Application.dataPath+"/" + nameof(QDataList) + "Assets/" + name + ".txt";
+			return Application.dataPath+"/" + nameof(QDataList) + "Asset/" + name + ".txt";
 		}
 		public static QDataList GetResourcesData(string name, System.Func<QDataList> autoCreate = null)
 		{
