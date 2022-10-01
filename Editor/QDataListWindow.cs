@@ -33,7 +33,7 @@ namespace QTool.FlowGraph
 		{
 			if (textAsset == null) return false;
 			var path = AssetDatabase.GetAssetPath(textAsset);
-			if (path.Contains(nameof(QDataList) + "Assets" + '/') && path.EndsWith(".txt"))
+			if (path.Contains(nameof(QDataList) + "Asset" + '/') && path.EndsWith(".txt"))
 			{
 				var window = GetWindow<QDataListWindow>();
 				window.minSize = new Vector2(400, 300);
