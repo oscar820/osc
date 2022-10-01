@@ -918,7 +918,18 @@ namespace QTool
 			{
 				if (TypeMembers.ContainsKey(type))
 				{
-					return !TypeMembers[type].Contains(member.Key)||member.Get==null||member.Set==null;
+					if (TypeMembers[type].Contains(member.Key))
+					{
+						if(member.Get != null&& member.Set != null)
+						{
+							return false;
+						}
+						else
+						{
+							Debug.LogError(type + "." + member.Key + " Get" + member.Get + " Set " + member.Set);
+						}
+					}
+					return true;
 				}
 				return member.MemeberInfo.GetCustomAttribute<QIgnoreAttribute>() != null || (!member.IsPublic&&member.MemeberInfo.GetCustomAttribute<QNameAttribute>()==null) || member.Key == "Item" || member.Set == null || member.Get == null || (member.Type.IsArray && member.Type.GetArrayRank() > 1);
 			});
