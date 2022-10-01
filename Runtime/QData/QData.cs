@@ -293,7 +293,7 @@ namespace QTool
 								}
 								catch (Exception e)
 								{
-									Debug.LogError("读取成员【" + name + ":" + typeInfo.Type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target) + "\n" + e+"\n 剩余信息"+reader.ReadToEnd());
+									Debug.LogError("读取成员【" + name + ":" + typeInfo.Type.Name + "." + memeberInfo.Key + "】出错" + memeberInfo.Type + ":" + result + ":" + memeberInfo.Get(target)+":" +memeberInfo.Set+ "\n" + e+"\n 剩余信息"+reader.ReadToEnd());
 									throw e;
 								}
 							}
