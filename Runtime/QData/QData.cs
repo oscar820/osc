@@ -848,9 +848,8 @@ namespace QTool
 			{
 				 typeof(Rect),
 				 new List<string>
-				 {
+				 { 
 					 nameof(Rect.position),
-					 nameof(Rect.size),
 					 nameof(Rect.height),
 					 nameof(Rect.width),
 				 }

@@ -712,9 +712,9 @@ namespace QTool.FlowGraph
             }
         }
         public string commandKey; 
-        public Rect rect;
-        
-        public object this[string key]
+        public Rect rect = new Rect(Vector2.zero, new Vector2(300, 80));
+
+		public object this[string key]
         {
             get
             {
