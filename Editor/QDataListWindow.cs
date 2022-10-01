@@ -89,6 +89,7 @@ namespace QTool.FlowGraph
 				qdataList?.Save();
 				lastTime = DateTime.Now;
 				gridView.HasChanged = false;
+				AssetDatabase.Refresh();
 			}
 		}
 		internal bool AutoOpen = true;

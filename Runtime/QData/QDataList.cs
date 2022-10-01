@@ -68,8 +68,8 @@ namespace QTool
             if (string.IsNullOrEmpty(path))
             {
                 path = LoadPath;
-            }
-            QFileManager.Save(path, ToString(),true);
+			}
+			QFileManager.Save(path, ToString(),true);
         }
         public int GetTitleIndex(string title)
         {
