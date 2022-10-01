@@ -1013,6 +1013,10 @@ namespace QTool.FlowGraph
                 case ReturnType.TaskDelayVoid:
                 case ReturnType.TaskDelayValue:
                     var task= returnObj as Task;
+					if (task.Exception != null)
+					{
+						Debug.LogError(task.Exception);
+					}
                     while (!task.IsCompleted)
                     {
                         yield return null;
