@@ -54,7 +54,29 @@ namespace QTool
 		{
 			RunningFlag = QId.GetNewId().GetHashCode();
 		}
-		public static async Task Wait(float second, bool ignoreTimeScale = false)
+		public static async Task WaitAllOver(params Task[] tasks)
+		{
+			foreach (var task in tasks)
+			{
+				if (task == null) continue;
+				await task;
+			}
+		}
+		public static async Task WaitAnyOver(params Task[] tasks)
+		{
+			while (true)
+			{
+				foreach (var task in tasks)
+				{
+					if (task.IsCompleted)
+					{
+						return;
+					}
+				}
+				await Task.Yield();
+			}
+		}
+		public static async Task Wait(float second, bool ignoreTimeScale = false, Func<bool> flagFunc = null)
 		{
 			if (Application.isPlaying)
 			{
