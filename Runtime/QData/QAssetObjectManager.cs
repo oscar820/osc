@@ -110,7 +110,7 @@ namespace QTool
 			{
 				return Get<GameObject>(id)?.GetComponent(type);
 			}
-			if (string.IsNullOrWhiteSpace(id)) return null;
+			if (string.IsNullOrWhiteSpace(id))throw new System.Exception("null Id") ;
             if (QId.InstanceIdList.ContainsKey(id) && QId.InstanceIdList[id] != null)
             {
                 return QId.InstanceIdList[id].gameObject;
@@ -121,7 +121,7 @@ namespace QTool
             }
 
 #if UNITY_EDITOR
-			else if (id.StartsWith("Assets"))
+			else if (id.StartsWith("Assets")&&!Application.isPlaying)
 			{
 				var obj = UnityEditor.AssetDatabase.LoadAssetAtPath(id, type);
 				if (obj != null)
@@ -131,6 +131,7 @@ namespace QTool
 				}
 			}
 #endif
+			Debug.LogError("找不到[" + id + "]对象");
 			return null;
         }
 
