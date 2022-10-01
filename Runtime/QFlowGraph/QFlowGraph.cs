@@ -33,9 +33,12 @@ namespace QTool.FlowGraph
         {
             return this.ToQData();
         }
+		[QName]
 		public string Name {  set; get; }
+		[QName]
 		public QList<string,QFlowNode> NodeList { private set; get; } = new QList<string,QFlowNode>();
-        public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
+		[QName]
+		public QDictionary<string, object> Values { private set; get; } = new QDictionary<string, object>();
 		public bool IsRunning => CoroutineList.Count > 0;
         public T GetValue<T>(string key)
         {
@@ -693,8 +696,7 @@ namespace QTool.FlowGraph
         public List<QFlowPort> OutParamPorts = new List<QFlowPort>();
         public string Key { get;  set; } = QId.GetNewId();
         public string name;
-        public bool IsStartNode { private set; get; }
-        public string ViewName { 
+		public string ViewName { 
             get
             {
                 switch (returnType)
@@ -912,7 +914,7 @@ namespace QTool.FlowGraph
         {
             Ports[QFlowKey.NextPort].Connect(new PortId(targetState.Ports[QFlowKey.FromPort]));
         }
-
+		[QName]
         public QList<string, QFlowPort> Ports { get; private set; } = new QList<string, QFlowPort>();
         PortId? _nextFlowPort;
         public void SetNetFlowPort(string portKey,int listIndex=0)

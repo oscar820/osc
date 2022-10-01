@@ -818,11 +818,7 @@ namespace QTool
 		void ToQData(StringWriter writer);
 		void ParseQData(StringReader reader);
 	}
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Interface)]
-	public class QValueAttribute : Attribute
-	{
-
-	}
+	
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Interface)]
 	public class QIgnoreAttribute : Attribute
 	{
