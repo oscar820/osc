@@ -110,7 +110,7 @@ namespace QTool
 			{
 				return Get<GameObject>(id)?.GetComponent(type);
 			}
-			if (string.IsNullOrWhiteSpace(id))throw new System.Exception("null Id") ;
+			if (string.IsNullOrWhiteSpace(id)) return null;
             if (QId.InstanceIdList.ContainsKey(id) && QId.InstanceIdList[id] != null)
             {
                 return QId.InstanceIdList[id].gameObject;
