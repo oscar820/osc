@@ -49,7 +49,7 @@ namespace QTool.FlowGraph
 			try
 			{
 				lastTime = QFileManager.GetLastWriteTime(path);
-				var type = QReflection.ParseType(path.GetBlockValue(nameof(QDataList) + "Assets" + '/', ".txt").SplitStartString("/"));
+				var type = QReflection.ParseType(path.GetBlockValue(nameof(QDataList) + "Asset" + '/', ".txt").SplitStartString("/"));
 				if (type != null)
 				{
 					typeInfo = QSerializeType.Get(type);

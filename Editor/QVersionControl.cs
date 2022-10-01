@@ -279,10 +279,6 @@ namespace QTool
 			
 			commitList.Clear();
 			AddCommitList(path);
-			//if (path.StartsWith("Assets"))
-			//{
-			//	AddCommitList(path + ".meta");
-			//}
 			if (commitList.Count == 0) return "";
 			EditorUtility.ClearProgressBar();
 			var commitInfo = QVersionControlWindow.Commit(commitList);
