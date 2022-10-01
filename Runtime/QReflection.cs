@@ -39,7 +39,7 @@ namespace QTool.Reflection
 			IsPublic = true;
 			if (info.SetMethod != null)
 			{
-				Set = info.SetValue;
+				Set =(obj,value)=> info.SetMethod.Invoke(obj,new object[] { value });
 				if (!info.SetMethod.IsPublic)
 				{
 					IsPublic = false;
@@ -51,7 +51,7 @@ namespace QTool.Reflection
 			}
 			if (info.GetMethod != null)
 			{
-				Get = info.GetValue;
+				Get =(obj)=> info.GetMethod.Invoke(obj,null);
 				if (! info.GetMethod.IsPublic)
 				{
 					IsPublic = false;

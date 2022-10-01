@@ -926,7 +926,7 @@ namespace QTool
 						}
 						else
 						{
-							Debug.LogError(type + "." + member.Key + " Get" + member.Get + " Set " + member.Set);
+							Debug.LogError(type + "." + member.Key + " Get" + member.Get+ " Set " + member.Set);
 						}
 					}
 					return true;
