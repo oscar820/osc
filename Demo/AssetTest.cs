@@ -6,7 +6,9 @@ using UnityEngine.UI;
 using QTool;
 using QTool.Inspector;
 using UnityEngine.SceneManagement;
+#if QTest
 using UnityEngine.AddressableAssets;
+#endif
 public class ResourceTest : QAssetLoader<ResourceTest,Sprite>
 {
 
@@ -29,8 +31,10 @@ public class AssetTest : MonoBehaviour
 		}
 		else
 		{
+#if QTest
 			obj = await Addressables.LoadAssetAsync<GameObject>(nameof(ResourceTest) + "/" + nameof(ResourceTest) + nameof(GameObject)).Task;
 			sprite = await Addressables.LoadAssetAsync<Sprite>(nameof(ResourceTest) + "/" + nameof(ResourceTest) + nameof(Sprite)).Task;
+#endif
 		}
 
 		sView.sprite = sprite;
@@ -49,8 +53,10 @@ public class AssetTest : MonoBehaviour
 		}
 		else
 		{
+#if QTest
 			Addressables.Release(sprite);
 			Addressables.Release(obj);
+#endif
 			obj = null;
 			sView.sprite = null;
 			sprite = null;
