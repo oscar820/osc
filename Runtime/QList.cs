@@ -517,7 +517,7 @@ namespace QTool
 		}
 		public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dic, TValue value) where TValue : IKey<TKey>
 		{
-			Set(dic, value);
+			Set(dic,value.Key, value);
 		}
 		public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey key, TValue value)
 		{
