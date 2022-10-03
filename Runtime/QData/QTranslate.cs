@@ -51,16 +51,16 @@ namespace QTool
 		};
 		static QDataList _languageData;
 		
-		public static QDataList LanguageData =>_languageData??=GetQDataList();
+		public static QDataList QTranslateData =>_languageData??=GetQDataList();
 		public static QDataList GetQDataList(string name=null)
 		{
 			if (string.IsNullOrEmpty(name))
 			{
-				name = nameof(LanguageData);
+				name = nameof(QTranslateData);
 			}
 			else
 			{
-				name = nameof(LanguageData) + "/" + name;
+				name = nameof(QTranslateData) + "/" + name;
 			}
 			return QDataList.GetResourcesData(name, () => {
 				var data = new QDataList();
@@ -71,7 +71,7 @@ namespace QTool
 					titleList.Add(translateKey.Key);
 				}
 				data.SetTitles(titleList.ToArray());
-				if (name == nameof(LanguageData))
+				if (name == nameof(QTranslateData))
 				{
 					data["测试文本"].SetValue(GlobalLanguage, @"测试文
 本123");
@@ -198,9 +198,9 @@ namespace QTool
 			{
 				return TranslateKey(KeyReplace[value]);
 			}
-			else if (LanguageData.ContainsKey(value)&& LanguageData[value].HasValue(GlobalLanguage))
+			else if (QTranslateData.ContainsKey(value)&& QTranslateData[value].HasValue(GlobalLanguage))
             {
-                var translate = LanguageData[value].GetValue<string>(GlobalLanguage);
+                var translate = QTranslateData[value].GetValue<string>(GlobalLanguage);
 				return translate;
 			}
             return value;

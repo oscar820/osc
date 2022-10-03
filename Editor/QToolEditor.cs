@@ -18,15 +18,15 @@ namespace QTool
 		[MenuItem("QTool/翻译/查看翻译语言信息")]
 		public static void LanguageTest()
 		{
-			Debug.LogError(QTool.QTranslate.LanguageData.ToString());
-			GUIUtility.systemCopyBuffer = QTool.QTranslate.LanguageData.ToString();
+			Debug.LogError(QTool.QTranslate.QTranslateData.ToString());
+			GUIUtility.systemCopyBuffer = QTool.QTranslate.QTranslateData.ToString();
 		}
 		[MenuItem("QTool/翻译/翻译语言文件")]
 		public static async void NetworkTranslate()
 		{
 			var newData = new QDataList();
-			newData.SetTitles(QTranslate.LanguageData.TitleRow.ToArray());
-			foreach (var data in QTranslate.LanguageData)
+			newData.SetTitles(QTranslate.QTranslateData.TitleRow.ToArray());
+			foreach (var data in QTranslate.QTranslateData)
 			{
 				for (int i = 2; i < data.Count; i++)
 				{
@@ -35,12 +35,12 @@ namespace QTool
 					{
 						var newLine = newData[data[0]];
 						newLine[1] = text;
-						newLine[i] = "*"+await text.NetworkTranslateAsync(QTranslate.GetTranslateKey(QTranslate.LanguageData.TitleRow[i]).WebAPI);
+						newLine[i] = "*"+await text.NetworkTranslateAsync(QTranslate.GetTranslateKey(QTranslate.QTranslateData.TitleRow[i]).WebAPI);
 					}
 				}
 			}
 			Debug.LogError(newData.ToString());
-			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.LanguageData),nameof(NetworkTranslate)));
+			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.QTranslateData),nameof(NetworkTranslate)));
 		}
 		[MenuItem("QTool/工具/运行时信息")]
 		public static void BaseTest()
