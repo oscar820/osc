@@ -962,7 +962,7 @@ namespace QTool.FlowGraph
 					for (int i = 0; i < port.ConnectInfolist.Count; i++)
 					{
 						var connectInfo = port.ConnectInfolist[i];
-						foreach (var connect in connectInfo.ConnectList)
+						foreach (var connect in connectInfo.ConnectList.ToArray())
 						{
 							newNode.Ports[port.Key].Connect(connect, i);
 						}
