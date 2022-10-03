@@ -969,6 +969,7 @@ namespace QTool.FlowGraph
 					}
 				}
 			}
+			Graph.NodeList.Replace(Graph.NodeList.IndexOf(this), Graph.NodeList.IndexOf(newNode));
 			newNode.rect = rect;
 			Graph.Remove(this);
 			return newNode;
