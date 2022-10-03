@@ -92,7 +92,7 @@ namespace QTool.FlowGraph
         public QFlowNode AddNode(string commandKey)
         {
             var newNode= Add(new QFlowNode(commandKey));
-			newNode.rect =new Rect(new Vector2(300*1.5f*(NodeList.Count-1),0 ), new Vector2(300, 80));
+			newNode.rect =new Rect(new Vector2(300*1.1f*(NodeList.Count-1),0 ), new Vector2(300, 80));
 			return newNode;
         }
 	
@@ -279,7 +279,14 @@ namespace QTool.FlowGraph
             }
             return this;
         }
-
+		public void Clear()
+		{
+			this.Stop();
+			foreach (var node in NodeList.ToArray())
+			{
+				Remove(node);
+			}
+		}
 	
 	}
     public enum PortType
