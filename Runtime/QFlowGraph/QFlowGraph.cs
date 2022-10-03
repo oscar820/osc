@@ -91,7 +91,9 @@ namespace QTool.FlowGraph
         }
         public QFlowNode AddNode(string commandKey)
         {
-            return Add(new QFlowNode(commandKey));
+            var newNode= Add(new QFlowNode(commandKey));
+			newNode.rect =new Rect(new Vector2(300*1.5f*(NodeList.Count-1),0 ), new Vector2(300, 80));
+			return newNode;
         }
 	
 		public QFlowNode AddNodeToEnd(string commandKey)
@@ -960,6 +962,7 @@ namespace QTool.FlowGraph
 					}
 				}
 			}
+			newNode.rect = rect;
 			Graph.Remove(this);
 			return newNode;
 		}
