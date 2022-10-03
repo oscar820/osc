@@ -93,6 +93,7 @@ namespace QTool.FlowGraph
         {
             return Add(new QFlowNode(commandKey));
         }
+	
 		public QFlowNode AddNodeToEnd(string commandKey)
 		{
 			if (NodeList.Count > 0)
@@ -942,6 +943,26 @@ namespace QTool.FlowGraph
 		public QFlowNode AddNextNode(string commandKey)
 		{
 			return SetNextNode(Graph.AddNode(commandKey));
+		}
+		public QFlowNode ReplaceNode( string commandKey)
+		{
+			var newNode= Graph.AddNode(commandKey);
+			foreach (var port in Ports)
+			{
+				if (newNode.Ports.ContainsKey(port.Key))
+				{
+					for (int i = 0; i < port.ConnectInfolist.Count; i++)
+					{
+						var connectInfo = port.ConnectInfolist[i];
+						foreach (var connect in connectInfo.ConnectList)
+						{
+							newNode.Ports[port.Key].Connect(connect, i);
+						}
+					}
+				}
+			}
+			Graph.Remove(this);
+			return newNode;
 		}
 		[QName]
         public QList<string, QFlowPort> Ports { get; private set; } = new QList<string, QFlowPort>();
