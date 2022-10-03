@@ -935,18 +935,17 @@ namespace QTool.FlowGraph
                 port.ClearAllConnect();
             }
         }
-        public QFlowNode SetNextNode(QFlowNode targetState)
+        public QFlowNode SetNextNode(QFlowNode nextNode)
         {
-            Ports[QFlowKey.NextPort].Connect(new PortId(targetState.Ports[QFlowKey.FromPort]));
-			return targetState;
+            Ports[QFlowKey.NextPort].Connect(new PortId(nextNode.Ports[QFlowKey.FromPort]));
+			return nextNode;
         }
 		public QFlowNode AddNextNode(string commandKey)
 		{
 			return SetNextNode(Graph.AddNode(commandKey));
 		}
-		public QFlowNode ReplaceNode( string commandKey)
+		public QFlowNode ReplaceNode(QFlowNode newNode)
 		{
-			var newNode= Graph.AddNode(commandKey);
 			foreach (var port in Ports)
 			{
 				if (newNode.Ports.ContainsKey(port.Key))
@@ -963,6 +962,10 @@ namespace QTool.FlowGraph
 			}
 			Graph.Remove(this);
 			return newNode;
+		}
+		public QFlowNode ReplaceNode( string commandKey)
+		{
+			return ReplaceNode(Graph.AddNode(commandKey));
 		}
 		[QName]
         public QList<string, QFlowPort> Ports { get; private set; } = new QList<string, QFlowPort>();
