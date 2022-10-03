@@ -99,7 +99,7 @@ namespace QTool.FlowGraph
                 {
                     menu.AddItem(new GUIContent(info.fullName), false, () =>
                     {
-                        var node =Graph.Add(info.Key);
+                        var node =Graph.AddNode(info.Key);
                         node.rect = new Rect(mousePos, new Vector2(300, 80));
                         fromPort.Connect( node.Ports[portKey]);
                     });
@@ -116,7 +116,7 @@ namespace QTool.FlowGraph
                 {
                     menu.AddItem(new GUIContent(kv.fullName), false, () =>
                    {
-                       var state =Graph.Add(kv.Key);
+                       var state =Graph.AddNode(kv.Key);
                        state.rect = new Rect(mousePos, new Vector2(300, 80));
                    });
                 }

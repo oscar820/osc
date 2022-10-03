@@ -89,11 +89,22 @@ namespace QTool.FlowGraph
             node.ClearAllConnect();   
             NodeList.Remove(node);
         }
-        public QFlowNode Add(string commandKey)
+        public QFlowNode AddNode(string commandKey)
         {
             return Add(new QFlowNode(commandKey));
         }
-        public void Parse(IList<QFlowNode> nodes,Vector2 startPos)
+		public QFlowNode AddNodeToEnd(string commandKey)
+		{
+			if (NodeList.Count > 0)
+			{
+				return NodeList.StackPeek().AddNextNode(commandKey);
+			}
+			else
+			{
+				return AddNode(commandKey);
+			}
+		}
+		public void Parse(IList<QFlowNode> nodes,Vector2 startPos)
         {
             var lastKeys = new List<string>();
             var keys = new List<string>();
@@ -923,10 +934,15 @@ namespace QTool.FlowGraph
                 port.ClearAllConnect();
             }
         }
-        public void SetNextNode(QFlowNode targetState)
+        public QFlowNode SetNextNode(QFlowNode targetState)
         {
             Ports[QFlowKey.NextPort].Connect(new PortId(targetState.Ports[QFlowKey.FromPort]));
+			return targetState;
         }
+		public QFlowNode AddNextNode(string commandKey)
+		{
+			return SetNextNode(Graph.AddNode(commandKey));
+		}
 		[QName]
         public QList<string, QFlowPort> Ports { get; private set; } = new QList<string, QFlowPort>();
         PortId? _nextFlowPort;

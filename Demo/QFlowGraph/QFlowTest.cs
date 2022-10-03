@@ -33,9 +33,9 @@ public class QFlowTest : MonoBehaviour
     public void Test()
     {
         var graph = new QFlowGraph();
-        var logNode= graph.Add(nameof(QFlowNodeTest.LogErrorTest));
+        var logNode= graph.AddNode(nameof(QFlowNodeTest.LogErrorTest));
         logNode["value"] = "QFlowGraph测试";
-        var waitNode = graph.Add(nameof(QFlowNodeTest.CoroutineWaitTest));
+        var waitNode = graph.AddNode(nameof(QFlowNodeTest.CoroutineWaitTest));
         waitNode["time"]=3;
         logNode.SetNextNode(waitNode);
         waitNode.SetNextNode(logNode);
