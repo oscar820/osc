@@ -415,15 +415,16 @@ namespace QTool.Reflection
 				}
 				return method.Invoke(null, param);
 			}
-			else
+			else if(type!=null)
 			{
 				return type.InvokeStaticFunction(end);
 			}
+			return null;
 			
 		}
 		public static object InvokeFunction(this object obj, string funcName, params object[] param)
 		{
-			if (obj == null)
+			if (obj == null||funcName.IsNullOrEmpty())
 			{
 				return null;
 			}

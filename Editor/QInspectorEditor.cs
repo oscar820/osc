@@ -156,10 +156,9 @@ namespace QTool.Inspector
 				var drawer = DrawerDic[att];
 				using (new GUILayout.HorizontalScope())
 				{
-					if (att.GetKeyListFunc.SplitTowString(".", out var start, out var end))
+					var getObj = QReflection.InvokeStaticFunction(null,att.GetKeyListFunc);
+					if (getObj!=null)
 					{
-						var type = QReflection.ParseType(start);
-						var getObj = QReflection.InvokeStaticFunction(type, end);
 						if (getObj is IList<string> stringList)
 						{
 							drawer.enumList.Clear();
@@ -174,6 +173,10 @@ namespace QTool.Inspector
 								{
 									drawer.enumList.AddCheckExist(key.Key);
 								}
+								else if (item is UnityEngine.Object uObj)
+								{ 
+									drawer.enumList.AddCheckExist(uObj.name);
+								}
 								else 
 								{
 									drawer.enumList.AddCheckExist(item?.ToString());
@@ -182,7 +185,7 @@ namespace QTool.Inspector
 						}
 						else
 						{
-							EditorGUILayout.LabelField("错误函数" + start+"    "+end);
+							EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
 						}
 					}
 					else
@@ -222,7 +225,6 @@ namespace QTool.Inspector
 				return str;
 			}
 			
-			return obj;
 		}
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -257,6 +259,10 @@ namespace QTool.Inspector
 						{
 							enumList.Add(key.Key);
 						}
+						else if (item is UnityEngine.Object uObj)
+						{
+							enumList.AddCheckExist(uObj.name);
+						}
 						else
 						{
 							enumList.AddCheckExist(item?.ToString());
@@ -287,12 +293,6 @@ namespace QTool.Inspector
                 }
 
             }
-
-            // EditorGUI.BeginChangeCheck();
-            // property.Draw(position, att.name );
-
-            //EditorGUI.PropertyField(rect, property, new GUIContent(viewName), property.isExpanded);
-            // EditorGUI.EndChangeCheck();
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -300,28 +300,7 @@ namespace QTool.Inspector
             return property.GetHeight();
         }
     }
-    //[CustomPropertyDrawer(typeof(TitleAttribute))]
-    //public class TitleAttributeDrawer : DecoratorDrawBase<TitleAttribute>
-    //{
-    
-    //    public override void OnGUI(Rect position)
-    //    {
-    //        var falg = GUI.enabled;
-    //        GUI.enabled = true;
-    //        var titleRect = position;
-    //        titleRect.y += 10;
-    //        titleRect.height = att.height;
-    //        GUI.Label(titleRect, att.title, QGUITool.TitleLable);
-    //        titleRect.y += 4;
-    //        titleRect.height -= 4;
-    //        GUI.Label(titleRect, "__________________________________", QGUITool.TitleLable);
-    //        GUI.enabled = falg;
-    //    }
-    //    public override float GetHeight()
-    //    {
-    //        return att.height + 10;
-    //    }
-    //}
+   
 
     #endregion
     public static class QEditorTool
@@ -456,19 +435,9 @@ namespace QTool.Inspector
 		}
         public static object Call(this SerializedProperty property, string funcName, object[] paramsList = null)
         {
-            if (string.IsNullOrEmpty(funcName))
-            {
-                return null;
-            }
-            object obj = property.serializedObject.targetObject;
-            Type objType = obj.GetType();
-            var method = objType.GetMethod(funcName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (method == null)
-            {
-				return objType.InvokeStaticFunction(funcName, paramsList);
-			} 
-            return method?.Invoke(method.IsStatic ? null : obj, paramsList);
-        }
+			return property.serializedObject.targetObject.InvokeFunction(funcName,paramsList);
+
+		}
         public static Action DrawLayout(this SerializedProperty property)
         {
             if (!property.IsShow())
