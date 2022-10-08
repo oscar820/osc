@@ -66,7 +66,7 @@ namespace QTool
 				var data = new QDataList();
 				List<string> titleList = new List<string>();
 				titleList.Add("Key");
-				foreach (var translateKey in TranslateKeys)
+				foreach (var translateKey in TranslateKeys)  
 				{
 					titleList.Add(translateKey.Key);
 				}

@@ -25,24 +25,29 @@ namespace QTool
 		public static async void NetworkTranslate()
 		{
 			var newData = new QDataList();
-			QTranslate.QTranslateData.TitleRow.RemoveAll((key) => !QTranslate.TranslateKeys.ContainsKey(key));
 			newData.SetTitles(QTranslate.QTranslateData.TitleRow.ToArray());
-
+			QDictionary<string, string> keyCache = new QDictionary<string, string>();
 			
 			for (int rowIndex = 0; rowIndex < QTranslate.QTranslateData.Count; rowIndex++)
 			{
 				var data = QTranslate.QTranslateData[rowIndex];
 				for (int i = 2; i < data.Count; i++)
 				{
-					var text = data[1];
+					keyCache.Clear();
+					var text =  data[1];
+					text = text.ForeachBlockValue('{', '}', (key) => { var value = key.GetHashCode().ToString();keyCache[value] ="{"+ key+"}";   return "["+value+"]"; });
+					text = text.ForeachBlockValue('<', '>', (key) => { var value = key.GetHashCode().ToString(); keyCache[value] ="<" +key+">"; return "["+value+"]"; });
+					var key = QTranslate.QTranslateData.TitleRow[i];
 
-					var language = QTranslate.GetTranslateKey(QTranslate.QTranslateData.TitleRow[i]);
-					if (!text.IsNullOrEmpty() && data[i].IsNullOrEmpty() && !QTranslate.QTranslateData.TitleRow[i].IsNullOrEmpty())
-					{
+					if (!text.IsNullOrEmpty() && data[i].IsNullOrEmpty() && !QTranslate.QTranslateData.TitleRow[i].IsNullOrEmpty()&&!key.IsNullOrEmpty()&& QTranslate.TranslateKeys.ContainsKey(key))
+					{  
+						var language = QTranslate.GetTranslateKey(key);
 						var newLine = newData[data[0]];
-						newLine[1] = text;
-						newLine[i] = "*" + await text.NetworkTranslateAsync(language.WebAPI);
-						Debug.Log("翻译" + language.Key + " " + rowIndex + "/" + QTranslate.QTranslateData.Count + " " + " [" + text + "]=>[" + newLine[i] + "]");
+						newLine[1] = data[1];
+					    var translateText = "#" + await text.NetworkTranslateAsync(language.WebAPI);
+						translateText = translateText.ForeachBlockValue('[', ']', (key) => keyCache.ContainsKey(key)?keyCache[key]:key );
+						newLine[i] = translateText;
+						Debug.Log("翻译" + language.Key + " " + rowIndex + "/" + QTranslate.QTranslateData.Count + " " + " [" + data[1] + "]=>[" + newLine[i] + "]");
 					}
 				}
 			}
