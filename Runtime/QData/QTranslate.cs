@@ -42,12 +42,12 @@ namespace QTool
 				Name="日本語",
 				WebAPI="ja",
 			},
-			new QTranslateKey
-			{
-				Key="koreana",
-				Name="한국어",
-				WebAPI="ko",
-			},
+			//new QTranslateKey
+			//{
+			//	Key="koreana",
+			//	Name="한국어",
+			//	WebAPI="ko",
+			//},
 		};
 		static QDataList _languageData;
 		

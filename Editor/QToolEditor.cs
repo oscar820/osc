@@ -32,18 +32,19 @@ namespace QTool
 				for (int i = 2; i < data.Count; i++)
 				{
 					var text = data[1];
-					var language = QTranslate.GetTranslateKey(QTranslate.QTranslateData.TitleRow[i]);
-					if (!text.IsNullOrEmpty() && data[i].IsNullOrEmpty() && !QTranslate.QTranslateData.TitleRow[i].IsNullOrEmpty())
+					if (QTranslate.TranslateKeys.ContainsKey(QTranslate.QTranslateData.TitleRow[i]))
 					{
-						var newLine = newData[data[0]];
-						newLine[1] = text;
-						newLine[i] = "*" + await text.NetworkTranslateAsync(language.WebAPI);
-						Debug.Log("翻译"+ language.Key+" " + rowIndex + "/" + QTranslate.QTranslateData.Count+" "+ " [" + text + "]=>[" + newLine[i] + "]");
+						var language = QTranslate.GetTranslateKey(QTranslate.QTranslateData.TitleRow[i]);
+						if (!text.IsNullOrEmpty() && data[i].IsNullOrEmpty() && !QTranslate.QTranslateData.TitleRow[i].IsNullOrEmpty())
+						{
+							var newLine = newData[data[0]];
+							newLine[1] = text;
+							newLine[i] = "*" + await text.NetworkTranslateAsync(language.WebAPI);
+							Debug.Log("翻译" + language.Key + " " + rowIndex + "/" + QTranslate.QTranslateData.Count + " " + " [" + text + "]=>[" + newLine[i] + "]");
+						}
 					}
 				}
-
 			}
-			
 			Debug.LogError(newData.ToString());
 			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.QTranslateData),nameof(NetworkTranslate)));
 		}
