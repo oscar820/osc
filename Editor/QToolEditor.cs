@@ -35,6 +35,8 @@ namespace QTool
 				{
 					keyCache.Clear();
 					var text =  data[1];
+					keyCache["[" + "%".GetHashCode() + "]"] = "%";
+					text = text.Replace("%", "[" + "%".GetHashCode() + "]");
 					text = text.ForeachBlockValue('{', '}', (key) => { var value = key.GetHashCode().ToString();keyCache[value] ="{"+ key+"}";   return "["+value+"]"; });
 					text = text.ForeachBlockValue('<', '>', (key) => { var value = key.GetHashCode().ToString(); keyCache[value] ="<" +key+">"; return "["+value+"]"; });
 					var key = QTranslate.QTranslateData.TitleRow[i];
