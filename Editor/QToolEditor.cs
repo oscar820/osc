@@ -31,11 +31,12 @@ namespace QTool
 				for (int i = 2; i < data.Count; i++)
 				{
 					var text= data[1];
-					if (!text.IsNullOrEmpty()&&data[i].IsNullOrEmpty())
+					if (!text.IsNullOrEmpty()&&data[i].IsNullOrEmpty()&& !QTranslate.QTranslateData.TitleRow[i].IsNullOrEmpty())
 					{
 						var newLine = newData[data[0]];
 						newLine[1] = text;
 						newLine[i] = "*"+await text.NetworkTranslateAsync(QTranslate.GetTranslateKey(QTranslate.QTranslateData.TitleRow[i]).WebAPI);
+						Debug.Log("翻译"+i+"/"+data.Count+" [" + text + "]=>[" + newLine[i] + "]");
 					}
 				}
 			}
