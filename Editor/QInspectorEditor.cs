@@ -147,15 +147,11 @@ namespace QTool.Inspector
             selectIndex = enumList.IndexOf(input);
          
         }
-		public static QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer> DrawerDic = new QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer>();
+		public static QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer> DrawerDic = new QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer>((key)=>new ViewEnumAttributeDrawer());
 		public static object Draw(object obj,ViewEnumAttribute att)
 		{
 			var str = obj?.ToString();
 			{
-				if(DrawerDic[att]==null)
-				{
-					DrawerDic[att] = new ViewEnumAttributeDrawer();
-				}
 
 				var drawer = DrawerDic[att];
 				using (new GUILayout.HorizontalScope())
@@ -233,8 +229,16 @@ namespace QTool.Inspector
             if (!property.IsShow()) return;
             if (property.propertyType == SerializedPropertyType.String)
             {
-				var list = property.Call(att.GetKeyListFunc);
-				
+				object list = null;
+				try
+				{
+					list = property.Call(att.GetKeyListFunc);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError(e);
+				}
+
 				enumList = new List<string>();
 				if (att.CanWriteString)
 				{
@@ -461,22 +465,8 @@ namespace QTool.Inspector
             var method = objType.GetMethod(funcName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (method == null)
             {
-				if(funcName.SplitTowString(".",out var start,out var end))
-				{
-					var staticType = QReflection.ParseType(start);
-					return staticType.InvokeStaticFunction(end,paramsList);
-				}
-				else
-				{
-					method = objType.GetStaticMethod(funcName);
-					if (method == null)
-					{
-						Debug.LogWarning(obj + " 不存在函数 " + funcName + "()");
-						return null;
-					}
-				}
-               
-            }
+				return objType.InvokeStaticFunction(funcName, paramsList);
+			} 
             return method?.Invoke(method.IsStatic ? null : obj, paramsList);
         }
         public static Action DrawLayout(this SerializedProperty property)

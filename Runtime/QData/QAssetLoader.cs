@@ -187,7 +187,16 @@ namespace QTool.Asset
 			QDebug.Log("加载 [" + DirectoryPath + "][" + typeof(TObj) + "] 资源：\n" + assetList.ToOneString());
 		
 		}
-	
+#if UNITY_EDITOR
+		public static List<TObj> GetEditorList()
+		{
+			List<TObj> assetList = new List<TObj>();
+			assetList.Clear();
+			assetList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
+			assetList.AddRange( AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/')));
+			return assetList;
+		}
+#endif
 		public static async Task<TObj> LoadAsync(string key)
 		{
 			TObj obj = null;

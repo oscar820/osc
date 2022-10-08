@@ -390,23 +390,55 @@ namespace QTool.Reflection
         {
             while (type.BaseType != null)
             {
-                var funcInfo = type.GetMethod(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                var funcInfo = type.GetMethod(name);
                 if (funcInfo != null)
                 {
                     return funcInfo;
-                }
-                else
-                {
+                }else
+				{
 					type = type.BaseType;
                 }
             }
             return null;
         }
-        public static object InvokeStaticFunction(this Type type,string name,params object[] param)
+	
+		public static object InvokeStaticFunction(this Type type,string name,params object[] param)
         {
-			return GetStaticMethod(type, name)?.Invoke(null, param);
-        }
-        public static List<Type> GetAllTypes(this Type rootType)
+
+			if (name.SplitTowString(".", out var start, out var end))
+			{
+				var staticType = QReflection.ParseType(start);
+				var method = GetStaticMethod(staticType, end);
+				if (method == null)
+				{
+					throw new Exception("不存在函数" + staticType + "." + name + "()");
+				}
+				return method.Invoke(null, param);
+			}
+			else
+			{
+				return type.InvokeStaticFunction(end);
+			}
+			
+		}
+		public static object InvokeFunction(this object obj, string funcName, params object[] param)
+		{
+			if (obj == null)
+			{
+				return null;
+			}
+			Type objType = obj.GetType();
+			var method = objType.GetMethod(funcName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			if (method == null)
+			{
+				return objType.InvokeStaticFunction(funcName, param);
+			}
+			else
+			{
+				return method.Invoke( obj, param); 
+			}
+		}
+		public static List<Type> GetAllTypes(this Type rootType)
         {
             List<Type> typeList = new List<Type>();
             foreach (var ass in GetAllAssemblies())
