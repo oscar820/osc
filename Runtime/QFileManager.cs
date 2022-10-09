@@ -14,7 +14,7 @@ namespace QTool
 {
 	public static class QFileManager
 	{
-		public static string RootPath
+		public static string SaveDataPathRoot
 		{
 			get
 			{
@@ -28,6 +28,9 @@ namespace QTool
 				}
 			}
 		}
+		public static string ModPathRoot=> Application.persistentDataPath;
+
+		public const string ResourcesPathRoot = "Assets/Resources";
 #if UNITY_SWITCH
 		public static nn.account.Uid userId;
 		public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
@@ -222,7 +225,6 @@ namespace QTool
 				}
 			}
 		}
-		public const string ResourcesRoot = "Assets/Resources/";
 		public static DateTime GetLastWriteTime(string path)
 		{
 			
@@ -231,7 +233,7 @@ namespace QTool
 #if UNITY_SWITCH
 				return DateTime.MinValue;
 #else
-				if (Application.isPlaying && path.StartsWith(ResourcesRoot))
+				if (Application.isPlaying && path.StartsWith(ResourcesPathRoot))
 				{
 #if UNITY_EDITOR
 					return File.GetLastWriteTime(path);
@@ -255,11 +257,11 @@ namespace QTool
    
 		public static void LoadAll(string path,Action<string,string> action, string defaultValue = "")
 		{
-			if (path.StartsWith(ResourcesRoot))
+			if (path.StartsWith(ResourcesPathRoot))
 			{
 				try 
 				{ 
-					var loadPath = path.SplitEndString(ResourcesRoot).SplitStartString(".");
+					var loadPath = path.SplitEndString(ResourcesPathRoot+"/").SplitStartString(".");
 					var texts= Resources.LoadAll<TextAsset>(loadPath);
 					foreach (var text in texts)
 					{
@@ -456,9 +458,9 @@ namespace QTool
 		{
 			try
 			{
-				if (path.StartsWith(ResourcesRoot))
+				if (path.StartsWith(ResourcesPathRoot))
 				{
-					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesRoot).SplitStartString("."));
+					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesPathRoot+"/").SplitStartString("."));
 					if (text == null)
 					{
 						return defaultValue;

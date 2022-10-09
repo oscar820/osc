@@ -18,7 +18,7 @@ namespace QTool.Test
 {
    
     
-    [ScriptToggle(nameof(scriptList))]
+    [QScriptToggle(nameof(scriptList))]
     public class QToolTest : MonoBehaviour
     {
         public QIdObject instanceTest;
@@ -26,7 +26,7 @@ namespace QTool.Test
         public static List<string> scriptList=> new List<string> { "QId" };
         public bool toggle;
         public List<string> tansList;
-        [ReadOnly]
+        [QReadOnly]
         [QName(name ="索引"  )]
         public int index = 0;
         public int[] b;
@@ -203,12 +203,12 @@ namespace QTool.Test
 			//QDebug.Log("QData Dictionary序列化测试：" + new Dictionary<string, string> { {"asd","askdj" } }.ToQData());
 		}
         public string commandStr;
-        [ViewButton("命令测试")]
+        [QButton("命令测试")]
         public void CommandTest()
         { 
             QCommand.Invoke(commandStr);
         }
-		[ViewButton("QRuntimeValue测试")]
+		[QButton("QRuntimeValue测试")]
 		public void QRuntimeValueTest()
 		{
 			QRuntimeData data = new QRuntimeData();
@@ -221,12 +221,12 @@ namespace QTool.Test
 		[TextArea(5,10)]
         public string QDataStr;
 
-		[ViewButton("时间测试")]
+		[QButton("时间测试")]
 		public void TimeTest()
 		{
 			QTime.ChangeScale("测试时间", UnityEngine.Random.Range(0, 2));
 		}
-		[ViewButton("QDataList测试")]
+		[QButton("QDataList测试")]
         public async void QDataTest()
 		{
 			Debug.LogError("\"aslkdasdj,asldjl\"".ParseElement());
@@ -259,7 +259,7 @@ namespace QTool.Test
 			QPlayerPrefs.Set("test1", data.ToQData());
 			Debug.LogError(nameof(QPlayerPrefs) + ": " + QPlayerPrefs.GetString("test1"));
 		}
-		[ViewButton("ToComuteFloatTest")]
+		[QButton("ToComuteFloatTest")]
 		public void ToComuteFloatTest()
 		{
 			QDebug.Log("1.1"+"  :  "+"1.1".ToComputeFloat());
@@ -269,7 +269,7 @@ namespace QTool.Test
 			QDebug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
 			QDebug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
 		}
-		[ViewButton("PlayerLoop")]
+		[QButton("PlayerLoop")]
 		public static void PlayerLoop()
 		{
 			var playerLoop = UnityEngine.LowLevel.PlayerLoop.GetCurrentPlayerLoop();
@@ -294,7 +294,7 @@ namespace QTool.Test
 
 			UnityEngine.Debug.Log(sb.ToString());
 		}
-		[ViewButton("QTaskTest")]
+		[QButton("QTaskTest")]
 		public async void QTaskTest()
 		{
 			//UnityEngine.LowLevel.PlayerLoop.GetDefaultPlayerLoop();
@@ -317,7 +317,7 @@ namespace QTool.Test
 			public TestEnum testEnum;
 			public string Key { get ; set ; }
 			[QName("数值")]
-			[ViewEnum(nameof(QDataListTestType)+".get_list")]
+			[QEnum(nameof(QDataListTestType)+".get_list")]
 			public string value="";
 			public Vector3 v3;
 			public List<int> array;

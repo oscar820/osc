@@ -87,7 +87,7 @@ public static class QFlowNodeTest
         E2,
     }
   
-    public static void EnumTest(TestEnum testEnum, T1 testEnum2,  out string value, [ViewEnum(nameof(QDataListTestType) + ".get_list")] string defaultTest1 = "1239180")
+    public static void EnumTest(TestEnum testEnum, T1 testEnum2,  out string value, [QEnum(nameof(QDataListTestType) + ".get_list")] string defaultTest1 = "1239180")
     {
         value = testEnum2.ToString();
         Debug.LogError(value + "  " + defaultTest1);

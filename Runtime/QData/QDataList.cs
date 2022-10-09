@@ -8,7 +8,8 @@ namespace QTool
 	
     public class QDataList: QList<string, QDataRow>
 	{
-		public static string ResourcesPathRoot => QFileManager.ResourcesRoot + nameof(QDataList) +"Asset"+ '/';
+		public static string ResourcesPathRoot => QFileManager.ResourcesPathRoot+"/" + nameof(QDataList) +"Asset"+ '/';
+		public static string ModPath=>QFileManager.ModPathRoot + "/" + nameof(QDataList) + "Asset" + '/';
 		public static string GetResourcesDataPath(string name,string childFile=null)
 		{
 			if (childFile.IsNullOrEmpty())
@@ -19,10 +20,6 @@ namespace QTool
 			{
 				return ResourcesPathRoot + name +"/"+childFile+ ".txt";
 			}
-		}
-		public static string GetAssetDataPath(string name)
-		{
-			return Application.dataPath+"/" + nameof(QDataList) + "Asset/" + name + ".txt";
 		}
 		public static QDataList GetResourcesData(string name, System.Func<QDataList> autoCreate = null)
 		{
@@ -41,6 +38,13 @@ namespace QTool
 				{
 					data.Add(new QDataList(fileValue) { LoadPath = loadPath });
 				}, "{}");
+				if (path.StartsWith(ResourcesPathRoot))
+				{
+					QFileManager.LoadAll(path, (fileValue, loadPath) =>
+					{
+						data.Add(new QDataList(fileValue) { LoadPath = loadPath });
+					}, "{}");
+				}
 			}
 			catch (System.Exception e)
 			{

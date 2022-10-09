@@ -8,9 +8,9 @@ namespace QTool.Model
 	public class QCharacterModel : MonoBehaviour
 	{
 		public List<GameObject> modelRoot;
-		[ReadOnly]
+		[QReadOnly]
 		public List<SkinnedMeshRenderer> skinnedMesh;
-		[ReadOnly]
+		[QReadOnly]
 		public Transform rootBone;
 		public List<string> meshKeys;
 

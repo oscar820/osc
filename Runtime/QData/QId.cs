@@ -98,10 +98,10 @@ namespace QTool
             }
         }
         public string Key { get => InstanceId; set { } }
-        [ReadOnly]
+        [QReadOnly]
         [QName("预制体Id", nameof(HasPrefabId) )]
         public string PrefabId;
-        [ReadOnly]
+        [QReadOnly]
         [QName("实例Id")]
         public string InstanceId;
         bool IsPlaying

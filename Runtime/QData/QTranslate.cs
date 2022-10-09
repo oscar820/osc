@@ -92,7 +92,7 @@ namespace QTool
         private string language = "";
         [SerializeField]
         [QName("翻译结果")]
-        [ReadOnly]
+        [QReadOnly]
         private string translateResult = "";
 		[QName("强制刷新翻译")]
 		public bool forceUpdate;
@@ -210,7 +210,7 @@ namespace QTool
 			CheckFresh();
 		}
 
-		[ViewButton("翻译刷新")]
+		[QButton("翻译刷新")]
         private void CheckFresh(string key=null)
         {
             if (curValue != value)

@@ -86,8 +86,8 @@ namespace QTool.Inspector
 
     }
    
-    [CustomPropertyDrawer(typeof(ViewToggleAttribute))]
-    public class ViewToggleAttributeDrawer : PropertyDrawBase<ViewToggleAttribute>
+    [CustomPropertyDrawer(typeof(QToggleAttribute))]
+    public class ViewToggleAttributeDrawer : PropertyDrawBase<QToggleAttribute>
     {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -123,8 +123,8 @@ namespace QTool.Inspector
 
 
 
-    [CustomPropertyDrawer(typeof(ViewEnumAttribute))]
-    public class ViewEnumAttributeDrawer : PropertyDrawBase<ViewEnumAttribute>
+    [CustomPropertyDrawer(typeof(QEnumAttribute))]
+    public class ViewEnumAttributeDrawer : PropertyDrawBase<QEnumAttribute>
     {
 		public List<string> enumList = new List<string>();
         public int selectIndex =0;
@@ -147,8 +147,8 @@ namespace QTool.Inspector
             selectIndex = enumList.IndexOf(input);
          
         }
-		public static QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer> DrawerDic = new QDictionary<ViewEnumAttribute, ViewEnumAttributeDrawer>((key)=>new ViewEnumAttributeDrawer());
-		public static object Draw(object obj,ViewEnumAttribute att)
+		public static QDictionary<QEnumAttribute, ViewEnumAttributeDrawer> DrawerDic = new QDictionary<QEnumAttribute, ViewEnumAttributeDrawer>((key)=>new ViewEnumAttributeDrawer());
+		public static object Draw(object obj,QEnumAttribute att)
 		{
 			var str = obj?.ToString();
 			{
@@ -444,13 +444,13 @@ namespace QTool.Inspector
             {
                 return null;
             }
-            var changeCall = property.GetAttribute<ChangeCallAttribute>();
-			var group = property.GetAttribute<GroupAttribute>();
+            var changeCall = property.GetAttribute<QOnChangeAttribute>();
+			var group = property.GetAttribute<QGroupAttribute>();
 			if (changeCall != null)
             {
                 EditorGUI.BeginChangeCheck(); ;
             }
-            var readonlyAtt = property.GetAttribute<ReadOnlyAttribute>();
+            var readonlyAtt = property.GetAttribute<QReadOnlyAttribute>();
 			if (group != null && group.start)
 			{
 				GUILayout.BeginVertical(QGUITool.BackStyle);
@@ -612,7 +612,7 @@ namespace QTool.Inspector
                 case TypeCode.Double:
                         obj= EditorGUILayout.DoubleField(name, (double)obj, layoutOption);break;
                 case TypeCode.String:
-					var enumView = customAttribute?.GetAttribute<ViewEnumAttribute>();
+					var enumView = customAttribute?.GetAttribute<QEnumAttribute>();
 					if (enumView != null)
 					{
 						obj = ViewEnumAttributeDrawer.Draw(obj, enumView);break;
@@ -1026,36 +1026,36 @@ namespace QTool.Inspector
     }
     public class QInspectorType : QTypeInfo<QInspectorType>
     {
-        public QDictionary<EidtorInitInvokeAttribute, QFunctionInfo> initFunc = new QDictionary<EidtorInitInvokeAttribute, QFunctionInfo>();
-        public QDictionary<SceneInputEventAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<SceneInputEventAttribute, QFunctionInfo>();
-        public QDictionary<ViewButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<ViewButtonAttribute, QFunctionInfo>();
-        public ScriptToggleAttribute scriptToggle = null;
-        public QDictionary<EditorModeAttribute, QFunctionInfo> editorMode = new QDictionary<EditorModeAttribute, QFunctionInfo>();
+        public QDictionary<QOnEidtorInitAttribute, QFunctionInfo> initFunc = new QDictionary<QOnEidtorInitAttribute, QFunctionInfo>();
+        public QDictionary<QOnSceneInputAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<QOnSceneInputAttribute, QFunctionInfo>();
+        public QDictionary<QButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<QButtonAttribute, QFunctionInfo>();
+        public QScriptToggleAttribute scriptToggle = null;
+        public QDictionary<QOnEditorModeAttribute, QFunctionInfo> editorMode = new QDictionary<QOnEditorModeAttribute, QFunctionInfo>();
         protected override void Init(Type type)
         {
             MemberFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             FunctionFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             base.Init(type);
-            scriptToggle = type.GetCustomAttribute<ScriptToggleAttribute>();
+            scriptToggle = type.GetCustomAttribute<QScriptToggleAttribute>();
             foreach (var funcInfo in Functions)
             {
-                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<SceneInputEventAttribute>())
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QOnSceneInputAttribute>())
                 {
                     mouseEventFunc[att] = funcInfo;
                 }
-                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<ViewButtonAttribute>())
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QButtonAttribute>())
                 {
                     buttonFunc[att] = funcInfo;
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<ContextMenu>())
                 {
-                    buttonFunc[new ViewButtonAttribute(att.menuItem)] = funcInfo;
+                    buttonFunc[new QButtonAttribute(att.menuItem)] = funcInfo;
                 }
-                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EidtorInitInvokeAttribute>())
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QOnEidtorInitAttribute>())
                 {
                     initFunc[att] = funcInfo;
                 }
-                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<EditorModeAttribute>())
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QOnEditorModeAttribute>())
                 {
                     editorMode[att] = funcInfo;
                 }
@@ -1213,7 +1213,7 @@ namespace QTool.Inspector
                     var att = kv.Key;
                     if (att.Active(target))
                     {
-                        if (att is SelectObjectButtonAttribute)
+                        if (att is QSelectObjectButtonAttribute)
                         {
                             if (GUILayout.Button(att.name, GUILayout.Height(att.height)))
                             {
@@ -1265,7 +1265,7 @@ namespace QTool.Inspector
         #region 将数组数据显示成工具栏
         public bool DrawToolbar(SerializedProperty property)
         {
-            var toolbar = property.GetAttribute<ToolbarListAttribute>();
+            var toolbar = property.GetAttribute<QToolbarAttribute>();
             if (toolbar != null)
             {
                 if (!toolbar.Active(target))
