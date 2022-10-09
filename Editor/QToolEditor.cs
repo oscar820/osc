@@ -54,7 +54,7 @@ namespace QTool
 				}
 			}
 			Debug.LogError(newData.ToString());
-			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.QTranslateData),nameof(AutoTranslate)));
+			newData.Save(QDataList.GetModPath( nameof(QTranslate.QTranslateData),nameof(AutoTranslate)));
 		}
 		[MenuItem("QTool/工具/运行时信息")]
 		public static void BaseTest()
