@@ -408,7 +408,7 @@ namespace QTool.Reflection
 			if (name.SplitTowString(".", out var start, out var end))
 			{
 				var staticType = QReflection.ParseType(start);
-				return type.InvokeStaticFunction(end);
+				return staticType.InvokeStaticFunction(end);
 			}
 			else if(type!=null)
 			{
