@@ -21,8 +21,8 @@ namespace QTool
 			Debug.LogError(QTool.QTranslate.QTranslateData.ToString());
 			GUIUtility.systemCopyBuffer = QTool.QTranslate.QTranslateData.ToString();
 		}
-		[MenuItem("QTool/翻译/翻译语言文件")]
-		public static async void NetworkTranslate()
+		[MenuItem("QTool/翻译/生成自动翻译文件")]
+		public static async void AutoTranslate()
 		{
 			var newData = new QDataList();
 			newData.SetTitles(QTranslate.QTranslateData.TitleRow.ToArray());
@@ -54,7 +54,7 @@ namespace QTool
 				}
 			}
 			Debug.LogError(newData.ToString());
-			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.QTranslateData),nameof(NetworkTranslate)));
+			newData.Save(QDataList.GetResourcesDataPath( nameof(QTranslate.QTranslateData),nameof(AutoTranslate)));
 		}
 		[MenuItem("QTool/工具/运行时信息")]
 		public static void BaseTest()
