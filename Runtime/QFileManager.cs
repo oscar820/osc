@@ -331,11 +331,11 @@ namespace QTool
 		{
 			if (childe.IsNullOrEmpty())
 			{
-				return rootPath+"/"+childe;
+				return rootPath;
 			}
 			else
 			{
-				return rootPath;
+				return rootPath + "/" + childe;
 			}
 		}
 		public static string CheckPath(this string path)
