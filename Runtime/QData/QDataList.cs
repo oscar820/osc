@@ -18,6 +18,10 @@ namespace QTool
 		{
 			return ModPath.ChildPath(name).ChildPath(child) + ".txt";
 		}
+		public static string GetAssetDataPath(string name)
+		{
+			return Application.dataPath + "/" + nameof(QDataList) + "Asset/" + name + ".txt";
+		}
 		public static QDataList GetResourcesData(string name, System.Func<QDataList> autoCreate = null)
 		{
 			var dataList= GetData(GetResourcesDataPath(name),autoCreate);
