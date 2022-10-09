@@ -173,7 +173,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("错误" + " 不存在文件" + rootPath);
+                Debug.LogError("错误" + " 不存在文件夹" + rootPath);
             }
         }
 
@@ -286,8 +286,9 @@ namespace QTool
 				{
 					action(Load(path, defaultValue), path);
 				}
-				else
+				else 
 				{
+					path= path.SplitStartString(".");
 					path.ForeachDirectoryFiles((filePath) =>
 					{
 						action(Load(filePath, defaultValue),filePath);
