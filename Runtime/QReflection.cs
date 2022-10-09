@@ -390,7 +390,7 @@ namespace QTool.Reflection
         {
             while (type.BaseType != null)
             {
-                var funcInfo = type.GetMethod(name);
+                var funcInfo = type.GetMethod(name,BindingFlags.Public|BindingFlags.Static|BindingFlags.NonPublic);
                 if (funcInfo != null)
                 {
                     return funcInfo;
@@ -408,16 +408,16 @@ namespace QTool.Reflection
 			if (name.SplitTowString(".", out var start, out var end))
 			{
 				var staticType = QReflection.ParseType(start);
-				var method = GetStaticMethod(staticType, end);
-				if (method == null)
-				{
-					throw new Exception("不存在函数" + staticType + "." + name + "()");
-				}
-				return method.Invoke(null, param);
+				return type.InvokeStaticFunction(end);
 			}
 			else if(type!=null)
 			{
-				return type.InvokeStaticFunction(end);
+				var method = GetStaticMethod(type, name);
+				if (method == null)
+				{
+					throw new Exception("不存在函数" + type + "." + name + "()");
+				}
+				return method.Invoke(null, param);
 			}
 			return null;
 			

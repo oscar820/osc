@@ -28,7 +28,7 @@ namespace QTool
 				}
 			}
 		}
-		public static string ModPathRoot=> Application.persistentDataPath;
+		public static string ModPathRoot=> Application.streamingAssetsPath;
 
 		public const string ResourcesPathRoot = "Assets/Resources";
 #if UNITY_SWITCH
@@ -106,7 +106,7 @@ namespace QTool
         }
 		public static bool ExistsFile(this string path)
 		{
-			CheckPath(ref path);
+			path= CheckPath( path);
 			switch (Application.platform)
 			{
 				case RuntimePlatform.Switch:
@@ -327,7 +327,18 @@ namespace QTool
 			tex.LoadImage(bytes);
 			return tex;
 		}
-		public static void CheckPath(ref string path)
+		public static string ChildPath(this string rootPath,string childe)
+		{
+			if (childe.IsNullOrEmpty())
+			{
+				return rootPath+"/"+childe;
+			}
+			else
+			{
+				return rootPath;
+			}
+		}
+		public static string CheckPath(this string path)
 		{
 			switch (Application.platform)
 			{
@@ -356,10 +367,11 @@ namespace QTool
 					}
 					break;
 			}
+			return path;
 		}
 		public static bool Save(string path, byte[] bytes,bool checkUpdate=false)
 		{
-			CheckPath(ref path);
+			path = CheckPath(path);
 			try
 			{
 				switch (Application.platform)
@@ -421,7 +433,7 @@ namespace QTool
 			}
 			else
 			{
-				CheckPath(ref path);
+				path = CheckPath(path);
 				File.WriteAllText(path, data);
 				return true;
 			}
@@ -486,7 +498,7 @@ namespace QTool
 #endif
 							}
 						default:
-							CheckPath(ref path);
+							path = CheckPath(path);
 							return File.ReadAllText(path);
 					}
 				}

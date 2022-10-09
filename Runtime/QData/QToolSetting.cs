@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using QTool.Inspector;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,6 +12,18 @@ namespace QTool
 		public QMailAccount QAnalysisMail;
 		public string QAnalysisProject;
 		public string danmuRoomId= "55336";
+		[QEnum(nameof(GetModList))]
+		public List<string> modeList = new List<string>();
+		public static List<string> GetModList()
+		{
+			List<string> pathList = new List<string>();
+			(QDataList.ModPath+"/").CheckPath();
+			QDataList.ModPath.ForeachDirectory((path) =>
+			{
+				pathList.Add(path.SplitEndString(QDataList.ModPath+"/"));
+			});
+			return pathList;
+		}
 #if UNITY_EDITOR
 		[QName("音频强制单声道")]
 		public bool forceToMono = true;
@@ -41,6 +54,7 @@ namespace QTool
 		[Range(0,100)]
 		public int compressionQuality = 50;
 #endif
+		
 		private void OnValidate()
 		{
 			QAnalysisMail?.Init();

@@ -8,22 +8,27 @@ namespace QTool
 	
     public class QDataList: QList<string, QDataRow>
 	{
-		public static string ResourcesPathRoot => QFileManager.ResourcesPathRoot+"/" + nameof(QDataList) +"Asset"+ '/';
-		public static string ModPath=>QFileManager.ModPathRoot + "/" + nameof(QDataList) + "Asset" + '/';
-		public static string GetResourcesDataPath(string name,string childFile=null)
+		public static string ResourcesPathRoot => QFileManager.ResourcesPathRoot+"/" + nameof(QDataList) +"Asset";
+		public static string ModPath=>QFileManager.ModPathRoot + "/" + nameof(QDataList) + "Asset" ;
+		public static string GetResourcesDataPath(string name,string child=null)
 		{
-			if (childFile.IsNullOrEmpty())
-			{
-				return ResourcesPathRoot + name + ".txt";
-			}
-			else
-			{
-				return ResourcesPathRoot + name +"/"+childFile+ ".txt";
-			}
+			return ResourcesPathRoot.ChildPath(name).ChildPath(child)+".txt";
+		}
+		public static string GetModPath(string name, string child = null)
+		{
+			return ModPath.ChildPath(name).ChildPath(child) + ".txt";
 		}
 		public static QDataList GetResourcesData(string name, System.Func<QDataList> autoCreate = null)
 		{
-			return GetData(GetResourcesDataPath(name),autoCreate);
+			var dataList= GetData(GetResourcesDataPath(name),autoCreate);
+			if (QToolSetting.Instance.modeList.Contains(name))
+			{
+				QFileManager.LoadAll(GetModPath(name), (fileValue, loadPath) =>
+				{
+					dataList.Add(new QDataList(fileValue) { LoadPath = loadPath });
+				}, "{}");
+			}
+			return dataList;
 		}
 
 		public static QDataList GetData(string path,System.Func<QDataList> autoCreate=null)
@@ -38,13 +43,7 @@ namespace QTool
 				{
 					data.Add(new QDataList(fileValue) { LoadPath = loadPath });
 				}, "{}");
-				if (path.StartsWith(ResourcesPathRoot))
-				{
-					QFileManager.LoadAll(path, (fileValue, loadPath) =>
-					{
-						data.Add(new QDataList(fileValue) { LoadPath = loadPath });
-					}, "{}");
-				}
+			
 			}
 			catch (System.Exception e)
 			{
