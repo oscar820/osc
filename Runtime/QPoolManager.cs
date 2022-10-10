@@ -35,7 +35,6 @@ namespace QTool
 		private void OnDestroy()
 		{
 			EditorApplication.playModeStateChanged -= EditorModeChanged;
-			IsPlaying = false;
 		}
 		void EditorModeChanged(PlayModeStateChange state)
 		{
@@ -50,6 +49,7 @@ namespace QTool
 
 		public static ObjectPool<T> GetPool<T>(string poolName, System.Func<T> newFunc = null) where T : class
         {
+			
             var key = poolName;
             if (string.IsNullOrEmpty(key))
             {
@@ -72,7 +72,7 @@ namespace QTool
 				}
 
 			}
-			else if(newFunc !=null)
+			else if(newFunc !=null&&IsPlaying)
 			{
 				var type = typeof(T);
 				if (type.IsSubclassOf(typeof(UnityEngine.Object))&&type!=typeof( GameObject))
