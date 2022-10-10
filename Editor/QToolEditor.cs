@@ -92,18 +92,25 @@ namespace QTool
 			}
 		}
 		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.activeBuildTarget + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
+		
 		[PostProcessBuild]
 		public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
 		{
-			//var tempPath= pathToBuiltProject.SplitStartString(".exe") + "_BackUpThisFolder_ButDontShipItWithYourGame";
-			//if (Directory.Exists(tempPath))
-			//{
-			//	Directory.Delete(tempPath, true);
-			//}
-			//if (Directory.Exists(BuildPath))
-			//{
-			//	Directory.Delete(BuildPath,true);
-			//}
+			switch (target)
+			{
+				case BuildTarget.StandaloneWindows:
+				case BuildTarget.StandaloneWindows64:
+					{
+						var tempPath = pathToBuiltProject.SplitStartString(".exe") + "_BackUpThisFolder_ButDontShipItWithYourGame";
+						if (Directory.Exists(tempPath))
+						{
+							Directory.Delete(tempPath, true);
+						}
+					}
+					break;
+				default:
+					break;
+			}
 			var DirectoryPath = Path.GetDirectoryName(pathToBuiltProject);
 			Debug.Log("移动打包文件"+ DirectoryPath + "到：" + BuildPath);
 			QFileManager.Copy(DirectoryPath, BuildPath);
