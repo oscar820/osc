@@ -344,7 +344,7 @@ namespace QTool
 			};
 			OnPush += (obj) =>
 			{
-				if (obj == null) return;
+				if (obj == null||!QPoolManager.IsPlaying) return;
 				obj.SetActive(false);
 				obj.transform.SetParent(PoolParent, true);
 				foreach (var poolObj in obj.GetComponents<IPoolObject>())
@@ -356,7 +356,7 @@ namespace QTool
 		}
 		protected void OnSceneChange(Scene scene, Scene next)
 		{
-			if (!DontDestroyOnLoad)
+			if (!DontDestroyOnLoad&& QPoolManager.IsPlaying)
 			{
 				SceneManager.activeSceneChanged -= OnSceneChange;
 				Destory();
