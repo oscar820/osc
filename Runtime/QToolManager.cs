@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 namespace QTool
 {
     public class QToolManager:InstanceManager<QToolManager>
@@ -15,7 +18,10 @@ namespace QTool
 			}
 			base.Awake();
 			DontDestroyOnLoad(gameObject);
+
+
 		}
+
 		public event Action OnUpdate=null;
 		private void Update()
 		{

@@ -13,7 +13,7 @@ namespace QTool
 		public string QAnalysisProject;
 		public string danmuRoomId= "55336";
 		[QEnum(nameof(GetModList))]
-		public List<string> modeList = new List<string>();
+		public List<string> modeList = new List<string> { nameof(QTranslate.QTranslateData) };
 		public static List<string> GetModList()
 		{
 			List<string> pathList = new List<string>();

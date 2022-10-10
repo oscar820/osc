@@ -245,9 +245,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b911cf1ff5c24bb4296ff51501378b74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  run: 0
+  run: 1
   prefab: {fileID: 1965503464802349847, guid: 63430fcfc81908141b561723e89d54be, type: 3}
-  usePool: 0
+  usePool: 1
   size: 100
 --- !u!4 &896761534
 Transform:

@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using QTool.Inspector;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 namespace QTool
 {
 	public static partial class Tool
@@ -22,11 +25,30 @@ namespace QTool
 	}
     public class QPoolManager: InstanceManager<QPoolManager>
     {
-        
-        public static QDictionary<string, PoolBase> Pools = new QDictionary<string, PoolBase>();
-	
+		public static bool IsPlaying { private set; get; } = true;
+#if UNITY_EDITOR
+		protected override void Awake()
+		{
+			base.Awake();
+			EditorApplication.playModeStateChanged += EditorModeChanged;
+		}
+		private void OnDestroy()
+		{
+			EditorApplication.playModeStateChanged -= EditorModeChanged;
+			IsPlaying = false;
+		}
+		void EditorModeChanged(PlayModeStateChange state)
+		{
+			if(state== PlayModeStateChange.ExitingPlayMode)
+			{
+				IsPlaying = false;
+			}
+		}
+#endif
 
-        public static ObjectPool<T> GetPool<T>(string poolName, System.Func<T> newFunc = null) where T : class
+		public static QDictionary<string, PoolBase> Pools = new QDictionary<string, PoolBase>();
+
+		public static ObjectPool<T> GetPool<T>(string poolName, System.Func<T> newFunc = null) where T : class
         {
             var key = poolName;
             if (string.IsNullOrEmpty(key))
@@ -355,7 +377,7 @@ namespace QTool
 		{
 			get
 			{
-				if (_poolParent == null)
+				if (_poolParent == null&&QPoolManager.IsPlaying)
 				{
 					_poolParent = QPoolManager.Instance.transform.GetChild(Key, true);
 				}
