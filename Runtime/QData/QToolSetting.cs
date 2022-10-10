@@ -17,7 +17,7 @@ namespace QTool
 		public static List<string> GetModList()
 		{
 			List<string> pathList = new List<string>();
-			(QDataList.ModPath+"/").CheckPath();
+			(QDataList.ModPath+"/").CheckDirectoryPath();
 			QDataList.ModPath.ForeachDirectory((path) =>
 			{
 				pathList.Add(path.SplitEndString(QDataList.ModPath+"/"));

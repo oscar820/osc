@@ -106,7 +106,7 @@ namespace QTool
         }
 		public static bool ExistsFile(this string path)
 		{
-			path= CheckPath( path);
+			path= CheckDirectoryPath( path);
 			switch (Application.platform)
 			{
 				case RuntimePlatform.Switch:
@@ -176,6 +176,25 @@ namespace QTool
                 Debug.LogError("错误" + " 不存在文件夹" + rootPath);
             }
         }
+	
+		public static void Copy(string sourcePath, string targetPath)
+		{
+			CheckDirectoryPath(targetPath + "/");
+			if (Directory.Exists(sourcePath))
+			{
+				sourcePath.ForeachDirectoryFiles((file) =>
+				{
+					var newFile = file.Replace(sourcePath.CheckPath(), targetPath.CheckPath());
+					newFile.CheckDirectoryPath();
+					Debug.Log(file + "  =>  " + newFile);
+					File.Copy(file, newFile, true);
+				});
+			}
+			else if(File.Exists(sourcePath))
+			{
+				File.Copy(sourcePath, targetPath);
+			}
+		}
 
         public static Dictionary<string, XmlSerializer> xmlSerDic = new Dictionary<string, XmlSerializer>();
         public static XmlSerializer GetSerializer(Type type, params Type[] extraTypes)
@@ -339,8 +358,9 @@ namespace QTool
 				return rootPath + "/" + childe;
 			}
 		}
-		public static string CheckPath(this string path)
+		public static string CheckDirectoryPath(this string path)
 		{
+			path = path.CheckPath();
 			switch (Application.platform)
 			{
 				case RuntimePlatform.Switch:
@@ -350,7 +370,7 @@ namespace QTool
 						{
 							if (!path.StartsWith(nameof(QTool) + ":/"))
 							{
-								path = nameof(QTool) + ":/" + path.Replace('/', '_').Replace('\\', '_').Replace('.', '_');
+								path = nameof(QTool) + ":/" + path.Replace('/', '_').Replace('.', '_');
 								Debug.Log("转换路径 " + path);
 							}
 						}
@@ -370,9 +390,13 @@ namespace QTool
 			}
 			return path;
 		}
+		public static string CheckPath(this string path)
+		{
+			return path.Replace('\\', '/');
+		}
 		public static bool Save(string path, byte[] bytes,bool checkUpdate=false)
 		{
-			path = CheckPath(path);
+			path = CheckDirectoryPath(path);
 			try
 			{
 				switch (Application.platform)
@@ -434,7 +458,7 @@ namespace QTool
 			}
 			else
 			{
-				path = CheckPath(path);
+				path = CheckDirectoryPath(path);
 				File.WriteAllText(path, data);
 				return true;
 			}
@@ -499,7 +523,7 @@ namespace QTool
 #endif
 							}
 						default:
-							path = CheckPath(path);
+							path = CheckDirectoryPath(path);
 							return File.ReadAllText(path);
 					}
 				}
