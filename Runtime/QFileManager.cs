@@ -446,7 +446,7 @@ namespace QTool
 				case RuntimePlatform.Switch:
 					{
 #if UNITY_SWITCH
-						CheckPath(ref path);
+						path=CheckPath(path);
 						nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
 						result.abortUnlessSuccess();
 						long fileSize = 0;
