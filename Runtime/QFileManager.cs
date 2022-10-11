@@ -186,7 +186,6 @@ namespace QTool
 				{
 					var newFile = file.Replace(sourcePath.CheckPath(), targetPath.CheckPath());
 					newFile.CheckDirectoryPath();
-					Debug.Log(file + "  =>  " + newFile);
 					File.Copy(file, newFile, true);
 				});
 			}
