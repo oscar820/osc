@@ -136,7 +136,16 @@ namespace QTool
 		}
 		public static bool ExistsDirectory(this string path)
 		{
-			return Directory.Exists(path);
+			switch (Application.platform)
+			{
+				case RuntimePlatform.Switch:
+					{
+						return false;
+					}
+				default:
+
+					return Directory.Exists(path);
+			}
 		}
 		public static void ForeachDirectory(this string rootPath, Action<string> action)
         {
@@ -154,7 +163,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("错误" + " 不存在文件夹" + rootPath);
+                Debug.LogWarning("错误" + " 不存在文件夹" + rootPath);
             }
         }
         public static void ForeachFiles(this string rootPath, Action<string> action)
@@ -173,7 +182,7 @@ namespace QTool
             }
             else
             {
-                Debug.LogError("错误" + " 不存在文件夹" + rootPath);
+                Debug.LogWarning("错误" + " 不存在文件夹" + rootPath);
             }
         }
 	
