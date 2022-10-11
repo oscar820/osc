@@ -42,6 +42,7 @@ namespace QTool
 				case RuntimePlatform.Switch:
 					{
 #if UNITY_SWITCH
+
 						nn.account.Account.Initialize();
 						nn.account.UserHandle userHandle = new nn.account.UserHandle();
 						if (!nn.account.Account.TryOpenPreselectedUser(ref userHandle))
@@ -52,6 +53,7 @@ namespace QTool
 						result.abortUnlessSuccess();
 						result = nn.fs.SaveData.Mount(nameof(QTool), userId);
 						result.abortUnlessSuccess();
+						Debug.Log("初始化" + Application.platform);
 #endif
 					}
 					break;
@@ -116,12 +118,14 @@ namespace QTool
 						nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
 						if (result.IsSuccess())
 						{
+							Debug.Log("存在 " + path);
 							return true;
 						}
 						if (!nn.fs.FileSystem.ResultPathNotFound.Includes(result))
 						{
 							result.abortUnlessSuccess();
 						}
+						Debug.Log("不存在 " + path);
 						return false;
 #else
 						return false;
@@ -479,6 +483,7 @@ namespace QTool
 					{
 #if UNITY_SWITCH
 						path=CheckPath(path);
+						Debug.Log("打开 " + path);
 						nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
 						result.abortUnlessSuccess();
 						long fileSize = 0;
@@ -524,6 +529,7 @@ namespace QTool
 						case RuntimePlatform.Switch:
 							{
 #if UNITY_SWITCH
+							
 								return LoadBytes(path).GetString();
 
 #else
