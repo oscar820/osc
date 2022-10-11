@@ -215,8 +215,11 @@ namespace QTool
 		{
 			Debug.Log("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
 			var path= Path.GetDirectoryName(report.summary.outputPath);
-			Directory.Delete(path, true);
-			Debug.Log("删除打包路径下文件 " + path);
+			if (Directory.Exists(path))
+			{
+				Directory.Delete(path, true);
+				Debug.Log("删除打包路径下文件 " + path);
+			}
 			Directory.CreateDirectory(path);
 		}
 		//打包后处理
