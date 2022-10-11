@@ -11,6 +11,7 @@ using QTool.Reflection;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEditor.Callbacks;
+using UnityEditor.Build;
 
 namespace QTool
 {
@@ -91,40 +92,11 @@ namespace QTool
 				}
 			}
 		}
-		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.activeBuildTarget + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
 		
 		[PostProcessBuild]
 		public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
 		{
-			switch (target)
-			{
-				case BuildTarget.StandaloneWindows:
-				case BuildTarget.StandaloneWindows64:
-					{
-						var tempPath = pathToBuiltProject.SplitStartString(".exe") + "_BackUpThisFolder_ButDontShipItWithYourGame";
-						if (Directory.Exists(tempPath))
-						{
-							Directory.Delete(tempPath, true);
-						}
-					}
-					break;
-				default:
-					break;
-			}
-			var DirectoryPath = Path.GetDirectoryName(pathToBuiltProject);
-			Debug.Log("移动打包文件"+ DirectoryPath + "到：" + BuildPath);
-			QFileManager.Copy(DirectoryPath, BuildPath);
-			var versions = PlayerSettings.bundleVersion.Split('.');
-			if (versions.Length > 0)
-			{
-				versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
-			}
-			if (!EditorUserBuildSettings.development)
-			{
-				PlayerSettings.bundleVersion = versions.ToOneString(".");
 			
-				QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
-			}
 		}
 		#region OldBuild
 
@@ -229,6 +201,52 @@ namespace QTool
 
 
 		#endregion
+
+	}
+	public class QToolBuild:Editor, IPreprocessBuildWithReport, IPostprocessBuildWithReport
+	{
+		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.activeBuildTarget + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
+
+		public int callbackOrder => 0;
+
+		//打包前处理
+		public void OnPreprocessBuild(BuildReport report)
+		{
+			Debug.LogError("开始打包" + report.summary.outputPath);
+		}
+		//打包后处理
+		public void OnPostprocessBuild(BuildReport report)
+		{
+			switch (report.summary.platformGroup)
+			{
+				case BuildTargetGroup.Standalone:
+					{
+						var tempPath = report.summary.outputPath.SplitStartString(".exe") + "_BackUpThisFolder_ButDontShipItWithYourGame";
+						if (Directory.Exists(tempPath))
+						{
+							Directory.Delete(tempPath, true);
+						}
+					}
+					break;
+				default:
+					break;
+			}
+			var DirectoryPath = Path.GetDirectoryName(report.summary.outputPath);
+			Debug.Log("移动打包文件" + DirectoryPath + "到：" + BuildPath);
+			QFileManager.Copy(DirectoryPath, BuildPath);
+			var versions = PlayerSettings.bundleVersion.Split('.');
+			if (versions.Length > 0)
+			{
+				versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
+			}
+			if (!EditorUserBuildSettings.development)
+			{
+				PlayerSettings.bundleVersion = versions.ToOneString(".");
+
+				QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
+			}
+			Debug.Log("打包完成 =========================");
+		}
 
 	}
 }
