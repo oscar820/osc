@@ -208,11 +208,16 @@ namespace QTool
 		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.selectedBuildTargetGroup + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
 
 		public int callbackOrder => 0;
+		
 
 		//打包前处理
 		public void OnPreprocessBuild(BuildReport report)
 		{
 			Debug.Log("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
+			var path= Path.GetDirectoryName(report.summary.outputPath);
+			Directory.Delete(path, true);
+			Debug.Log("删除打包路径下文件 " + path);
+			Directory.CreateDirectory(path);
 		}
 		//打包后处理
 		public void OnPostprocessBuild(BuildReport report)
