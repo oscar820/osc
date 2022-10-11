@@ -205,14 +205,14 @@ namespace QTool
 	}
 	public class QToolBuild:Editor, IPreprocessBuildWithReport, IPostprocessBuildWithReport
 	{
-		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.activeBuildTarget + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
+		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.selectedBuildTargetGroup + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
 
 		public int callbackOrder => 0;
 
 		//打包前处理
 		public void OnPreprocessBuild(BuildReport report)
 		{
-			Debug.LogError("开始打包" + report.summary.outputPath);
+			Debug.LogError("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
 		}
 		//打包后处理
 		public void OnPostprocessBuild(BuildReport report)
@@ -231,9 +231,10 @@ namespace QTool
 				default:
 					break;
 			}
+			var moveToPath = BuildPath;
 			var DirectoryPath = Path.GetDirectoryName(report.summary.outputPath);
-			Debug.Log("移动打包文件" + DirectoryPath + "到：" + BuildPath);
-			QFileManager.Copy(DirectoryPath, BuildPath);
+			Debug.Log("移动打包文件" + DirectoryPath + "到：" + moveToPath);
+			QFileManager.Copy(DirectoryPath, moveToPath);
 			var versions = PlayerSettings.bundleVersion.Split('.');
 			if (versions.Length > 0)
 			{
@@ -245,7 +246,7 @@ namespace QTool
 
 				QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
 			}
-			Debug.Log("打包完成 =========================");
+			Debug.Log("打包完成 "+ moveToPath);
 		}
 
 	}
