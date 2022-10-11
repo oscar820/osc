@@ -193,7 +193,9 @@ namespace QTool.Asset
 			List<TObj> assetList = new List<TObj>();
 			assetList.Clear();
 			assetList.AddRange(Resources.LoadAll<TObj>(DirectoryPath));
+#if Addressables
 			assetList.AddRange( AddressableTool.GetLabelList<TObj>(DirectoryPath.Replace('\\', '/')));
+#endif
 			return assetList;
 		}
 #endif
