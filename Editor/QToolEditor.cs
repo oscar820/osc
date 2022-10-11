@@ -212,7 +212,7 @@ namespace QTool
 		//打包前处理
 		public void OnPreprocessBuild(BuildReport report)
 		{
-			Debug.LogError("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
+			Debug.Log("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
 		}
 		//打包后处理
 		public void OnPostprocessBuild(BuildReport report)
