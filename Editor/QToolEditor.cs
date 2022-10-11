@@ -217,7 +217,14 @@ namespace QTool
 			var path= Path.GetDirectoryName(report.summary.outputPath);
 			if (Directory.Exists(path))
 			{
-				Directory.Delete(path, true);
+				try
+				{
+					Directory.Delete(path, true);
+				}
+				catch (Exception e)
+				{
+					Debug.LogWarning(e);
+				}
 				Debug.Log("删除打包路径下文件 " + path);
 			}
 			Directory.CreateDirectory(path);
