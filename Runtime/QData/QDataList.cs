@@ -54,15 +54,12 @@ namespace QTool
 				Debug.LogError("读取QDataList[" + path + "]出错：\n" + e);
 
 			}
-			if (data == null)
+			if (autoCreate != null)
 			{
-				if (autoCreate != null)
-				{
-					data = autoCreate();
-					data.LoadPath = path;
-					data.Save();
-					Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + data);
-				}
+				data = autoCreate();
+				data.LoadPath = path;
+				data.Save();
+				Debug.LogWarning("不存在QDataList自动创建[" + path + "]:\n" + data);
 			}
 			return data;
 
