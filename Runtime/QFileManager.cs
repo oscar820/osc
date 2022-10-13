@@ -147,7 +147,9 @@ namespace QTool
 						return false;
 					}
 				default:
-
+					if( path.Contains(nameof(Resources)+'/')){
+						return true;
+					}
 					return Directory.Exists(path);
 			}
 		}
@@ -391,14 +393,11 @@ namespace QTool
 					break;
 				default:
 					{
-						if (!Application.isPlaying||!path.Contains(nameof(Resources)+"/"))
+						var directoryPath = Path.GetDirectoryName(path);
+						if (!directoryPath.IsNullOrEmpty() && !ExistsDirectory(directoryPath))
 						{
-							var directoryPath = Path.GetDirectoryName(path);
-							if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
-							{
-								Debug.LogWarning("自动创建文件夹 " + directoryPath);
-								Directory.CreateDirectory(directoryPath);
-							}
+							Debug.LogWarning("自动创建文件夹 " + directoryPath);
+							Directory.CreateDirectory(directoryPath);
 						}
 					}
 					break;
