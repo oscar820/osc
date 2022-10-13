@@ -70,6 +70,10 @@ namespace QTool
 			GCCollect();
 			await QTask.Wait(time / 2);
 			await SceneManager.LoadSceneAsync(sceneName);
+			if(QReflection.InvokeStaticFunction(null,"QUISetting.InitOverAsync") is Task task)
+			{
+				await task;
+			}
 			await QTask.Wait(time / 2);
 		}
 		public static void GCCollect()
