@@ -391,11 +391,14 @@ namespace QTool
 					break;
 				default:
 					{
-						var directoryPath = Path.GetDirectoryName(path);
-						if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
+						if (!Application.isPlaying)
 						{
-							Debug.LogWarning("自动创建文件夹 " + directoryPath);
-							Directory.CreateDirectory(directoryPath);
+							var directoryPath = Path.GetDirectoryName(path);
+							if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
+							{
+								Debug.LogWarning("自动创建文件夹 " + directoryPath);
+								Directory.CreateDirectory(directoryPath);
+							}
 						}
 					}
 					break;
