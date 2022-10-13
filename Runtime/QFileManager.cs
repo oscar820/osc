@@ -140,15 +140,11 @@ namespace QTool
 		}
 		public static bool ExistsDirectory(this string path)
 		{
-			switch (Application.platform)
+			if (path.Contains(nameof(Resources)+'/'))
 			{
-				case RuntimePlatform.WindowsPlayer:
-					{
-						return Directory.Exists(path);
-					}
-				default:
-					return false;
+				return true;
 			}
+			return Directory.Exists(path);
 		}
 		public static void ForeachDirectory(this string rootPath, Action<string> action)
         {
@@ -388,16 +384,20 @@ namespace QTool
 #endif
 					}
 					break;
-				case RuntimePlatform.WindowsPlayer:
+				default:
+					var directoryPath = Path.GetDirectoryName(path);
+					if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
 					{
-						var directoryPath = Path.GetDirectoryName(path);
-						if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
+						try
 						{
 							Debug.LogWarning("自动创建文件夹 " + directoryPath);
 							Directory.CreateDirectory(directoryPath);
 						}
-					}break;
-				default:
+						catch (Exception e)
+						{
+							Debug.LogError("创建文件夹出错：" + directoryPath + ":" + e);
+						}
+					}
 					break;
 			}
 			return path;
