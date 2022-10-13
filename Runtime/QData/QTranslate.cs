@@ -201,7 +201,7 @@ namespace QTool
 			else if (QTranslateData.ContainsKey(value)&& QTranslateData[value].HasValue(GlobalLanguage))
             {
                 var translate = QTranslateData[value].GetValue<string>(GlobalLanguage);
-				return translate;
+				return translate==null?value:translate;
 			}
             return value;
         }
