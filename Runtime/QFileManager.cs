@@ -391,7 +391,7 @@ namespace QTool
 					break;
 				default:
 					{
-						if (!Application.isPlaying)
+						if (!Application.isPlaying||!path.Contains(nameof(Resources)+"/"))
 						{
 							var directoryPath = Path.GetDirectoryName(path);
 							if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
