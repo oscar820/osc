@@ -39,8 +39,16 @@ namespace QTool
 
 #if UNITY_EDITOR
 			SetSize(width, height);
+			switch (Application.platform)
+			{
+				case RuntimePlatform.WindowsPlayer:
+					Screen.SetResolution(width, height, fullScreen);
+					break;
+				default:
+					Screen.SetResolution(width, height, true);
+					break;
+			}
 #else
-			Screen.SetResolution(width, height, fullScreen);
 
 #if PLATFORM_STANDALONE_WIN
 			await Task.Delay(5);
