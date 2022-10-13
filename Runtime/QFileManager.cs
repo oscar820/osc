@@ -388,7 +388,7 @@ namespace QTool
 #endif
 					}
 					break;
-				default:
+				case RuntimePlatform.WindowsPlayer:
 					{
 						var directoryPath = Path.GetDirectoryName(path);
 						if (!string.IsNullOrWhiteSpace(directoryPath) && !ExistsDirectory(directoryPath))
@@ -396,7 +396,8 @@ namespace QTool
 							Debug.LogWarning("自动创建文件夹 " + directoryPath);
 							Directory.CreateDirectory(directoryPath);
 						}
-					}
+					}break;
+				default:
 					break;
 			}
 			return path;
