@@ -93,11 +93,6 @@ namespace QTool
 			}
 		}
 		
-		[PostProcessBuild]
-		public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
-		{
-			
-		}
 		#region OldBuild
 
 		//		public static string Build( string[] scenes,BuildOptions options= BuildOptions.None)
@@ -209,25 +204,24 @@ namespace QTool
 
 		public int callbackOrder => 0;
 		
-
+		bool CheckBuildPath(string path)
+		{
+			return !Application.dataPath.StartsWith(path);
+		}
 		//打包前处理
 		public void OnPreprocessBuild(BuildReport report)
 		{
 			Debug.Log("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
 			var path= Path.GetDirectoryName(report.summary.outputPath);
-			if (Directory.Exists(path))
+			if (!CheckBuildPath(path))
 			{
-				try
+				if (Directory.Exists(path))
 				{
+					Debug.Log("删除打包路径下文件 " + path);
 					Directory.Delete(path, true);
 				}
-				catch (Exception e)
-				{
-					Debug.LogWarning(e);
-				}
-				Debug.Log("删除打包路径下文件 " + path);
+				Directory.CreateDirectory(path);
 			}
-			Directory.CreateDirectory(path);
 		}
 		//打包后处理
 		public void OnPostprocessBuild(BuildReport report)
@@ -247,9 +241,12 @@ namespace QTool
 					break;
 			}
 			var moveToPath = BuildPath;
-			var DirectoryPath = Path.GetDirectoryName(report.summary.outputPath);
-			Debug.Log("移动打包文件" + DirectoryPath + "到：" + moveToPath);
-			QFileManager.Copy(DirectoryPath, moveToPath);
+			if (!CheckBuildPath(moveToPath))
+			{
+				var DirectoryPath = Path.GetDirectoryName(report.summary.outputPath);
+				Debug.Log("移动打包文件" + DirectoryPath + "到：" + moveToPath);
+				QFileManager.Copy(DirectoryPath, moveToPath);
+			}
 			var versions = PlayerSettings.bundleVersion.Split('.');
 			if (versions.Length > 0)
 			{
