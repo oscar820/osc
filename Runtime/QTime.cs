@@ -75,9 +75,9 @@ namespace QTool
 		{
 
 		}
-		public QWaitTime(float Time)
+		public QWaitTime(float Time, bool startOver = false)
 		{
-			this.Time = Time;
+			Reset(Time, startOver);
 		}
 		public void Clear()
 		{
