@@ -124,7 +124,7 @@ namespace QTool.Inspector
 
 
     [CustomPropertyDrawer(typeof(QEnumAttribute))]
-    public class ViewEnumAttributeDrawer : PropertyDrawBase<QEnumAttribute>
+    public class QEnumAttributeDrawer : PropertyDrawBase<QEnumAttribute>
     {
 		public List<string> enumList = new List<string>();
         public int selectIndex =0;
@@ -147,7 +147,7 @@ namespace QTool.Inspector
             selectIndex = enumList.IndexOf(input);
          
         }
-		public static QDictionary<QEnumAttribute, ViewEnumAttributeDrawer> DrawerDic = new QDictionary<QEnumAttribute, ViewEnumAttributeDrawer>((key)=>new ViewEnumAttributeDrawer());
+		public static QDictionary<QEnumAttribute, QEnumAttributeDrawer> DrawerDic = new QDictionary<QEnumAttribute, QEnumAttributeDrawer>((key)=>new QEnumAttributeDrawer());
 		public static object Draw(object obj,QEnumAttribute att)
 		{
 			var str = obj?.ToString();
@@ -615,7 +615,7 @@ namespace QTool.Inspector
 					var enumView = customAttribute?.GetAttribute<QEnumAttribute>();
 					if (enumView != null)
 					{
-						obj = ViewEnumAttributeDrawer.Draw(obj, enumView);break;
+						obj = QEnumAttributeDrawer.Draw(obj, enumView);break;
 					}
 					else if (string.IsNullOrWhiteSpace(name))
 					{

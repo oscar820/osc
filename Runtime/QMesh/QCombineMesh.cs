@@ -1,18 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using QTool.Inspector;
 namespace QTool.Model
 {
 	[RequireComponent(typeof(Animator))]
-	public class QCharacterModel : MonoBehaviour
+	public class QCombineMesh : MonoBehaviour
 	{
 		public List<GameObject> modelRoot;
-		[QReadOnly]
-		public List<SkinnedMeshRenderer> skinnedMesh;
-		[QReadOnly]
-		public Transform rootBone;
+		[QEnum("get_" + nameof(SkinnedMesh))]
 		public List<string> meshKeys;
+		[HideInInspector]
+		public List<SkinnedMeshRenderer> skinnedMesh;
+		public List<SkinnedMeshRenderer> SkinnedMesh => skinnedMesh;
+		[HideInInspector]
+		public Transform rootBone;
+	
 
 		private void OnValidate()
 		{
@@ -47,7 +50,7 @@ namespace QTool.Model
 			}
 			if (meshs.Count > 0)
 			{
-				QModel.CombineMeshs(gameObject, meshs.ToArray());
+				QMesh.CombineMeshs(gameObject, meshs.ToArray());
 			}
 		}
 		public void CheckBone(Transform modelRoot)
@@ -72,7 +75,7 @@ namespace QTool.Model
 			}
 		}
 	}
-	public static class QModel
+	public static class QMesh
 	{
 		public static void CombineMeshs(GameObject skeleton, SkinnedMeshRenderer[] meshes)
 		{
