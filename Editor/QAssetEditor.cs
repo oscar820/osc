@@ -295,7 +295,7 @@ namespace QTool.Asset {
 		{
 			if (texture == null) return;
 			var setting = QToolSetting.Instance;
-			if (!textureImporter.crunchedCompression|| (textureImporter.maxTextureSize>texture.width&&textureImporter.maxTextureSize>texture.height))
+			if (!textureImporter.crunchedCompression)
 			{
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
 
