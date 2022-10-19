@@ -235,18 +235,19 @@ namespace QTool
 						{
 							Directory.Delete(tempPath, true);
 						}
+						var moveToPath = BuildPath;
+						if (!CheckBuildPath(moveToPath))
+						{
+							var DirectoryPath = Path.GetDirectoryName(report.summary.outputPath);
+							Debug.Log("移动打包文件" + DirectoryPath + "到：" + moveToPath);
+							QFileManager.Copy(DirectoryPath, moveToPath);
+						}
 					}
 					break;
 				default:
 					break;
 			}
-			var moveToPath = BuildPath;
-			if (!CheckBuildPath(moveToPath))
-			{
-				var DirectoryPath = Path.GetDirectoryName(report.summary.outputPath);
-				Debug.Log("移动打包文件" + DirectoryPath + "到：" + moveToPath);
-				QFileManager.Copy(DirectoryPath, moveToPath);
-			}
+		
 			var versions = PlayerSettings.bundleVersion.Split('.');
 			if (versions.Length > 0)
 			{
@@ -258,7 +259,7 @@ namespace QTool
 
 				QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
 			}
-			Debug.Log("打包完成 "+ moveToPath);
+			Debug.Log("打包完成 "+ report.summary.outputPath);
 		}
 
 	}
