@@ -439,43 +439,52 @@ namespace QTool.Reflection
 				return method.Invoke( obj, param); 
 			}
 		}
-		public static List<Type> GetAllTypes(this Type rootType)
+		static List<Type> typeList = new List<Type>();
+		static QDictionary<Type, Type[]> AllTypesCache = new QDictionary<Type, Type[]>();
+		public static Type[] GetAllTypes(this Type rootType)
         {
-            List<Type> typeList = new List<Type>();
-            foreach (var ass in GetAllAssemblies())
-            {
-                typeList.AddRange(ass.GetTypes());
-            }
-            typeList.RemoveAll((type) =>
-            {
-                var baseType = type.BaseType;
-                while (baseType != null && !type.IsAbstract)
-                {
-                    if (baseType.Name == rootType.Name)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        baseType = baseType.BaseType;
-                    }
-                }
-                return true;
-            });
-            return typeList;
-        }
-		public static List<Type> GetAllTypes<T>() where T:Attribute
-		{
-			List<Type> typeList = new List<Type>();
-			foreach (var ass in GetAllAssemblies())
+			if (!AllTypesCache.ContainsKey(rootType))
 			{
-				typeList.AddRange(ass.GetTypes());
+				if (typeof(Attribute).IsAssignableFrom(rootType))
+				{
+					List<Type> typeList = new List<Type>();
+					foreach (var ass in GetAllAssemblies())
+					{
+						typeList.AddRange(ass.GetTypes());
+					}
+					typeList.RemoveAll((type) =>
+					{
+						return type.GetCustomAttribute(rootType) == null;
+					});
+					AllTypesCache[rootType] = typeList.ToArray();
+				}
+				else
+				{
+					typeList.Clear();
+					foreach (var ass in GetAllAssemblies())
+					{
+						typeList.AddRange(ass.GetTypes());
+					}
+					typeList.RemoveAll((type) =>
+					{
+						var baseType = type;
+						while (baseType != null && !type.IsAbstract)
+						{
+							if (baseType.Name == rootType.Name)
+							{
+								return false;
+							}
+							else
+							{
+								baseType = baseType.BaseType;
+							}
+						}
+						return true;
+					});
+					AllTypesCache[rootType] = typeList.ToArray();
+				}
 			}
-			typeList.RemoveAll((type) =>
-			{
-				return type.GetCustomAttribute<T>() == null;
-			});
-			return typeList;
+			return AllTypesCache[rootType];
 		}
 		public static object CreateInstance(this Type type, object targetObj=null,bool copyTarget=false, params object[] param)
         {

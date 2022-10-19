@@ -12,7 +12,7 @@ namespace QTool
     {
         static QCommand()
         {
-            FreshCommands(QReflection.GetAllTypes<QCommandType>().ToArray());
+            FreshCommands(typeof(QCommandType).GetAllTypes());
         }
         public static bool Invoke(string commandStr) 
         {

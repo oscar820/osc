@@ -17,13 +17,11 @@ using System.Runtime.ExceptionServices;
 namespace QTool.Test
 {
    
-    
-    [QScriptToggle(nameof(scriptList))]
+    [QScriptToggle(typeof(QId))]
     public class QToolTest : MonoBehaviour
     {
         public QIdObject instanceTest;
         public QDictionary<string, string> qDcitionaryTest = new QDictionary<string, string>();
-        public static List<string> scriptList=> new List<string> { "QId" };
         public bool toggle;
         public List<string> tansList;
         [QReadOnly]

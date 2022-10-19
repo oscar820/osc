@@ -103,10 +103,10 @@ namespace QTool.Inspector
     [AttributeUsage(AttributeTargets.Class)]
     public class QScriptToggleAttribute : QHeightAttribute
     {
-        public string scriptList="";
-        public QScriptToggleAttribute( string scriptList, float height = 30, string showControl = "") : base("", height, showControl)
+        public Type baseType;
+        public QScriptToggleAttribute(Type baseType, float height = 30, string showControl = "") : base("", height, showControl)
         {
-            this.scriptList = scriptList;
+            this.baseType = baseType;
         }
     }
     /// <summary>

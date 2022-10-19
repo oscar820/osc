@@ -1341,34 +1341,23 @@ namespace QTool.Inspector
 
         #region 将数组数据显示成可选项
         GameObject gameObject => (target as MonoBehaviour)?.gameObject;
-        public bool HasCompoent(string name)
+        public bool HasCompoent(Type type)
         {
-            try
-            {
-
-                return gameObject?.GetComponent(QReflection.ParseType( name));
-            }
-            catch (System.Exception e)
-            {
-
-                Debug.LogError("判断脚本[" + name + "]出错：" + e);
-                return false;
-            }
-        }
-        public void SetCompoent(string name, bool value)
+			return gameObject?.GetComponent(type);
+		}
+        public void SetCompoent(Type type, bool value)
         {
-            if (HasCompoent(name) != value)
+            if (HasCompoent(type) != value)
             {
-                if (value)
-                {
-                    gameObject?.AddComponent(QReflection.ParseType(name));
-                    //  UnityEngineInternal.APIUpdaterRuntimeServices.AddComponent(gameObject, "Assets\Scripts\Scenes\FightScene\Tile\TileObject.cs (296,17)", nameDic[name]);
-                }
-                else
-                {
+				if (value)
+				{
+					gameObject?.AddComponent(type);
+				}
+				else
+				{
 
-                    DestroyImmediate(gameObject.GetComponent(QReflection.ParseType(name)));
-                }
+					DestroyImmediate(gameObject.GetComponent(type));
+				}
             }
         }
         public bool DrawScriptToggleList()
@@ -1382,40 +1371,18 @@ namespace QTool.Inspector
                 }
 
                 var GuiList = new List<GUIContent>();
-				var list= target.GetPathObject(att.scriptList) as IList;
-				if (list != null)
-                {
-                    GUILayout.BeginHorizontal();
-                    for (int i = 0; i < list.Count; i++)
-                    {
-                        if (list[i] != null)
-                        {
-                            if (list[i] is UnityEngine.Object)
-                            {
-                                var uObj = list[i] as UnityEngine.Object;
-                                var texture = AssetPreview.GetAssetPreview(uObj);
-                                GuiList.Add(new GUIContent(texture, uObj.name));
-                            }
-                            else
-                            {
-                                GuiList.Add(new GUIContent(list[i].ToString()));
-                            }
-                        }
-                        else
-                        {
-                            GuiList.Add(new GUIContent("空"));
-                        }
-                        var value = HasCompoent(list[i]?.ToString());
-                        var style = EditorStyles.miniButton;
-                        SetCompoent(list[i]?.ToString(), value.DrawToogleButton(GuiList[i], style));
-                    }
-                    GUILayout.EndHorizontal();
-                }
-                else
-                {
-                    GUILayout.Box("无法获取列表【" + att.scriptList + "】");
-                }
-                return true;
+				var types= att.baseType.GetAllTypes();
+				GUILayout.BeginHorizontal();
+				for (int i = 0; i < types.Length; i++)
+				{
+					var type = types[i];
+					GuiList.Add(new GUIContent(type.QName()));
+					var value = HasCompoent(type);
+					var style = EditorStyles.miniButton;
+					SetCompoent(type, value.DrawToogleButton(GuiList[i], style));
+				}
+				GUILayout.EndHorizontal();
+				return true;
 
             }
             return false;
