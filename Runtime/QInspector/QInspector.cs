@@ -169,21 +169,14 @@ namespace QTool.Inspector
         }
 
     }
-    [AttributeUsage(AttributeTargets.Method)]
-    public class QButtonAttribute : QHeightAttribute
-    {
-        public QButtonAttribute(string name, float height = 30, string showControl = "") : base(name, height, showControl)
-        {
-            // order = 0;
-        }
-    }
+  
     /// <summary>
     /// 选取对象按钮显示 会调用函数CallFunc传入GameObject
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class QSelectObjectButtonAttribute : QButtonAttribute
+    public class QSelectObjectButtonAttribute : QNameAttribute
     {
-        public QSelectObjectButtonAttribute(string name, float height = 30, string showControl = "") : base(name,height, showControl)
+        public QSelectObjectButtonAttribute(string name,  string showControl = "") : base(name, showControl)
         {
         }
     }

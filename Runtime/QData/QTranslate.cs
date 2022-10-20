@@ -210,7 +210,7 @@ namespace QTool
 			CheckFresh();
 		}
 
-		[QButton("翻译刷新")]
+		[QName("翻译刷新")]
         private void CheckFresh(string key=null)
         {
             if (curValue != value)

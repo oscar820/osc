@@ -201,12 +201,12 @@ namespace QTool.Test
 			//QDebug.Log("QData Dictionary序列化测试：" + new Dictionary<string, string> { {"asd","askdj" } }.ToQData());
 		}
         public string commandStr;
-        [QButton("命令测试")]
+        [QName("命令测试")]
         public void CommandTest()
         { 
             QCommand.Invoke(commandStr);
         }
-		[QButton("QRuntimeValue测试")]
+		[QName("QRuntimeValue测试")]
 		public void QRuntimeValueTest()
 		{
 			QRuntimeData data = new QRuntimeData();
@@ -219,12 +219,12 @@ namespace QTool.Test
 		[TextArea(5,10)]
         public string QDataStr;
 
-		[QButton("时间测试")]
+		[QName("时间测试")]
 		public void TimeTest()
 		{
 			QTime.ChangeScale("测试时间", UnityEngine.Random.Range(0, 2));
 		}
-		[QButton("QDataList测试")]
+		[QName("QDataList测试")]
         public async void QDataTest()
 		{
 			Debug.LogError("\"aslkdasdj,asldjl\"".ParseElement());
@@ -257,7 +257,7 @@ namespace QTool.Test
 			QPlayerPrefs.Set("test1", data.ToQData());
 			Debug.LogError(nameof(QPlayerPrefs) + ": " + QPlayerPrefs.GetString("test1"));
 		}
-		[QButton("ToComuteFloatTest")]
+		[QName("ToComuteFloatTest")]
 		public void ToComuteFloatTest()
 		{
 			QDebug.Log("1.1"+"  :  "+"1.1".ToComputeFloat());
@@ -267,7 +267,7 @@ namespace QTool.Test
 			QDebug.Log("0.4.18" + "  :  " + "0.4.18".ToComputeFloat());
 			QDebug.Log("0.4.20" + "  :  " + "0.4.20".ToComputeFloat());
 		}
-		[QButton("PlayerLoop")]
+		[QName("PlayerLoop")]
 		public static void PlayerLoop()
 		{
 			var playerLoop = UnityEngine.LowLevel.PlayerLoop.GetCurrentPlayerLoop();
@@ -292,7 +292,7 @@ namespace QTool.Test
 
 			UnityEngine.Debug.Log(sb.ToString());
 		}
-		[QButton("QTaskTest")]
+		[QName("QTaskTest")]
 		public async void QTaskTest()
 		{
 			//UnityEngine.LowLevel.PlayerLoop.GetDefaultPlayerLoop();

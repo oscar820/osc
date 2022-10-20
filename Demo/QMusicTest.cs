@@ -14,7 +14,7 @@ public class QMusicTest : MonoBehaviour
     public int Scale = 4;
 
     // Start is called before the first frame update
-    [QButton("test")]
+    [QName("test")]
     void Start()
     {
         CubePool = new ObjectPool<GameObject>("QMusicPool", () => Instantiate(cubePrefab)); ;

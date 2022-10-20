@@ -1028,7 +1028,7 @@ namespace QTool.Inspector
     {
         public QDictionary<QOnEidtorInitAttribute, QFunctionInfo> initFunc = new QDictionary<QOnEidtorInitAttribute, QFunctionInfo>();
         public QDictionary<QOnSceneInputAttribute, QFunctionInfo> mouseEventFunc = new QDictionary<QOnSceneInputAttribute, QFunctionInfo>();
-        public QDictionary<QButtonAttribute, QFunctionInfo> buttonFunc = new QDictionary<QButtonAttribute, QFunctionInfo>();
+        public QDictionary<QNameAttribute, QFunctionInfo> buttonFunc = new QDictionary<QNameAttribute, QFunctionInfo>();
         public QScriptToggleAttribute scriptToggle = null;
         public QDictionary<QOnEditorModeAttribute, QFunctionInfo> editorMode = new QDictionary<QOnEditorModeAttribute, QFunctionInfo>();
         protected override void Init(Type type)
@@ -1043,13 +1043,13 @@ namespace QTool.Inspector
                 {
                     mouseEventFunc[att] = funcInfo;
                 }
-                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QButtonAttribute>())
+                foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QNameAttribute>())
                 {
                     buttonFunc[att] = funcInfo;
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<ContextMenu>())
                 {
-                    buttonFunc[new QButtonAttribute(att.menuItem)] = funcInfo;
+                    buttonFunc[new QNameAttribute(att.menuItem)] = funcInfo;
                 }
                 foreach (var att in funcInfo.MethodInfo.GetCustomAttributes<QOnEidtorInitAttribute>())
                 {
@@ -1215,7 +1215,7 @@ namespace QTool.Inspector
                     {
                         if (att is QSelectObjectButtonAttribute)
                         {
-                            if (GUILayout.Button(att.name, GUILayout.Height(att.height)))
+                            if (GUILayout.Button(att.name))
                             {
                                 EditorGUIUtility.ShowObjectPicker<GameObject>(null, false, "", att.name.GetHashCode());
 
@@ -1235,7 +1235,7 @@ namespace QTool.Inspector
                         }
                         else
                         {
-                            if (GUILayout.Button(att.name, GUILayout.Height(att.height)))
+                            if (GUILayout.Button(att.name))
                             {
                                 kv.Value.Invoke(target);
                             }

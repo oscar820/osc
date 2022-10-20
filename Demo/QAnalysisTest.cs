@@ -11,13 +11,13 @@ namespace QTool
 		public StringEvent OnOverInfo;
 		[Range(1,1000)]
 		public int idRange=1;
-		[QButton("开始")]
+		[QName("开始")]
 		public void Login()
 		{
 			QAnalysis.Start("TestAccount"+ "_" + Random.Range(1, idRange)); 
 		}
 
-		[QButton("战斗模拟")]
+		[QName("战斗模拟")]
 		public async Task Fight()
 		{
 			for (int level = 0; level < 3; level++)
@@ -38,12 +38,12 @@ namespace QTool
 				await Task.Delay(100);
 			}
 		}
-		[QButton("结束")]
+		[QName("结束")]
 		public async void Logout()
 		{
 			await QAnalysis.Stop();
 		}
-		[QButton("大量测试")]
+		[QName("大量测试")]
 		public async void AllTest()
 		{
 			for (int id = 0; id < idRange&&Application.isPlaying; id++)

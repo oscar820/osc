@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QTool.Inspector;
-namespace QTool.Model
+namespace QTool.Mesh
 {
 	[RequireComponent(typeof(Animator))]
-	public class QCombineMesh : MonoBehaviour
+	public class QSkinnedMeshSystem : MonoBehaviour
 	{
 		public List<GameObject> modelRoot;
 		[QEnum("get_" + nameof(SkinnedMesh))]
@@ -50,7 +50,7 @@ namespace QTool.Model
 			}
 			if (meshs.Count > 0)
 			{
-				QMesh.CombineMeshs(gameObject, meshs.ToArray());
+				QMesh.CombineSkinedMeshs(gameObject, meshs.ToArray());
 			}
 		}
 		public void CheckBone(Transform modelRoot)
@@ -75,40 +75,6 @@ namespace QTool.Model
 			}
 		}
 	}
-	public static class QMesh
-	{
-		public static void CombineMeshs(GameObject skeleton, SkinnedMeshRenderer[] meshes)
-		{
-			var childs = skeleton.GetComponentsInChildren<Transform>(true);
-			var matList = new List<Material>();
-			var combineInfos = new List<CombineInstance>();
-			var bones = new List<Transform>();
-			foreach (var skinedMesh in meshes)
-			{
-				matList.AddRange(skinedMesh.sharedMaterials);
-				for (int sub = 0; sub < skinedMesh.sharedMesh.subMeshCount; sub++)
-				{
-					CombineInstance combine = new CombineInstance();
-					combine.mesh = skinedMesh.sharedMesh;
-					combine.subMeshIndex = sub;
-					combineInfos.Add(combine);
-				}
-				foreach (var bone in skinedMesh.bones)
-				{
-					bones.Add(childs.Get(bone.name, (trans) => trans.name));
-				}
-			}
-			var meshRenderer = skeleton.GetComponent<SkinnedMeshRenderer>();
-			if (meshRenderer == null)
-			{
-				meshRenderer = skeleton.AddComponent<SkinnedMeshRenderer>();
-			}
-			meshRenderer.sharedMesh = new Mesh();
-			meshRenderer.sharedMesh.CombineMeshes(combineInfos.ToArray(),false,false);
-			meshRenderer.bones = bones.ToArray();
-			meshRenderer.materials = matList.ToArray();
-		}
-	}
-
+	
 }
 

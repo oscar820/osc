@@ -1,18 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class QVoxelMesh : MonoBehaviour
+using QTool.Inspector;
+namespace QTool.Mesh
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	public class QVoxelMesh : MonoBehaviour
+	{
+		[QName("刷新")]
+		public void Refresh()
+		{
+
+		}
+	}
 }
