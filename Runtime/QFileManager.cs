@@ -418,7 +418,7 @@ namespace QTool
 #if UNITY_SWITCH
 							if (!ExistsFile(path))
 							{
-								Debug.LogError("不存在文件" + path);
+								Debug.LogWarning("不存在文件" + path);
 								UnityEngine.Switch.Notification.EnterExitRequestHandlingSection();
 								var t = nn.fs.File.Create(path, bytes.LongLength);
 								t.abortUnlessSuccess();
