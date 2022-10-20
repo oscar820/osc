@@ -30,10 +30,10 @@ namespace QTool
 		}
 		public static int MinSendCount { get; set; } = 100;
 		public static int AutoSendCount { get; set; } =5000;
-		public static bool Active => Application.platform == RuntimePlatform.WindowsPlayer || Application.platform==RuntimePlatform.WindowsEditor;
+
+		[System.Diagnostics.Conditional("UNITY_STANDALONE")]
 		public static void Start(string playerId)
 		{
-			if (!Active) return;
 			try
 			{
 				if (QPlayerPrefs.HasKey(EventListKey))
@@ -114,9 +114,9 @@ namespace QTool
 		}
 		static Task stopTask = null;
 		static Task sendTask = null;
+
 		public static async Task Stop()
 		{
-			if (!Active) return;
 			if (sendTask != null)
 			{
 				await sendTask;
@@ -139,7 +139,6 @@ namespace QTool
 	
 		static async Task SendAndClear()
 		{
-			if (!Active) return;
 			if (sendTask != null)
 			{
 				await sendTask;
@@ -178,8 +177,10 @@ namespace QTool
 			}
 			sendTask = null;
 		}
-		
+
 		static List<QAnalysisEvent> EventList = new List<QAnalysisEvent>();
+
+		[System.Diagnostics.Conditional("UNITY_STANDALONE")]
 		public static void Trigger(string eventKey,object value=null)
 		{
 
@@ -219,6 +220,7 @@ namespace QTool
 
 			}
 		}
+		[System.Diagnostics.Conditional("UNITY_STANDALONE")]
 		public static void Trigger(string eventKey,string key, object value)
 		{
 			Trigger(eventKey, new QKeyValue<string, object>(key, value));
