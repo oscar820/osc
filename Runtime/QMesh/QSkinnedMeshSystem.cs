@@ -50,7 +50,7 @@ namespace QTool.Mesh
 			}
 			if (meshs.Count > 0)
 			{
-				QMesh.CombineSkinedMeshs(gameObject, meshs.ToArray());
+				gameObject.GetComponent<SkinnedMeshRenderer>(true).CombineMeshs(meshs.ToArray());
 			}
 		}
 		public void CheckBone(Transform modelRoot)

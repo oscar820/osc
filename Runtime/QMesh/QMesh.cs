@@ -5,27 +5,45 @@ namespace QTool.Mesh
 {
 	public static class QMesh
 	{
-		public static void CombineMeshs(GameObject root, MeshRenderer[] meshes)
+		public static void CombineMeshs(this MeshRenderer root, MeshRenderer[] meshes=null)
 		{
-			var childs = root.GetComponentsInChildren<Transform>(true);
+			bool deleteOld = false;
+			if (meshes == null)
+			{
+				meshes=root.GetComponentsInChildren<MeshRenderer>();
+				deleteOld = true;
+			}
 			var matList = new List<Material>();
 			var combineInfos = new List<CombineInstance>();
 			foreach (var meshObj in meshes)
 			{
-				var mesh = meshObj.GetComponent<MeshFilter>()?.mesh;
+				if (meshObj == root) continue;
+				var mesh = meshObj.GetComponent<MeshFilter>()?.sharedMesh;
 				matList.AddRange(meshObj.sharedMaterials);
 				CombineInstance combine = new CombineInstance();
+				combine.transform = Matrix4x4.TRS( meshObj.transform.localPosition,meshObj.transform.rotation,meshObj.transform.localScale);
 				combine.mesh = mesh;
 				combineInfos.Add(combine);
 			}
-			root.GetComponent<MeshRenderer>(true).materials = matList.ToArray();
+			root.sharedMaterials = matList.ToArray();
 			var filter = root.GetComponent<MeshFilter>(true);
 			filter.sharedMesh = new UnityEngine.Mesh();
-			filter.sharedMesh.CombineMeshes(combineInfos.ToArray(), false, false);
+			filter.sharedMesh.CombineMeshes(combineInfos.ToArray(), false, true);
+			Debug.Log(root + " " + nameof(CombineMeshs) + " 顶点数:" + filter.sharedMesh.vertices.Length);
+			if (deleteOld)
+			{
+				foreach (var mesh in meshes)
+				{
+					if (mesh != null)
+					{
+						mesh.gameObject.CheckDestory();
+					}
+				}
+			}
 		}
-		public static void CombineSkinedMeshs(this GameObject skeleton, SkinnedMeshRenderer[] meshes)
+		public static void CombineMeshs(this SkinnedMeshRenderer root, SkinnedMeshRenderer[] meshes)
 		{
-			var childs = skeleton.GetComponentsInChildren<Transform>(true);
+			var childs = root.GetComponentsInChildren<Transform>(true);
 			var matList = new List<Material>();
 			var combineInfos = new List<CombineInstance>();
 			var bones = new List<Transform>();
@@ -44,15 +62,10 @@ namespace QTool.Mesh
 					bones.Add(childs.Get(bone.name, (trans) => trans.name));
 				}
 			}
-			var meshRenderer = skeleton.GetComponent<SkinnedMeshRenderer>();
-			if (meshRenderer == null)
-			{
-				meshRenderer = skeleton.AddComponent<SkinnedMeshRenderer>();
-			}
-			meshRenderer.sharedMesh = new UnityEngine.Mesh();
-			meshRenderer.sharedMesh.CombineMeshes(combineInfos.ToArray(), false, false);
-			meshRenderer.bones = bones.ToArray();
-			meshRenderer.materials = matList.ToArray();
+			root.sharedMesh = new UnityEngine.Mesh();
+			root.sharedMesh.CombineMeshes(combineInfos.ToArray(), false, false);
+			root.bones = bones.ToArray();
+			root.materials = matList.ToArray();
 		}
 	}
 

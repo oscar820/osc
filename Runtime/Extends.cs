@@ -121,7 +121,7 @@ namespace QTool
 #endif
         }
 
-        public static T CheckInstantiate<T>(this Object recordObj,T prefab, Transform parent)where T: Object
+        public static T CheckInstantiate<T>(this T prefab, Transform parent)where T: Object
         {
 
 #if UNITY_EDITOR
@@ -139,7 +139,7 @@ namespace QTool
             return null;
 #endif
         }
-        public static void CheckDestory(this Object recordObj, GameObject obj)
+        public static void CheckDestory(this GameObject obj)
         {
 #if UNITY_EDITOR
             if (obj != null)
