@@ -23,7 +23,7 @@ namespace QTool
 		/// <param name="eventKey">事件名</param>
 		public static void Trigger(string eventKey)
         {
-			QDebug.Log("触发事件 " + eventKey);
+			Debug.Log("触发事件[" + eventKey+"]");
 			try
 			{
 				eventKey = eventKey.Trim();
@@ -88,8 +88,8 @@ namespace QTool
 
 		internal static QDictionary<string, System.Action<T>> OnceEventList = new QDictionary<string, System.Action<T>>();
 		public static void Trigger(string eventKey,T value)
-        {
-			QDebug.Log("触发事件 " + eventKey+"("+value+")");
+		{
+			QEventManager.Trigger(eventKey + "_" + value);
 			try
 			{
 				eventKey = eventKey.Trim();
