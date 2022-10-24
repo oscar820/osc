@@ -11,7 +11,10 @@ namespace QTool.Mesh
 		{
 			voxelData.Foreach((x, y, z, value) =>
 			{
-
+				if (x >= voxelData.Max.x || y >= voxelData.Max.y || z >= voxelData.Max.z)
+				{
+					return;
+				}
 				int flagIndex = 0;
 				var cube = new float[8];
 				for (var i = 0; i < 8; i++)
@@ -53,7 +56,7 @@ namespace QTool.Mesh
 		private static float GetOffset(float v1, float v2)
 		{
 			float delta = v2 - v1;
-			return (delta == 0.0f) ? 0 : -v1 / delta;
+			return (delta == 0.0f) ? 0 : -v1/ delta;
 		}
 		#region 静态索引表
 		private static readonly int[,] VertexOffset = new int[,]

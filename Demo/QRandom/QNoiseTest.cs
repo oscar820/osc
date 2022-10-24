@@ -20,7 +20,10 @@ namespace QTool.Noise
 				{
 					for (int z = 0; z < size; z++)
 					{
-						voxels[x, y, z] = fractal[x, y, z];
+						float u = x / (size - 1.0f);
+						float v = y / (size - 1.0f);
+						float w = z / (size - 1.0f);
+						voxels[x, y, z] = fractal[u,v,w];
 					}
 				}
 			}
@@ -28,6 +31,8 @@ namespace QTool.Noise
 		}
 		void Start()
 		{
+			NoiseTest();
+			return;
 			var voxels = new QVoxelData();
 			for (int x = 0; x < 10; x++)
 			{
@@ -35,16 +40,23 @@ namespace QTool.Noise
 				{
 					for (int z = 0; z < 10; z++)
 					{
-						voxels[x, y, z] = 0.1f;
-						continue;
 						if (x <= 6 && x >= 4 && y <= 6 && y >= 4 && z <= 6 && z >= 4)
 						{
-							voxels[x, y, z] = 0.1f;
+							if (x == 6 || y == 6||z==6)
+							{
+								voxels[x, y, z] = 10;
+							}
+							else
+							{
+
+								voxels[x, y, z] = 1;
+							}
 						}
 						else
 						{
 							voxels[x, y, z] = 0;
 						}
+
 					}
 				}
 			}
