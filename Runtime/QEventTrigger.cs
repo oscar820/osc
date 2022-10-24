@@ -89,7 +89,6 @@ namespace QTool
 		internal static QDictionary<string, System.Action<T>> OnceEventList = new QDictionary<string, System.Action<T>>();
 		public static void Trigger(string eventKey,T value)
 		{
-			QEventManager.Trigger(eventKey + "_" + value);
 			try
 			{
 				eventKey = eventKey.Trim();
