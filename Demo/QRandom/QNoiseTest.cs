@@ -13,41 +13,31 @@ namespace QTool.Noise
 		{
 			QNoise fractal = new ValueNoise();
 
-			var voxels = new QVoxelData(size);
+			var voxels = new QVoxelData();
 			for (int x = 0; x < size; x++)
 			{
 				for (int y = 0; y < size; y++)
 				{
 					for (int z = 0; z < size; z++)
 					{
-						float u = x / (size - 1.0f);
-						float v = y / (size - 1.0f);
-						float w = z / (size - 1.0f);
-						voxels[x, y, z] = fractal[u, v, w];
+						voxels[x, y, z] = fractal[x, y, z];
 					}
 				}
 			}
-			var marching = new QMarchingCubes();
-			List<Vector3> verts = new List<Vector3>();
-			List<Vector3> normals = new List<Vector3>();
-			List<int> indices = new List<int>();
-			marching.Generate(voxels.Voxels, verts, indices);
-			CreateMesh(verts, normals, indices, -Vector3.one * size / 2f);
+			CreateMesh(voxels.Generate(), -Vector3.one * size / 2f);
 		}
 		void Start()
 		{
-
-			var voxels = new QVoxelData(size);
+			var voxels = new QVoxelData();
 			for (int x = 0; x < 10; x++)
 			{
 				for (int y = 0; y < 10; y++)
 				{
 					for (int z = 0; z < 10; z++)
 					{
-						float u = x / (size - 1.0f);
-						float v = y / (size - 1.0f);
-						float w = z / (size - 1.0f);
-						if (x <= 6 && x >= 5 && y <= 6 && y >= 5 && z <= 6 && z >= 5)
+						voxels[x, y, z] = 0.1f;
+						continue;
+						if (x <= 6 && x >= 4 && y <= 6 && y >= 4 && z <= 6 && z >= 4)
 						{
 							voxels[x, y, z] = 0.1f;
 						}
@@ -58,25 +48,12 @@ namespace QTool.Noise
 					}
 				}
 			}
-			var marching = new QMarchingCubes();
-			List<Vector3> verts = new List<Vector3>();
-			List<Vector3> normals = new List<Vector3>();
-			List<int> indices = new List<int>();
-			marching.Generate(voxels.Voxels, verts, indices);
-			CreateMesh(verts, normals, indices, -Vector3.one * size / 2f);
+			CreateMesh(voxels.Generate(), -Vector3.one * 10 / 2f);
 		}
 
 
-		private void CreateMesh(List<Vector3> verts, List<Vector3> normals, List<int> indices, Vector3 position)
+		private void CreateMesh(UnityEngine.Mesh mesh , Vector3 position)
 		{
-			UnityEngine.Mesh mesh = new UnityEngine.Mesh();
-			mesh.SetVertices(verts);
-			mesh.SetTriangles(indices, 0);
-			if (normals.Count > 0)
-				mesh.SetNormals(normals);
-			else
-				mesh.RecalculateNormals();
-			mesh.RecalculateBounds();
 			GameObject go = new GameObject("Mesh");
 			go.transform.parent = transform;
 			go.AddComponent<MeshFilter>();

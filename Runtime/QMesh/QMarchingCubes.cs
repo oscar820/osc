@@ -4,128 +4,75 @@ using UnityEngine;
 
 namespace QTool.Mesh
 {
-	public class QMarchingCubes
+	public static class QMarchingCubes
 	{
-		private float[] Cube { get; set; }
-		public QMarchingCubes()
+		private static Vector3[] EdgeVertex = new Vector3[12];
+		public static UnityEngine.Mesh Generate(this QVoxelData voxelData)
 		{
-			Cube = new float[8];
-			EdgeVertex = new Vector3[12];
-		}
-		public virtual void Generate(float[,,] voxels, IList<Vector3> verts, IList<int> indices)
-		{
-			int width = voxels.GetLength(0);
-			int height = voxels.GetLength(1);
-			int depth = voxels.GetLength(2);
-			int x, y, z, i;
-			int ix, iy, iz;
-			for (x = 0; x < width - 1; x++)
+			voxelData.Foreach((x, y, z, value) =>
 			{
-				for (y = 0; y < height - 1; y++)
-				{
-					for (z = 0; z < depth - 1; z++)
-					{
-						for (i = 0; i < 8; i++)
-						{
-							ix = x + VertexOffset[i, 0];
-							iy = y + VertexOffset[i, 1];
-							iz = z + VertexOffset[i, 2];
 
-							Cube[i] = voxels[ix, iy, iz];
-						}
-						March(x, y, z, Cube, verts, indices);
+				int flagIndex = 0;
+				var cube = new float[8];
+				for (var i = 0; i < 8; i++)
+				{
+					var ix = x + VertexOffset[i, 0];
+					var iy = y + VertexOffset[i, 1];
+					var iz = z + VertexOffset[i, 2];
+					cube[i] = voxelData[ix, iy, iz];
+					if (cube[i] <= 0) { flagIndex |= 1 << i; }
+				}
+				int edgeFlags = CubeEdgeFlags[flagIndex];
+				if (edgeFlags == 0) return;
+				for (var i = 0; i < 12; i++)
+				{
+					if ((edgeFlags & (1 << i)) != 0)
+					{
+						var offset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
+
+						EdgeVertex[i].x = x + (VertexOffset[EdgeConnection[i, 0], 0] + offset * EdgeDirection[i, 0]);
+						EdgeVertex[i].y = y + (VertexOffset[EdgeConnection[i, 0], 1] + offset * EdgeDirection[i, 1]);
+						EdgeVertex[i].z = z + (VertexOffset[EdgeConnection[i, 0], 2] + offset * EdgeDirection[i, 2]);
 					}
 				}
-			}
-
-		}
-		public virtual void Generate(IList<float> voxels, int width, int height, int depth, IList<Vector3> verts, IList<int> indices)
-		{
-			int x, y, z, i;
-			int ix, iy, iz;
-			for (x = 0; x < width - 1; x++)
-			{
-				for (y = 0; y < height - 1; y++)
+				for (var i = 0; i < 5; i++)
 				{
-					for (z = 0; z < depth - 1; z++)
+					if (TriangleConnectionTable[flagIndex, 3 * i] < 0) break;
+					var idx = voxelData.meshData.vertices.Count;
+					for (var j = 0; j < 3; j++)
 					{
-						for (i = 0; i < 8; i++)
-						{
-							ix = x + VertexOffset[i, 0];
-							iy = y + VertexOffset[i, 1];
-							iz = z + VertexOffset[i, 2];
-
-							Cube[i] = voxels[ix + iy * width + iz * width * height];
-						}
-						March(x, y, z, Cube, verts, indices);
+						var vert = TriangleConnectionTable[flagIndex, 3 * i + j];
+						voxelData.meshData.triangles.Add(idx + j);
+						voxelData.meshData.vertices.Add(EdgeVertex[vert]);
 					}
 				}
-			}
-
+			});
+			return voxelData.meshData.CreateMesh();
 		}
 		
-		protected virtual float GetOffset(float v1, float v2)
+		private static float GetOffset(float v1, float v2)
 		{
 			float delta = v2 - v1;
 			return (delta == 0.0f) ? 0 : -v1 / delta;
 		}
-
-
-		private Vector3[] EdgeVertex { get; set; }
-
-		
-
-		protected void March(float x, float y, float z, float[] cube, IList<Vector3> vertList, IList<int> indexList)
-		{
-			int i, j, vert, idx;
-			int flagIndex = 0;
-			float offset = 0.0f;
-
-			for (i = 0; i < 8; i++) if (cube[i] <= 0) flagIndex |= 1 << i;
-
-			int edgeFlags = CubeEdgeFlags[flagIndex];
-			if (edgeFlags == 0) return;
-			for (i = 0; i < 12; i++)
-			{
-				if ((edgeFlags & (1 << i)) != 0)
-				{
-					offset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
-
-					EdgeVertex[i].x = x + (VertexOffset[EdgeConnection[i, 0], 0] + offset * EdgeDirection[i, 0]);
-					EdgeVertex[i].y = y + (VertexOffset[EdgeConnection[i, 0], 1] + offset * EdgeDirection[i, 1]);
-					EdgeVertex[i].z = z + (VertexOffset[EdgeConnection[i, 0], 2] + offset * EdgeDirection[i, 2]);
-				}
-			}
-			for (i = 0; i < 5; i++)
-			{
-				if (TriangleConnectionTable[flagIndex, 3 * i] < 0) break;
-
-				idx = vertList.Count;
-
-				for (j = 0; j < 3; j++)
-				{
-					vert = TriangleConnectionTable[flagIndex, 3 * i + j];
-					indexList.Add(idx + j);
-					vertList.Add(EdgeVertex[vert]);
-				}
-			}
-		}
-
 		#region 静态索引表
+		private static readonly int[,] VertexOffset = new int[,]
+		{
+			{0, 0, 0},{1, 0, 0},{1, 1, 0},{0, 1, 0},
+			{0, 0, 1},{1, 0, 1},{1, 1, 1},{0, 1, 1}
+		};
 		private static readonly int[,] EdgeConnection = new int[,]
 		{
 			{0,1}, {1,2}, {2,3}, {3,0},
 			{4,5}, {5,6}, {6,7}, {7,4},
 			{0,4}, {1,5}, {2,6}, {3,7}
 		};
-
 		private static readonly float[,] EdgeDirection = new float[,]
 		{
 			{1.0f, 0.0f, 0.0f},{0.0f, 1.0f, 0.0f},{-1.0f, 0.0f, 0.0f},{0.0f, -1.0f, 0.0f},
 			{1.0f, 0.0f, 0.0f},{0.0f, 1.0f, 0.0f},{-1.0f, 0.0f, 0.0f},{0.0f, -1.0f, 0.0f},
 			{0.0f, 0.0f, 1.0f},{0.0f, 0.0f, 1.0f},{ 0.0f, 0.0f, 1.0f},{0.0f,  0.0f, 1.0f}
 		};
-
 		private static readonly int[] CubeEdgeFlags = new int[]
 		{
 		0x000, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -145,8 +92,6 @@ namespace QTool.Mesh
 		0xe90, 0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795, 0x49f, 0x596, 0x29a, 0x393, 0x099, 0x190,
 		0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x000
 		};
-
-
 		private static readonly int[,] TriangleConnectionTable = new int[,]
 		{
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -406,14 +351,6 @@ namespace QTool.Mesh
 		{0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 		};
-
-		protected static readonly int[,] VertexOffset = new int[,]
-		{
-			{0, 0, 0},{1, 0, 0},{1, 1, 0},{0, 1, 0},
-			{0, 0, 1},{1, 0, 1},{1, 1, 1},{0, 1, 1}
-		};
-
-
 		#endregion
 
 	}
