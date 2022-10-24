@@ -9,10 +9,10 @@ namespace QTool.Noise
 	{
 		public Material material;
 		public int size = 30;
-		void Start()
+		public void NoiseTest()
 		{
-			QNoise fractal = new ValueNoise();	
-			var marching = new QMarchingCubes();
+			QNoise fractal = new ValueNoise();
+
 			var voxels = new QVoxelData(size);
 			for (int x = 0; x < size; x++)
 			{
@@ -27,11 +27,43 @@ namespace QTool.Noise
 					}
 				}
 			}
+			var marching = new QMarchingCubes();
 			List<Vector3> verts = new List<Vector3>();
 			List<Vector3> normals = new List<Vector3>();
 			List<int> indices = new List<int>();
 			marching.Generate(voxels.Voxels, verts, indices);
-			CreateMesh(verts, normals, indices, -Vector3.one*size/2f);
+			CreateMesh(verts, normals, indices, -Vector3.one * size / 2f);
+		}
+		void Start()
+		{
+
+			var voxels = new QVoxelData(size);
+			for (int x = 0; x < 10; x++)
+			{
+				for (int y = 0; y < 10; y++)
+				{
+					for (int z = 0; z < 10; z++)
+					{
+						float u = x / (size - 1.0f);
+						float v = y / (size - 1.0f);
+						float w = z / (size - 1.0f);
+						if (x <= 6 && x >= 5 && y <= 6 && y >= 5 && z <= 6 && z >= 5)
+						{
+							voxels[x, y, z] = 0.1f;
+						}
+						else
+						{
+							voxels[x, y, z] = 0;
+						}
+					}
+				}
+			}
+			var marching = new QMarchingCubes();
+			List<Vector3> verts = new List<Vector3>();
+			List<Vector3> normals = new List<Vector3>();
+			List<int> indices = new List<int>();
+			marching.Generate(voxels.Voxels, verts, indices);
+			CreateMesh(verts, normals, indices, -Vector3.one * size / 2f);
 		}
 
 
