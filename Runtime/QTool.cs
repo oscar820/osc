@@ -53,11 +53,11 @@ namespace QTool
 		{
 			UnityWebRequest req = UnityWebRequest.Get(requestUrl);
 			await req.SendWebRequest();
-			if(!req.error.IsNullOrEmpty())
+			if (!req.error.IsNullOrEmpty())
 			{
 				throw new Exception(req.error);
 			}
-			QDebug.Log(nameof(RunURLAsync) + " url: " + requestUrl+"\n"+req.downloadHandler.text);
+			Debug.Log(nameof(RunURLAsync) + " url: " + requestUrl+"\n"+req.downloadHandler.text);
 			return req.downloadHandler.text;
 		}
 		public static async Task LoadSceneAsync(this string sceneName,string loadingScene=null,float time=2f)
