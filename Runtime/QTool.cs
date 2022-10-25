@@ -12,10 +12,6 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
-#if UNITY_SWITCH_API
-using UnityEngine.Switch;
-using nn.hid;
-#endif
 namespace QTool
 {
 
@@ -35,14 +31,6 @@ namespace QTool
 			CultureInfo.CurrentCulture = new CultureInfo("en-US");
 			CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
 			QTranslate.KeyReplace["版本号"] = Application.version;
-#if UNITY_SWITCH_API
-			if(Application.platform== RuntimePlatform.Switch)
-			{
-				Npad.Initialize();
-				Npad.SetSupportedStyleSet(NpadStyle.Handheld | NpadStyle.JoyDual | NpadStyle.FullKey);
-				Npad.SetSupportedIdType(new NpadId[] { NpadId.Handheld, NpadId.No1 });
-			}
-#endif
 		}
 		public static string Version => Application.version; 
 		public static bool IsTestVersion => Application.version.StartsWith("0.");
