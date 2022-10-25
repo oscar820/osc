@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using QTool.Binary;
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 using UnityEngine.Switch;
 #endif
 namespace QTool
@@ -31,7 +31,7 @@ namespace QTool
 		public static string ModPathRoot=> Application.streamingAssetsPath;
 
 		public const string ResourcesPathRoot = "Assets/Resources";
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 		public static nn.account.Uid userId;
 		public static nn.fs.FileHandle fileHandle = new nn.fs.FileHandle();
 #endif
@@ -41,7 +41,7 @@ namespace QTool
 			{
 				case RuntimePlatform.Switch:
 					{
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 
 						nn.account.Account.Initialize();
 						nn.account.UserHandle userHandle = new nn.account.UserHandle();
@@ -113,7 +113,7 @@ namespace QTool
 			{
 				case RuntimePlatform.Switch:
 					{
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 						nn.fs.EntryType entryType = 0;
 						nn.Result result = nn.fs.FileSystem.GetEntryType(ref entryType, path);
 						if (result.IsSuccess())
@@ -256,7 +256,7 @@ namespace QTool
 			
 			try
 			{
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 				return DateTime.MinValue;
 #else
 				if (Application.isPlaying && path.StartsWith(ResourcesPathRoot))
@@ -372,7 +372,7 @@ namespace QTool
 			{
 				case RuntimePlatform.Switch:
 					{
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 						if (!path.StartsWith(Application.streamingAssetsPath))
 						{
 							if (!path.StartsWith(nameof(QTool) + ":/"))
@@ -415,7 +415,7 @@ namespace QTool
 				{
 					case RuntimePlatform.Switch:
 						{
-#if UNITY_SWITCH
+#if UNITY_SWITCH_API
 							if (!ExistsFile(path))
 							{
 								Debug.LogWarning("不存在文件" + path);
@@ -481,9 +481,9 @@ namespace QTool
 			{
 				case RuntimePlatform.Switch:
 					{
-#if UNITY_SWITCH
-						
-						path=CheckDirectoryPath(path);
+#if UNITY_SWITCH_API
+
+						path = CheckDirectoryPath(path);
 						Debug.Log("打开 " + path);
 						nn.Result result = nn.fs.File.Open(ref fileHandle, path, nn.fs.OpenFileMode.Read);
 						result.abortUnlessSuccess();
@@ -529,8 +529,8 @@ namespace QTool
 					{
 						case RuntimePlatform.Switch:
 							{
-#if UNITY_SWITCH
-							
+#if UNITY_SWITCH_API
+
 								return LoadBytes(path).GetString();
 
 #else
