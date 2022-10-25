@@ -41,7 +41,6 @@ namespace QTool
 				Npad.Initialize();
 				Npad.SetSupportedStyleSet(NpadStyle.Handheld | NpadStyle.JoyDual | NpadStyle.FullKey);
 				Npad.SetSupportedIdType(new NpadId[] { NpadId.Handheld, NpadId.No1 });
-				Debug.LogError("初始化 " + nameof(RuntimePlatform.Switch) + "手柄");
 			}
 #endif
 		}
