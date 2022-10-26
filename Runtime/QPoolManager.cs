@@ -116,10 +116,7 @@ namespace QTool
 				result.name = prefab.name;
 				return result;
 			}) as GameObjectPool;
-			if (pool.prefab == null)
-			{
-				pool.prefab = prefab;
-			}
+			pool.prefab = prefab;
 			return pool;
 		}
 		public static TCom Get<TCom>(TCom prefab, Transform parent, Vector3 position=default, Quaternion rotation = default) where TCom : Component
