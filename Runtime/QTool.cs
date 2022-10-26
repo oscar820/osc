@@ -183,6 +183,10 @@ namespace QTool
 			public string Key { get; set; }
 			public float Float;
 		}
+		public static Vector3 ToVector3(this Vector3Int vector3Int)
+		{
+			return new Vector3(vector3Int.x, vector3Int.y, vector3Int.z);
+		}
 		public static float ToComputeFloat(this object value)
 		{
 			if (value == null) return 0;

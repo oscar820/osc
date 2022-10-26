@@ -27,7 +27,7 @@ namespace QTool.Noise
 					}
 				}
 			}
-			CreateMesh(voxels.GetMesh(), -Vector3.one * size / 2f);
+			voxels.GenerateMesh(gameObject,material);
 		}
 		void Start()
 		{
@@ -60,20 +60,10 @@ namespace QTool.Noise
 					}
 				}
 			}
-			CreateMesh(voxels.GetMesh(), -Vector3.one * 10 / 2f);
+			voxels.GenerateMesh(gameObject,material);
 		}
 
 
-		private void CreateMesh(UnityEngine.Mesh mesh , Vector3 position)
-		{
-			GameObject go = new GameObject("Mesh");
-			go.transform.parent = transform;
-			go.AddComponent<MeshFilter>();
-			go.AddComponent<MeshRenderer>();
-			go.GetComponent<Renderer>().material = material;
-			go.GetComponent<MeshFilter>().mesh = mesh;
-			go.transform.localPosition = position;
-			Debug.LogError("mesh " + mesh.vertices.Length);
-		}
+	
 	}
 }

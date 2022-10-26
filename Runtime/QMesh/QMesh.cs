@@ -45,7 +45,18 @@ namespace QTool.Mesh
 	public static class QMeshTool
 	{
 
-		
+
+		public static MeshFilter GenerateMesh(this QVoxelData qVoxelData, GameObject root,Material mat=null)
+		{
+			var filter = root.GetComponent<MeshFilter>(true);
+			filter.mesh = qVoxelData.GetMesh();
+			var renderer= root.GetComponent<MeshRenderer>(true);
+			if (mat != null)
+			{
+				renderer.material = mat;
+			}
+			return filter;
+		}
 		public static void CombineMeshs(this MeshRenderer root, MeshRenderer[] meshes = null)
 		{
 			bool deleteOld = false;

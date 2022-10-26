@@ -6,7 +6,7 @@ namespace QTool.Mesh
 {
 	public static class QMarchingCubes
 	{
-		static void GenerateCube(QVoxelData voxelData,Vector3Int pos,float value)
+		static void GenerateCube(QVoxelData voxelData,Vector3Int pos)
 		{
 
 			var EdgeVertex = new Vector3[12];
@@ -14,10 +14,7 @@ namespace QTool.Mesh
 			var cube = new float[8];
 			for (var i = 0; i < 8; i++)
 			{
-				var ix = pos.x + VertexOffset[i, 0];
-				var iy = pos.y + VertexOffset[i, 1];
-				var iz = pos.z + VertexOffset[i, 2];
-				cube[i] = voxelData[ix, iy, iz];
+				cube[i] = voxelData[pos+VertexOffset[i]];
 				if (cube[i] <= 0) { flagIndex |= 1 << i; }
 			}
 			int edgeFlags = CubeEdgeFlags[flagIndex];
@@ -27,10 +24,7 @@ namespace QTool.Mesh
 				if ((edgeFlags & (1 << i)) != 0)
 				{
 					var tOffset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
-
-					EdgeVertex[i].x = pos.x + (VertexOffset[EdgeConnection[i, 0], 0] + tOffset * EdgeDirection[i, 0]);
-					EdgeVertex[i].y = pos.y + (VertexOffset[EdgeConnection[i, 0], 1] + tOffset * EdgeDirection[i, 1]);
-					EdgeVertex[i].z = pos.z + (VertexOffset[EdgeConnection[i, 0], 2] + tOffset * EdgeDirection[i, 2]);
+					EdgeVertex[i] = pos+ VertexOffset[EdgeConnection[i, 0]]+EdgeDirection[i].ToVector3() * tOffset;
 				}
 			}
 			for (var i = 0; i < 5; i++)
@@ -45,53 +39,24 @@ namespace QTool.Mesh
 				}
 			}
 		}
-		public static UnityEngine.Mesh GenerateMesh(QVoxelData voxelData,bool hasBorder=true)
+		public static QMeshData GenerateMeshData(QVoxelData voxelData)
 		{
-			var BorderCube = new QDictionary<Vector3Int, float>();
 			if (voxelData.meshData.HasMesh)
 			{
 				voxelData.meshData.Clear();
 			}
-			foreach (var kv in voxelData.Voxels)
+			for (int x = voxelData.Min.x-1; x <=voxelData.Max.x; x++)
 			{
-				if (hasBorder)
+				for (int y = voxelData.Min.y-1; y <= voxelData.Max.y; y++)
 				{
-					if (kv.Key.x == voxelData.Min.x|| kv.Key.y == voxelData.Min.y|| kv.Key.z == voxelData.Min.z)
+					for (int z = voxelData.Min.z-1; z <= voxelData.Max.z; z++)
 					{
-						for (int x = -1; x <= 0; x++)
-						{
-							for (int y = -1; y <= 0; y++)
-							{
-								for (int z = -1; z <=0; z++)
-								{
-									if (x == 0 && y == 0 && z == 0)
-									{
-										continue;
-									}
-									var pos = kv.Key + new Vector3Int(x, y, z);
-									if (!voxelData.Voxels.ContainsKey(pos))
-									{
-										BorderCube[pos] = 0;
-									}
-								}
-							}
-						}
+						var pos = new Vector3Int(x, y, z);
+						GenerateCube(voxelData, pos);
 					}
 				}
-				else
-				{
-					if (kv.Key.x >= voxelData.Max.x || kv.Key.y >= voxelData.Max.y || kv.Key.z >= voxelData.Max.z)
-					{
-						continue;
-					}
-				}
-				GenerateCube(voxelData, kv.Key, kv.Value);
 			}
-			foreach (var kv in BorderCube)
-			{
-				GenerateCube(voxelData, kv.Key, kv.Value);
-			}
-			return voxelData.meshData.GetMesh();
+			return voxelData.meshData;
 		}
 		
 		private static float GetOffset(float v1, float v2)
@@ -100,10 +65,10 @@ namespace QTool.Mesh
 			return v1/ (v1-v2);
 		}
 		#region 静态索引表
-		private static readonly int[,] VertexOffset = new int[,]
+		private static readonly Vector3Int[] VertexOffset = new Vector3Int[]
 		{
-			{0, 0, 0},{1, 0, 0},{1, 1, 0},{0, 1, 0},
-			{0, 0, 1},{1, 0, 1},{1, 1, 1},{0, 1, 1}
+			new Vector3Int(0, 0, 0),new Vector3Int(1, 0, 0),new Vector3Int(1, 1, 0),new Vector3Int(0, 1, 0),
+			new Vector3Int(0, 0, 1),new Vector3Int(1, 0, 1),new Vector3Int(1, 1, 1),new Vector3Int(0, 1, 1)
 		};
 		private static readonly int[,] EdgeConnection = new int[,]
 		{
@@ -111,11 +76,11 @@ namespace QTool.Mesh
 			{4,5}, {5,6}, {6,7}, {7,4},
 			{0,4}, {1,5}, {2,6}, {3,7}
 		};
-		private static readonly float[,] EdgeDirection = new float[,]
+		private static readonly Vector3Int[] EdgeDirection = new Vector3Int[]
 		{
-			{1.0f, 0.0f, 0.0f},{0.0f, 1.0f, 0.0f},{-1.0f, 0.0f, 0.0f},{0.0f, -1.0f, 0.0f},
-			{1.0f, 0.0f, 0.0f},{0.0f, 1.0f, 0.0f},{-1.0f, 0.0f, 0.0f},{0.0f, -1.0f, 0.0f},
-			{0.0f, 0.0f, 1.0f},{0.0f, 0.0f, 1.0f},{ 0.0f, 0.0f, 1.0f},{0.0f,  0.0f, 1.0f}
+			Vector3Int.right,Vector3Int.up,Vector3Int.left,Vector3Int.down,
+			Vector3Int.right,Vector3Int.up,Vector3Int.left,Vector3Int.down,
+			Vector3Int.forward,Vector3Int.forward,Vector3Int.forward,Vector3Int.forward,
 		};
 		private static readonly int[] CubeEdgeFlags = new int[]
 		{
