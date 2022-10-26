@@ -6,57 +6,98 @@ namespace QTool.Mesh
 {
 	public static class QMarchingCubes
 	{
-		private static Vector3[] EdgeVertex = new Vector3[12];
-		public static UnityEngine.Mesh Generate(this QVoxelData voxelData)
+		static void GenerateCube(QVoxelData voxelData,Vector3Int pos,float value)
 		{
-			voxelData.Foreach((x, y, z, value) =>
-			{
-				if (x >= voxelData.Max.x || y >= voxelData.Max.y || z >= voxelData.Max.z)
-				{
-					return;
-				}
-				int flagIndex = 0;
-				var cube = new float[8];
-				for (var i = 0; i < 8; i++)
-				{
-					var ix = x + VertexOffset[i, 0];
-					var iy = y + VertexOffset[i, 1];
-					var iz = z + VertexOffset[i, 2];
-					cube[i] = voxelData[ix, iy, iz];
-					if (cube[i] <= 0) { flagIndex |= 1 << i; }
-				}
-				int edgeFlags = CubeEdgeFlags[flagIndex];
-				if (edgeFlags == 0) return;
-				for (var i = 0; i < 12; i++)
-				{
-					if ((edgeFlags & (1 << i)) != 0)
-					{
-						var offset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
 
-						EdgeVertex[i].x = x + (VertexOffset[EdgeConnection[i, 0], 0] + offset * EdgeDirection[i, 0]);
-						EdgeVertex[i].y = y + (VertexOffset[EdgeConnection[i, 0], 1] + offset * EdgeDirection[i, 1]);
-						EdgeVertex[i].z = z + (VertexOffset[EdgeConnection[i, 0], 2] + offset * EdgeDirection[i, 2]);
-					}
-				}
-				for (var i = 0; i < 5; i++)
+			var EdgeVertex = new Vector3[12];
+			int flagIndex = 0;
+			var cube = new float[8];
+			for (var i = 0; i < 8; i++)
+			{
+				var ix = pos.x + VertexOffset[i, 0];
+				var iy = pos.y + VertexOffset[i, 1];
+				var iz = pos.z + VertexOffset[i, 2];
+				cube[i] = voxelData[ix, iy, iz];
+				if (cube[i] <= 0) { flagIndex |= 1 << i; }
+			}
+			int edgeFlags = CubeEdgeFlags[flagIndex];
+			if (edgeFlags == 0) return;
+			for (var i = 0; i < 12; i++)
+			{
+				if ((edgeFlags & (1 << i)) != 0)
 				{
-					if (TriangleConnectionTable[flagIndex, 3 * i] < 0) break;
-					var idx = voxelData.meshData.vertices.Count;
-					for (var j = 0; j < 3; j++)
+					var tOffset = GetOffset(cube[EdgeConnection[i, 0]], cube[EdgeConnection[i, 1]]);
+
+					EdgeVertex[i].x = pos.x + (VertexOffset[EdgeConnection[i, 0], 0] + tOffset * EdgeDirection[i, 0]);
+					EdgeVertex[i].y = pos.y + (VertexOffset[EdgeConnection[i, 0], 1] + tOffset * EdgeDirection[i, 1]);
+					EdgeVertex[i].z = pos.z + (VertexOffset[EdgeConnection[i, 0], 2] + tOffset * EdgeDirection[i, 2]);
+				}
+			}
+			for (var i = 0; i < 5; i++)
+			{
+				if (TriangleConnectionTable[flagIndex, 3 * i] < 0) break;
+				var idx = voxelData.meshData.vertices.Count;
+				for (var j = 0; j < 3; j++)
+				{
+					var vert = TriangleConnectionTable[flagIndex, 3 * i + j];
+					voxelData.meshData.triangles.Add(idx + j);
+					voxelData.meshData.vertices.Add(EdgeVertex[vert]);
+				}
+			}
+		}
+		public static UnityEngine.Mesh GenerateMesh(QVoxelData voxelData,bool hasBorder=true)
+		{
+			var BorderCube = new QDictionary<Vector3Int, float>();
+			if (voxelData.meshData.HasMesh)
+			{
+				voxelData.meshData.Clear();
+			}
+			foreach (var kv in voxelData.Voxels)
+			{
+				if (hasBorder)
+				{
+					if (kv.Key.x == voxelData.Min.x|| kv.Key.y == voxelData.Min.y|| kv.Key.z == voxelData.Min.z)
 					{
-						var vert = TriangleConnectionTable[flagIndex, 3 * i + j];
-						voxelData.meshData.triangles.Add(idx + j);
-						voxelData.meshData.vertices.Add(EdgeVertex[vert]);
+						for (int x = -1; x <= 0; x++)
+						{
+							for (int y = -1; y <= 0; y++)
+							{
+								for (int z = -1; z <=0; z++)
+								{
+									if (x == 0 && y == 0 && z == 0)
+									{
+										continue;
+									}
+									var pos = kv.Key + new Vector3Int(x, y, z);
+									if (!voxelData.Voxels.ContainsKey(pos))
+									{
+										BorderCube[pos] = 0;
+									}
+								}
+							}
+						}
 					}
 				}
-			});
-			return voxelData.meshData.CreateMesh();
+				else
+				{
+					if (kv.Key.x >= voxelData.Max.x || kv.Key.y >= voxelData.Max.y || kv.Key.z >= voxelData.Max.z)
+					{
+						continue;
+					}
+				}
+				GenerateCube(voxelData, kv.Key, kv.Value);
+			}
+			foreach (var kv in BorderCube)
+			{
+				GenerateCube(voxelData, kv.Key, kv.Value);
+			}
+			return voxelData.meshData.GetMesh();
 		}
 		
 		private static float GetOffset(float v1, float v2)
 		{
-			float delta = v2 - v1;
-			return (delta == 0.0f) ? 0 : -v1/ delta;
+			if (v1 == v2) return 0;
+			return v1/ (v1-v2);
 		}
 		#region 静态索引表
 		private static readonly int[,] VertexOffset = new int[,]

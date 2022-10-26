@@ -4,16 +4,7 @@ using UnityEngine;
 using QTool.Inspector;
 namespace QTool.Mesh
 {
-	public class QMesh : MonoBehaviour
-	{
-		public GameObject target;
-		[QName("刷新")]
-		public void Refresh()
-		{
-			gameObject.GetComponent<MeshRenderer>(true).CombineMeshs(target.GetComponentsInChildren<MeshRenderer>());
-			
-		}
-	}
+	
 	public class QMeshData
 	{
 		public List<Vector3> vertices = new List<Vector3>();
@@ -21,9 +12,21 @@ namespace QTool.Mesh
 		public List<Color> colors = new List<Color>();
 		public List<int> triangles = new List<int>();
 		public List<Vector2> uvs = new List<Vector2>();
-		public UnityEngine.Mesh CreateMesh()
+		public void Clear()
 		{
-			UnityEngine.Mesh mesh = new UnityEngine.Mesh();
+			vertices.Clear();
+			normals.Clear();
+			colors.Clear();
+			triangles.Clear();
+			uvs.Clear();
+			mesh = null;
+		}
+		public bool HasMesh => mesh != null;
+		UnityEngine.Mesh mesh=null;
+		public UnityEngine.Mesh GetMesh()
+		{
+			if (mesh != null) return mesh;
+			mesh = new UnityEngine.Mesh();
 			mesh.vertices = vertices.ToArray();
 			mesh.uv = uvs.ToArray();
 			mesh.colors = colors.ToArray();

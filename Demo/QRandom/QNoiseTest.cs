@@ -8,7 +8,7 @@ namespace QTool.Noise
 	public class QNoiseTest : MonoBehaviour
 	{
 		public Material material;
-		public int size = 30;
+		public int size = 50;
 		public void NoiseTest()
 		{
 			QNoise fractal = new ValueNoise();
@@ -20,14 +20,14 @@ namespace QTool.Noise
 				{
 					for (int z = 0; z < size; z++)
 					{
-						float u = x / (size - 1.0f);
-						float v = y / (size - 1.0f);
-						float w = z / (size - 1.0f);
+						float u = x / (size - 1.0f)*5;
+						float v = y / (size - 1.0f)*5;
+						float w = z / (size - 1.0f)*5;
 						voxels[x, y, z] = fractal[u,v,w];
 					}
 				}
 			}
-			CreateMesh(voxels.Generate(), -Vector3.one * size / 2f);
+			CreateMesh(voxels.GetMesh(), -Vector3.one * size / 2f);
 		}
 		void Start()
 		{
@@ -60,7 +60,7 @@ namespace QTool.Noise
 					}
 				}
 			}
-			CreateMesh(voxels.Generate(), -Vector3.one * 10 / 2f);
+			CreateMesh(voxels.GetMesh(), -Vector3.one * 10 / 2f);
 		}
 
 
