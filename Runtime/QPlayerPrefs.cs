@@ -22,6 +22,11 @@ namespace QTool
 		}
 		public static void Set<T>(string key,T value)
 		{
+			if (key.IsNullOrEmpty())
+			{
+				Debug.LogError("key 为空");
+				return;
+			}
 			Data[key].SetValue(value);
 			Data.Save();
 		}
@@ -40,6 +45,11 @@ namespace QTool
 
 		public static T Get<T>(string key, T defaultValue=default)
 		{
+			if (key.IsNullOrEmpty())
+			{
+				Debug.LogError("key 为空");
+				return defaultValue;
+			}
 			if (!HasKey(key))
 			{
 				return defaultValue;
