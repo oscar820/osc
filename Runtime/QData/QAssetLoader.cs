@@ -287,8 +287,7 @@ namespace QTool.Asset
 				if (prefab != null)
 				{
 					pool= QPoolManager.GetPool(poolKey, prefab);
-					pool.DontDestroyOnLoad = false;
-					pool.OnDestory += () =>
+					pool.OnRelease += () =>
 					{
 						Release(ref prefab);
 					};

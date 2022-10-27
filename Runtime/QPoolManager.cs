@@ -302,7 +302,6 @@ namespace QTool
         public void Clear()
         {
 			UsingPool.Clear();
-			CanUsePool.Clear();
 			QDebug.ChangeProfilerCount(Key + " " + nameof(AllCount), AllCount);
 			QDebug.ChangeProfilerCount(Key + " UseCount", AllCount - CanUseCount);
 		}
@@ -317,19 +316,16 @@ namespace QTool
             this.Key = poolName;
 
         }
-		protected virtual void Destory()
+		protected virtual void Release()
 		{
 			this.newFunc = null;
-			this.OnGet = null;
-			this.OnPush = null;
 		}
     }
 
 	public class GameObjectPool : ObjectPool<GameObject>
 	{
-		public bool DontDestroyOnLoad { get; set; } = true;
 		public GameObject prefab { get; internal set; }
-		public event Action OnDestory;
+		public event Action OnRelease;
 		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
 		{
 			OnGet += (obj) =>
@@ -353,19 +349,18 @@ namespace QTool
 		}
 		protected void OnSceneChange(Scene scene, Scene next)
 		{
-			if (!DontDestroyOnLoad && QPoolManager.IsPlaying)
+			if ( QPoolManager.IsPlaying)
 			{
 				SceneManager.activeSceneChanged -= OnSceneChange;
-				Destory();
+				Release();
 			}
 		}
-		protected override void Destory()
+		protected override void Release()
 		{
-			base.Destory();
 			Clear();
-			QPoolManager.Pools.Remove(Key);
-			OnDestory?.Invoke();
-			OnDestory = null;
+			base.Release();
+			OnRelease?.Invoke();
+			OnRelease = null;
 			prefab = null;
 		}
 
