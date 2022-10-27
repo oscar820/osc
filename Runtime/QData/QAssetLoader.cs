@@ -281,7 +281,7 @@ namespace QTool.Asset
 		{
 			var poolKey = DirectoryPath + "_" + key;
 			var pool = QPoolManager.GetPool<GameObject>(key) as GameObjectPool;
-			if (pool == null)
+			if (pool == null||pool.prefab==null)
 			{
 				var prefab = await LoadAsync(key);
 				if (prefab != null)
