@@ -60,7 +60,7 @@ namespace QTool
 				if (Pools[key] is ObjectPool<T>)
 				{
 					var pool = Pools[key] as ObjectPool<T>;
-					if (newFunc != null && pool.newFunc == null)
+					if (newFunc != null )
 					{
 						pool.newFunc = newFunc;
 					}
@@ -327,7 +327,6 @@ namespace QTool
 
 	public class GameObjectPool : ObjectPool<GameObject>
 	{
-		public bool DontDestroyOnLoad { get;  set; } = true;
 		public GameObject prefab { get; internal set; }
 		public event Action OnDestory;
 		public GameObjectPool(string poolName, Func<GameObject> newFunc = null):base(poolName,newFunc)
@@ -353,7 +352,7 @@ namespace QTool
 		}
 		protected void OnSceneChange(Scene scene, Scene next)
 		{
-			if (!DontDestroyOnLoad&& QPoolManager.IsPlaying)
+			if (QPoolManager.IsPlaying)
 			{
 				SceneManager.activeSceneChanged -= OnSceneChange;
 				Destory();
