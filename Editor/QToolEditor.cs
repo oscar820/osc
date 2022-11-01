@@ -201,8 +201,19 @@ namespace QTool
 		#endregion
 
 	}
+	[InitializeOnLoad]
 	public class QToolBuild:Editor, IPreprocessBuildWithReport, IPostprocessBuildWithReport
 	{
+		static QToolBuild()
+		{
+			BuildPlayerWindow.RegisterBuildPlayerHandler(
+			buildPlayerOptions => {
+#if Addressable
+				AddressableAssetSettings.BuildPlayerContent();
+#endif
+				BuildPlayerWindow.DefaultBuildMethods.BuildPlayer(buildPlayerOptions);
+			});
+		}
 		public static string BuildPath => Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets")) + "Builds/" + EditorUserBuildSettings.selectedBuildTargetGroup + "/" + PlayerSettings.productName + "_v" + PlayerSettings.bundleVersion.Replace(".", "_");
 
 		public int callbackOrder => 0;
@@ -214,9 +225,6 @@ namespace QTool
 		//打包前处理
 		public void OnPreprocessBuild(BuildReport report)
 		{
-#if Addressable
-			AddressableAssetSettings.BuildPlayerContent();
-#endif
 			Debug.Log("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
 			var path= Path.GetDirectoryName(report.summary.outputPath);
 			if (!CheckBuildPath(path))
