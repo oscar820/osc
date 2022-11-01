@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 using UnityEditor.Callbacks;
 using UnityEditor.Build;
 
+#if Addressable
+using UnityEditor.AddressableAssets.Settings;
+#endif
 namespace QTool
 {
     public static class QToolEditor
@@ -211,6 +214,9 @@ namespace QTool
 		//打包前处理
 		public void OnPreprocessBuild(BuildReport report)
 		{
+#if Addressable
+			AddressableAssetSettings.BuildPlayerContent();
+#endif
 			Debug.Log("开始打包["+report.summary.platformGroup+"]" + report.summary.outputPath);
 			var path= Path.GetDirectoryName(report.summary.outputPath);
 			if (!CheckBuildPath(path))
