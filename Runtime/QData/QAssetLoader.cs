@@ -249,7 +249,7 @@ namespace QTool.Asset
 #endif
 
 		}
-		public static void Release(ref TObj obj)
+		public static void Release(TObj obj)
 		{
 			if (ResoucesList.ContainsKey(obj))
 			{
@@ -262,13 +262,11 @@ namespace QTool.Asset
 					}
 					ResoucesList.Remove(obj);
 				}
-				obj = null;
 			}
 #if Addressables
 			else
 			{
 				Addressables.Release(obj);
-				obj = null;
 			}
 #endif
 		}
@@ -289,7 +287,7 @@ namespace QTool.Asset
 					pool= QPoolManager.GetPool(poolKey, prefab);
 					pool.OnRelease += () =>
 					{
-						Release(ref prefab);
+						Release(prefab);
 					};
 				}
 			}
