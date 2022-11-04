@@ -16,7 +16,7 @@ namespace QTool
 			base.Awake();
 			DontDestroyOnLoad(gameObject);
 		}
-		public event Action OnUpdate=null;
+		public static event Action OnUpdate=null;
 		private void Update()
 		{
 			OnUpdate?.Invoke();

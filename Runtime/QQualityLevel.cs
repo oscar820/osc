@@ -24,7 +24,7 @@ namespace QTool.TileMap {
 		{
 			if (Application.isPlaying)
 			{
-				QToolManager.Instance.OnUpdate += CheckUpdate;
+				QToolManager.OnUpdate += CheckUpdate;
 			}
 		}
 		static void CheckUpdate()
