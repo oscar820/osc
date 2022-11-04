@@ -22,7 +22,10 @@ namespace QTool.TileMap {
 		public static int curLevel = -1;
 		static QQualityLevel()
 		{
-			QToolManager.Instance.OnUpdate += CheckUpdate;
+			if (Application.isPlaying)
+			{
+				QToolManager.Instance.OnUpdate += CheckUpdate;
+			}
 		}
 		static void CheckUpdate()
 		{
