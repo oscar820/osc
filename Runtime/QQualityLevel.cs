@@ -29,37 +29,37 @@ namespace QTool.TileMap {
 			if (curLevel != QualitySettings.GetQualityLevel())
 			{
 				curLevel = QualitySettings.GetQualityLevel();
-				OnFresh?.Invoke();
+				OnFresh?.Invoke(curLevel);
 			}
 		}
-		public static System.Action OnFresh;
+		public static System.Action<int> OnFresh;
 		#endregion
 		public List<QualityLevelObject> levelObj = new List<QualityLevelObject>();
 
 #if UNITY_EDITOR
 		private void OnValidate()
 		{
-			Fresh();
+			Fresh(QualitySettings.GetQualityLevel());
 		}
 #endif
 		private void Awake()
 		{
-			Fresh();
+			Fresh(QualitySettings.GetQualityLevel());
 			OnFresh += Fresh;
 		}
 		private void OnDestroy()
 		{
 			OnFresh -= Fresh;
 		}
-		void Fresh()
+		void Fresh(int level)
 		{
 			for (int i = 0; i < levelObj.Count; i++)
 			{
 				if (levelObj[i].obj != null)
 				{
-					levelObj[i].obj?.SetActive(levelObj[i].InLevel(curLevel));
+					levelObj[i].obj?.SetActive(levelObj[i].InLevel(level));
 				}
-				levelObj[i].OnActive?.Invoke(levelObj[i].InLevel(curLevel));
+				levelObj[i].OnActive?.Invoke(levelObj[i].InLevel(level));
 			}
 		}
 	}
