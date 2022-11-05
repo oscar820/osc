@@ -691,11 +691,11 @@ namespace QTool.Inspector
 														{
 															if (member.Type.IsValueType)
 															{
-																member.Set(obj, member.Get(obj).Draw(member.Key, member.Type));
+																member.Set(obj, member.Get(obj).Draw(member.QName, member.Type));
 															}
 															else
 															{
-																member.Set(obj, member.Get(obj).Draw(member.Key, member.Type, (value) => member.Set(obj, value)));
+																member.Set(obj, member.Get(obj).Draw(member.QName, member.Type, (value) => member.Set(obj, value)));
 															}
 														}
 														catch (Exception e)
