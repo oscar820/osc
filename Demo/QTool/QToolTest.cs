@@ -251,7 +251,7 @@ namespace QTool.Test
             Debug.LogError((new int[][] {new int[] { 1, 2 },new int[] { 3, 4 } }).ToQData().ParseQData<int[][]>().ToQData());
 
 
-			Debug.LogError(QDataListTestType.list.ToOneString());
+			Debug.LogError(QDataListTestType.List.ToOneString());
 			Debug.LogError(new List<TTestClass>() { new TTestClass { Key = "1" }, new TTestClass { Key = "2" } }.ToQDataList());
 			QFileManager.Save("saveTest.txt" , data.ToQData());
 			QPlayerPrefs.Set("test1", data.ToQData());

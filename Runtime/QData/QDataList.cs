@@ -210,7 +210,7 @@ namespace QTool
 	{
 		public static bool ContainsKey(string key)
 		{
-			return list.ContainsKey(key);
+			return List.ContainsKey(key);
 		}
 		public static T Get(string key)
 		{
@@ -220,20 +220,28 @@ namespace QTool
 				return null;
 			}
 			key = key.Trim();
-			var value = list[key]; ;
+			var value = List[key]; ;
 			if (value == null)
 			{
 				Debug.LogError(typeof(T).Name + " 未找到[" + key + "]");
 			}
 			return value;
 		}
-		static QDataList()
-		{
+		static QList<string, T> _list = null;
+		
 
-			var qdataList = QDataList.GetResourcesData(typeof(T).Name, () => new List<T> { new T { Key = "测试Key" }, }.ToQDataList());
-			qdataList.ParseQdataList(list);
+		public static QList<string, T> List
+		{
+			get
+			{
+				if (_list == null)
+				{
+					var qdataList = QDataList.GetResourcesData(typeof(T).Name, () => new List<T> { new T { Key = "测试Key" }, }.ToQDataList());
+					qdataList.ParseQdataList(_list);
+				}
+				return _list;
+			}
 		}
-		public static QList<string, T> list { get; private set; } = new QList<string, T>();
 	}
 	public class QDataRow:QList<string>,IKey<string>
     {
