@@ -181,6 +181,7 @@ namespace QTool
 
 
 	}
+
 	public class QKeyValueList<TKey, T> : QList<TKey, QKeyValue<TKey, T>>
 	{
 		public QKeyValueList()
@@ -429,6 +430,15 @@ namespace QTool
 			array[indexA] = array[indexB];
 			array[indexB] = temp;
 			return array;
+		}
+		public static int NextIndex(this int curIndex,int count)
+		{
+			curIndex++;
+			if (curIndex >= count)
+			{
+				curIndex = 0;
+			}
+			return curIndex;
 		}
 		public static IList CreateAt(this IList list, QSerializeType typeInfo, int index = -1)
 		{
