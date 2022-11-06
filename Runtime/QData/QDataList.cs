@@ -228,8 +228,8 @@ namespace QTool
 			return value;
 		}
 		static QList<string, T> _list = null;
-		
 
+		public static QList<string, T> list => List;
 		public static QList<string, T> List
 		{
 			get
