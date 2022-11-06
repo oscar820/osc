@@ -134,7 +134,7 @@ namespace QTool.Inspector
             {
 				if (selectIndex >= 0 && selectIndex < enumList.Count)
 				{
-					return enumList[selectIndex];
+					return enumList[selectIndex]=="null"?null:enumList[selectIndex];
 				}
 				else
 				{
@@ -157,16 +157,15 @@ namespace QTool.Inspector
 				using (new GUILayout.HorizontalScope())
 				{
 					var getObj = QReflection.InvokeStaticFunction(null,att.GetKeyListFunc);
+					drawer.enumList.Clear();
 					if (getObj!=null)
 					{
 						if (getObj is IList<string> stringList)
 						{
-							drawer.enumList.Clear();
 							drawer.enumList.AddRange(stringList);
 						}
 						else if (getObj is IList itemList)
 						{
-							drawer.enumList.Clear();
 							foreach (var item in itemList)
 							{
 								if(item is IKey<string> key)
@@ -192,10 +191,7 @@ namespace QTool.Inspector
 					{
 						EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
 					}
-					if (att.CanWriteString)
-					{
-						drawer.enumList.AddCheckExist("【不存在】");
-					}
+					drawer.enumList.AddCheckExist("null");
 
 					drawer.UpdateList(str);
 
@@ -242,12 +238,9 @@ namespace QTool.Inspector
 				}
 
 				enumList = new List<string>();
-				if (att.CanWriteString)
-				{
-					enumList.Add("【不存在】");
-				}
+				enumList.Add("null");
 
-				if(list is IList<string> strList)
+				if (list is IList<string> strList)
 				{
 					enumList.AddRange(strList);
 				}
