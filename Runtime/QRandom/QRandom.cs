@@ -58,7 +58,7 @@ namespace QTool
 			{
 				var cur = list[i];
 				list.Remove(cur);
-				list.Insert(UnityEngine.Random.Range(0, i), cur);
+				list.Insert(UnityEngine.Random.Range(0, i+1), cur);
 			}
 			return list;
 		}
