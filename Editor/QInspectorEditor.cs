@@ -144,8 +144,14 @@ namespace QTool.Inspector
         }
         public void UpdateList(string input)
         {
-            selectIndex = enumList.IndexOf(input);
-         
+			if (input.IsNullOrEmpty())
+			{
+				selectIndex = enumList.Count - 1;
+			}
+			else
+			{
+				selectIndex = enumList.IndexOf(input);
+			}
         }
 		public static QDictionary<QEnumAttribute, QEnumAttributeDrawer> DrawerDic = new QDictionary<QEnumAttribute, QEnumAttributeDrawer>((key)=>new QEnumAttributeDrawer());
 		public static object Draw(object obj,QEnumAttribute att)
