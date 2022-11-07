@@ -244,6 +244,7 @@ namespace QTool.Asset {
 			foreach (var path in paths)
 			{
 				if (!path.StartsWith("Assets/") ) continue;
+				if (path.Contains("/Pulgins/") ) continue;
 				AssetImporter assetImporter = AssetImporter.GetAtPath(path);
 				if (assetImporter is AudioImporter audioImporter)
 				{
