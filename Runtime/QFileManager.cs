@@ -283,6 +283,10 @@ namespace QTool
    
 		public static void LoadAll(string path,Action<string,string> action, string defaultValue = "")
 		{
+			if (Path.GetExtension(path).IsNullOrEmpty())
+			{
+				path += ".txt";
+			}
 			if (path.StartsWith(ResourcesPathRoot))
 			{
 				try 
