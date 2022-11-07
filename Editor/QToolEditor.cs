@@ -257,20 +257,19 @@ namespace QTool
 							QFileManager.Copy(DirectoryPath, moveToPath);
 						}
 
-						var versions = PlayerSettings.bundleVersion.Split('.');
-						if (versions.Length > 0)
-						{
-							versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
-						}
-						PlayerSettings.bundleVersion = versions.ToOneString(".");
-						QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
+						
 					}
 					break;
 				default:
 					break;
 			}
-		
-			
+			var versions = PlayerSettings.bundleVersion.Split('.');
+			if (versions.Length > 0)
+			{
+				versions[versions.Length - 1] = (int.Parse(versions[versions.Length - 1]) + 1).ToString();
+			}
+			PlayerSettings.bundleVersion = versions.ToOneString(".");
+			QEventManager.Trigger("游戏版本", PlayerSettings.bundleVersion);
 			Debug.Log("打包完成 "+ report.summary.outputPath);
 		}
 
