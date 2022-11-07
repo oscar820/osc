@@ -299,7 +299,7 @@ namespace QTool.Asset {
 		{
 			if (texture == null) return;
 			var setting = QToolSetting.Instance;
-			if (textureImporter.textureType == TextureImporterType.Sprite&&textureImporter.spriteImportMode== SpriteImportMode.Single&&(texture.width%4!=0||texture.height%4!=0))
+			if (textureImporter.assetPath.EndsWith(".png") && textureImporter.textureType == TextureImporterType.Sprite&&textureImporter.spriteImportMode== SpriteImportMode.Single&&(texture.width%4!=0||texture.height%4!=0))
 			{
 				var last = textureImporter.isReadable;
 				if (!last)
@@ -347,8 +347,8 @@ namespace QTool.Asset {
 						{
 							if (texture.width <= maxSize && texture.height <= maxSize)
 							{
-								textureImporter.maxTextureSize = minSize;
-								Debug.LogError(texture + "  " + nameof(textureImporter.maxTextureSize) + " : " + minSize);
+								textureImporter.maxTextureSize = maxSize;
+								Debug.LogError(texture + "  " + nameof(textureImporter.maxTextureSize) + " : " + maxSize);
 								break;
 							}
 						}
