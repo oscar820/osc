@@ -108,7 +108,7 @@ namespace QTool
             });
         }
 		public const string SecretExtension = ".sec";
-		public static byte[] SecretKey = ("QASK").GetBytes();
+		public static byte[] SecretKey = ("unity."+Application.companyName+"."+Application.productName).GetBytes();
 		public static byte[] Encrypt(this byte[] bytes)
 		{
 			if (bytes == null || bytes.Length == 0) return bytes;
