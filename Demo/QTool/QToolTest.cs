@@ -224,6 +224,12 @@ namespace QTool.Test
 		{
 			QTime.ChangeScale("测试时间", UnityEngine.Random.Range(0, 2));
 		}
+		[QName("加密文件测试")]
+		public void SecretTest()
+		{
+			QFileManager.Save(nameof(QToolTest), nameof(QToolTest));
+			Debug.LogError(QFileManager.Load(nameof(QToolTest)));
+		}
 		[QName("QDataList测试")]
         public async void QDataTest()
 		{

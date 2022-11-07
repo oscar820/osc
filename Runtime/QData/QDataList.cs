@@ -76,7 +76,7 @@ namespace QTool
             {
                 path = LoadPath;
 			}
-			QFileManager.Save(path, ToString(),true);
+			QFileManager.Save(path, ToString());
         }
         public int GetTitleIndex(string title)
         {

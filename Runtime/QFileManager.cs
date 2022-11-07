@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using QTool.Binary;
+using System.Security.Cryptography;
 #if UNITY_SWITCH_API
 using UnityEngine.Switch;
 #endif
@@ -106,6 +107,44 @@ namespace QTool
                 }
             });
         }
+		public const string SecretExtension = ".sec";
+		public static byte[] SecretKey = ("QASK").GetBytes();
+		public static byte[] Encrypt(this byte[] bytes)
+		{
+			if (bytes == null || bytes.Length == 0) return bytes;
+			using (var memery = new MemoryStream())
+			{
+				using (var des = new DESCryptoServiceProvider())
+				{
+					des.Key = SecretKey;
+					des.IV = SecretKey;
+					using (var writer = new CryptoStream(memery, des.CreateEncryptor(), CryptoStreamMode.Write))
+					{
+						writer.Write(bytes, 0, bytes.Length);
+						writer.FlushFinalBlock();
+						return memery.ToArray();
+					}
+				}
+			}
+		}
+		public static byte[] Decrypt(this byte[] bytes)
+		{
+			if (bytes == null || bytes.Length == 0) return bytes;
+			using (var memery = new MemoryStream())
+			{
+				using (var des = new DESCryptoServiceProvider())
+				{
+					des.Key = SecretKey;
+					des.IV = SecretKey;
+					using (var writer = new CryptoStream(memery, des.CreateDecryptor(), CryptoStreamMode.Write))
+					{
+						writer.Write(bytes, 0, bytes.Length);
+						writer.FlushFinalBlock();
+						return memery.ToArray();
+					}
+				}
+			}
+		}
 		public static bool ExistsFile(this string path)
 		{
 			path= CheckDirectoryPath( path);
@@ -285,7 +324,7 @@ namespace QTool
 		{
 			if (Path.GetExtension(path).IsNullOrEmpty())
 			{
-				path += ".txt";
+				path += SecretExtension;
 			}
 			if (path.StartsWith(ResourcesPathRoot))
 			{
@@ -381,7 +420,7 @@ namespace QTool
 						{
 							if (!path.StartsWith(nameof(QTool) + ":/"))
 							{
-								path = nameof(QTool) + ":/" + path.Replace('/', '_').Replace('.', '_');
+								path = nameof(QTool) + ":/" + path;
 								Debug.Log("转换路径 " + path);
 							}
 						}
@@ -410,11 +449,11 @@ namespace QTool
 		{
 			return path.Replace('\\', '/');
 		}
-		public static bool Save(string path, byte[] bytes,bool checkUpdate=false)
+		public static void Save(string path, byte[] bytes)
 		{
 			if (Path.GetExtension(path).IsNullOrEmpty())
 			{
-				path += ".txt";
+				path += SecretExtension;
 			}
 			path = CheckDirectoryPath(path);
 			try
@@ -442,49 +481,35 @@ namespace QTool
 							result = nn.fs.FileSystem.Commit(nameof(QTool));
 							result.abortUnlessSuccess();
 							Notification.LeaveExitRequestHandlingSection();
-#else
-							return false;
 #endif
 						}
 						break;
 					default:
 						{
-							if (checkUpdate)
+							if (path.EndsWith(SecretExtension))
 							{
-								var oldData = Load(path);
-								if (!string.IsNullOrWhiteSpace(oldData) && oldData.GetHashCode() == bytes.GetHashCode())
-								{
-									return false;
-								}
-								File.WriteAllBytes(path, bytes);
+								bytes = bytes.Encrypt();
 							}
+							File.WriteAllBytes(path, bytes);
 						}
 						break;
 				}
-				return true;
 			}
 			catch (Exception e)
 			{
 				Debug.LogError("向路径写入数据出错" + e);
 
-				return false;
 			}
 		}
-		public static bool Save(string path, string data, bool checkUpdate = false)
+		public static void Save(string path, string data)
 		{
-			if (Path.GetExtension(path).IsNullOrEmpty())
+			if (path.EndsWith(SecretExtension))
 			{
-				path += ".txt";
-			}
-			if(Application.platform== RuntimePlatform.Switch)
-			{
-				return Save(path, data.GetBytes(), checkUpdate);
+				Save(path, data.GetBytes());
 			}
 			else
 			{
-				path = CheckDirectoryPath(path);
 				File.WriteAllText(path, data);
-				return true;
 			}
 		}
 		public static byte[] LoadBytes(string path)
@@ -512,7 +537,21 @@ namespace QTool
 #endif
 					}
 				default:
-					return File.ReadAllBytes(path);
+					try
+					{
+						var result = File.ReadAllBytes(path);
+						if (path.EndsWith(SecretExtension))
+						{
+							result = result.Decrypt();
+						}
+						return result;
+					}
+					catch (Exception e)
+					{
+						Debug.LogWarning("加载 " + path + " 出错：" + e);
+						return new byte[0];
+					}
+					
 			}
 
 
@@ -521,13 +560,14 @@ namespace QTool
 		{
 			if (Path.GetExtension(path).IsNullOrEmpty())
 			{
-				path += ".txt";
+				path += SecretExtension;
+				
 			}
 			try
 			{
 				if (path.StartsWith(ResourcesPathRoot))
 				{
-					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesPathRoot+"/").SplitStartString("."));
+					var text = Resources.Load<TextAsset>(path.SplitEndString(ResourcesPathRoot + "/").SplitStartString("."));
 					if (text == null)
 					{
 						return defaultValue;
@@ -539,23 +579,13 @@ namespace QTool
 				}
 				else
 				{
-
-
-					switch (Application.platform)
+					if (path.EndsWith(SecretExtension))
 					{
-						case RuntimePlatform.Switch:
-							{
-#if UNITY_SWITCH_API
-
-								return LoadBytes(path).GetString();
-
-#else
-								return "";
-#endif
-							}
-						default:
-							path = CheckDirectoryPath(path);
-							return File.ReadAllText(path);
+						return LoadBytes(path).GetString();
+					}
+					else
+					{
+						return File.ReadAllText(path);
 					}
 				}
 			}

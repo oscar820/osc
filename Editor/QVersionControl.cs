@@ -165,6 +165,7 @@ namespace QTool
 			if (File.Exists(packagePath))
 			{
 				var text = QFileManager.Load(packagePath);
+				
 				var version = text.GetBlockValue("\"version\"", ",");
 				text = text.Replace(version, ": \"" + DateTime.Now.ToQVersionString() + "\"");
 				QFileManager.Save(packagePath, text);
