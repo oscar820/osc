@@ -108,7 +108,7 @@ namespace QTool
             });
         }
 		public const string SecretExtension = ".sec";
-		public static byte[] SecretKey = ("unity."+Application.companyName+"."+Application.productName).GetBytes();
+		public static byte[] SecretKey = Application.companyName.IsNullOrEmpty()||Application.productName.IsNullOrEmpty()? "QTSC".GetBytes():(Application.companyName.Substring(0,2)+Application.productName.Substring(0,2)).GetBytes();
 		public static byte[] Encrypt(this byte[] bytes)
 		{
 			if (bytes == null || bytes.Length == 0) return bytes;
@@ -116,9 +116,7 @@ namespace QTool
 			{
 				using (var des = new DESCryptoServiceProvider())
 				{
-					des.Key = SecretKey;
-					des.IV = SecretKey;
-					using (var writer = new CryptoStream(memery, des.CreateEncryptor(), CryptoStreamMode.Write))
+					using (var writer = new CryptoStream(memery, des.CreateEncryptor(SecretKey,SecretKey), CryptoStreamMode.Write))
 					{
 						writer.Write(bytes, 0, bytes.Length);
 						writer.FlushFinalBlock();
@@ -134,9 +132,7 @@ namespace QTool
 			{
 				using (var des = new DESCryptoServiceProvider())
 				{
-					des.Key = SecretKey;
-					des.IV = SecretKey;
-					using (var writer = new CryptoStream(memery, des.CreateDecryptor(), CryptoStreamMode.Write))
+					using (var writer = new CryptoStream(memery, des.CreateDecryptor(SecretKey, SecretKey), CryptoStreamMode.Write))
 					{
 						writer.Write(bytes, 0, bytes.Length);
 						writer.FlushFinalBlock();
@@ -503,6 +499,10 @@ namespace QTool
 		}
 		public static void Save(string path, string data)
 		{
+			if (Path.GetExtension(path).IsNullOrEmpty())
+			{
+				path += SecretExtension;
+			}
 			if (path.EndsWith(SecretExtension))
 			{
 				Save(path, data.GetBytes());
