@@ -251,7 +251,10 @@ namespace QTool.Asset {
 				}
 				else if (assetImporter is TextureImporter textureImporter)
 				{
-					ReImportTexture(AssetDatabase.LoadAssetAtPath<Texture>(path), textureImporter);
+					if(AssetDatabase.LoadAssetAtPath<Texture>(path) is Texture2D tex2D)
+					{
+						ReImportTexture(tex2D, textureImporter);
+					}
 				}
 			};
 			AssetDatabase.SaveAssets();
@@ -291,10 +294,44 @@ namespace QTool.Asset {
 			}
 		}
 		public readonly static List<int> TextureSize = new List<int> {1,4,8,16 ,32, 64,128,256,512,1024,2048,4096 };
-		public static void ReImportTexture(Texture texture, TextureImporter textureImporter)
+		public static void ReImportTexture(Texture2D texture, TextureImporter textureImporter)
 		{
 			if (texture == null) return;
 			var setting = QToolSetting.Instance;
+			if (textureImporter.textureType == TextureImporterType.Sprite&&textureImporter.spriteImportMode== SpriteImportMode.Single&&(texture.width%4!=0||texture.height%4!=0))
+			{
+				var last = textureImporter.isReadable;
+				if (!last)
+				{
+					textureImporter.isReadable = true;
+					textureImporter.SaveAndReimport();
+				}
+				var widthOffset= texture.width % 4;
+				var heightOffset = texture.height % 4;
+				var newText= new Texture2D(texture.width+ (widthOffset == 0 ? 0 : 4 - widthOffset),texture.height+ (heightOffset == 0 ? 0 : 4 - heightOffset));
+				textureImporter.spriteBorder += new Vector4(0, 0, newText.width - texture.width, newText.height - texture.height);
+				for (int x = 0; x < newText.width; x++)
+				{
+					for (int y = 0; y < newText.height; y++)
+					{
+						if (x < texture.width && y < texture.height)
+						{
+							newText.SetPixel(x, y, texture.GetPixel(x, y));
+						}
+						else
+						{
+							newText.SetPixel(x, y,Color.clear);
+						}
+					}
+				}
+				QFileManager.SavePng(newText, textureImporter.assetPath);
+				Debug.LogError("拓展图片用于压缩 " + textureImporter.assetPath);
+				if (textureImporter.isReadable != last)
+				{
+					textureImporter.isReadable = false;
+					textureImporter.SaveAndReimport();
+				}
+			}
 			if (!textureImporter.crunchedCompression)
 			{
 				Debug.Log("重新导入图片[" + textureImporter.assetPath + "]");
