@@ -329,7 +329,7 @@ namespace QTool.Asset {
 				Debug.LogError("拓展图片用于压缩 " + textureImporter.assetPath);
 				if (textureImporter.isReadable != last)
 				{
-					textureImporter.isReadable = false;
+					textureImporter.isReadable = last;
 					textureImporter.SaveAndReimport();
 				}
 			}
