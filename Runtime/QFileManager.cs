@@ -408,6 +408,10 @@ namespace QTool
 		}
 		public static bool Save(string path, byte[] bytes,bool checkUpdate=false)
 		{
+			if (Path.GetExtension(path).IsNullOrEmpty())
+			{
+				path += ".txt";
+			}
 			path = CheckDirectoryPath(path);
 			try
 			{
@@ -464,6 +468,10 @@ namespace QTool
 		}
 		public static bool Save(string path, string data, bool checkUpdate = false)
 		{
+			if (Path.GetExtension(path).IsNullOrEmpty())
+			{
+				path += ".txt";
+			}
 			if(Application.platform== RuntimePlatform.Switch)
 			{
 				return Save(path, data.GetBytes(), checkUpdate);
@@ -507,6 +515,10 @@ namespace QTool
 		}
 		public static string Load(string path, string defaultValue = "")
 		{
+			if (Path.GetExtension(path).IsNullOrEmpty())
+			{
+				path += ".txt";
+			}
 			try
 			{
 				if (path.StartsWith(ResourcesPathRoot))
