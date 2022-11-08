@@ -47,6 +47,13 @@ namespace QTool
 	}
 	public static class QRandomTool
 	{
+		public static T RandomPop<T>(this IList<T> list)
+		{
+			var index = UnityEngine.Random.Range(0, list.Count);
+			var obj= list[index];
+			list.RemoveAt(index);
+			return obj;
+		}
 		public static T RandomGet<T>(this IList<T> list)
 		{
 			return list[UnityEngine.Random.Range(0, list.Count)];
