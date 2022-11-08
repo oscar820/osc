@@ -443,16 +443,18 @@ namespace QTool
             return null;
 #endif
 		}
-		//public static GameObject CreateInstance(this GameObject prefab)
-		//{
-		//	var obj = GameObject.Instantiate(prefab);
-		//	if (obj.transform is RectTransform)
-		//	{
-		//		(obj.transform as RectTransform).anchoredPosition = (prefab.transform as RectTransform).anchoredPosition;
-		//	}
-		//	return obj;
-		//}
-
+		public static T As<T>(this object obj)
+		{
+			try
+			{
+				return (T)obj;
+			}
+			catch (System.Exception)
+			{
+				Debug.LogError("强制转换"+ typeof(T) + "["+obj + "]出错");
+			}
+			return default;
+		}
 
 		static System.Diagnostics.ProcessStartInfo RunInfo = new System.Diagnostics.ProcessStartInfo()
 		{
