@@ -218,21 +218,14 @@ namespace QTool
 					}
 					else
 					{
-						Add(key, default);
+						return default;
 					}
 				}
 				return base[key];
 			}
 			set
 			{
-				if (ContainsKey(key))
-				{
-					base[key] = value;
-				}
-				else
-				{
-					Add(key, value);
-				}
+				Add(key, value);
 			}
 		}
 		public Func<TKey, T> AutoCreateFunc { protected set; get; }
