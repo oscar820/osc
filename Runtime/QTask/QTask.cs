@@ -54,7 +54,7 @@ namespace QTool
 		{
 			RunningFlag = QId.GetNewId().GetHashCode();
 		}
-		public static async Task WaitAllOver(params Task[] tasks)
+		public static async Task WaitAllOver(this IList<Task> tasks)
 		{
 			foreach (var task in tasks)
 			{
@@ -62,7 +62,11 @@ namespace QTool
 				await task;
 			}
 		}
-		public static async Task WaitAnyOver(params Task[] tasks)
+		public static async Task WaitAllOver(params Task[] tasks)
+		{
+			await tasks.WaitAllOver();
+		}
+		public static async Task WaitAnyOver(this IList<Task> tasks)
 		{
 			while (true)
 			{
@@ -75,6 +79,10 @@ namespace QTool
 				}
 				await Step();
 			}
+		}
+		public static async Task WaitAnyOver(params Task[] tasks)
+		{
+			await tasks.WaitAnyOver();
 		}
 		public static async Task Step()
 		{
