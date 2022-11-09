@@ -73,6 +73,17 @@ namespace QTool
 						return;
 					}
 				}
+				await Step();
+			}
+		}
+		public static async Task Step()
+		{
+			if(Application.platform== RuntimePlatform.Switch)
+			{
+				await Task.Delay(100);
+			}
+			else
+			{
 				await Task.Yield();
 			}
 		}
@@ -96,7 +107,7 @@ namespace QTool
 			if (flagFunc == null) return;
 			while (!flagFunc.Invoke())
 			{
-				await Task.Yield();
+				await Step();
 				if (!playingFlag.Equals(Application.isPlaying) || !RunningFlag.Equals(flag))
 				{
 					throw new QTaskCancelException();
@@ -150,7 +161,7 @@ namespace QTool
 					{
 						Debug.LogError(member.Name);
 					});
-					await Task.Yield();
+					await Step();
 				}
 
 			}
@@ -216,7 +227,7 @@ namespace QTool
 			{
 				while (!request.IsCompleted)
 				{
-					await Task.Yield();
+					await Step();
 				}
 				continuation?.Invoke();
 			}
