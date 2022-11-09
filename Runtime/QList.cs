@@ -69,6 +69,17 @@ namespace QTool
 	}
 	public class QList<TKey, T> : QList<T> where T : IKey<TKey>
 	{
+		[QIgnore]
+		private QDictionary<TKey, T> Cache = new QDictionary<TKey, T>();
+		private void CheckFreshCache()
+		{
+			if (Count == Cache.Count) return;
+			Cache.Clear();
+			foreach (var kv in this)
+			{
+				Cache[kv.Key] = kv;
+			}
+		}
 		public QList()
 		{
 		}
@@ -85,7 +96,8 @@ namespace QTool
 		}
 		public new bool Contains(T value)
 		{
-			return base.Contains(value);
+			if (value == null) return false;
+			return ContainsKey(value.Key);
 		}
 		public bool ContainsKey(TKey key)
 		{
@@ -94,7 +106,8 @@ namespace QTool
 				Debug.LogError("key is null");
 				return false;
 			}
-			return this.ContainsKey<T, TKey>(key);
+			CheckFreshCache();
+			return Cache.ContainsKey(key);
 		}
 		public T Get(TKey key)
 		{
@@ -103,14 +116,13 @@ namespace QTool
 				Debug.LogError("key is null");
 				return default;
 			}
-			var value = this.Get<T, TKey>(key);
-			if (value == null && AutoCreate != null)
+			if (!ContainsKey(key)&& AutoCreate!=null)
 			{
-				value = AutoCreate();
+				var value = AutoCreate();
 				value.Key = key;
-				this.Add(value);
+				Add(value);
 			}
-			return value;
+			return Cache[key];
 		}
 		public void Set(TKey key, T value)
 		{
@@ -127,6 +139,7 @@ namespace QTool
 				value.Key = key;
 				base.Add(value);
 			}
+			Cache[key] = value;
 		}
 		public void Remove(TKey key)
 		{
@@ -168,6 +181,7 @@ namespace QTool
 			if (obj != null)
 			{
 				base.Remove(obj);
+				Cache.Remove(obj.Key);
 			}
 		}
 		public void RemoveKey(TKey key)
@@ -177,6 +191,7 @@ namespace QTool
 		public new void Clear()
 		{
 			base.Clear();
+			Cache.Clear();
 		}
 
 
