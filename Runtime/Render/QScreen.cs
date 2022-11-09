@@ -9,29 +9,19 @@ namespace QTool
 {
     public static class QScreen
     {
-#if PLATFORM_STANDALONE_WIN
-		[System.Runtime.InteropServices.DllImport("user32.dll")]
-		static extern IntPtr SetWindowLong(IntPtr hwnd, int _nIndex, int dwNewLong);
-		[System.Runtime.InteropServices.DllImport("user32.dll")]
-		static extern IntPtr GetForegroundWindow();
-		[System.Runtime.InteropServices.DllImport("USER32.DLL")]
-		public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-		public const int GWL_STYLE = -16;
-		public const int WS_CHILD = 0x40000000; //child window
-		public const int WS_BORDER = 0x00800000; //window with border
-		public const int WS_DLGFRAME = 0x00400000; //window with double border but no title
-		public const int WS_CAPTION = WS_BORDER | WS_DLGFRAME; //window with a title bar
-#endif
-		public static async Task<Texture> Capture()
-        {
-            return await QCapture.Instance.Capture();
-        }
-		public static void SetScreen()
+		static Texture2D CaptureTexture2d=null;
+		public static Texture Capture()
 		{
-
+			if (CaptureTexture2d = null)
+			{
+				CaptureTexture2d = new Texture2D(Screen.width, Screen.height);
+			}
+			CaptureTexture2d.ReadPixels(new Rect(0, 0, CaptureTexture2d.width, CaptureTexture2d.height), 0, 0);
+			CaptureTexture2d.Apply();
+			return CaptureTexture2d;
 		}
-        public static async void SetResolution(int width, int height, bool fullScreen,bool hasBorder=true)
-        {
+		public static void SetResolution(int width, int height, bool fullScreen, bool hasBorder = true)
+		{
 
 #if PLATFORM_STANDALONE_WIN
 			var window = GetForegroundWindow();
@@ -60,6 +50,22 @@ namespace QTool
 
 
 		}
+		#region 分辨率设置逻辑
+
+#if PLATFORM_STANDALONE_WIN
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		static extern IntPtr SetWindowLong(IntPtr hwnd, int _nIndex, int dwNewLong);
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		static extern IntPtr GetForegroundWindow();
+		[System.Runtime.InteropServices.DllImport("USER32.DLL")]
+		public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+		public const int GWL_STYLE = -16;
+		public const int WS_CHILD = 0x40000000; //child window
+		public const int WS_BORDER = 0x00800000; //window with border
+		public const int WS_DLGFRAME = 0x00400000; //window with double border but no title
+		public const int WS_CAPTION = WS_BORDER | WS_DLGFRAME; //window with a title bar
+#endif
+
 
 #if UNITY_EDITOR
 
@@ -167,5 +173,7 @@ namespace QTool
             }
         }
 #endif
-    }
+		#endregion
+
+	}
 }
