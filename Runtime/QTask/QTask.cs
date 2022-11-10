@@ -86,14 +86,7 @@ namespace QTool
 		}
 		public static async Task Step()
 		{
-			if(Application.platform== RuntimePlatform.Switch)
-			{
-				await Task.Delay(100);
-			}
-			else
-			{
-				await Task.Yield();
-			}
+			await Task.Yield();
 		}
 		public static async Task Wait(float second, bool ignoreTimeScale = false, Func<bool> flagFunc = null)
 		{
