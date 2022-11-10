@@ -20,7 +20,7 @@ namespace QTool
 			CaptureTexture2d.Apply();
 			return CaptureTexture2d;
 		}
-		public static void SetResolution(int width, int height, bool fullScreen, bool hasBorder = true)
+		public static async void SetResolution(int width, int height, bool fullScreen, bool hasBorder = true)
 		{
 
 #if PLATFORM_STANDALONE_WIN
