@@ -12,7 +12,7 @@ namespace QTool
 		static Texture2D CaptureTexture2d=null;
 		public static Texture Capture()
 		{
-			if (CaptureTexture2d = null)
+			if (CaptureTexture2d == null)
 			{
 				CaptureTexture2d = new Texture2D(Screen.width, Screen.height);
 			}
