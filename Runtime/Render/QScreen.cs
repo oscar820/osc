@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 using System.Threading.Tasks;
+using System.Collections;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,15 +11,28 @@ namespace QTool
     public static class QScreen
     {
 		static Texture2D CaptureTexture2d=null;
-		public static Texture Capture()
+		public static async Task<Texture2D> Capture()
 		{
-			if (CaptureTexture2d == null|| CaptureTexture2d.width != Screen.width || CaptureTexture2d.height != Screen.height)
+			if (!CaptureRunning)
+			{
+				QToolManager.Instance.StartCoroutine(CaptureCoroutine());
+				CaptureRunning = true;
+			}
+			await QTask.Wait(() => !CaptureRunning);
+			return CaptureTexture2d;
+		}
+		static WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
+		static bool CaptureRunning = false;
+		static IEnumerator CaptureCoroutine()
+		{
+			yield return waitForEndOfFrame;
+			if (CaptureTexture2d == null || CaptureTexture2d.width != Screen.width || CaptureTexture2d.height != Screen.height)
 			{
 				CaptureTexture2d = new Texture2D(Screen.width, Screen.height);
 			}
 			CaptureTexture2d.ReadPixels(new Rect(0, 0, Screen.width, Screen.width), 0, 0);
 			CaptureTexture2d.Apply();
-			return CaptureTexture2d;
+			CaptureRunning = false;
 		}
 		public static async void SetResolution(int width, int height, bool fullScreen, bool hasBorder = true)
 		{
