@@ -60,16 +60,12 @@ namespace QTool
 			Debug.Log(nameof(RunURLAsync) + " url: " + requestUrl+"\n"+req.downloadHandler.text);
 			return req.downloadHandler.text;
 		}
-		public static async Task LoadSceneAsync(this string sceneName,string loadingScene=null,float time=2f)
+		public static async Task LoadSceneAsync(this string sceneName,float time=2f)
 		{
-			if (!loadingScene.IsNullOrEmpty())
-			{
-				await SceneManager.LoadSceneAsync(loadingScene);
-			}
-			GCCollect();
 			await QTask.Wait(time / 2,true);
 			await SceneManager.LoadSceneAsync(sceneName);
-			if(QReflection.InvokeStaticFunction(null,"QUISetting.InitOverAsync") is Task task)
+			GCCollect();
+			if (QReflection.InvokeStaticFunction(null,"QUISetting.InitOverAsync") is Task task)
 			{
 				await task;
 			}
