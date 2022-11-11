@@ -94,7 +94,7 @@ public class AssetTest : MonoBehaviour
 	[ContextMenu("GCLoading")]
 	public async void GCLoading()
 	{
-		await Tool.LoadSceneAsync(SceneManager.GetActiveScene().name,"QLoading");
+		await Tool.LoadSceneAsync(SceneManager.GetActiveScene().name);
 	}
 	// Update is called once per frame
 	void Update()
