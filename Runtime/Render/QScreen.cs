@@ -12,11 +12,11 @@ namespace QTool
 		static Texture2D CaptureTexture2d=null;
 		public static Texture Capture()
 		{
-			if (CaptureTexture2d == null)
+			if (CaptureTexture2d == null|| CaptureTexture2d.width != Screen.width || CaptureTexture2d.height != Screen.height)
 			{
 				CaptureTexture2d = new Texture2D(Screen.width, Screen.height);
 			}
-			CaptureTexture2d.ReadPixels(new Rect(0, 0, CaptureTexture2d.width, CaptureTexture2d.height), 0, 0);
+			CaptureTexture2d.ReadPixels(new Rect(0, 0, Screen.width, Screen.width), 0, 0);
 			CaptureTexture2d.Apply();
 			return CaptureTexture2d;
 		}
