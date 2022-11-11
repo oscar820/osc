@@ -199,6 +199,18 @@ namespace QTool
 
 	public class QKeyValueList<TKey, T> : QList<TKey, QKeyValue<TKey, T>>
 	{
+		public new T this[TKey key]
+		{
+			get=> base[key].Value;
+			set
+			{
+				var oldValue = base[key].Value;
+				if (oldValue == null|| !oldValue.Equals(value))
+				{
+					base[key] = new QKeyValue<TKey, T> { Key = key, Value = value };
+				}
+			}
+		}
 		public QKeyValueList()
 		{
 			AutoCreate = () => new QKeyValue<TKey, T>();
