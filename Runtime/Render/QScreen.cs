@@ -28,7 +28,7 @@ namespace QTool
 			yield return waitForEndOfFrame;
 			if (CaptureTexture2d == null || CaptureTexture2d.width != Screen.width || CaptureTexture2d.height != Screen.height)
 			{
-				CaptureTexture2d = new Texture2D(Screen.width, Screen.height);
+				CaptureTexture2d = new Texture2D(Screen.width, Screen.height,TextureFormat.RGB24,false);
 			}
 			CaptureTexture2d.ReadPixels(new Rect(0, 0, Screen.width, Screen.width), 0, 0);
 			CaptureTexture2d.Apply();
