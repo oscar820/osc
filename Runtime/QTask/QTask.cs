@@ -41,8 +41,27 @@ namespace QTool
 		}
 		public static async Task Run(this Task task)
 		{
-			await task;
-			if (task.Exception != null)
+			Exception exception = null;
+			try
+			{
+				await task;
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+			if (exception != null)
+			{
+				if(exception is QTaskCancelException)
+				{
+					throw exception;
+				}
+				else
+				{
+					Debug.LogError(exception);
+				}
+			}
+			else if(task.Exception!=null)
 			{
 				Debug.LogError(task.Exception);
 			}
@@ -129,27 +148,16 @@ namespace QTool
 		}
 		public static async Task<bool> IsCancel(this Task task)
 		{
-			Exception exception=null;
+			Exception exception = null;
 			try
 			{
-				await task;
+				await task.Run();
 			}
 			catch (Exception e)
 			{
 				exception = e;
 			}
-			if (exception != null)
-			{
-				if(exception is QTaskCancelException)
-				{
-					return true;
-				}
-				else
-				{
-					Debug.LogError(exception);
-				}
-			}
-			return false;
+			return exception is QTaskCancelException;
 		}
 
 		public static async Task TaskRunCoroutine(this IEnumerator enumerator)
