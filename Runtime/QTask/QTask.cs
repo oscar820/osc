@@ -39,14 +39,22 @@ namespace QTool
 				await OnlyOneRun[onlyOneKey];
 			}
 		}
-		public static async Task Run(this Task task,Func<Task>  nextAction)
+		public static async Task Run(this Task task)
 		{
 			await task;
+			if (task.Exception != null)
+			{
+				Debug.LogError(task.Exception);
+			}
+		}
+		public static async Task Run(this Task task,Func<Task>  nextAction)
+		{
+			await task.Run();
 			await nextAction();
 		}
 		public static async Task Run(this Task task, Action nextAction)
 		{
-			await task;
+			await task.Run();
 			nextAction();
 		}
 		public static int RunningFlag { get; private set; } = QId.GetNewId().GetHashCode();
@@ -59,7 +67,7 @@ namespace QTool
 			foreach (var task in tasks)
 			{
 				if (task == null) continue;
-				await task;
+				await task.Run();
 			}
 		}
 		public static async Task WaitAllOver(params Task[] tasks)
@@ -68,6 +76,10 @@ namespace QTool
 		}
 		public static async Task WaitAnyOver(this IList<Task> tasks)
 		{
+			foreach (var task in tasks)
+			{
+				_ = task.Run();
+			}
 			while (true)
 			{
 				foreach (var task in tasks)
