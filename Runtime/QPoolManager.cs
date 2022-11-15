@@ -345,13 +345,13 @@ namespace QTool
 					poolObj.OnPoolRecover();
 				}
 			};
-			SceneManager.activeSceneChanged += OnSceneChange;
+			SceneManager.sceneLoaded += OnSceneChange;
 		}
-		protected void OnSceneChange(Scene scene, Scene next)
+		protected void OnSceneChange(Scene scene, LoadSceneMode mode)
 		{
 			if ( QPoolManager.IsPlaying)
 			{
-				SceneManager.activeSceneChanged -= OnSceneChange;
+				SceneManager.sceneLoaded -= OnSceneChange;
 				Release();
 			}
 		}
