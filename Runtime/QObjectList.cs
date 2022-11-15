@@ -8,11 +8,10 @@ namespace QTool
     {
 		[UnityEngine.Serialization.FormerlySerializedAs("viewPrefab")]
         public GameObject prefab;
-		GameObjectPool _pool;
 		public GameObjectPool Pool
         {
-            get=> _pool??= QPoolManager.GetPool(nameof(QObjectList)+"_"+prefab.name, prefab);
-        }
+            get=> QPoolManager.GetPool(nameof(QObjectList) + "_" + prefab.name, prefab);
+		}
         public List<GameObject> objList{ get; private set; }= new List<GameObject>();
 
         public virtual GameObject this[string name]
