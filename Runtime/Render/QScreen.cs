@@ -81,7 +81,7 @@ namespace QTool
 		{
 			CurWindow = default;
 			yield return new WaitForEndOfFrame();
-			yield return new WaitForFixedUpdate();
+			yield return new WaitForSecondsRealtime(0.1f);
 			if (!Screen.fullScreen)
 			{
 #if PLATFORM_STANDALONE_WIN
