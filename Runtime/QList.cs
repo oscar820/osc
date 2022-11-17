@@ -141,6 +141,14 @@ namespace QTool
 			}
 			Cache[key] = value;
 		}
+		public new void AddRange(IEnumerable<T> collection)
+		{
+			foreach (var obj in collection)
+			{
+				Cache.Add(obj);
+			}
+			base.AddRange(collection);
+		}
 		public void Remove(TKey key)
 		{
 			RemoveKey(key);

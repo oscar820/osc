@@ -12,8 +12,21 @@ namespace QTool
     }
     public class QAssetObjectManager : InstanceScriptable<QAssetObjectManager>
     {
-        public List<QAssetObjectReference> objList = new List<QAssetObjectReference>();
-    }
+		[SerializeField]
+        internal List<QAssetObjectReference> objList = new List<QAssetObjectReference>();
+
+		public QDictionary<string, Object> ObjectCache { get; private set; } = new QDictionary<string, Object>();
+		public QDictionary<Object, string> IdCache { get; private set; } = new QDictionary<Object, string>();
+		private void OnEnable()
+		{
+			foreach (var or in objList)
+			{
+				if (or.obj == null) continue;
+				ObjectCache[or.Key] = or.obj;
+				IdCache[or.obj] = or.id;
+			}
+		}
+	}
   
     [System.Serializable]
     public class QIdObject
@@ -58,21 +71,18 @@ namespace QTool
 #if UNITY_EDITOR
                 if (UnityEditor.EditorUtility.IsPersistent(obj))
                 {
-					QAssetObjectManager.Instance.objList.RemoveNull();
 					var objRef = QAssetObjectManager.Instance.objList.Get(obj, (item) => item.obj);
                     if (objRef == null)
                     {
 						var id = UnityEditor.AssetDatabase.GetAssetPath(obj);
-						//if (QAssetObjectManager.Instance.objList.ContainsKey(id))
-						//{
-						//	id = UnityEditor.AssetDatabase.GetAssetPath(obj)+"_"+ QId.GetNewId();
-						//}
                         objRef = new QAssetObjectReference
                         {
                             Key = id,
                             obj = obj,
                         };
                         QAssetObjectManager.Instance.objList.Add(objRef);
+						QAssetObjectManager.Instance.ObjectCache[objRef.id] = objRef.obj;
+						QAssetObjectManager.Instance.IdCache[objRef.obj] = objRef.id;
 						if (!Application.isPlaying)
 						{ 
 							UnityEditor.EditorUtility.SetDirty(QAssetObjectManager.Instance);
@@ -115,9 +125,9 @@ namespace QTool
             {
                 return QId.InstanceIdList[id].gameObject;
 			}
-			else if (QAssetObjectManager.Instance.objList.ContainsKey(id))
+			else if (QAssetObjectManager.Instance.ObjectCache.ContainsKey(id))
             {
-                return QAssetObjectManager.Instance.objList.Get(id).obj;
+                return QAssetObjectManager.Instance.ObjectCache[id];
             }
 
 #if UNITY_EDITOR

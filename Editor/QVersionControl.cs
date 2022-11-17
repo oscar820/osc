@@ -61,6 +61,10 @@ namespace QTool
 		{
 			if (!editor.target.IsAsset())
 				return;
+			if (QAssetObjectManager.Instance.IdCache.ContainsKey(editor.target))
+			{
+				GUILayout.Label("QAssetId : "+ QAssetObjectManager.Instance.IdCache[editor.target]);
+			}
 			var path = AssetDatabase.GetAssetPath(editor.target);
 			if (path.EndsWith("unity_builtin_extra")) return;
 			GUILayout.Space(10);
