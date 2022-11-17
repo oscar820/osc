@@ -52,6 +52,7 @@ namespace QTool
 		}
 		public static void SetResolution(int width, int height, bool fullScreen)
 		{
+			
 
 			switch (Application.platform)
 			{
@@ -66,9 +67,15 @@ namespace QTool
 #if UNITY_EDITOR
 			SetSize(width, height);
 #else
+			if (coroutine != null)
+			{
+				QToolManager.Instance.StopCoroutine(coroutine);
+				coroutine = null;
+			}
 			QToolManager.Instance.StartCoroutine(SetNoBorder(width, height));
 #endif
 		}
+		static Coroutine coroutine = null;
 		static IntPtr CurWindow = default;
 		static IEnumerator SetNoBorder(int width,int height)
 		{
