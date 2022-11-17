@@ -34,6 +34,22 @@ namespace QTool
 			CaptureTexture2d.Apply();
 			CaptureRunning = false;
 		}
+		static bool IsDrag = false;
+		static void OnGUI()
+		{
+			IsDrag = Event.current.mousePosition.y < 40 && Event.current.isMouse;
+		}
+		static void OnUpdate()
+		{
+			if(IsDrag&&CurWindow != default)
+			{
+#if PLATFORM_STANDALONE_WIN
+				ReleaseCapture();
+				SendMessage(CurWindow, 0xA1, 0x02, 0);
+				SendMessage(CurWindow, 0x0202, 0, 0);
+#endif
+			}
+		}
 		public static void SetResolution(int width, int height, bool fullScreen)
 		{
 
@@ -53,18 +69,26 @@ namespace QTool
 			QToolManager.Instance.StartCoroutine(SetNoBorder(width, height));
 #endif
 		}
-
+		static IntPtr CurWindow = default;
 		static IEnumerator SetNoBorder(int width,int height)
 		{
+			CurWindow = default;
 			yield return new WaitForEndOfFrame();
 			yield return new WaitForFixedUpdate();
 			if (!Screen.fullScreen)
 			{
 #if PLATFORM_STANDALONE_WIN
-				var window = GetForegroundWindow();
-				SetWindowLong(window, GWL_STYLE, WS_POPUP);
-				SetWindowPos(window, 0, (Screen.currentResolution.width - width) / 2, (Screen.currentResolution.height - height) / 2, width, height, SWP_SHOWWINDOW);
+				CurWindow = GetForegroundWindow();
+				SetWindowLong(CurWindow, GWL_STYLE, WS_POPUP);
+				SetWindowPos(CurWindow, 0, (Screen.currentResolution.width - width) / 2, (Screen.currentResolution.height - height) / 2, width, height, SWP_SHOWWINDOW);
 #endif
+				QToolManager.OnGUIEvent += OnGUI;
+				QToolManager.OnUpdate += OnUpdate;
+			}
+			else
+			{
+				QToolManager.OnGUIEvent -= OnGUI;
+				QToolManager.OnUpdate -= OnUpdate;
 			}
 		}
 		#region 分辨率设置逻辑
@@ -82,6 +106,11 @@ namespace QTool
 		//设置窗口位置，大小
 		[System.Runtime.InteropServices.DllImport("user32.dll")]
 		public static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		public static extern bool ReleaseCapture();
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
 
 		const uint SWP_SHOWWINDOW = 0x0040;
 		const int GWL_STYLE = -16;

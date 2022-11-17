@@ -17,9 +17,14 @@ namespace QTool
 			DontDestroyOnLoad(gameObject);
 		}
 		public static event Action OnUpdate=null;
+		public static event Action OnGUIEvent = null;
 		private void Update()
 		{
 			OnUpdate?.Invoke();
+		}
+		private void OnGUI()
+		{
+			OnGUIEvent?.Invoke();
 		}
 	}
     public abstract class QToolManagerBase<T>:MonoBehaviour where T : QToolManagerBase<T>
