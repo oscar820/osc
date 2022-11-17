@@ -230,6 +230,10 @@ namespace QTool.Test
 			QFileManager.Save(nameof(QToolTest), nameof(QToolTest));
 			Debug.LogError(QFileManager.Load(nameof(QToolTest)));
 		}
+		public void ScreenTest(bool value)
+		{
+			QScreen.SetResolution(900, 600, value);
+		}
 		[QName("QDataList测试")]
         public async void QDataTest()
 		{

@@ -34,50 +34,59 @@ namespace QTool
 			CaptureTexture2d.Apply();
 			CaptureRunning = false;
 		}
-		public static async void SetResolution(int width, int height, bool fullScreen, bool hasBorder = true)
+		public static void SetResolution(int width, int height, bool fullScreen)
 		{
 
-#if PLATFORM_STANDALONE_WIN
-			var window = GetForegroundWindow();
-#endif
-
-#if UNITY_EDITOR
-			SetSize(width, height);
 			switch (Application.platform)
 			{
 				case RuntimePlatform.WindowsPlayer:
+				case RuntimePlatform.LinuxPlayer:
 					Screen.SetResolution(width, height, fullScreen);
 					break;
 				default:
 					Screen.SetResolution(width, height, true);
 					break;
 			}
+#if UNITY_EDITOR
+			SetSize(width, height);
 #else
+			QToolManager.Instance.StartCoroutine(SetNoBorder(width, height));
+#endif
+		}
 
+		static IEnumerator SetNoBorder(int width,int height)
+		{
+			yield return new WaitForEndOfFrame();
+			yield return new WaitForFixedUpdate();
+			if (!Screen.fullScreen)
+			{
 #if PLATFORM_STANDALONE_WIN
-			await Task.Delay(5);
-			var style= GetWindowLong(window, GWL_STYLE);
-			SetWindowLong(window, GWL_STYLE, ( hasBorder?( style | WS_CAPTION) :( style & ~WS_CAPTION)));
+				var window = GetForegroundWindow();
+				SetWindowLong(window, GWL_STYLE, WS_POPUP);
+				SetWindowPos(window, 0, (Screen.currentResolution.width - width) / 2, (Screen.currentResolution.height - height) / 2, width, height, SWP_SHOWWINDOW);
 #endif
-
-#endif
-
-
+			}
 		}
 		#region 分辨率设置逻辑
 
 #if PLATFORM_STANDALONE_WIN
 		[System.Runtime.InteropServices.DllImport("user32.dll")]
 		static extern IntPtr SetWindowLong(IntPtr hwnd, int _nIndex, int dwNewLong);
-		[System.Runtime.InteropServices.DllImport("user32.dll")]
+
+		[System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint =nameof(GetForegroundWindow))]
 		static extern IntPtr GetForegroundWindow();
-		[System.Runtime.InteropServices.DllImport("USER32.DLL")]
-		public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-		public const int GWL_STYLE = -16;
-		public const int WS_CHILD = 0x40000000; //child window
-		public const int WS_BORDER = 0x00800000; //window with border
-		public const int WS_DLGFRAME = 0x00400000; //window with double border but no title
-		public const int WS_CAPTION = WS_BORDER | WS_DLGFRAME; //window with a title bar
+
+		[System.Runtime.InteropServices.DllImport("user32.DLL")]
+		static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+		//设置窗口位置，大小
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		public static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+		const uint SWP_SHOWWINDOW = 0x0040;
+		const int GWL_STYLE = -16;
+		const int WS_BORDER = 1; //window with border
+		const int WS_POPUP = 0x800000;
 #endif
 
 
