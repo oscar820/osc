@@ -85,6 +85,12 @@ namespace QTool
 			{
 				yield return new WaitForFixedUpdate();
 			}
+			else
+			{
+				Time.timeScale = 1;
+				yield return new WaitForFixedUpdate();
+				Time.timeScale = 0;
+			}
 			
 			if (!Screen.fullScreen)
 			{
