@@ -162,6 +162,7 @@ namespace QTool.Inspector
 			var drawer = DrawerDic[att.GetKeyListFunc];
 			if (drawer.enumList.Count <= 0)
 			{
+				return drawer;
 				var getObj = QReflection.InvokeStaticFunction(type, att.GetKeyListFunc);
 				drawer.enumList.Clear();
 				if (getObj != null)
