@@ -121,28 +121,26 @@ namespace QTool.Inspector
     }
 
 
-
-    [CustomPropertyDrawer(typeof(QEnumAttribute))]
-    public class QEnumAttributeDrawer : PropertyDrawBase<QEnumAttribute>
-    {
+	public class QEnumData
+	{
 		public List<string> enumList = new List<string>();
-        public int selectIndex =0;
-        public string SelectValue
-        {
-            get
-            {
+		public int selectIndex = 0;
+		public string SelectValue
+		{
+			get
+			{
 				if (selectIndex >= 0 && selectIndex < enumList.Count)
 				{
-					return enumList[selectIndex]=="null"?null:enumList[selectIndex];
+					return enumList[selectIndex] == "null" ? null : enumList[selectIndex];
 				}
 				else
 				{
 					return "";
 				}
-            }
-        }
-        public void UpdateList(string input)
-        {
+			}
+		}
+		public void UpdateList(string input)
+		{
 			if (input.IsNullOrEmpty())
 			{
 				selectIndex = enumList.Count - 1;
@@ -151,58 +149,68 @@ namespace QTool.Inspector
 			{
 				selectIndex = enumList.IndexOf(input);
 			}
-        }
-		public static QDictionary<string, QEnumAttributeDrawer> DrawerDic = new QDictionary<string, QEnumAttributeDrawer>((key)=>new QEnumAttributeDrawer());
+		}
+	}
+    [CustomPropertyDrawer(typeof(QEnumAttribute))]
+    public class QEnumAttributeDrawer : PropertyDrawBase<QEnumAttribute>
+    {
+		
+       
+		static QDictionary<string, QEnumData> DrawerDic = new QDictionary<string, QEnumData>((key)=>new QEnumData());
+		static QEnumData GetQEnumData(Type type ,QEnumAttribute att)
+		{
+			var drawer = DrawerDic[att.GetKeyListFunc];
+			if (drawer.enumList.Count <= 0)
+			{
+				var getObj = QReflection.InvokeStaticFunction(type, att.GetKeyListFunc);
+				drawer.enumList.Clear();
+				if (getObj != null)
+				{
+					if (getObj is IList<string> stringList)
+					{
+						drawer.enumList.AddRange(stringList);
+					}
+					else if (getObj is IList itemList)
+					{
+						foreach (var item in itemList)
+						{
+							if (item is IKey<string> key)
+							{
+								drawer.enumList.AddCheckExist(key.Key);
+							}
+							else if (item is UnityEngine.Object uObj)
+							{
+								drawer.enumList.AddCheckExist(uObj.name);
+							}
+							else
+							{
+								drawer.enumList.AddCheckExist(item?.ToString());
+							}
+						}
+					}
+					else
+					{
+						EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
+					}
+				}
+				else
+				{
+					EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
+				}
+				drawer.enumList.AddCheckExist("null");
+			}
+			return drawer;
+		}
 		public static object Draw(object obj,QEnumAttribute att)
 		{
 			var str = obj?.ToString();
 			{
-				var funcKey= obj?.GetType() +" "+ att.GetKeyListFunc;
-				var drawer = DrawerDic[funcKey];
+			
 				using (new GUILayout.HorizontalScope())
 				{
-					if (drawer.enumList.Count <= 0)
-					{
-						var getObj = QReflection.InvokeStaticFunction(null, att.GetKeyListFunc);
-						drawer.enumList.Clear();
-						if (getObj != null)
-						{
-							if (getObj is IList<string> stringList)
-							{
-								drawer.enumList.AddRange(stringList);
-							}
-							else if (getObj is IList itemList)
-							{
-								foreach (var item in itemList)
-								{
-									if (item is IKey<string> key)
-									{
-										drawer.enumList.AddCheckExist(key.Key);
-									}
-									else if (item is UnityEngine.Object uObj)
-									{
-										drawer.enumList.AddCheckExist(uObj.name);
-									}
-									else
-									{
-										drawer.enumList.AddCheckExist(item?.ToString());
-									}
-								}
-							}
-							else
-							{
-								EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
-							}
-						}
-						else
-						{
-							EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
-						}
-						drawer.enumList.AddCheckExist("null");
-					}
-					
 
-					drawer.UpdateList(str);
+					var data = GetQEnumData(obj?.GetType(),att);
+					data.UpdateList(str);
 
 					if (att.CanWriteString)
 					{
@@ -210,20 +218,20 @@ namespace QTool.Inspector
 					}
 					if (GUI.changed)
 					{
-						drawer.UpdateList(str);
+						data.UpdateList(str);
 					}
-					if (drawer.selectIndex < 0)
+					if (data.selectIndex < 0)
 					{
-						drawer.selectIndex = 0;
-						str = drawer.SelectValue;
+						data.selectIndex = 0;
+						str = data.SelectValue;
 					}
-					var newIndex = EditorGUILayout.Popup(drawer.selectIndex, drawer.enumList.ToArray());
-					if (newIndex != drawer.selectIndex)
+					var newIndex = EditorGUILayout.Popup(data.selectIndex, data.enumList.ToArray());
+					if (newIndex != data.selectIndex)
 					{
-						drawer.selectIndex = newIndex;
-						if (drawer.selectIndex >= 0)
+						data.selectIndex = newIndex;
+						if (data.selectIndex >= 0)
 						{
-							str = drawer.SelectValue;
+							str = data.SelectValue;
 						}
 					}
 				}
@@ -236,42 +244,8 @@ namespace QTool.Inspector
             if (!property.IsShow()) return;
             if (property.propertyType == SerializedPropertyType.String)
             {
-				object list = null;
-				try
-				{
-					list = property.Call(att.GetKeyListFunc);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError(e);
-				}
-
-				enumList = new List<string>();
-				enumList.Add("null");
-
-				if (list is IList<string> strList)
-				{
-					enumList.AddRange(strList);
-				}
-				else if( list is IList ItemList)
-				{
-					foreach (var item in ItemList)
-					{
-						if(item is IKey<string> key)
-						{
-							enumList.Add(key.Key);
-						}
-						else if (item is UnityEngine.Object uObj)
-						{
-							enumList.AddCheckExist(uObj.name);
-						}
-						else
-						{
-							enumList.AddCheckExist(item?.ToString());
-						}
-					}
-				}
-				UpdateList(property.stringValue);
+				var data = GetQEnumData(property.serializedObject.targetObject?.GetType(), att);
+				data.UpdateList(property.stringValue);
 				EditorGUI.LabelField(position.HorizontalRect(0f, 0.3f), property.QName());
 				if (att.CanWriteString)
                 {
@@ -279,19 +253,19 @@ namespace QTool.Inspector
                 }
                 if (GUI.changed)
                 {
-                    UpdateList(property.stringValue);
+					data.UpdateList(property.stringValue);
                 }
-                if (selectIndex < 0)
+                if (data.selectIndex < 0)
                 {
-                    selectIndex = 0;
-                    property.stringValue = SelectValue;
+					data.selectIndex = 0;
+                    property.stringValue = data.SelectValue;
                 }
                 
-                var newIndex = EditorGUI.Popup(position.HorizontalRect(0.7f, 1), selectIndex, enumList.ToArray());
-                if (newIndex !=selectIndex)
+                var newIndex = EditorGUI.Popup(position.HorizontalRect(0.7f, 1), data.selectIndex, data.enumList.ToArray());
+                if (newIndex != data.selectIndex)
                 {
-                    selectIndex = newIndex;
-                    property.stringValue = SelectValue;
+					data.selectIndex = newIndex;
+                    property.stringValue = data.SelectValue;
                 }
 
             }
