@@ -18,11 +18,6 @@
       "displayName": "Demo",
       "description": "Demo",
       "path": "Demo"
-    },
-  {
-      "displayName": "SwitchSupport",
-      "description": "SwitchSupport",
-      "path": "SwitchSupport"
     }
   ]
 }
