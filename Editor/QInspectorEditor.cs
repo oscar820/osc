@@ -161,42 +161,46 @@ namespace QTool.Inspector
 				var drawer = DrawerDic[funcKey];
 				using (new GUILayout.HorizontalScope())
 				{
-					var getObj = QReflection.InvokeStaticFunction(null,att.GetKeyListFunc);
-					drawer.enumList.Clear();
-					if (getObj!=null)
+					if (drawer.enumList.Count <= 0)
 					{
-						if (getObj is IList<string> stringList)
+						var getObj = QReflection.InvokeStaticFunction(null, att.GetKeyListFunc);
+						drawer.enumList.Clear();
+						if (getObj != null)
 						{
-							drawer.enumList.AddRange(stringList);
-						}
-						else if (getObj is IList itemList)
-						{
-							foreach (var item in itemList)
+							if (getObj is IList<string> stringList)
 							{
-								if(item is IKey<string> key)
+								drawer.enumList.AddRange(stringList);
+							}
+							else if (getObj is IList itemList)
+							{
+								foreach (var item in itemList)
 								{
-									drawer.enumList.AddCheckExist(key.Key);
+									if (item is IKey<string> key)
+									{
+										drawer.enumList.AddCheckExist(key.Key);
+									}
+									else if (item is UnityEngine.Object uObj)
+									{
+										drawer.enumList.AddCheckExist(uObj.name);
+									}
+									else
+									{
+										drawer.enumList.AddCheckExist(item?.ToString());
+									}
 								}
-								else if (item is UnityEngine.Object uObj)
-								{ 
-									drawer.enumList.AddCheckExist(uObj.name);
-								}
-								else 
-								{
-									drawer.enumList.AddCheckExist(item?.ToString());
-								}
+							}
+							else
+							{
+								EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
 							}
 						}
 						else
 						{
 							EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
 						}
+						drawer.enumList.AddCheckExist("null");
 					}
-					else
-					{
-						EditorGUILayout.LabelField("错误函数" + att.GetKeyListFunc);
-					}
-					drawer.enumList.AddCheckExist("null");
+					
 
 					drawer.UpdateList(str);
 
