@@ -14,7 +14,6 @@ namespace QTool.Inspector
 
 
     #region 自定义显示效果
-
     [CustomPropertyDrawer(typeof(QIdObject))]
     public class QObjectReferenceDrawer : PropertyDrawer
     {
@@ -153,13 +152,13 @@ namespace QTool.Inspector
 				selectIndex = enumList.IndexOf(input);
 			}
         }
-		public static QDictionary<QEnumAttribute, QEnumAttributeDrawer> DrawerDic = new QDictionary<QEnumAttribute, QEnumAttributeDrawer>((key)=>new QEnumAttributeDrawer());
+		public static QDictionary<string, QEnumAttributeDrawer> DrawerDic = new QDictionary<string, QEnumAttributeDrawer>((key)=>new QEnumAttributeDrawer());
 		public static object Draw(object obj,QEnumAttribute att)
 		{
 			var str = obj?.ToString();
 			{
-
-				var drawer = DrawerDic[att];
+				var funcKey= obj?.GetType() +" "+ att.GetKeyListFunc;
+				var drawer = DrawerDic[funcKey];
 				using (new GUILayout.HorizontalScope())
 				{
 					var getObj = QReflection.InvokeStaticFunction(null,att.GetKeyListFunc);
